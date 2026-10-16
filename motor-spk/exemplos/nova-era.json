@@ -1,0 +1,2822 @@
+{
+  "nome": "Mercantil Nova Era — MNE Ponta Negra (Sprinkler-CALC 7.2)",
+  "classe": "Armazenamento",
+  "base": {
+    "tipo": "esfr",
+    "pressaoMinima": 283,
+    "item": "memorial 02-10-2023: 2,83 bar / 603 L/min"
+  },
+  "areaOperacaoManual": [
+    "B92",
+    "B93",
+    "B94",
+    "B95",
+    "B100",
+    "B101",
+    "B102",
+    "B103",
+    "B108",
+    "B109",
+    "B110",
+    "B111"
+  ],
+  "vazaoHidrantes": 0,
+  "duracaoMinutos": 60,
+  "abastecimento": {
+    "descricao": "Curva do memorial (estática 15 bar, residual 14,9 bar a 7500 L/min)",
+    "pontos": [
+      {
+        "vazao": 0,
+        "pressao": 1500
+      },
+      {
+        "vazao": 7500,
+        "pressao": 1490
+      }
+    ]
+  },
+  "rede": {
+    "fonte": "1",
+    "nos": [
+      {
+        "id": "1",
+        "x": 0,
+        "y": 0,
+        "z": 0.0088,
+        "demandaFixa": 0
+      },
+      {
+        "id": "2",
+        "x": 0,
+        "y": 0,
+        "z": 0.0088,
+        "demandaFixa": 0
+      },
+      {
+        "id": "3",
+        "x": 0,
+        "y": 0,
+        "z": 2.1094,
+        "demandaFixa": 0
+      },
+      {
+        "id": "4",
+        "x": 0,
+        "y": 0,
+        "z": 2.1094,
+        "demandaFixa": 0
+      },
+      {
+        "id": "5",
+        "x": 0,
+        "y": 0,
+        "z": 2.1094,
+        "demandaFixa": 0
+      },
+      {
+        "id": "6",
+        "x": 0,
+        "y": 0,
+        "z": 2.1094,
+        "demandaFixa": 0
+      },
+      {
+        "id": "7",
+        "x": 0,
+        "y": 0,
+        "z": -0.9906,
+        "demandaFixa": 0
+      },
+      {
+        "id": "8",
+        "x": 0,
+        "y": 0,
+        "z": -0.9906,
+        "demandaFixa": 0
+      },
+      {
+        "id": "9",
+        "x": 0,
+        "y": 0,
+        "z": -0.9906,
+        "demandaFixa": 0
+      },
+      {
+        "id": "10",
+        "x": 0,
+        "y": 0,
+        "z": -0.9906,
+        "demandaFixa": 0
+      },
+      {
+        "id": "11",
+        "x": 0,
+        "y": 0,
+        "z": -0.1952,
+        "demandaFixa": 0
+      },
+      {
+        "id": "12",
+        "x": 0,
+        "y": 0,
+        "z": -0.1952,
+        "demandaFixa": 0
+      },
+      {
+        "id": "13",
+        "x": 0,
+        "y": 0,
+        "z": 1.2222,
+        "demandaFixa": 0
+      },
+      {
+        "id": "14",
+        "x": 0,
+        "y": 0,
+        "z": 9.3188,
+        "demandaFixa": 0
+      },
+      {
+        "id": "15",
+        "x": 0,
+        "y": 0,
+        "z": 9.3188,
+        "demandaFixa": 0
+      },
+      {
+        "id": "16",
+        "x": 0,
+        "y": 0,
+        "z": 9.3188,
+        "demandaFixa": 0
+      },
+      {
+        "id": "17",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "18",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "19",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "20",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "21",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "22",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "23",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "24",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "25",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "26",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "27",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "28",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "29",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "30",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "31",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "32",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "33",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "34",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "35",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "36",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "37",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "38",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "39",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "40",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "41",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "42",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "43",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "44",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "45",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "46",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "47",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "48",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "49",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "50",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "51",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "52",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "53",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "54",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "55",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "56",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "57",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "58",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "59",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "60",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "61",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "62",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "63",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "64",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "65",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "66",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "67",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "68",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "69",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "70",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "71",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "72",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "73",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "74",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "75",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "76",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "77",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "78",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "79",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "80",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "81",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "82",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "83",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "84",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "85",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "86",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "87",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "88",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "89",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "90",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "91",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "92",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "93",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "94",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "95",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "96",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "97",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "98",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "99",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "100",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "101",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "102",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "103",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "104",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "105",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "106",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "107",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "108",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "109",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "110",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "111",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "112",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "113",
+        "x": 0,
+        "y": 0,
+        "z": 13.52,
+        "demandaFixa": 0
+      },
+      {
+        "id": "114",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "115",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "116",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "117",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "118",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "119",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "120",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "121",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "122",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "123",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "124",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "125",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "126",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "127",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "128",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "129",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "130",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "131",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "132",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "133",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "134",
+        "x": 0,
+        "y": 0,
+        "z": 25.1346,
+        "demandaFixa": 0
+      },
+      {
+        "id": "135",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      },
+      {
+        "id": "136",
+        "x": 0,
+        "y": 0,
+        "z": 12.9694,
+        "demandaFixa": 0
+      }
+    ],
+    "trechos": [
+      {
+        "id": "1-2",
+        "de": "1",
+        "para": "2",
+        "diametroInterno": 208.3,
+        "comprimento": 0.7,
+        "c": 120.0,
+        "comprimentoEquivalente": 5.68,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "2-3",
+        "de": "2",
+        "para": "3",
+        "diametroInterno": 208.3,
+        "comprimento": 2.1,
+        "c": 120.0,
+        "comprimentoEquivalente": 5.68,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "3-4",
+        "de": "3",
+        "para": "4",
+        "diametroInterno": 208.3,
+        "comprimento": 2.5,
+        "c": 120.0,
+        "comprimentoEquivalente": 5.68,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "4-5",
+        "de": "4",
+        "para": "5",
+        "diametroInterno": 208.3,
+        "comprimento": 2.2,
+        "c": 120.0,
+        "comprimentoEquivalente": 5.68,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "5-6",
+        "de": "5",
+        "para": "6",
+        "diametroInterno": 208.3,
+        "comprimento": 8.6,
+        "c": 120.0,
+        "comprimentoEquivalente": 5.68,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "6-7",
+        "de": "6",
+        "para": "7",
+        "diametroInterno": 208.3,
+        "comprimento": 3.1,
+        "c": 120.0,
+        "comprimentoEquivalente": 5.68,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "7-8",
+        "de": "7",
+        "para": "8",
+        "diametroInterno": 208.3,
+        "comprimento": 0.7,
+        "c": 120.0,
+        "comprimentoEquivalente": 5.68,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "8-9",
+        "de": "8",
+        "para": "9",
+        "diametroInterno": 208.3,
+        "comprimento": 51.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 5.68,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "9-10",
+        "de": "9",
+        "para": "10",
+        "diametroInterno": 208.3,
+        "comprimento": 0.65,
+        "c": 120.0,
+        "comprimentoEquivalente": 5.68,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "10-11",
+        "de": "10",
+        "para": "11",
+        "diametroInterno": 208.3,
+        "comprimento": 0.8,
+        "c": 120.0,
+        "comprimentoEquivalente": 5.68,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "11-12",
+        "de": "11",
+        "para": "12",
+        "diametroInterno": 208.3,
+        "comprimento": 1.21,
+        "c": 120.0,
+        "comprimentoEquivalente": 5.68,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "12-13",
+        "de": "12",
+        "para": "13",
+        "diametroInterno": 208.3,
+        "comprimento": 1.42,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.64,
+        "conexoes": "1× borboleta",
+        "material": "Aco"
+      },
+      {
+        "id": "13-14",
+        "de": "13",
+        "para": "14",
+        "diametroInterno": 158.3,
+        "comprimento": 8.1,
+        "c": 120.0,
+        "comprimentoEquivalente": 4.31,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "14-15",
+        "de": "14",
+        "para": "15",
+        "diametroInterno": 158.3,
+        "comprimento": 1.81,
+        "c": 120.0,
+        "comprimentoEquivalente": 4.31,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "15-16",
+        "de": "15",
+        "para": "16",
+        "diametroInterno": 158.3,
+        "comprimento": 94.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 4.31,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "16-17",
+        "de": "16",
+        "para": "17",
+        "diametroInterno": 158.3,
+        "comprimento": 3.65,
+        "c": 120.0,
+        "comprimentoEquivalente": 4.31,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "17-18",
+        "de": "17",
+        "para": "18",
+        "diametroInterno": 158.3,
+        "comprimento": 0.1,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "17-19",
+        "de": "17",
+        "para": "19",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "19-20",
+        "de": "19",
+        "para": "20",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "20-21",
+        "de": "20",
+        "para": "21",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "21-22",
+        "de": "21",
+        "para": "22",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "22-23",
+        "de": "22",
+        "para": "23",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "23-24",
+        "de": "23",
+        "para": "24",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "24-25",
+        "de": "24",
+        "para": "25",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "25-26",
+        "de": "25",
+        "para": "26",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "26-27",
+        "de": "26",
+        "para": "27",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "27-28",
+        "de": "27",
+        "para": "28",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "28-29",
+        "de": "28",
+        "para": "29",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "29-30",
+        "de": "29",
+        "para": "30",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "30-31",
+        "de": "30",
+        "para": "31",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "31-32",
+        "de": "31",
+        "para": "32",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "32-33",
+        "de": "32",
+        "para": "33",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "33-34",
+        "de": "33",
+        "para": "34",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "34-35",
+        "de": "34",
+        "para": "35",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "35-36",
+        "de": "35",
+        "para": "36",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "36-37",
+        "de": "36",
+        "para": "37",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "37-38",
+        "de": "37",
+        "para": "38",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "38-39",
+        "de": "38",
+        "para": "39",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "39-40",
+        "de": "39",
+        "para": "40",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "40-41",
+        "de": "40",
+        "para": "41",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "41-42",
+        "de": "41",
+        "para": "42",
+        "diametroInterno": 158.3,
+        "comprimento": 2.04,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "18-43",
+        "de": "18",
+        "para": "43",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "19-44",
+        "de": "19",
+        "para": "44",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "20-45",
+        "de": "20",
+        "para": "45",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "21-46",
+        "de": "21",
+        "para": "46",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "22-47",
+        "de": "22",
+        "para": "47",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "23-48",
+        "de": "23",
+        "para": "48",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "24-49",
+        "de": "24",
+        "para": "49",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "25-50",
+        "de": "25",
+        "para": "50",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "26-51",
+        "de": "26",
+        "para": "51",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "27-52",
+        "de": "27",
+        "para": "52",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "28-53",
+        "de": "28",
+        "para": "53",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "29-54",
+        "de": "29",
+        "para": "54",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "30-55",
+        "de": "30",
+        "para": "55",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "31-56",
+        "de": "31",
+        "para": "56",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "32-57",
+        "de": "32",
+        "para": "57",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "33-58",
+        "de": "33",
+        "para": "58",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "34-59",
+        "de": "34",
+        "para": "59",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "35-60",
+        "de": "35",
+        "para": "60",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "36-61",
+        "de": "36",
+        "para": "61",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "37-62",
+        "de": "37",
+        "para": "62",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "38-63",
+        "de": "38",
+        "para": "63",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "39-64",
+        "de": "39",
+        "para": "64",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "40-65",
+        "de": "40",
+        "para": "65",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "41-66",
+        "de": "41",
+        "para": "66",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "42-67",
+        "de": "42",
+        "para": "67",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "43-68",
+        "de": "43",
+        "para": "68",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "44-69",
+        "de": "44",
+        "para": "69",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "45-70",
+        "de": "45",
+        "para": "70",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "46-71",
+        "de": "46",
+        "para": "71",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "47-72",
+        "de": "47",
+        "para": "72",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "48-73",
+        "de": "48",
+        "para": "73",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "49-74",
+        "de": "49",
+        "para": "74",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "50-75",
+        "de": "50",
+        "para": "75",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "51-76",
+        "de": "51",
+        "para": "76",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "52-77",
+        "de": "52",
+        "para": "77",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "53-78",
+        "de": "53",
+        "para": "78",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "54-79",
+        "de": "54",
+        "para": "79",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "55-80",
+        "de": "55",
+        "para": "80",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "56-81",
+        "de": "56",
+        "para": "81",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "57-82",
+        "de": "57",
+        "para": "82",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "58-83",
+        "de": "58",
+        "para": "83",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "59-84",
+        "de": "59",
+        "para": "84",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "60-85",
+        "de": "60",
+        "para": "85",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "61-86",
+        "de": "61",
+        "para": "86",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "62-87",
+        "de": "62",
+        "para": "87",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "63-88",
+        "de": "63",
+        "para": "88",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "64-89",
+        "de": "64",
+        "para": "89",
+        "diametroInterno": 66.87,
+        "comprimento": 20.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "65-90",
+        "de": "65",
+        "para": "90",
+        "diametroInterno": 66.87,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "90-91",
+        "de": "90",
+        "para": "91",
+        "diametroInterno": 66.87,
+        "comprimento": 2.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "91-92",
+        "de": "91",
+        "para": "92",
+        "diametroInterno": 66.87,
+        "comprimento": 2.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "92-93",
+        "de": "92",
+        "para": "93",
+        "diametroInterno": 66.87,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "93-94",
+        "de": "93",
+        "para": "94",
+        "diametroInterno": 66.87,
+        "comprimento": 2.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "94-95",
+        "de": "94",
+        "para": "95",
+        "diametroInterno": 66.87,
+        "comprimento": 2.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "95-96",
+        "de": "95",
+        "para": "96",
+        "diametroInterno": 66.87,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "96-97",
+        "de": "96",
+        "para": "97",
+        "diametroInterno": 66.87,
+        "comprimento": 1.5,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "66-98",
+        "de": "66",
+        "para": "98",
+        "diametroInterno": 66.87,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "98-99",
+        "de": "98",
+        "para": "99",
+        "diametroInterno": 66.87,
+        "comprimento": 2.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "99-100",
+        "de": "99",
+        "para": "100",
+        "diametroInterno": 66.87,
+        "comprimento": 2.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "100-101",
+        "de": "100",
+        "para": "101",
+        "diametroInterno": 66.87,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "101-102",
+        "de": "101",
+        "para": "102",
+        "diametroInterno": 66.87,
+        "comprimento": 2.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "102-103",
+        "de": "102",
+        "para": "103",
+        "diametroInterno": 66.87,
+        "comprimento": 2.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "103-104",
+        "de": "103",
+        "para": "104",
+        "diametroInterno": 66.87,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "104-105",
+        "de": "104",
+        "para": "105",
+        "diametroInterno": 66.87,
+        "comprimento": 1.5,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "67-106",
+        "de": "67",
+        "para": "106",
+        "diametroInterno": 66.87,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "106-107",
+        "de": "106",
+        "para": "107",
+        "diametroInterno": 66.87,
+        "comprimento": 2.4,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "107-108",
+        "de": "107",
+        "para": "108",
+        "diametroInterno": 66.87,
+        "comprimento": 24.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "108-109",
+        "de": "108",
+        "para": "109",
+        "diametroInterno": 66.87,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "109-110",
+        "de": "109",
+        "para": "110",
+        "diametroInterno": 66.87,
+        "comprimento": 2.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "110-111",
+        "de": "110",
+        "para": "111",
+        "diametroInterno": 66.87,
+        "comprimento": 2.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "111-112",
+        "de": "111",
+        "para": "112",
+        "diametroInterno": 66.87,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "112-113",
+        "de": "112",
+        "para": "113",
+        "diametroInterno": 66.87,
+        "comprimento": 1.5,
+        "c": 120.0,
+        "comprimentoEquivalente": 1.89,
+        "conexoes": "1× 90°",
+        "material": "Aco"
+      },
+      {
+        "id": "68-114",
+        "de": "68",
+        "para": "114",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "69-115",
+        "de": "69",
+        "para": "115",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "70-116",
+        "de": "70",
+        "para": "116",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "71-117",
+        "de": "71",
+        "para": "117",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "72-118",
+        "de": "72",
+        "para": "118",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "73-119",
+        "de": "73",
+        "para": "119",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "74-120",
+        "de": "74",
+        "para": "120",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "75-121",
+        "de": "75",
+        "para": "121",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "76-122",
+        "de": "76",
+        "para": "122",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "77-123",
+        "de": "77",
+        "para": "123",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "78-124",
+        "de": "78",
+        "para": "124",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "79-125",
+        "de": "79",
+        "para": "125",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "80-126",
+        "de": "80",
+        "para": "126",
+        "diametroInterno": 65.8,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "81-127",
+        "de": "81",
+        "para": "127",
+        "diametroInterno": 65.8,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "82-128",
+        "de": "82",
+        "para": "128",
+        "diametroInterno": 65.8,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "83-129",
+        "de": "83",
+        "para": "129",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "84-130",
+        "de": "84",
+        "para": "130",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "85-131",
+        "de": "85",
+        "para": "131",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "86-132",
+        "de": "86",
+        "para": "132",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "87-133",
+        "de": "87",
+        "para": "133",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "97-134",
+        "de": "97",
+        "para": "134",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "105-135",
+        "de": "105",
+        "para": "135",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "113-136",
+        "de": "113",
+        "para": "136",
+        "diametroInterno": 66.87,
+        "comprimento": 0.55,
+        "c": 120.0,
+        "comprimentoEquivalente": 3.82,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "114-115",
+        "de": "114",
+        "para": "115",
+        "diametroInterno": 158.3,
+        "comprimento": 3.1,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "115-116",
+        "de": "115",
+        "para": "116",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "116-117",
+        "de": "116",
+        "para": "117",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "117-118",
+        "de": "117",
+        "para": "118",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "118-119",
+        "de": "118",
+        "para": "119",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "119-120",
+        "de": "119",
+        "para": "120",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "120-121",
+        "de": "120",
+        "para": "121",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "121-122",
+        "de": "121",
+        "para": "122",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "122-123",
+        "de": "122",
+        "para": "123",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "123-124",
+        "de": "123",
+        "para": "124",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "124-125",
+        "de": "124",
+        "para": "125",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "125-126",
+        "de": "125",
+        "para": "126",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "126-127",
+        "de": "126",
+        "para": "127",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "127-128",
+        "de": "127",
+        "para": "128",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "128-129",
+        "de": "128",
+        "para": "129",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "129-130",
+        "de": "129",
+        "para": "130",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "130-131",
+        "de": "130",
+        "para": "131",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "131-132",
+        "de": "131",
+        "para": "132",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "132-133",
+        "de": "132",
+        "para": "133",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "133-134",
+        "de": "133",
+        "para": "134",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "134-135",
+        "de": "134",
+        "para": "135",
+        "diametroInterno": 158.3,
+        "comprimento": 3.0,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      },
+      {
+        "id": "135-136",
+        "de": "135",
+        "para": "136",
+        "diametroInterno": 158.3,
+        "comprimento": 2.04,
+        "c": 120.0,
+        "comprimentoEquivalente": 8.63,
+        "conexoes": "1× T/cruzeta",
+        "material": "Aco"
+      }
+    ],
+    "chuveiros": [
+      {
+        "id": "B92",
+        "no": "92",
+        "fatorK": 360,
+        "areaCobertura": 12.0,
+        "ramal": "R1",
+        "pressaoMinima": 283
+      },
+      {
+        "id": "B93",
+        "no": "93",
+        "fatorK": 360,
+        "areaCobertura": 12.0,
+        "ramal": "R1",
+        "pressaoMinima": 283
+      },
+      {
+        "id": "B94",
+        "no": "94",
+        "fatorK": 360,
+        "areaCobertura": 12.0,
+        "ramal": "R1",
+        "pressaoMinima": 283
+      },
+      {
+        "id": "B95",
+        "no": "95",
+        "fatorK": 360,
+        "areaCobertura": 12.0,
+        "ramal": "R1",
+        "pressaoMinima": 283
+      },
+      {
+        "id": "B100",
+        "no": "100",
+        "fatorK": 360,
+        "areaCobertura": 12.0,
+        "ramal": "R2",
+        "pressaoMinima": 283
+      },
+      {
+        "id": "B101",
+        "no": "101",
+        "fatorK": 360,
+        "areaCobertura": 12.0,
+        "ramal": "R2",
+        "pressaoMinima": 283
+      },
+      {
+        "id": "B102",
+        "no": "102",
+        "fatorK": 360,
+        "areaCobertura": 12.0,
+        "ramal": "R2",
+        "pressaoMinima": 283
+      },
+      {
+        "id": "B103",
+        "no": "103",
+        "fatorK": 360,
+        "areaCobertura": 12.0,
+        "ramal": "R2",
+        "pressaoMinima": 283
+      },
+      {
+        "id": "B108",
+        "no": "108",
+        "fatorK": 360,
+        "areaCobertura": 12.0,
+        "ramal": "R3",
+        "pressaoMinima": 283
+      },
+      {
+        "id": "B109",
+        "no": "109",
+        "fatorK": 360,
+        "areaCobertura": 12.0,
+        "ramal": "R3",
+        "pressaoMinima": 283
+      },
+      {
+        "id": "B110",
+        "no": "110",
+        "fatorK": 360,
+        "areaCobertura": 12.0,
+        "ramal": "R3",
+        "pressaoMinima": 283
+      },
+      {
+        "id": "B111",
+        "no": "111",
+        "fatorK": 360,
+        "areaCobertura": 12.0,
+        "ramal": "R3",
+        "pressaoMinima": 283
+      }
+    ]
+  }
+}

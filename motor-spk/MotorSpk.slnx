@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Spk.Cli/Spk.Cli.csproj" />
+    <Project Path="src/Spk.Motor/Spk.Motor.csproj" />
+  </Folder>
+  <Folder Name="/testes/">
+    <Project Path="testes/Spk.Motor.Testes/Spk.Motor.Testes.csproj" />
+  </Folder>
+</Solution>

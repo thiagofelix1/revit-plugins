@@ -1,0 +1,8461 @@
+{
+  "nome": "Galp\u00E3o de exemplo \u2014 VGA 1",
+  "classe": "Ordinario2",
+  "base": {
+    "tipo": "figura42",
+    "area": 140
+  },
+  "abastecimento": {
+    "descricao": "Bomba de exemplo",
+    "pontos": [
+      {
+        "vazao": 0,
+        "pressao": 900
+      },
+      {
+        "vazao": 3000,
+        "pressao": 780
+      },
+      {
+        "vazao": 4500,
+        "pressao": 600
+      }
+    ]
+  },
+  "rede": {
+    "fonte": "VGA",
+    "nos": [
+      {
+        "id": "VGA",
+        "x": 0,
+        "y": -15,
+        "z": 0,
+        "demandaFixa": 0
+      },
+      {
+        "id": "TOPO",
+        "x": 0,
+        "y": -15,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG0",
+        "x": 0,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R0E0",
+        "x": -1.5,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R0E1",
+        "x": -4.5,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R0E2",
+        "x": -7.5,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R0E3",
+        "x": -10.5,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R0E4",
+        "x": -13.5,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R0E5",
+        "x": -16.5,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R0E6",
+        "x": -19.5,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R0E7",
+        "x": -22.5,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R0D0",
+        "x": 1.5,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R0D1",
+        "x": 4.5,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R0D2",
+        "x": 7.5,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R0D3",
+        "x": 10.5,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R0D4",
+        "x": 13.5,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R0D5",
+        "x": 16.5,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R0D6",
+        "x": 19.5,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R0D7",
+        "x": 22.5,
+        "y": 0,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG1",
+        "x": 0,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R1E0",
+        "x": -1.5,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R1E1",
+        "x": -4.5,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R1E2",
+        "x": -7.5,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R1E3",
+        "x": -10.5,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R1E4",
+        "x": -13.5,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R1E5",
+        "x": -16.5,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R1E6",
+        "x": -19.5,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R1E7",
+        "x": -22.5,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R1D0",
+        "x": 1.5,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R1D1",
+        "x": 4.5,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R1D2",
+        "x": 7.5,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R1D3",
+        "x": 10.5,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R1D4",
+        "x": 13.5,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R1D5",
+        "x": 16.5,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R1D6",
+        "x": 19.5,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R1D7",
+        "x": 22.5,
+        "y": 3.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG2",
+        "x": 0,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R2E0",
+        "x": -1.5,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R2E1",
+        "x": -4.5,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R2E2",
+        "x": -7.5,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R2E3",
+        "x": -10.5,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R2E4",
+        "x": -13.5,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R2E5",
+        "x": -16.5,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R2E6",
+        "x": -19.5,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R2E7",
+        "x": -22.5,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R2D0",
+        "x": 1.5,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R2D1",
+        "x": 4.5,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R2D2",
+        "x": 7.5,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R2D3",
+        "x": 10.5,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R2D4",
+        "x": 13.5,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R2D5",
+        "x": 16.5,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R2D6",
+        "x": 19.5,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R2D7",
+        "x": 22.5,
+        "y": 7,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG3",
+        "x": 0,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R3E0",
+        "x": -1.5,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R3E1",
+        "x": -4.5,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R3E2",
+        "x": -7.5,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R3E3",
+        "x": -10.5,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R3E4",
+        "x": -13.5,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R3E5",
+        "x": -16.5,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R3E6",
+        "x": -19.5,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R3E7",
+        "x": -22.5,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R3D0",
+        "x": 1.5,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R3D1",
+        "x": 4.5,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R3D2",
+        "x": 7.5,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R3D3",
+        "x": 10.5,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R3D4",
+        "x": 13.5,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R3D5",
+        "x": 16.5,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R3D6",
+        "x": 19.5,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R3D7",
+        "x": 22.5,
+        "y": 10.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG4",
+        "x": 0,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R4E0",
+        "x": -1.5,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R4E1",
+        "x": -4.5,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R4E2",
+        "x": -7.5,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R4E3",
+        "x": -10.5,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R4E4",
+        "x": -13.5,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R4E5",
+        "x": -16.5,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R4E6",
+        "x": -19.5,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R4E7",
+        "x": -22.5,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R4D0",
+        "x": 1.5,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R4D1",
+        "x": 4.5,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R4D2",
+        "x": 7.5,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R4D3",
+        "x": 10.5,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R4D4",
+        "x": 13.5,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R4D5",
+        "x": 16.5,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R4D6",
+        "x": 19.5,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R4D7",
+        "x": 22.5,
+        "y": 14,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG5",
+        "x": 0,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R5E0",
+        "x": -1.5,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R5E1",
+        "x": -4.5,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R5E2",
+        "x": -7.5,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R5E3",
+        "x": -10.5,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R5E4",
+        "x": -13.5,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R5E5",
+        "x": -16.5,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R5E6",
+        "x": -19.5,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R5E7",
+        "x": -22.5,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R5D0",
+        "x": 1.5,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R5D1",
+        "x": 4.5,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R5D2",
+        "x": 7.5,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R5D3",
+        "x": 10.5,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R5D4",
+        "x": 13.5,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R5D5",
+        "x": 16.5,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R5D6",
+        "x": 19.5,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R5D7",
+        "x": 22.5,
+        "y": 17.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG6",
+        "x": 0,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R6E0",
+        "x": -1.5,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R6E1",
+        "x": -4.5,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R6E2",
+        "x": -7.5,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R6E3",
+        "x": -10.5,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R6E4",
+        "x": -13.5,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R6E5",
+        "x": -16.5,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R6E6",
+        "x": -19.5,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R6E7",
+        "x": -22.5,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R6D0",
+        "x": 1.5,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R6D1",
+        "x": 4.5,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R6D2",
+        "x": 7.5,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R6D3",
+        "x": 10.5,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R6D4",
+        "x": 13.5,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R6D5",
+        "x": 16.5,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R6D6",
+        "x": 19.5,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R6D7",
+        "x": 22.5,
+        "y": 21,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG7",
+        "x": 0,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R7E0",
+        "x": -1.5,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R7E1",
+        "x": -4.5,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R7E2",
+        "x": -7.5,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R7E3",
+        "x": -10.5,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R7E4",
+        "x": -13.5,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R7E5",
+        "x": -16.5,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R7E6",
+        "x": -19.5,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R7E7",
+        "x": -22.5,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R7D0",
+        "x": 1.5,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R7D1",
+        "x": 4.5,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R7D2",
+        "x": 7.5,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R7D3",
+        "x": 10.5,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R7D4",
+        "x": 13.5,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R7D5",
+        "x": 16.5,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R7D6",
+        "x": 19.5,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R7D7",
+        "x": 22.5,
+        "y": 24.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG8",
+        "x": 0,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R8E0",
+        "x": -1.5,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R8E1",
+        "x": -4.5,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R8E2",
+        "x": -7.5,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R8E3",
+        "x": -10.5,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R8E4",
+        "x": -13.5,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R8E5",
+        "x": -16.5,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R8E6",
+        "x": -19.5,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R8E7",
+        "x": -22.5,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R8D0",
+        "x": 1.5,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R8D1",
+        "x": 4.5,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R8D2",
+        "x": 7.5,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R8D3",
+        "x": 10.5,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R8D4",
+        "x": 13.5,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R8D5",
+        "x": 16.5,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R8D6",
+        "x": 19.5,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R8D7",
+        "x": 22.5,
+        "y": 28,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG9",
+        "x": 0,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R9E0",
+        "x": -1.5,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R9E1",
+        "x": -4.5,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R9E2",
+        "x": -7.5,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R9E3",
+        "x": -10.5,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R9E4",
+        "x": -13.5,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R9E5",
+        "x": -16.5,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R9E6",
+        "x": -19.5,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R9E7",
+        "x": -22.5,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R9D0",
+        "x": 1.5,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R9D1",
+        "x": 4.5,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R9D2",
+        "x": 7.5,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R9D3",
+        "x": 10.5,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R9D4",
+        "x": 13.5,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R9D5",
+        "x": 16.5,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R9D6",
+        "x": 19.5,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R9D7",
+        "x": 22.5,
+        "y": 31.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG10",
+        "x": 0,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R10E0",
+        "x": -1.5,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R10E1",
+        "x": -4.5,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R10E2",
+        "x": -7.5,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R10E3",
+        "x": -10.5,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R10E4",
+        "x": -13.5,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R10E5",
+        "x": -16.5,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R10E6",
+        "x": -19.5,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R10E7",
+        "x": -22.5,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R10D0",
+        "x": 1.5,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R10D1",
+        "x": 4.5,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R10D2",
+        "x": 7.5,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R10D3",
+        "x": 10.5,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R10D4",
+        "x": 13.5,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R10D5",
+        "x": 16.5,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R10D6",
+        "x": 19.5,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R10D7",
+        "x": 22.5,
+        "y": 35,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG11",
+        "x": 0,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R11E0",
+        "x": -1.5,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R11E1",
+        "x": -4.5,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R11E2",
+        "x": -7.5,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R11E3",
+        "x": -10.5,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R11E4",
+        "x": -13.5,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R11E5",
+        "x": -16.5,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R11E6",
+        "x": -19.5,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R11E7",
+        "x": -22.5,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R11D0",
+        "x": 1.5,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R11D1",
+        "x": 4.5,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R11D2",
+        "x": 7.5,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R11D3",
+        "x": 10.5,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R11D4",
+        "x": 13.5,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R11D5",
+        "x": 16.5,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R11D6",
+        "x": 19.5,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R11D7",
+        "x": 22.5,
+        "y": 38.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG12",
+        "x": 0,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R12E0",
+        "x": -1.5,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R12E1",
+        "x": -4.5,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R12E2",
+        "x": -7.5,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R12E3",
+        "x": -10.5,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R12E4",
+        "x": -13.5,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R12E5",
+        "x": -16.5,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R12E6",
+        "x": -19.5,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R12E7",
+        "x": -22.5,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R12D0",
+        "x": 1.5,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R12D1",
+        "x": 4.5,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R12D2",
+        "x": 7.5,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R12D3",
+        "x": 10.5,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R12D4",
+        "x": 13.5,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R12D5",
+        "x": 16.5,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R12D6",
+        "x": 19.5,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R12D7",
+        "x": 22.5,
+        "y": 42,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG13",
+        "x": 0,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R13E0",
+        "x": -1.5,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R13E1",
+        "x": -4.5,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R13E2",
+        "x": -7.5,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R13E3",
+        "x": -10.5,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R13E4",
+        "x": -13.5,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R13E5",
+        "x": -16.5,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R13E6",
+        "x": -19.5,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R13E7",
+        "x": -22.5,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R13D0",
+        "x": 1.5,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R13D1",
+        "x": 4.5,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R13D2",
+        "x": 7.5,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R13D3",
+        "x": 10.5,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R13D4",
+        "x": 13.5,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R13D5",
+        "x": 16.5,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R13D6",
+        "x": 19.5,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R13D7",
+        "x": 22.5,
+        "y": 45.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG14",
+        "x": 0,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R14E0",
+        "x": -1.5,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R14E1",
+        "x": -4.5,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R14E2",
+        "x": -7.5,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R14E3",
+        "x": -10.5,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R14E4",
+        "x": -13.5,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R14E5",
+        "x": -16.5,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R14E6",
+        "x": -19.5,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R14E7",
+        "x": -22.5,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R14D0",
+        "x": 1.5,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R14D1",
+        "x": 4.5,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R14D2",
+        "x": 7.5,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R14D3",
+        "x": 10.5,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R14D4",
+        "x": 13.5,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R14D5",
+        "x": 16.5,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R14D6",
+        "x": 19.5,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R14D7",
+        "x": 22.5,
+        "y": 49,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG15",
+        "x": 0,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R15E0",
+        "x": -1.5,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R15E1",
+        "x": -4.5,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R15E2",
+        "x": -7.5,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R15E3",
+        "x": -10.5,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R15E4",
+        "x": -13.5,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R15E5",
+        "x": -16.5,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R15E6",
+        "x": -19.5,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R15E7",
+        "x": -22.5,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R15D0",
+        "x": 1.5,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R15D1",
+        "x": 4.5,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R15D2",
+        "x": 7.5,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R15D3",
+        "x": 10.5,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R15D4",
+        "x": 13.5,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R15D5",
+        "x": 16.5,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R15D6",
+        "x": 19.5,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R15D7",
+        "x": 22.5,
+        "y": 52.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG16",
+        "x": 0,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R16E0",
+        "x": -1.5,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R16E1",
+        "x": -4.5,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R16E2",
+        "x": -7.5,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R16E3",
+        "x": -10.5,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R16E4",
+        "x": -13.5,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R16E5",
+        "x": -16.5,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R16E6",
+        "x": -19.5,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R16E7",
+        "x": -22.5,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R16D0",
+        "x": 1.5,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R16D1",
+        "x": 4.5,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R16D2",
+        "x": 7.5,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R16D3",
+        "x": 10.5,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R16D4",
+        "x": 13.5,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R16D5",
+        "x": 16.5,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R16D6",
+        "x": 19.5,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R16D7",
+        "x": 22.5,
+        "y": 56,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG17",
+        "x": 0,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R17E0",
+        "x": -1.5,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R17E1",
+        "x": -4.5,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R17E2",
+        "x": -7.5,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R17E3",
+        "x": -10.5,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R17E4",
+        "x": -13.5,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R17E5",
+        "x": -16.5,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R17E6",
+        "x": -19.5,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R17E7",
+        "x": -22.5,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R17D0",
+        "x": 1.5,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R17D1",
+        "x": 4.5,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R17D2",
+        "x": 7.5,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R17D3",
+        "x": 10.5,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R17D4",
+        "x": 13.5,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R17D5",
+        "x": 16.5,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R17D6",
+        "x": 19.5,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R17D7",
+        "x": 22.5,
+        "y": 59.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG18",
+        "x": 0,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R18E0",
+        "x": -1.5,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R18E1",
+        "x": -4.5,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R18E2",
+        "x": -7.5,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R18E3",
+        "x": -10.5,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R18E4",
+        "x": -13.5,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R18E5",
+        "x": -16.5,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R18E6",
+        "x": -19.5,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R18E7",
+        "x": -22.5,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R18D0",
+        "x": 1.5,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R18D1",
+        "x": 4.5,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R18D2",
+        "x": 7.5,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R18D3",
+        "x": 10.5,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R18D4",
+        "x": 13.5,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R18D5",
+        "x": 16.5,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R18D6",
+        "x": 19.5,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R18D7",
+        "x": 22.5,
+        "y": 63,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "SG19",
+        "x": 0,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R19E0",
+        "x": -1.5,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R19E1",
+        "x": -4.5,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R19E2",
+        "x": -7.5,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R19E3",
+        "x": -10.5,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R19E4",
+        "x": -13.5,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R19E5",
+        "x": -16.5,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R19E6",
+        "x": -19.5,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R19E7",
+        "x": -22.5,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R19D0",
+        "x": 1.5,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R19D1",
+        "x": 4.5,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R19D2",
+        "x": 7.5,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R19D3",
+        "x": 10.5,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R19D4",
+        "x": 13.5,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R19D5",
+        "x": 16.5,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R19D6",
+        "x": 19.5,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      },
+      {
+        "id": "R19D7",
+        "x": 22.5,
+        "y": 66.5,
+        "z": 9,
+        "demandaFixa": 0
+      }
+    ],
+    "trechos": [
+      {
+        "id": "COLUNA",
+        "de": "VGA",
+        "para": "TOPO",
+        "diametroInterno": 154.05,
+        "comprimento": 9,
+        "c": 120,
+        "comprimentoEquivalente": 14.935,
+        "conexoes": "1\u00D7 ValvulaRetencao, 1\u00D7 ValvulaGaveta, 1\u00D7 Cotovelo90Padrao",
+        "diametroNominal": 150,
+        "material": "Aco"
+      },
+      {
+        "id": "GERAL",
+        "de": "TOPO",
+        "para": "SG0",
+        "diametroInterno": 154.05,
+        "comprimento": 15,
+        "c": 120,
+        "comprimentoEquivalente": 4.267,
+        "conexoes": "1\u00D7 Cotovelo90Padrao",
+        "diametroNominal": 150,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R0E0",
+        "de": "SG0",
+        "para": "R0E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R0E1",
+        "de": "R0E0",
+        "para": "R0E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R0E2",
+        "de": "R0E1",
+        "para": "R0E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R0E3",
+        "de": "R0E2",
+        "para": "R0E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R0E4",
+        "de": "R0E3",
+        "para": "R0E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R0E5",
+        "de": "R0E4",
+        "para": "R0E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R0E6",
+        "de": "R0E5",
+        "para": "R0E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R0E7",
+        "de": "R0E6",
+        "para": "R0E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R0D0",
+        "de": "SG0",
+        "para": "R0D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R0D1",
+        "de": "R0D0",
+        "para": "R0D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R0D2",
+        "de": "R0D1",
+        "para": "R0D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R0D3",
+        "de": "R0D2",
+        "para": "R0D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R0D4",
+        "de": "R0D3",
+        "para": "R0D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R0D5",
+        "de": "R0D4",
+        "para": "R0D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R0D6",
+        "de": "R0D5",
+        "para": "R0D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R0D7",
+        "de": "R0D6",
+        "para": "R0D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG0-1",
+        "de": "SG0",
+        "para": "SG1",
+        "diametroInterno": 102.26,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 100,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R1E0",
+        "de": "SG1",
+        "para": "R1E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R1E1",
+        "de": "R1E0",
+        "para": "R1E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R1E2",
+        "de": "R1E1",
+        "para": "R1E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R1E3",
+        "de": "R1E2",
+        "para": "R1E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R1E4",
+        "de": "R1E3",
+        "para": "R1E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R1E5",
+        "de": "R1E4",
+        "para": "R1E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R1E6",
+        "de": "R1E5",
+        "para": "R1E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R1E7",
+        "de": "R1E6",
+        "para": "R1E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R1D0",
+        "de": "SG1",
+        "para": "R1D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R1D1",
+        "de": "R1D0",
+        "para": "R1D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R1D2",
+        "de": "R1D1",
+        "para": "R1D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R1D3",
+        "de": "R1D2",
+        "para": "R1D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R1D4",
+        "de": "R1D3",
+        "para": "R1D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R1D5",
+        "de": "R1D4",
+        "para": "R1D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R1D6",
+        "de": "R1D5",
+        "para": "R1D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R1D7",
+        "de": "R1D6",
+        "para": "R1D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG1-2",
+        "de": "SG1",
+        "para": "SG2",
+        "diametroInterno": 102.26,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 100,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R2E0",
+        "de": "SG2",
+        "para": "R2E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R2E1",
+        "de": "R2E0",
+        "para": "R2E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R2E2",
+        "de": "R2E1",
+        "para": "R2E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R2E3",
+        "de": "R2E2",
+        "para": "R2E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R2E4",
+        "de": "R2E3",
+        "para": "R2E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R2E5",
+        "de": "R2E4",
+        "para": "R2E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R2E6",
+        "de": "R2E5",
+        "para": "R2E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R2E7",
+        "de": "R2E6",
+        "para": "R2E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R2D0",
+        "de": "SG2",
+        "para": "R2D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R2D1",
+        "de": "R2D0",
+        "para": "R2D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R2D2",
+        "de": "R2D1",
+        "para": "R2D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R2D3",
+        "de": "R2D2",
+        "para": "R2D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R2D4",
+        "de": "R2D3",
+        "para": "R2D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R2D5",
+        "de": "R2D4",
+        "para": "R2D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R2D6",
+        "de": "R2D5",
+        "para": "R2D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R2D7",
+        "de": "R2D6",
+        "para": "R2D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG2-3",
+        "de": "SG2",
+        "para": "SG3",
+        "diametroInterno": 102.26,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 100,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R3E0",
+        "de": "SG3",
+        "para": "R3E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R3E1",
+        "de": "R3E0",
+        "para": "R3E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R3E2",
+        "de": "R3E1",
+        "para": "R3E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R3E3",
+        "de": "R3E2",
+        "para": "R3E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R3E4",
+        "de": "R3E3",
+        "para": "R3E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R3E5",
+        "de": "R3E4",
+        "para": "R3E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R3E6",
+        "de": "R3E5",
+        "para": "R3E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R3E7",
+        "de": "R3E6",
+        "para": "R3E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R3D0",
+        "de": "SG3",
+        "para": "R3D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R3D1",
+        "de": "R3D0",
+        "para": "R3D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R3D2",
+        "de": "R3D1",
+        "para": "R3D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R3D3",
+        "de": "R3D2",
+        "para": "R3D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R3D4",
+        "de": "R3D3",
+        "para": "R3D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R3D5",
+        "de": "R3D4",
+        "para": "R3D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R3D6",
+        "de": "R3D5",
+        "para": "R3D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R3D7",
+        "de": "R3D6",
+        "para": "R3D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG3-4",
+        "de": "SG3",
+        "para": "SG4",
+        "diametroInterno": 102.26,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 100,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R4E0",
+        "de": "SG4",
+        "para": "R4E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R4E1",
+        "de": "R4E0",
+        "para": "R4E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R4E2",
+        "de": "R4E1",
+        "para": "R4E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R4E3",
+        "de": "R4E2",
+        "para": "R4E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R4E4",
+        "de": "R4E3",
+        "para": "R4E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R4E5",
+        "de": "R4E4",
+        "para": "R4E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R4E6",
+        "de": "R4E5",
+        "para": "R4E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R4E7",
+        "de": "R4E6",
+        "para": "R4E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R4D0",
+        "de": "SG4",
+        "para": "R4D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R4D1",
+        "de": "R4D0",
+        "para": "R4D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R4D2",
+        "de": "R4D1",
+        "para": "R4D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R4D3",
+        "de": "R4D2",
+        "para": "R4D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R4D4",
+        "de": "R4D3",
+        "para": "R4D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R4D5",
+        "de": "R4D4",
+        "para": "R4D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R4D6",
+        "de": "R4D5",
+        "para": "R4D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R4D7",
+        "de": "R4D6",
+        "para": "R4D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG4-5",
+        "de": "SG4",
+        "para": "SG5",
+        "diametroInterno": 102.26,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 100,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R5E0",
+        "de": "SG5",
+        "para": "R5E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R5E1",
+        "de": "R5E0",
+        "para": "R5E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R5E2",
+        "de": "R5E1",
+        "para": "R5E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R5E3",
+        "de": "R5E2",
+        "para": "R5E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R5E4",
+        "de": "R5E3",
+        "para": "R5E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R5E5",
+        "de": "R5E4",
+        "para": "R5E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R5E6",
+        "de": "R5E5",
+        "para": "R5E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R5E7",
+        "de": "R5E6",
+        "para": "R5E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R5D0",
+        "de": "SG5",
+        "para": "R5D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R5D1",
+        "de": "R5D0",
+        "para": "R5D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R5D2",
+        "de": "R5D1",
+        "para": "R5D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R5D3",
+        "de": "R5D2",
+        "para": "R5D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R5D4",
+        "de": "R5D3",
+        "para": "R5D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R5D5",
+        "de": "R5D4",
+        "para": "R5D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R5D6",
+        "de": "R5D5",
+        "para": "R5D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R5D7",
+        "de": "R5D6",
+        "para": "R5D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG5-6",
+        "de": "SG5",
+        "para": "SG6",
+        "diametroInterno": 102.26,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 100,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R6E0",
+        "de": "SG6",
+        "para": "R6E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R6E1",
+        "de": "R6E0",
+        "para": "R6E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R6E2",
+        "de": "R6E1",
+        "para": "R6E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R6E3",
+        "de": "R6E2",
+        "para": "R6E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R6E4",
+        "de": "R6E3",
+        "para": "R6E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R6E5",
+        "de": "R6E4",
+        "para": "R6E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R6E6",
+        "de": "R6E5",
+        "para": "R6E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R6E7",
+        "de": "R6E6",
+        "para": "R6E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R6D0",
+        "de": "SG6",
+        "para": "R6D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R6D1",
+        "de": "R6D0",
+        "para": "R6D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R6D2",
+        "de": "R6D1",
+        "para": "R6D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R6D3",
+        "de": "R6D2",
+        "para": "R6D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R6D4",
+        "de": "R6D3",
+        "para": "R6D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R6D5",
+        "de": "R6D4",
+        "para": "R6D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R6D6",
+        "de": "R6D5",
+        "para": "R6D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R6D7",
+        "de": "R6D6",
+        "para": "R6D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG6-7",
+        "de": "SG6",
+        "para": "SG7",
+        "diametroInterno": 102.26,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 100,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R7E0",
+        "de": "SG7",
+        "para": "R7E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R7E1",
+        "de": "R7E0",
+        "para": "R7E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R7E2",
+        "de": "R7E1",
+        "para": "R7E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R7E3",
+        "de": "R7E2",
+        "para": "R7E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R7E4",
+        "de": "R7E3",
+        "para": "R7E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R7E5",
+        "de": "R7E4",
+        "para": "R7E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R7E6",
+        "de": "R7E5",
+        "para": "R7E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R7E7",
+        "de": "R7E6",
+        "para": "R7E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R7D0",
+        "de": "SG7",
+        "para": "R7D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R7D1",
+        "de": "R7D0",
+        "para": "R7D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R7D2",
+        "de": "R7D1",
+        "para": "R7D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R7D3",
+        "de": "R7D2",
+        "para": "R7D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R7D4",
+        "de": "R7D3",
+        "para": "R7D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R7D5",
+        "de": "R7D4",
+        "para": "R7D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R7D6",
+        "de": "R7D5",
+        "para": "R7D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R7D7",
+        "de": "R7D6",
+        "para": "R7D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG7-8",
+        "de": "SG7",
+        "para": "SG8",
+        "diametroInterno": 102.26,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 100,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R8E0",
+        "de": "SG8",
+        "para": "R8E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R8E1",
+        "de": "R8E0",
+        "para": "R8E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R8E2",
+        "de": "R8E1",
+        "para": "R8E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R8E3",
+        "de": "R8E2",
+        "para": "R8E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R8E4",
+        "de": "R8E3",
+        "para": "R8E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R8E5",
+        "de": "R8E4",
+        "para": "R8E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R8E6",
+        "de": "R8E5",
+        "para": "R8E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R8E7",
+        "de": "R8E6",
+        "para": "R8E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R8D0",
+        "de": "SG8",
+        "para": "R8D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R8D1",
+        "de": "R8D0",
+        "para": "R8D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R8D2",
+        "de": "R8D1",
+        "para": "R8D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R8D3",
+        "de": "R8D2",
+        "para": "R8D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R8D4",
+        "de": "R8D3",
+        "para": "R8D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R8D5",
+        "de": "R8D4",
+        "para": "R8D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R8D6",
+        "de": "R8D5",
+        "para": "R8D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R8D7",
+        "de": "R8D6",
+        "para": "R8D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG8-9",
+        "de": "SG8",
+        "para": "SG9",
+        "diametroInterno": 102.26,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 100,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R9E0",
+        "de": "SG9",
+        "para": "R9E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R9E1",
+        "de": "R9E0",
+        "para": "R9E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R9E2",
+        "de": "R9E1",
+        "para": "R9E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R9E3",
+        "de": "R9E2",
+        "para": "R9E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R9E4",
+        "de": "R9E3",
+        "para": "R9E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R9E5",
+        "de": "R9E4",
+        "para": "R9E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R9E6",
+        "de": "R9E5",
+        "para": "R9E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R9E7",
+        "de": "R9E6",
+        "para": "R9E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R9D0",
+        "de": "SG9",
+        "para": "R9D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R9D1",
+        "de": "R9D0",
+        "para": "R9D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R9D2",
+        "de": "R9D1",
+        "para": "R9D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R9D3",
+        "de": "R9D2",
+        "para": "R9D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R9D4",
+        "de": "R9D3",
+        "para": "R9D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R9D5",
+        "de": "R9D4",
+        "para": "R9D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R9D6",
+        "de": "R9D5",
+        "para": "R9D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R9D7",
+        "de": "R9D6",
+        "para": "R9D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG9-10",
+        "de": "SG9",
+        "para": "SG10",
+        "diametroInterno": 102.26,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 100,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R10E0",
+        "de": "SG10",
+        "para": "R10E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R10E1",
+        "de": "R10E0",
+        "para": "R10E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R10E2",
+        "de": "R10E1",
+        "para": "R10E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R10E3",
+        "de": "R10E2",
+        "para": "R10E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R10E4",
+        "de": "R10E3",
+        "para": "R10E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R10E5",
+        "de": "R10E4",
+        "para": "R10E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R10E6",
+        "de": "R10E5",
+        "para": "R10E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R10E7",
+        "de": "R10E6",
+        "para": "R10E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R10D0",
+        "de": "SG10",
+        "para": "R10D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R10D1",
+        "de": "R10D0",
+        "para": "R10D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R10D2",
+        "de": "R10D1",
+        "para": "R10D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R10D3",
+        "de": "R10D2",
+        "para": "R10D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R10D4",
+        "de": "R10D3",
+        "para": "R10D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R10D5",
+        "de": "R10D4",
+        "para": "R10D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R10D6",
+        "de": "R10D5",
+        "para": "R10D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R10D7",
+        "de": "R10D6",
+        "para": "R10D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG10-11",
+        "de": "SG10",
+        "para": "SG11",
+        "diametroInterno": 102.26,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 100,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R11E0",
+        "de": "SG11",
+        "para": "R11E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R11E1",
+        "de": "R11E0",
+        "para": "R11E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R11E2",
+        "de": "R11E1",
+        "para": "R11E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R11E3",
+        "de": "R11E2",
+        "para": "R11E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R11E4",
+        "de": "R11E3",
+        "para": "R11E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R11E5",
+        "de": "R11E4",
+        "para": "R11E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R11E6",
+        "de": "R11E5",
+        "para": "R11E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R11E7",
+        "de": "R11E6",
+        "para": "R11E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R11D0",
+        "de": "SG11",
+        "para": "R11D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R11D1",
+        "de": "R11D0",
+        "para": "R11D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R11D2",
+        "de": "R11D1",
+        "para": "R11D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R11D3",
+        "de": "R11D2",
+        "para": "R11D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R11D4",
+        "de": "R11D3",
+        "para": "R11D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R11D5",
+        "de": "R11D4",
+        "para": "R11D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R11D6",
+        "de": "R11D5",
+        "para": "R11D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R11D7",
+        "de": "R11D6",
+        "para": "R11D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG11-12",
+        "de": "SG11",
+        "para": "SG12",
+        "diametroInterno": 102.26,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 100,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R12E0",
+        "de": "SG12",
+        "para": "R12E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R12E1",
+        "de": "R12E0",
+        "para": "R12E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R12E2",
+        "de": "R12E1",
+        "para": "R12E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R12E3",
+        "de": "R12E2",
+        "para": "R12E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R12E4",
+        "de": "R12E3",
+        "para": "R12E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R12E5",
+        "de": "R12E4",
+        "para": "R12E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R12E6",
+        "de": "R12E5",
+        "para": "R12E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R12E7",
+        "de": "R12E6",
+        "para": "R12E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R12D0",
+        "de": "SG12",
+        "para": "R12D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R12D1",
+        "de": "R12D0",
+        "para": "R12D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R12D2",
+        "de": "R12D1",
+        "para": "R12D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R12D3",
+        "de": "R12D2",
+        "para": "R12D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R12D4",
+        "de": "R12D3",
+        "para": "R12D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R12D5",
+        "de": "R12D4",
+        "para": "R12D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R12D6",
+        "de": "R12D5",
+        "para": "R12D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R12D7",
+        "de": "R12D6",
+        "para": "R12D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG12-13",
+        "de": "SG12",
+        "para": "SG13",
+        "diametroInterno": 102.26,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 100,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R13E0",
+        "de": "SG13",
+        "para": "R13E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R13E1",
+        "de": "R13E0",
+        "para": "R13E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R13E2",
+        "de": "R13E1",
+        "para": "R13E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R13E3",
+        "de": "R13E2",
+        "para": "R13E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R13E4",
+        "de": "R13E3",
+        "para": "R13E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R13E5",
+        "de": "R13E4",
+        "para": "R13E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R13E6",
+        "de": "R13E5",
+        "para": "R13E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R13E7",
+        "de": "R13E6",
+        "para": "R13E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R13D0",
+        "de": "SG13",
+        "para": "R13D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R13D1",
+        "de": "R13D0",
+        "para": "R13D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R13D2",
+        "de": "R13D1",
+        "para": "R13D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R13D3",
+        "de": "R13D2",
+        "para": "R13D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R13D4",
+        "de": "R13D3",
+        "para": "R13D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R13D5",
+        "de": "R13D4",
+        "para": "R13D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R13D6",
+        "de": "R13D5",
+        "para": "R13D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R13D7",
+        "de": "R13D6",
+        "para": "R13D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG13-14",
+        "de": "SG13",
+        "para": "SG14",
+        "diametroInterno": 102.26,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 100,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R14E0",
+        "de": "SG14",
+        "para": "R14E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R14E1",
+        "de": "R14E0",
+        "para": "R14E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R14E2",
+        "de": "R14E1",
+        "para": "R14E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R14E3",
+        "de": "R14E2",
+        "para": "R14E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R14E4",
+        "de": "R14E3",
+        "para": "R14E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R14E5",
+        "de": "R14E4",
+        "para": "R14E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R14E6",
+        "de": "R14E5",
+        "para": "R14E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R14E7",
+        "de": "R14E6",
+        "para": "R14E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R14D0",
+        "de": "SG14",
+        "para": "R14D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R14D1",
+        "de": "R14D0",
+        "para": "R14D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R14D2",
+        "de": "R14D1",
+        "para": "R14D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R14D3",
+        "de": "R14D2",
+        "para": "R14D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R14D4",
+        "de": "R14D3",
+        "para": "R14D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R14D5",
+        "de": "R14D4",
+        "para": "R14D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R14D6",
+        "de": "R14D5",
+        "para": "R14D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R14D7",
+        "de": "R14D6",
+        "para": "R14D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG14-15",
+        "de": "SG14",
+        "para": "SG15",
+        "diametroInterno": 77.93,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 80,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R15E0",
+        "de": "SG15",
+        "para": "R15E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R15E1",
+        "de": "R15E0",
+        "para": "R15E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R15E2",
+        "de": "R15E1",
+        "para": "R15E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R15E3",
+        "de": "R15E2",
+        "para": "R15E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R15E4",
+        "de": "R15E3",
+        "para": "R15E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R15E5",
+        "de": "R15E4",
+        "para": "R15E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R15E6",
+        "de": "R15E5",
+        "para": "R15E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R15E7",
+        "de": "R15E6",
+        "para": "R15E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R15D0",
+        "de": "SG15",
+        "para": "R15D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R15D1",
+        "de": "R15D0",
+        "para": "R15D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R15D2",
+        "de": "R15D1",
+        "para": "R15D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R15D3",
+        "de": "R15D2",
+        "para": "R15D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R15D4",
+        "de": "R15D3",
+        "para": "R15D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R15D5",
+        "de": "R15D4",
+        "para": "R15D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R15D6",
+        "de": "R15D5",
+        "para": "R15D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R15D7",
+        "de": "R15D6",
+        "para": "R15D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG15-16",
+        "de": "SG15",
+        "para": "SG16",
+        "diametroInterno": 77.93,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 80,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R16E0",
+        "de": "SG16",
+        "para": "R16E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R16E1",
+        "de": "R16E0",
+        "para": "R16E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R16E2",
+        "de": "R16E1",
+        "para": "R16E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R16E3",
+        "de": "R16E2",
+        "para": "R16E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R16E4",
+        "de": "R16E3",
+        "para": "R16E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R16E5",
+        "de": "R16E4",
+        "para": "R16E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R16E6",
+        "de": "R16E5",
+        "para": "R16E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R16E7",
+        "de": "R16E6",
+        "para": "R16E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R16D0",
+        "de": "SG16",
+        "para": "R16D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R16D1",
+        "de": "R16D0",
+        "para": "R16D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R16D2",
+        "de": "R16D1",
+        "para": "R16D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R16D3",
+        "de": "R16D2",
+        "para": "R16D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R16D4",
+        "de": "R16D3",
+        "para": "R16D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R16D5",
+        "de": "R16D4",
+        "para": "R16D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R16D6",
+        "de": "R16D5",
+        "para": "R16D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R16D7",
+        "de": "R16D6",
+        "para": "R16D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG16-17",
+        "de": "SG16",
+        "para": "SG17",
+        "diametroInterno": 77.93,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 80,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R17E0",
+        "de": "SG17",
+        "para": "R17E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R17E1",
+        "de": "R17E0",
+        "para": "R17E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R17E2",
+        "de": "R17E1",
+        "para": "R17E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R17E3",
+        "de": "R17E2",
+        "para": "R17E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R17E4",
+        "de": "R17E3",
+        "para": "R17E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R17E5",
+        "de": "R17E4",
+        "para": "R17E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R17E6",
+        "de": "R17E5",
+        "para": "R17E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R17E7",
+        "de": "R17E6",
+        "para": "R17E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R17D0",
+        "de": "SG17",
+        "para": "R17D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R17D1",
+        "de": "R17D0",
+        "para": "R17D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R17D2",
+        "de": "R17D1",
+        "para": "R17D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R17D3",
+        "de": "R17D2",
+        "para": "R17D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R17D4",
+        "de": "R17D3",
+        "para": "R17D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R17D5",
+        "de": "R17D4",
+        "para": "R17D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R17D6",
+        "de": "R17D5",
+        "para": "R17D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R17D7",
+        "de": "R17D6",
+        "para": "R17D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG17-18",
+        "de": "SG17",
+        "para": "SG18",
+        "diametroInterno": 62.71,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 65,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R18E0",
+        "de": "SG18",
+        "para": "R18E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R18E1",
+        "de": "R18E0",
+        "para": "R18E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R18E2",
+        "de": "R18E1",
+        "para": "R18E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R18E3",
+        "de": "R18E2",
+        "para": "R18E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R18E4",
+        "de": "R18E3",
+        "para": "R18E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R18E5",
+        "de": "R18E4",
+        "para": "R18E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R18E6",
+        "de": "R18E5",
+        "para": "R18E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R18E7",
+        "de": "R18E6",
+        "para": "R18E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R18D0",
+        "de": "SG18",
+        "para": "R18D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R18D1",
+        "de": "R18D0",
+        "para": "R18D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R18D2",
+        "de": "R18D1",
+        "para": "R18D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R18D3",
+        "de": "R18D2",
+        "para": "R18D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R18D4",
+        "de": "R18D3",
+        "para": "R18D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R18D5",
+        "de": "R18D4",
+        "para": "R18D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R18D6",
+        "de": "R18D5",
+        "para": "R18D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R18D7",
+        "de": "R18D6",
+        "para": "R18D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "SG18-19",
+        "de": "SG18",
+        "para": "SG19",
+        "diametroInterno": 62.71,
+        "comprimento": 3.5,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 65,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R19E0",
+        "de": "SG19",
+        "para": "R19E0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R19E1",
+        "de": "R19E0",
+        "para": "R19E1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R19E2",
+        "de": "R19E1",
+        "para": "R19E2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R19E3",
+        "de": "R19E2",
+        "para": "R19E3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R19E4",
+        "de": "R19E3",
+        "para": "R19E4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R19E5",
+        "de": "R19E4",
+        "para": "R19E5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R19E6",
+        "de": "R19E5",
+        "para": "R19E6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R19E7",
+        "de": "R19E6",
+        "para": "R19E7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R19D0",
+        "de": "SG19",
+        "para": "R19D0",
+        "diametroInterno": 52.5,
+        "comprimento": 1.5,
+        "c": 120,
+        "comprimentoEquivalente": 3.048,
+        "conexoes": "1\u00D7 TeOuCruzetaFluxoDesviado",
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R19D1",
+        "de": "R19D0",
+        "para": "R19D1",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R19D2",
+        "de": "R19D1",
+        "para": "R19D2",
+        "diametroInterno": 52.5,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 50,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R19D3",
+        "de": "R19D2",
+        "para": "R19D3",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R19D4",
+        "de": "R19D3",
+        "para": "R19D4",
+        "diametroInterno": 40.89,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 40,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R19D5",
+        "de": "R19D4",
+        "para": "R19D5",
+        "diametroInterno": 35.05,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 32,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R19D6",
+        "de": "R19D5",
+        "para": "R19D6",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      },
+      {
+        "id": "T-R19D7",
+        "de": "R19D6",
+        "para": "R19D7",
+        "diametroInterno": 26.64,
+        "comprimento": 3,
+        "c": 120,
+        "comprimentoEquivalente": 0,
+        "diametroNominal": 25,
+        "material": "Aco"
+      }
+    ],
+    "chuveiros": [
+      {
+        "id": "B-R0E0",
+        "no": "R0E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R0"
+      },
+      {
+        "id": "B-R0E1",
+        "no": "R0E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R0"
+      },
+      {
+        "id": "B-R0E2",
+        "no": "R0E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R0"
+      },
+      {
+        "id": "B-R0E3",
+        "no": "R0E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R0"
+      },
+      {
+        "id": "B-R0E4",
+        "no": "R0E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R0"
+      },
+      {
+        "id": "B-R0E5",
+        "no": "R0E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R0"
+      },
+      {
+        "id": "B-R0E6",
+        "no": "R0E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R0"
+      },
+      {
+        "id": "B-R0E7",
+        "no": "R0E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R0"
+      },
+      {
+        "id": "B-R0D0",
+        "no": "R0D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R0"
+      },
+      {
+        "id": "B-R0D1",
+        "no": "R0D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R0"
+      },
+      {
+        "id": "B-R0D2",
+        "no": "R0D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R0"
+      },
+      {
+        "id": "B-R0D3",
+        "no": "R0D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R0"
+      },
+      {
+        "id": "B-R0D4",
+        "no": "R0D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R0"
+      },
+      {
+        "id": "B-R0D5",
+        "no": "R0D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R0"
+      },
+      {
+        "id": "B-R0D6",
+        "no": "R0D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R0"
+      },
+      {
+        "id": "B-R0D7",
+        "no": "R0D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R0"
+      },
+      {
+        "id": "B-R1E0",
+        "no": "R1E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R1"
+      },
+      {
+        "id": "B-R1E1",
+        "no": "R1E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R1"
+      },
+      {
+        "id": "B-R1E2",
+        "no": "R1E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R1"
+      },
+      {
+        "id": "B-R1E3",
+        "no": "R1E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R1"
+      },
+      {
+        "id": "B-R1E4",
+        "no": "R1E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R1"
+      },
+      {
+        "id": "B-R1E5",
+        "no": "R1E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R1"
+      },
+      {
+        "id": "B-R1E6",
+        "no": "R1E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R1"
+      },
+      {
+        "id": "B-R1E7",
+        "no": "R1E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R1"
+      },
+      {
+        "id": "B-R1D0",
+        "no": "R1D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R1"
+      },
+      {
+        "id": "B-R1D1",
+        "no": "R1D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R1"
+      },
+      {
+        "id": "B-R1D2",
+        "no": "R1D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R1"
+      },
+      {
+        "id": "B-R1D3",
+        "no": "R1D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R1"
+      },
+      {
+        "id": "B-R1D4",
+        "no": "R1D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R1"
+      },
+      {
+        "id": "B-R1D5",
+        "no": "R1D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R1"
+      },
+      {
+        "id": "B-R1D6",
+        "no": "R1D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R1"
+      },
+      {
+        "id": "B-R1D7",
+        "no": "R1D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R1"
+      },
+      {
+        "id": "B-R2E0",
+        "no": "R2E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R2"
+      },
+      {
+        "id": "B-R2E1",
+        "no": "R2E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R2"
+      },
+      {
+        "id": "B-R2E2",
+        "no": "R2E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R2"
+      },
+      {
+        "id": "B-R2E3",
+        "no": "R2E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R2"
+      },
+      {
+        "id": "B-R2E4",
+        "no": "R2E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R2"
+      },
+      {
+        "id": "B-R2E5",
+        "no": "R2E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R2"
+      },
+      {
+        "id": "B-R2E6",
+        "no": "R2E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R2"
+      },
+      {
+        "id": "B-R2E7",
+        "no": "R2E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R2"
+      },
+      {
+        "id": "B-R2D0",
+        "no": "R2D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R2"
+      },
+      {
+        "id": "B-R2D1",
+        "no": "R2D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R2"
+      },
+      {
+        "id": "B-R2D2",
+        "no": "R2D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R2"
+      },
+      {
+        "id": "B-R2D3",
+        "no": "R2D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R2"
+      },
+      {
+        "id": "B-R2D4",
+        "no": "R2D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R2"
+      },
+      {
+        "id": "B-R2D5",
+        "no": "R2D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R2"
+      },
+      {
+        "id": "B-R2D6",
+        "no": "R2D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R2"
+      },
+      {
+        "id": "B-R2D7",
+        "no": "R2D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R2"
+      },
+      {
+        "id": "B-R3E0",
+        "no": "R3E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R3"
+      },
+      {
+        "id": "B-R3E1",
+        "no": "R3E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R3"
+      },
+      {
+        "id": "B-R3E2",
+        "no": "R3E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R3"
+      },
+      {
+        "id": "B-R3E3",
+        "no": "R3E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R3"
+      },
+      {
+        "id": "B-R3E4",
+        "no": "R3E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R3"
+      },
+      {
+        "id": "B-R3E5",
+        "no": "R3E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R3"
+      },
+      {
+        "id": "B-R3E6",
+        "no": "R3E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R3"
+      },
+      {
+        "id": "B-R3E7",
+        "no": "R3E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R3"
+      },
+      {
+        "id": "B-R3D0",
+        "no": "R3D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R3"
+      },
+      {
+        "id": "B-R3D1",
+        "no": "R3D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R3"
+      },
+      {
+        "id": "B-R3D2",
+        "no": "R3D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R3"
+      },
+      {
+        "id": "B-R3D3",
+        "no": "R3D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R3"
+      },
+      {
+        "id": "B-R3D4",
+        "no": "R3D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R3"
+      },
+      {
+        "id": "B-R3D5",
+        "no": "R3D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R3"
+      },
+      {
+        "id": "B-R3D6",
+        "no": "R3D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R3"
+      },
+      {
+        "id": "B-R3D7",
+        "no": "R3D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R3"
+      },
+      {
+        "id": "B-R4E0",
+        "no": "R4E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R4"
+      },
+      {
+        "id": "B-R4E1",
+        "no": "R4E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R4"
+      },
+      {
+        "id": "B-R4E2",
+        "no": "R4E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R4"
+      },
+      {
+        "id": "B-R4E3",
+        "no": "R4E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R4"
+      },
+      {
+        "id": "B-R4E4",
+        "no": "R4E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R4"
+      },
+      {
+        "id": "B-R4E5",
+        "no": "R4E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R4"
+      },
+      {
+        "id": "B-R4E6",
+        "no": "R4E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R4"
+      },
+      {
+        "id": "B-R4E7",
+        "no": "R4E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R4"
+      },
+      {
+        "id": "B-R4D0",
+        "no": "R4D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R4"
+      },
+      {
+        "id": "B-R4D1",
+        "no": "R4D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R4"
+      },
+      {
+        "id": "B-R4D2",
+        "no": "R4D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R4"
+      },
+      {
+        "id": "B-R4D3",
+        "no": "R4D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R4"
+      },
+      {
+        "id": "B-R4D4",
+        "no": "R4D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R4"
+      },
+      {
+        "id": "B-R4D5",
+        "no": "R4D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R4"
+      },
+      {
+        "id": "B-R4D6",
+        "no": "R4D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R4"
+      },
+      {
+        "id": "B-R4D7",
+        "no": "R4D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R4"
+      },
+      {
+        "id": "B-R5E0",
+        "no": "R5E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R5"
+      },
+      {
+        "id": "B-R5E1",
+        "no": "R5E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R5"
+      },
+      {
+        "id": "B-R5E2",
+        "no": "R5E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R5"
+      },
+      {
+        "id": "B-R5E3",
+        "no": "R5E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R5"
+      },
+      {
+        "id": "B-R5E4",
+        "no": "R5E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R5"
+      },
+      {
+        "id": "B-R5E5",
+        "no": "R5E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R5"
+      },
+      {
+        "id": "B-R5E6",
+        "no": "R5E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R5"
+      },
+      {
+        "id": "B-R5E7",
+        "no": "R5E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R5"
+      },
+      {
+        "id": "B-R5D0",
+        "no": "R5D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R5"
+      },
+      {
+        "id": "B-R5D1",
+        "no": "R5D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R5"
+      },
+      {
+        "id": "B-R5D2",
+        "no": "R5D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R5"
+      },
+      {
+        "id": "B-R5D3",
+        "no": "R5D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R5"
+      },
+      {
+        "id": "B-R5D4",
+        "no": "R5D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R5"
+      },
+      {
+        "id": "B-R5D5",
+        "no": "R5D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R5"
+      },
+      {
+        "id": "B-R5D6",
+        "no": "R5D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R5"
+      },
+      {
+        "id": "B-R5D7",
+        "no": "R5D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R5"
+      },
+      {
+        "id": "B-R6E0",
+        "no": "R6E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R6"
+      },
+      {
+        "id": "B-R6E1",
+        "no": "R6E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R6"
+      },
+      {
+        "id": "B-R6E2",
+        "no": "R6E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R6"
+      },
+      {
+        "id": "B-R6E3",
+        "no": "R6E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R6"
+      },
+      {
+        "id": "B-R6E4",
+        "no": "R6E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R6"
+      },
+      {
+        "id": "B-R6E5",
+        "no": "R6E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R6"
+      },
+      {
+        "id": "B-R6E6",
+        "no": "R6E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R6"
+      },
+      {
+        "id": "B-R6E7",
+        "no": "R6E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R6"
+      },
+      {
+        "id": "B-R6D0",
+        "no": "R6D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R6"
+      },
+      {
+        "id": "B-R6D1",
+        "no": "R6D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R6"
+      },
+      {
+        "id": "B-R6D2",
+        "no": "R6D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R6"
+      },
+      {
+        "id": "B-R6D3",
+        "no": "R6D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R6"
+      },
+      {
+        "id": "B-R6D4",
+        "no": "R6D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R6"
+      },
+      {
+        "id": "B-R6D5",
+        "no": "R6D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R6"
+      },
+      {
+        "id": "B-R6D6",
+        "no": "R6D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R6"
+      },
+      {
+        "id": "B-R6D7",
+        "no": "R6D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R6"
+      },
+      {
+        "id": "B-R7E0",
+        "no": "R7E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R7"
+      },
+      {
+        "id": "B-R7E1",
+        "no": "R7E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R7"
+      },
+      {
+        "id": "B-R7E2",
+        "no": "R7E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R7"
+      },
+      {
+        "id": "B-R7E3",
+        "no": "R7E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R7"
+      },
+      {
+        "id": "B-R7E4",
+        "no": "R7E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R7"
+      },
+      {
+        "id": "B-R7E5",
+        "no": "R7E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R7"
+      },
+      {
+        "id": "B-R7E6",
+        "no": "R7E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R7"
+      },
+      {
+        "id": "B-R7E7",
+        "no": "R7E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R7"
+      },
+      {
+        "id": "B-R7D0",
+        "no": "R7D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R7"
+      },
+      {
+        "id": "B-R7D1",
+        "no": "R7D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R7"
+      },
+      {
+        "id": "B-R7D2",
+        "no": "R7D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R7"
+      },
+      {
+        "id": "B-R7D3",
+        "no": "R7D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R7"
+      },
+      {
+        "id": "B-R7D4",
+        "no": "R7D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R7"
+      },
+      {
+        "id": "B-R7D5",
+        "no": "R7D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R7"
+      },
+      {
+        "id": "B-R7D6",
+        "no": "R7D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R7"
+      },
+      {
+        "id": "B-R7D7",
+        "no": "R7D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R7"
+      },
+      {
+        "id": "B-R8E0",
+        "no": "R8E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R8"
+      },
+      {
+        "id": "B-R8E1",
+        "no": "R8E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R8"
+      },
+      {
+        "id": "B-R8E2",
+        "no": "R8E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R8"
+      },
+      {
+        "id": "B-R8E3",
+        "no": "R8E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R8"
+      },
+      {
+        "id": "B-R8E4",
+        "no": "R8E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R8"
+      },
+      {
+        "id": "B-R8E5",
+        "no": "R8E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R8"
+      },
+      {
+        "id": "B-R8E6",
+        "no": "R8E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R8"
+      },
+      {
+        "id": "B-R8E7",
+        "no": "R8E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R8"
+      },
+      {
+        "id": "B-R8D0",
+        "no": "R8D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R8"
+      },
+      {
+        "id": "B-R8D1",
+        "no": "R8D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R8"
+      },
+      {
+        "id": "B-R8D2",
+        "no": "R8D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R8"
+      },
+      {
+        "id": "B-R8D3",
+        "no": "R8D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R8"
+      },
+      {
+        "id": "B-R8D4",
+        "no": "R8D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R8"
+      },
+      {
+        "id": "B-R8D5",
+        "no": "R8D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R8"
+      },
+      {
+        "id": "B-R8D6",
+        "no": "R8D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R8"
+      },
+      {
+        "id": "B-R8D7",
+        "no": "R8D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R8"
+      },
+      {
+        "id": "B-R9E0",
+        "no": "R9E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R9"
+      },
+      {
+        "id": "B-R9E1",
+        "no": "R9E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R9"
+      },
+      {
+        "id": "B-R9E2",
+        "no": "R9E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R9"
+      },
+      {
+        "id": "B-R9E3",
+        "no": "R9E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R9"
+      },
+      {
+        "id": "B-R9E4",
+        "no": "R9E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R9"
+      },
+      {
+        "id": "B-R9E5",
+        "no": "R9E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R9"
+      },
+      {
+        "id": "B-R9E6",
+        "no": "R9E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R9"
+      },
+      {
+        "id": "B-R9E7",
+        "no": "R9E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R9"
+      },
+      {
+        "id": "B-R9D0",
+        "no": "R9D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R9"
+      },
+      {
+        "id": "B-R9D1",
+        "no": "R9D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R9"
+      },
+      {
+        "id": "B-R9D2",
+        "no": "R9D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R9"
+      },
+      {
+        "id": "B-R9D3",
+        "no": "R9D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R9"
+      },
+      {
+        "id": "B-R9D4",
+        "no": "R9D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R9"
+      },
+      {
+        "id": "B-R9D5",
+        "no": "R9D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R9"
+      },
+      {
+        "id": "B-R9D6",
+        "no": "R9D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R9"
+      },
+      {
+        "id": "B-R9D7",
+        "no": "R9D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R9"
+      },
+      {
+        "id": "B-R10E0",
+        "no": "R10E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R10"
+      },
+      {
+        "id": "B-R10E1",
+        "no": "R10E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R10"
+      },
+      {
+        "id": "B-R10E2",
+        "no": "R10E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R10"
+      },
+      {
+        "id": "B-R10E3",
+        "no": "R10E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R10"
+      },
+      {
+        "id": "B-R10E4",
+        "no": "R10E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R10"
+      },
+      {
+        "id": "B-R10E5",
+        "no": "R10E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R10"
+      },
+      {
+        "id": "B-R10E6",
+        "no": "R10E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R10"
+      },
+      {
+        "id": "B-R10E7",
+        "no": "R10E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R10"
+      },
+      {
+        "id": "B-R10D0",
+        "no": "R10D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R10"
+      },
+      {
+        "id": "B-R10D1",
+        "no": "R10D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R10"
+      },
+      {
+        "id": "B-R10D2",
+        "no": "R10D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R10"
+      },
+      {
+        "id": "B-R10D3",
+        "no": "R10D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R10"
+      },
+      {
+        "id": "B-R10D4",
+        "no": "R10D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R10"
+      },
+      {
+        "id": "B-R10D5",
+        "no": "R10D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R10"
+      },
+      {
+        "id": "B-R10D6",
+        "no": "R10D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R10"
+      },
+      {
+        "id": "B-R10D7",
+        "no": "R10D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R10"
+      },
+      {
+        "id": "B-R11E0",
+        "no": "R11E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R11"
+      },
+      {
+        "id": "B-R11E1",
+        "no": "R11E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R11"
+      },
+      {
+        "id": "B-R11E2",
+        "no": "R11E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R11"
+      },
+      {
+        "id": "B-R11E3",
+        "no": "R11E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R11"
+      },
+      {
+        "id": "B-R11E4",
+        "no": "R11E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R11"
+      },
+      {
+        "id": "B-R11E5",
+        "no": "R11E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R11"
+      },
+      {
+        "id": "B-R11E6",
+        "no": "R11E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R11"
+      },
+      {
+        "id": "B-R11E7",
+        "no": "R11E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R11"
+      },
+      {
+        "id": "B-R11D0",
+        "no": "R11D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R11"
+      },
+      {
+        "id": "B-R11D1",
+        "no": "R11D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R11"
+      },
+      {
+        "id": "B-R11D2",
+        "no": "R11D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R11"
+      },
+      {
+        "id": "B-R11D3",
+        "no": "R11D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R11"
+      },
+      {
+        "id": "B-R11D4",
+        "no": "R11D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R11"
+      },
+      {
+        "id": "B-R11D5",
+        "no": "R11D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R11"
+      },
+      {
+        "id": "B-R11D6",
+        "no": "R11D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R11"
+      },
+      {
+        "id": "B-R11D7",
+        "no": "R11D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R11"
+      },
+      {
+        "id": "B-R12E0",
+        "no": "R12E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R12"
+      },
+      {
+        "id": "B-R12E1",
+        "no": "R12E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R12"
+      },
+      {
+        "id": "B-R12E2",
+        "no": "R12E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R12"
+      },
+      {
+        "id": "B-R12E3",
+        "no": "R12E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R12"
+      },
+      {
+        "id": "B-R12E4",
+        "no": "R12E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R12"
+      },
+      {
+        "id": "B-R12E5",
+        "no": "R12E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R12"
+      },
+      {
+        "id": "B-R12E6",
+        "no": "R12E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R12"
+      },
+      {
+        "id": "B-R12E7",
+        "no": "R12E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R12"
+      },
+      {
+        "id": "B-R12D0",
+        "no": "R12D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R12"
+      },
+      {
+        "id": "B-R12D1",
+        "no": "R12D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R12"
+      },
+      {
+        "id": "B-R12D2",
+        "no": "R12D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R12"
+      },
+      {
+        "id": "B-R12D3",
+        "no": "R12D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R12"
+      },
+      {
+        "id": "B-R12D4",
+        "no": "R12D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R12"
+      },
+      {
+        "id": "B-R12D5",
+        "no": "R12D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R12"
+      },
+      {
+        "id": "B-R12D6",
+        "no": "R12D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R12"
+      },
+      {
+        "id": "B-R12D7",
+        "no": "R12D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R12"
+      },
+      {
+        "id": "B-R13E0",
+        "no": "R13E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R13"
+      },
+      {
+        "id": "B-R13E1",
+        "no": "R13E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R13"
+      },
+      {
+        "id": "B-R13E2",
+        "no": "R13E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R13"
+      },
+      {
+        "id": "B-R13E3",
+        "no": "R13E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R13"
+      },
+      {
+        "id": "B-R13E4",
+        "no": "R13E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R13"
+      },
+      {
+        "id": "B-R13E5",
+        "no": "R13E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R13"
+      },
+      {
+        "id": "B-R13E6",
+        "no": "R13E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R13"
+      },
+      {
+        "id": "B-R13E7",
+        "no": "R13E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R13"
+      },
+      {
+        "id": "B-R13D0",
+        "no": "R13D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R13"
+      },
+      {
+        "id": "B-R13D1",
+        "no": "R13D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R13"
+      },
+      {
+        "id": "B-R13D2",
+        "no": "R13D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R13"
+      },
+      {
+        "id": "B-R13D3",
+        "no": "R13D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R13"
+      },
+      {
+        "id": "B-R13D4",
+        "no": "R13D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R13"
+      },
+      {
+        "id": "B-R13D5",
+        "no": "R13D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R13"
+      },
+      {
+        "id": "B-R13D6",
+        "no": "R13D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R13"
+      },
+      {
+        "id": "B-R13D7",
+        "no": "R13D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R13"
+      },
+      {
+        "id": "B-R14E0",
+        "no": "R14E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R14"
+      },
+      {
+        "id": "B-R14E1",
+        "no": "R14E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R14"
+      },
+      {
+        "id": "B-R14E2",
+        "no": "R14E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R14"
+      },
+      {
+        "id": "B-R14E3",
+        "no": "R14E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R14"
+      },
+      {
+        "id": "B-R14E4",
+        "no": "R14E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R14"
+      },
+      {
+        "id": "B-R14E5",
+        "no": "R14E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R14"
+      },
+      {
+        "id": "B-R14E6",
+        "no": "R14E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R14"
+      },
+      {
+        "id": "B-R14E7",
+        "no": "R14E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R14"
+      },
+      {
+        "id": "B-R14D0",
+        "no": "R14D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R14"
+      },
+      {
+        "id": "B-R14D1",
+        "no": "R14D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R14"
+      },
+      {
+        "id": "B-R14D2",
+        "no": "R14D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R14"
+      },
+      {
+        "id": "B-R14D3",
+        "no": "R14D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R14"
+      },
+      {
+        "id": "B-R14D4",
+        "no": "R14D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R14"
+      },
+      {
+        "id": "B-R14D5",
+        "no": "R14D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R14"
+      },
+      {
+        "id": "B-R14D6",
+        "no": "R14D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R14"
+      },
+      {
+        "id": "B-R14D7",
+        "no": "R14D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R14"
+      },
+      {
+        "id": "B-R15E0",
+        "no": "R15E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R15"
+      },
+      {
+        "id": "B-R15E1",
+        "no": "R15E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R15"
+      },
+      {
+        "id": "B-R15E2",
+        "no": "R15E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R15"
+      },
+      {
+        "id": "B-R15E3",
+        "no": "R15E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R15"
+      },
+      {
+        "id": "B-R15E4",
+        "no": "R15E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R15"
+      },
+      {
+        "id": "B-R15E5",
+        "no": "R15E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R15"
+      },
+      {
+        "id": "B-R15E6",
+        "no": "R15E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R15"
+      },
+      {
+        "id": "B-R15E7",
+        "no": "R15E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R15"
+      },
+      {
+        "id": "B-R15D0",
+        "no": "R15D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R15"
+      },
+      {
+        "id": "B-R15D1",
+        "no": "R15D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R15"
+      },
+      {
+        "id": "B-R15D2",
+        "no": "R15D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R15"
+      },
+      {
+        "id": "B-R15D3",
+        "no": "R15D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R15"
+      },
+      {
+        "id": "B-R15D4",
+        "no": "R15D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R15"
+      },
+      {
+        "id": "B-R15D5",
+        "no": "R15D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R15"
+      },
+      {
+        "id": "B-R15D6",
+        "no": "R15D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R15"
+      },
+      {
+        "id": "B-R15D7",
+        "no": "R15D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R15"
+      },
+      {
+        "id": "B-R16E0",
+        "no": "R16E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R16"
+      },
+      {
+        "id": "B-R16E1",
+        "no": "R16E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R16"
+      },
+      {
+        "id": "B-R16E2",
+        "no": "R16E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R16"
+      },
+      {
+        "id": "B-R16E3",
+        "no": "R16E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R16"
+      },
+      {
+        "id": "B-R16E4",
+        "no": "R16E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R16"
+      },
+      {
+        "id": "B-R16E5",
+        "no": "R16E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R16"
+      },
+      {
+        "id": "B-R16E6",
+        "no": "R16E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R16"
+      },
+      {
+        "id": "B-R16E7",
+        "no": "R16E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R16"
+      },
+      {
+        "id": "B-R16D0",
+        "no": "R16D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R16"
+      },
+      {
+        "id": "B-R16D1",
+        "no": "R16D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R16"
+      },
+      {
+        "id": "B-R16D2",
+        "no": "R16D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R16"
+      },
+      {
+        "id": "B-R16D3",
+        "no": "R16D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R16"
+      },
+      {
+        "id": "B-R16D4",
+        "no": "R16D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R16"
+      },
+      {
+        "id": "B-R16D5",
+        "no": "R16D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R16"
+      },
+      {
+        "id": "B-R16D6",
+        "no": "R16D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R16"
+      },
+      {
+        "id": "B-R16D7",
+        "no": "R16D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R16"
+      },
+      {
+        "id": "B-R17E0",
+        "no": "R17E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R17"
+      },
+      {
+        "id": "B-R17E1",
+        "no": "R17E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R17"
+      },
+      {
+        "id": "B-R17E2",
+        "no": "R17E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R17"
+      },
+      {
+        "id": "B-R17E3",
+        "no": "R17E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R17"
+      },
+      {
+        "id": "B-R17E4",
+        "no": "R17E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R17"
+      },
+      {
+        "id": "B-R17E5",
+        "no": "R17E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R17"
+      },
+      {
+        "id": "B-R17E6",
+        "no": "R17E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R17"
+      },
+      {
+        "id": "B-R17E7",
+        "no": "R17E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R17"
+      },
+      {
+        "id": "B-R17D0",
+        "no": "R17D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R17"
+      },
+      {
+        "id": "B-R17D1",
+        "no": "R17D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R17"
+      },
+      {
+        "id": "B-R17D2",
+        "no": "R17D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R17"
+      },
+      {
+        "id": "B-R17D3",
+        "no": "R17D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R17"
+      },
+      {
+        "id": "B-R17D4",
+        "no": "R17D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R17"
+      },
+      {
+        "id": "B-R17D5",
+        "no": "R17D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R17"
+      },
+      {
+        "id": "B-R17D6",
+        "no": "R17D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R17"
+      },
+      {
+        "id": "B-R17D7",
+        "no": "R17D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R17"
+      },
+      {
+        "id": "B-R18E0",
+        "no": "R18E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R18"
+      },
+      {
+        "id": "B-R18E1",
+        "no": "R18E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R18"
+      },
+      {
+        "id": "B-R18E2",
+        "no": "R18E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R18"
+      },
+      {
+        "id": "B-R18E3",
+        "no": "R18E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R18"
+      },
+      {
+        "id": "B-R18E4",
+        "no": "R18E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R18"
+      },
+      {
+        "id": "B-R18E5",
+        "no": "R18E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R18"
+      },
+      {
+        "id": "B-R18E6",
+        "no": "R18E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R18"
+      },
+      {
+        "id": "B-R18E7",
+        "no": "R18E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R18"
+      },
+      {
+        "id": "B-R18D0",
+        "no": "R18D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R18"
+      },
+      {
+        "id": "B-R18D1",
+        "no": "R18D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R18"
+      },
+      {
+        "id": "B-R18D2",
+        "no": "R18D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R18"
+      },
+      {
+        "id": "B-R18D3",
+        "no": "R18D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R18"
+      },
+      {
+        "id": "B-R18D4",
+        "no": "R18D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R18"
+      },
+      {
+        "id": "B-R18D5",
+        "no": "R18D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R18"
+      },
+      {
+        "id": "B-R18D6",
+        "no": "R18D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R18"
+      },
+      {
+        "id": "B-R18D7",
+        "no": "R18D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R18"
+      },
+      {
+        "id": "B-R19E0",
+        "no": "R19E0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R19"
+      },
+      {
+        "id": "B-R19E1",
+        "no": "R19E1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R19"
+      },
+      {
+        "id": "B-R19E2",
+        "no": "R19E2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R19"
+      },
+      {
+        "id": "B-R19E3",
+        "no": "R19E3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R19"
+      },
+      {
+        "id": "B-R19E4",
+        "no": "R19E4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R19"
+      },
+      {
+        "id": "B-R19E5",
+        "no": "R19E5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R19"
+      },
+      {
+        "id": "B-R19E6",
+        "no": "R19E6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R19"
+      },
+      {
+        "id": "B-R19E7",
+        "no": "R19E7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R19"
+      },
+      {
+        "id": "B-R19D0",
+        "no": "R19D0",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R19"
+      },
+      {
+        "id": "B-R19D1",
+        "no": "R19D1",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R19"
+      },
+      {
+        "id": "B-R19D2",
+        "no": "R19D2",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R19"
+      },
+      {
+        "id": "B-R19D3",
+        "no": "R19D3",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R19"
+      },
+      {
+        "id": "B-R19D4",
+        "no": "R19D4",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R19"
+      },
+      {
+        "id": "B-R19D5",
+        "no": "R19D5",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R19"
+      },
+      {
+        "id": "B-R19D6",
+        "no": "R19D6",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R19"
+      },
+      {
+        "id": "B-R19D7",
+        "no": "R19D7",
+        "fatorK": 80,
+        "areaCobertura": 10.5,
+        "ramal": "R19"
+      }
+    ]
+  }
+}

@@ -1,0 +1,148 @@
+# Automation API (Design Automation v3): índice completo
+
+Gerado em 2026-10-16 por `_tools/gerar_indices.py` a partir do TOC oficial da APS (`https://developer.doc.config.autodesk.com/bPlouYTd/design-automation_v3.json`). 142 entradas.
+
+As páginas do portal `aps.autodesk.com` são renderizadas por JavaScript; para ler o HTML estático, siga o método de https://aps.autodesk.com/llms.txt.
+
+- **Developer's Guide**
+  - [Overview](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/overview/)
+  - [API Basics](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/basics/)
+  - [Field Guide](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/field-guide/)
+  - **Rate Limits and Quotas**
+    - [APS Rate Limits and Quotas](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/rate-limits/forge-rate-limits/)
+    - [Automation API Rate Limits](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/rate-limits/da-rate-limits/)
+  - [Restrictions](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/restrictions/)
+  - [Aliases and IDs](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/aliases-and-ids/)
+  - [Callbacks](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/callbacks/)
+  - [WebSockets for When Callbacks Aren't an Option](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/websocket-api/)
+  - [Using 3-legged OAuth Tokens](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/3-legged-oauth-token-usage/)
+  - [Engine Lifecycle Policy](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/engine-lifecycle/)
+  - [Reference Downloading](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/reference-downloading/)
+  - **Revit Specific Info**
+    - [Handling Revit Failures](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/revit/handling-failures/)
+    - [Custom Fonts Support](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/revit/custom-fonts-support/)
+    - [Revit Cloud Model Integration](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/revit/revit-cloud-model-integration/)
+  - **Inventor Specific Info**
+    - [iLogic logging](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/inventor/ilogic-logging/)
+  - **Fusion Specific Info**
+    - [TypeScript](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/fusion/typescript/)
+    - [Arguments](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/fusion/arguments/)
+    - [Fusion Team Integration](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/fusion/fusion-team-integration/)
+    - [Callbacks](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/fusion/callbacks/)
+    - [Running Without User Identity](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/fusion/running-without-user-identity/)
+  - [FAQs](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/faqs/)
+  - [Troubleshooting](https://aps.autodesk.com/en/docs/design-automation/v3/developers_guide/troubleshooting/)
+- **How-to Guide**
+  - **Execute a 3ds Max MaxScript**
+    - [About this Walkthrough](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/3dsmax/about-this-tutorial/)
+    - [Task 1 - Obtain an Access Token](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/3dsmax/task1-authenticate/)
+    - [Task 2 - Create a Nickname](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/3dsmax/task2-create-nickname/)
+    - [Task 3 - Publish an Activity](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/3dsmax/task3-create-activity/)
+    - [Task 4 - Prepare Cloud Storage](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/3dsmax/task4-manage-cloud-storage/)
+    - [Task 5 - Submit a WorkItem](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/3dsmax/task5-submit-workitem/)
+    - [Task 6 - Download the Results](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/3dsmax/task6-download-results/)
+  - **Execute an AutoCAD Plug-in**
+    - [About this Walkthrough](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/autocad/about_this_tutorial/)
+    - [Task 1 - Obtain an Access Token](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/autocad/task1-authenticate/)
+    - [Task 2 – Create a Nickname](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/autocad/task2-create-nickname/)
+    - [Task 3 – Upload an AppBundle](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/autocad/task3-upload-appbundle/)
+    - [Task 4 – Publish an Activity](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/autocad/task4-publish-activity/)
+    - [Task 5 – Prepare Cloud Storage](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/autocad/task5-prepare_cloud_storage/)
+    - [Task 6 – Submit a WorkItem](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/autocad/task6-post-workitem/)
+    - [Task 7 - Download the Results](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/autocad/task7-download-results/)
+  - **Execute an Inventor Add-in**
+    - [About this Walkthrough](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/inventor/about-this-tutorial/)
+    - [Task 1 - Obtain an Access Token](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/inventor/task1-authenticate/)
+    - [Task 2 - Create a Nickname](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/inventor/task2-create-nickname/)
+    - [Task 3 – Upload an AppBundle](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/inventor/task3-upload-appbundle/)
+    - [Task 4 – Publish an Activity](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/inventor/task4-publish-activity/)
+    - [Task 5 – Prepare Cloud Storage](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/inventor/task5-prepare_cloud_storage/)
+    - [Task 6 – Submit a WorkItem](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/inventor/task6-post-workitem/)
+    - [Task 7 - Download the Results](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/inventor/task7-download-results/)
+  - **Execute a Revit Add-in**
+    - [About this Walkthrough](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/revit/about_this_tutorial/)
+    - [Task 1 – Convert Revit Add-in](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/revit/step1-convert-addin/)
+    - [Task 2 – Obtain an Access Token](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/revit/step2-create-forge-app/)
+    - [Task 3 – Create a Nickname](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/revit/step3-create-nickname/)
+    - [Task 4 – Upload an AppBundle](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/revit/step4-publish-appbundle/)
+    - [Task 5 – Publish an Activity](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/revit/step5-publish-activity/)
+    - [Task 6 – Prepare Cloud Storage](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/revit/step6-prepare_cloud_storage/)
+    - [Task 7 – Submit a WorkItem](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/revit/step7-post-workitem/)
+    - [Task 8 - Download the Results](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/revit/step8-download-results/)
+  - **Execute a Fusion Script**
+    - [About this Walkthrough](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/fusion/about-this-tutorial/)
+    - [Task 1 - Obtain an Access Token](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/fusion/task1-authenticate/)
+    - [Task 2 - Create a Nickname](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/fusion/task2-create-nickname/)
+    - [Task 3 – Upload an AppBundle](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/fusion/task3-upload-appbundle/)
+    - [Task 4 – Publish an Activity](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/fusion/task4-publish-activity/)
+    - [Task 5 – Submit a WorkItem](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/fusion/task5-post-workitem/)
+    - [Task 6 - Open Result in Fusion](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/fusion/task6-open-result-in-fusion/)
+  - **Advanced**
+    - [Use OnDemand Input](https://aps.autodesk.com/en/docs/design-automation/v3/tutorials/using-on-demand-inputs/)
+- **Code Samples & Blog Posts**
+  - [Code Samples](https://aps.autodesk.com/en/docs/design-automation/v3/code_samples/general_code_samples/)
+  - [Blog Posts](https://aps.autodesk.com/en/docs/design-automation/v3/code_samples/additional_resources/)
+- **Reference Guide**
+  - [REST API Reference](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/)
+    - **Activities**
+      - [GET activities](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/activities-GET/)
+      - [POST activities](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/activities-POST/)
+      - [DELETE activities/:id/aliases/:aliasId](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/activities-id-aliases-aliasId-DELETE/)
+      - [GET activities/:id/aliases/:aliasId](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/activities-id-aliases-aliasId-GET/)
+      - [PATCH activities/:id/aliases/:aliasId](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/activities-id-aliases-aliasId-PATCH/)
+      - [GET activities/:id/aliases](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/activities-id-aliases-GET/)
+      - [POST activities/:id/aliases](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/activities-id-aliases-POST/)
+      - [DELETE activities/:id](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/activities-id-DELETE/)
+      - [GET activities/:id](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/activities-id-GET/)
+      - [GET activities/:id/versions](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/activities-id-versions-GET/)
+      - [POST activities/:id/versions](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/activities-id-versions-POST/)
+      - [GET activities/:id/versions/:version](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/activities-id-versions-version-GET/)
+      - [DELETE activities/:id/versions/:version](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/activities-id-versions-version-DELETE/)
+    - **AppBundles**
+      - [GET appbundles](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/appbundles-GET/)
+      - [POST appbundles](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/appbundles-POST/)
+      - [DELETE appbundles/:id/aliases/:aliasId](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/appbundles-id-aliases-aliasId-DELETE/)
+      - [GET appbundles/:id/aliases/:aliasId](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/appbundles-id-aliases-aliasId-GET/)
+      - [PATCH appbundles/:id/aliases/:aliasId](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/appbundles-id-aliases-aliasId-PATCH/)
+      - [GET appbundles/:id/aliases](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/appbundles-id-aliases-GET/)
+      - [POST appbundles/:id/aliases](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/appbundles-id-aliases-POST/)
+      - [DELETE appbundles/:id](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/appbundles-id-DELETE/)
+      - [GET appbundles/:id](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/appbundles-id-GET/)
+      - [GET appbundles/:id/versions](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/appbundles-id-versions-GET/)
+      - [POST appbundles/:id/versions](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/appbundles-id-versions-POST/)
+      - [GET appbundles/:id/versions/:version](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/appbundles-id-versions-version-GET/)
+      - [DELETE appbundles/:id/versions/:version](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/appbundles-id-versions-version-DELETE/)
+    - **Engines**
+      - [GET engines](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/engines-GET/)
+      - [GET engines/:id](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/engines-id-GET/)
+    - **ForgeApps**
+      - [DELETE forgeapps/:id](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/forgeapps-id-DELETE/)
+      - [GET forgeapps/:id](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/forgeapps-id-GET/)
+      - [PATCH forgeapps/:id](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/forgeapps-id-PATCH/)
+    - **Health**
+      - [GET health/:engine](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/health-engine-GET/)
+      - [GET health/:engine/stats](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/health-engine-stats-GET/)
+    - **ServiceLimits**
+      - [PUT servicelimits/:owner](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/servicelimits-owner-PUT/)
+      - [GET servicelimits/:owner](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/servicelimits-owner-GET/)
+    - **Shares**
+      - [GET shares](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/shares-GET/)
+    - **WorkItems**
+      - [GET workitems/:id](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/workitems-id-GET/)
+      - [DELETE workitems/:id](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/workitems-id-DELETE/)
+      - [POST workitems](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/workitems-POST/)
+      - [POST workitems/batch](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/workitems-batch-POST/)
+      - [GET workitems?startAfterTime=:epochSecondsInUTC](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/workitems-startAfterTime-GET/)
+      - [POST workitems/status](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/workitems-status-POST/)
+      - [POST workitems/combine](https://aps.autodesk.com/en/docs/design-automation/v3/reference/http/workitems-combine-POST/)
+  - [Websocket Reference](https://aps.autodesk.com/en/docs/design-automation/v3/reference/websocket/)
+  - [WorkItem combine API Reference](https://aps.autodesk.com/en/docs/design-automation/v3/reference/combinator/)
+  - [Special URLs](https://aps.autodesk.com/en/docs/design-automation/v3/reference/special_urls/)
+  - [Activity Variable Arguments](https://aps.autodesk.com/en/docs/design-automation/v3/reference/vararg/)
+  - [Command Line Reference](https://aps.autodesk.com/en/docs/design-automation/v3/reference/cmdLine/)
+    - [Inventor](https://aps.autodesk.com/en/docs/design-automation/v3/reference/cmdLine/inventor/inventorCoreConsole/)
+- **Change History**
+  - [Automation API Changelog](https://aps.autodesk.com/en/docs/design-automation/_change_history/changelog_v3/)
+  - [AutoCAD Automation Service Release Notes](https://aps.autodesk.com/en/docs/design-automation/_change_history/acad_release_notes/)
+  - [Inventor Automation Service Release Notes](https://aps.autodesk.com/en/docs/design-automation/_change_history/inventor_release_notes/)
+  - [Revit Automation Service Release Notes](https://aps.autodesk.com/en/docs/design-automation/_change_history/revit_release_notes/)

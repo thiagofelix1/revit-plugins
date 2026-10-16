@@ -1,0 +1,15 @@
+# Normas ABNT são licenciadas por usuário/instituição: não publicar
+plugin-inicial-arquivos/NBR*.pdf
+
+# Memorial de cliente (rede e números de um projeto real)
+plugin-inicial-arquivos/MEMORIAL*.txt
+
+# Áudios de conversas pessoais (a transcrição fica em docs/refinamentos)
+plugin-inicial-arquivos/*.ogg
+
+# .NET
+bin/
+obj/
+*.user
+.vs/
+TestResults/
