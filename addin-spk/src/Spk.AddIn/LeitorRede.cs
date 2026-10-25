@@ -1,12 +1,14 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Plumbing;
 using Spk.Motor.Modelo;
+using MechanicalFitting = Autodesk.Revit.DB.Mechanical.MechanicalFitting;
+using Spk.Motor.Normas;
 
 namespace Spk.AddIn;
 
 /// <summary>
 /// Monta o grafo do motor a partir dos bicos confirmados e dos tubos ligados a eles.
-/// Conexões viram um nó só, sem comprimento equivalente: a perda delas não entra nesta leitura.
+/// Cada conexão vira um nó; o comprimento equivalente dela entra no trecho ligado ao conector que desvia o fluxo.
 /// </summary>
 static class LeitorRede
 {
@@ -23,7 +25,6 @@ static class LeitorRede
         var avisos = new List<string>
         {
             $"Fator C = {fatorC:0} em todos os tubos (Dados do projeto, Tabela 30).",
-            "Comprimentos equivalentes de conexões não entram nesta leitura.",
         };
 
         var nos = new Dictionary<string, No>();
@@ -44,6 +45,7 @@ static class LeitorRede
         }
 
         var trechos = new List<Trecho>();
+        var trechosDoTubo = new Dictionary<ElementId, List<int>>();
         var seq = 0;
         var usouNominal = false;
         foreach (var id in naRede)
@@ -53,6 +55,7 @@ static class LeitorRede
             var pontos = Pontos(tubo, curva.Curve, idsBico);
             var comprimento = Metros(curva.Curve.Length);
             var diametro = DiametroMm(tubo, ref usouNominal);
+            var nominal = DiametroNominalMm(tubo);
             for (var i = 0; i < pontos.Count - 1; i++)
             {
                 var a = pontos[i];
@@ -62,9 +65,16 @@ static class LeitorRede
                 if (fracao <= 1e-6) continue;
                 Garantir(nos, a.No, a.Ponto);
                 Garantir(nos, b.No, b.Ponto);
-                trechos.Add(new Trecho($"T{seq++}", a.No, b.No, diametro, Math.Max(comprimento * fracao, 0.001), fatorC));
+                trechos.Add(new Trecho($"T{seq++}", a.No, b.No, diametro, Math.Max(comprimento * fracao, 0.001), fatorC)
+                {
+                    DiametroNominal = nominal,
+                });
+                if (!trechosDoTubo.TryGetValue(tubo.Id, out var lista)) trechosDoTubo[tubo.Id] = lista = [];
+                lista.Add(trechos.Count - 1);
             }
         }
+
+        AplicarConexoes(doc, naRede, idsBico, trechos, trechosDoTubo, fatorC, avisos);
 
         var ligacoesDeBico = LigarBicos(bicos, idsBico, nos, trechos, ref seq, fatorC);
         if (ligacoesDeBico > 0)
@@ -112,6 +122,159 @@ static class LeitorRede
 
         var rede = new Rede(componente.Fonte, componente.Nos, componente.Trechos, componente.Chuveiros);
         return new RedeLida(rede, avisos, componente.Trechos.Count);
+    }
+
+    static readonly int[] DnsTabelados = [25, 32, 40, 50, 65, 80, 100, 125, 150, 200];
+
+    /// <summary>
+    /// Soma o comprimento equivalente das conexões e válvulas (NBR 9.4.3.4) no trecho ligado a elas.
+    /// Cotovelo: no trecho de um dos lados. Tê e cruzeta: só no ramo que desvia o fluxo (9.4.4.7 e), que é o
+    /// conector fora do par alinhado de maior diâmetro. Válvula: pelo nome da família.
+    /// </summary>
+    static void AplicarConexoes(Document doc, HashSet<ElementId> naRede, HashSet<ElementId> idsBico, List<Trecho> trechos,
+        Dictionary<ElementId, List<int>> trechosDoTubo, double fatorC, List<string> avisos)
+    {
+        var c = Math.Clamp(fatorC, 100, 150);
+        var aplicadas = 0;
+        var semTabela = new SortedSet<string>(StringComparer.Ordinal);
+        var desconhecidas = new SortedSet<string>(StringComparer.Ordinal);
+
+        void Somar(Connector? conector, string no, TipoConexao tipo, string nome)
+        {
+            if (conector is null) return;
+            var indice = TrechoDoConector(conector, no, trechos, trechosDoTubo);
+            if (indice is null) return;
+            var trecho = trechos[indice.Value];
+            var dn = DnTabelado(trecho.DiametroNominal);
+            if (dn is null)
+            {
+                semTabela.Add($"{nome} DN {trecho.DiametroNominal?.ToString() ?? "?"}");
+                return;
+            }
+
+            double equivalente;
+            try
+            {
+                equivalente = ComprimentosEquivalentes.Obter(tipo, dn.Value, c, trecho.DiametroInterno);
+            }
+            catch (ArgumentException)
+            {
+                semTabela.Add($"{nome} DN {dn}");
+                return;
+            }
+
+            trechos[indice.Value] = trecho with
+            {
+                ComprimentoEquivalente = trecho.ComprimentoEquivalente + equivalente,
+                Conexoes = string.IsNullOrEmpty(trecho.Conexoes) ? nome : trecho.Conexoes + ", " + nome,
+            };
+            aplicadas++;
+        }
+
+        foreach (var id in naRede)
+        {
+            if (idsBico.Contains(id) || doc.GetElement(id) is not FamilyInstance peca) continue;
+            var no = IdPeca(id);
+            var conectores = Conectores(peca).ToList();
+            if (conectores.Count == 0) continue;
+            var categoria = peca.Category?.Id.Value;
+
+            if (categoria == (long)BuiltInCategory.OST_PipeFitting && peca.MEPModel is MechanicalFitting conexao)
+            {
+                if (conexao.PartType == PartType.Elbow && conectores.Count >= 2)
+                {
+                    var desvio = 180 - conectores[0].CoordinateSystem.BasisZ.AngleTo(conectores[1].CoordinateSystem.BasisZ) * 180 / Math.PI;
+                    var tipo = desvio <= 50 ? TipoConexao.Cotovelo45 : TipoConexao.Cotovelo90Padrao;
+                    Somar(conectores[0], no, tipo, desvio <= 50 ? "cotovelo 45°" : "cotovelo 90°");
+                }
+                else if (conexao.PartType is PartType.Tee or PartType.Cross)
+                {
+                    foreach (var ramo in Ramos(conectores))
+                        Somar(ramo, no, TipoConexao.TeOuCruzetaFluxoDesviado, conexao.PartType == PartType.Tee ? "tê" : "cruzeta");
+                }
+            }
+            else if (categoria == (long)BuiltInCategory.OST_PipeAccessory)
+            {
+                var nome = $"{peca.Symbol?.Family?.Name} {peca.Symbol?.Name}";
+                var tipo = TipoDeValvula(nome);
+                if (tipo is null)
+                {
+                    desconhecidas.Add(peca.Symbol?.Family?.Name ?? "acessório sem família");
+                    continue;
+                }
+                Somar(conectores[0], no, tipo.Value, tipo switch
+                {
+                    TipoConexao.ValvulaBorboleta => "válvula borboleta",
+                    TipoConexao.ValvulaGaveta => "válvula gaveta",
+                    _ => "válvula de retenção",
+                });
+            }
+        }
+
+        avisos.Add(aplicadas > 0
+            ? $"{aplicadas} conexões e válvulas entraram com comprimento equivalente (tabela de literatura, NBR 9.4.3.4). Confira com o catálogo do fabricante."
+            : "Nenhuma conexão ligada aos tubos: sem comprimento equivalente nesta rede.");
+        if (semTabela.Count > 0)
+            avisos.Add("Sem comprimento equivalente tabelado, ficaram de fora: " + string.Join("; ", semTabela.Take(8)) + ".");
+        if (desconhecidas.Count > 0)
+            avisos.Add("Acessórios sem perda conhecida (fora do cálculo): " + string.Join("; ", desconhecidas.Take(8)) + ".");
+    }
+
+    /// <summary>Conectores de tê ou cruzeta que desviam o fluxo: todos menos o par alinhado de maior diâmetro.</summary>
+    static IEnumerable<Connector> Ramos(List<Connector> conectores)
+    {
+        (Connector A, Connector B)? passagem = null;
+        var maior = -1.0;
+        for (var i = 0; i < conectores.Count; i++)
+        for (var j = i + 1; j < conectores.Count; j++)
+        {
+            var a = conectores[i];
+            var b = conectores[j];
+            if (a.CoordinateSystem.BasisZ.DotProduct(b.CoordinateSystem.BasisZ) > -0.95) continue;
+            var raio = Raio(a) + Raio(b);
+            if (raio <= maior) continue;
+            maior = raio;
+            passagem = (a, b);
+        }
+
+        return passagem is { } p
+            ? conectores.Where(c => !ReferenceEquals(c, p.A) && !ReferenceEquals(c, p.B))
+            : conectores.OrderBy(Raio).Take(1);
+    }
+
+    static double Raio(Connector conector)
+    {
+        try { return conector.Radius; }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return 0; }
+    }
+
+    /// <summary>O trecho do tubo ligado a este conector que encosta no nó da conexão.</summary>
+    static int? TrechoDoConector(Connector conector, string no, List<Trecho> trechos, Dictionary<ElementId, List<int>> trechosDoTubo)
+    {
+        foreach (Connector outro in conector.AllRefs)
+        {
+            if (outro.Owner is not Pipe tubo || !trechosDoTubo.TryGetValue(tubo.Id, out var indices)) continue;
+            foreach (var i in indices)
+                if (trechos[i].De == no || trechos[i].Para == no)
+                    return i;
+        }
+        return null;
+    }
+
+    static int? DnTabelado(int? nominal)
+    {
+        if (nominal is not { } n) return null;
+        var perto = DnsTabelados.OrderBy(d => Math.Abs(d - n)).First();
+        return Math.Abs(perto - n) <= 3 ? perto : null;
+    }
+
+    static TipoConexao? TipoDeValvula(string nome)
+    {
+        var n = nome.ToLowerInvariant();
+        if (n.Contains("borboleta") || n.Contains("butterfly")) return TipoConexao.ValvulaBorboleta;
+        if (n.Contains("gaveta") || n.Contains("gate")) return TipoConexao.ValvulaGaveta;
+        if (n.Contains("retenção") || n.Contains("retencao") || n.Contains("check")) return TipoConexao.ValvulaRetencao;
+        return null;
     }
 
     static HashSet<ElementId> Alcançaveis(Document doc, HashSet<ElementId> idsBico)
@@ -206,7 +369,7 @@ static class LeitorRede
                     var a = nos[idS];
                     var b = nos[destino];
                     var distancia = Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y) + (a.Z - b.Z) * (a.Z - b.Z));
-                    trechos.Add(new Trecho($"L{seq++}", idS, destino, 25, Math.Max(distancia, 0.001), fatorC));
+                    trechos.Add(new Trecho($"L{seq++}", idS, destino, 25, Math.Max(distancia, 0.001), fatorC) { DiametroNominal = 25 });
                     entrou = true;
                 }
             }
@@ -670,6 +833,13 @@ static class LeitorRede
         var nominal = tubo.get_Parameter(BuiltInParameter.RBS_PIPE_DIAMETER_PARAM);
         var pes = nominal is { HasValue: true } && nominal.AsDouble() > 1e-6 ? nominal.AsDouble() : tubo.Diameter;
         return Milimetros(pes);
+    }
+
+    static int? DiametroNominalMm(Pipe tubo)
+    {
+        var nominal = tubo.get_Parameter(BuiltInParameter.RBS_PIPE_DIAMETER_PARAM);
+        var pes = nominal is { HasValue: true } && nominal.AsDouble() > 1e-6 ? nominal.AsDouble() : tubo.Diameter;
+        return pes > 1e-6 ? (int)Math.Round(Milimetros(pes)) : null;
     }
 
     static void Garantir(Dictionary<string, No> nos, string id, XYZ ponto)
