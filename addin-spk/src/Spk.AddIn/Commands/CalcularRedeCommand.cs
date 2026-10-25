@@ -86,31 +86,14 @@ public class CalcularRedeCommand : ExternalCommand
             File.WriteAllText(Path.Combine(pasta, "memorial.md"), Memorial.Gerar(relatorio));
             File.WriteAllBytes(Path.Combine(pasta, "memorial.docx"), MemorialDocx.Gerar(relatorio));
 
-            var gravado = new ResultadoGravado
-            {
-                Atende = relatorio.Atende,
-                PressaoNecessariaKPa = relatorio.Resultado.PressaoNecessaria,
-                VazaoChuveirosLmin = relatorio.Resultado.VazaoChuveiros,
-                ChuveiroCritico = relatorio.Resultado.ChuveiroCritico,
-                Bicos = bicos.Count,
-                Tubos = lida.Tubos,
-                BicosDaRede = lida.Rede.Chuveiros.Select(c => c.Id).ToList(),
-                Chuveiros = relatorio.Resultado.Chuveiros.Select(c => new BicoGravado
-                {
-                    Id = c.Id,
-                    Ramal = c.Ramal,
-                    PressaoKPa = c.Pressao,
-                    VazaoLmin = c.Vazao,
-                }).ToList(),
-            };
-            ArmazenamentoSpk.GravarComTransacao(doc, ResultadoGravado.Chave, gravado, "SPK — Resultado do cálculo");
+            var avisoParametros = GravarNoModelo(doc, lida, relatorio, dados);
 
             var critico = relatorio.Resultado.Chuveiros.First(c => c.Id == relatorio.Resultado.ChuveiroCritico);
             var falhas = relatorio.Verificacoes.Where(v => !v.Atende).Select(v => $"• {v.Descricao} ({v.Item}): {v.Detalhe}").ToList();
             TaskDialog.Show("SPK — Calcular", $"""
                 {(relatorio.Atende ? "ATENDE" : "NÃO ATENDE")}
                 {(falhas.Count > 0 ? string.Join("\n", falhas) + "\n" : "")}
-                Bicos: {bicos.Count}    Tubos: {lida.Tubos}    Áreas avaliadas: {relatorio.Busca?.CandidatosAvaliados ?? 1}
+                Setor: {lida.Setor}    Bicos: {lida.Rede.Chuveiros.Count}    Trechos: {lida.Rede.Trechos.Count}    Áreas avaliadas: {relatorio.Busca?.CandidatosAvaliados ?? 1}
                 Pressão na fonte: {relatorio.Resultado.PressaoNecessaria:0.0} kPa ({relatorio.Resultado.PressaoNecessaria / 100:0.00} bar)
                 Vazão dos bicos: {relatorio.Resultado.VazaoChuveiros:0} L/min
                 Bico crítico: {critico.Id} a {critico.Pressao / 100:0.00} bar ({critico.Vazao:0} L/min)
@@ -128,6 +111,71 @@ public class CalcularRedeCommand : ExternalCommand
         {
             TaskDialog.Show("SPK — Calcular", e.Message);
         }
+    }
+
+    /// <summary>
+    /// Preenche os parâmetros SPK de bicos e tubos do setor e grava o resultado. Bicos fora da área ficam com pressão e
+    /// vazão zeradas, para nenhuma etiqueta mostrar valor de um cálculo anterior.
+    /// </summary>
+    static string? GravarNoModelo(Document doc, LeitorRede.RedeLida lida, RelatorioSpk relatorio, DadosProjeto dados)
+    {
+        using var transacao = new Transaction(doc, "SPK — Resultado do cálculo");
+        transacao.Start();
+        var aviso = ParametrosSpk.Garantir(doc);
+
+        var daArea = relatorio.Resultado.Chuveiros.ToDictionary(c => c.Id, StringComparer.Ordinal);
+        var bicos = new List<BicoGravado>();
+        foreach (var chuveiro in lida.Rede.Chuveiros)
+        {
+            var elemento = doc.GetElement(lida.Bicos[chuveiro.Id]);
+            daArea.TryGetValue(chuveiro.Id, out var calculado);
+            if (elemento is not null)
+            {
+                ParametrosSpk.Gravar(elemento, ParametrosSpk.Numero, chuveiro.Id);
+                ParametrosSpk.Gravar(elemento, ParametrosSpk.Setor, lida.Setor);
+                ParametrosSpk.Gravar(elemento, ParametrosSpk.AreaCalculo, calculado is not null);
+                ParametrosSpk.Gravar(elemento, ParametrosSpk.Pressao, calculado?.Pressao ?? 0);
+                ParametrosSpk.Gravar(elemento, ParametrosSpk.Vazao, calculado?.Vazao ?? 0);
+            }
+            bicos.Add(new BicoGravado
+            {
+                Id = chuveiro.Id,
+                Elemento = lida.Bicos[chuveiro.Id].Value,
+                Ramal = chuveiro.Ramal,
+                NaArea = calculado is not null,
+                PressaoKPa = calculado?.Pressao ?? 0,
+                VazaoLmin = calculado?.Vazao ?? 0,
+            });
+        }
+
+        var porTubo = relatorio.Resultado.Trechos
+            .Where(t => lida.Tubos.ContainsKey(t.Id))
+            .GroupBy(t => lida.Tubos[t.Id])
+            .ToDictionary(g => g.Key, g => (Vazao: g.Max(t => Math.Abs(t.Vazao)), Velocidade: g.Max(t => Math.Abs(t.Velocidade))));
+        foreach (var id in lida.Tubos.Values.Distinct())
+        {
+            if (doc.GetElement(id) is not { } tubo) continue;
+            porTubo.TryGetValue(id, out var valores);
+            ParametrosSpk.Gravar(tubo, ParametrosSpk.Setor, lida.Setor);
+            ParametrosSpk.Gravar(tubo, ParametrosSpk.Vazao, valores.Vazao);
+            ParametrosSpk.Gravar(tubo, ParametrosSpk.Velocidade, valores.Velocidade);
+        }
+
+        new ResultadoGravado
+        {
+            Setor = lida.Setor,
+            Classificacao = dados.Resumo(),
+            Atende = relatorio.Atende,
+            PressaoNecessariaKPa = relatorio.Resultado.PressaoNecessaria,
+            VazaoChuveirosLmin = relatorio.Resultado.VazaoChuveiros,
+            VazaoTotalLmin = relatorio.VazaoTotal,
+            ChuveiroCritico = relatorio.Resultado.ChuveiroCritico,
+            Chuveiros = bicos,
+            Tubos = lida.Tubos.Values.Distinct().Select(i => i.Value).ToList(),
+        }.Salvar(doc);
+
+        transacao.Commit();
+        return aviso;
     }
 
     static FamilyInstance EscolherVga(UIDocument ui, List<FamilyInstance> vgas)

@@ -14,7 +14,10 @@ static class LeitorRede
 {
     public sealed record BicoLido(FamilyInstance Instancia, double FatorK, double AreaCobertura, double? PressaoMinima = null);
 
-    public sealed record RedeLida(Rede Rede, IReadOnlyList<string> Avisos, int Tubos);
+    /// <param name="Bicos">Número do bico no cálculo → instância no Revit.</param>
+    /// <param name="Tubos">Id do trecho no cálculo → tubo no Revit (vários trechos podem estar no mesmo tubo).</param>
+    public sealed record RedeLida(Rede Rede, IReadOnlyList<string> Avisos, string Setor,
+        IReadOnlyDictionary<string, ElementId> Bicos, IReadOnlyDictionary<string, ElementId> Tubos);
 
     /// <param name="fonte">A VGA do setor. Nula: a fonte é a ponta de tubo mais baixa da rede.</param>
     /// <param name="vgas">Todas as VGAs do modelo. A leitura não passa por elas, o que separa um setor do outro.</param>
@@ -82,6 +85,10 @@ static class LeitorRede
         }
 
         AplicarConexoes(doc, naRede, idsBico, trechos, trechosDoTubo, fatorC, avisos);
+        var tuboDoTrecho = new Dictionary<string, ElementId>(StringComparer.Ordinal);
+        foreach (var (tubo, indices) in trechosDoTubo)
+            foreach (var i in indices)
+                tuboDoTrecho[trechos[i].Id] = tubo;
 
         var ligacoesDeBico = LigarBicos(bicos, idsBico, nos, trechos, ref seq, fatorC);
         if (ligacoesDeBico > 0)
@@ -156,8 +163,35 @@ static class LeitorRede
             : $"Fonte: VGA \"{fonte.Symbol?.Family?.Name}\" (id {fonte.Id.Value}), cota {cotaFonte:0.00} m.");
         avisos.Add($"{chuveiros.Count} bicos em {ramalDe.Values.Distinct().Count()} ramais.");
 
-        var rede = new Rede(noFonte, nosSetor, trechosSetor, chuveiros);
-        return new RedeLida(rede, avisos, trechosSetor.Count);
+        // Números a partir da VGA, os mesmos no memorial, nos parâmetros e nas folhas.
+        var numero = Topologia.Numerar(noFonte, trechosSetor);
+        string N(string id) => numero.TryGetValue(id, out var n) ? n.ToString() : id;
+        var idsTrecho = new HashSet<string>(StringComparer.Ordinal);
+        var tubos = new Dictionary<string, ElementId>(StringComparer.Ordinal);
+        var trechosNumerados = new List<Trecho>();
+        foreach (var trecho in trechosSetor)
+        {
+            var id = $"{N(trecho.De)}-{N(trecho.Para)}";
+            for (var k = 2; !idsTrecho.Add(id); k++) id = $"{N(trecho.De)}-{N(trecho.Para)}/{k}";
+            trechosNumerados.Add(trecho with { Id = id, De = N(trecho.De), Para = N(trecho.Para) });
+            if (tuboDoTrecho.TryGetValue(trecho.Id, out var tubo)) tubos[id] = tubo;
+        }
+
+        var bicosPorNo = doSetor.ToDictionary(b => IdBico(b.Instancia), b => b.Instancia.Id, StringComparer.Ordinal);
+        var chuveirosNumerados = chuveiros.Select(c => c with { Id = N(c.No), No = N(c.No) }).ToList();
+        var bicosNumerados = chuveiros.ToDictionary(c => N(c.No), c => bicosPorNo[c.No], StringComparer.Ordinal);
+        var setorNome = fonte is null ? "Malha" : NomeDaVga(fonte);
+
+        var rede = new Rede(N(noFonte), nosSetor.Select(n => n with { Id = N(n.Id) }), trechosNumerados, chuveirosNumerados);
+        return new RedeLida(rede, avisos, setorNome, bicosNumerados, tubos);
+    }
+
+    /// <summary>Marca, comentário ou nome do tipo da VGA, o que estiver preenchido primeiro.</summary>
+    public static string NomeDaVga(FamilyInstance vga)
+    {
+        foreach (var parametro in new[] { BuiltInParameter.ALL_MODEL_MARK, BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS })
+            if (vga.get_Parameter(parametro)?.AsString() is { Length: > 0 } texto) return texto.Trim();
+        return $"VGA {vga.Id.Value}";
     }
 
     static readonly int[] DnsTabelados = [25, 32, 40, 50, 65, 80, 100, 125, 150, 200];

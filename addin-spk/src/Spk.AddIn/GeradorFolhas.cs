@@ -152,20 +152,19 @@ static class GeradorFolhas
     static ResultadoGravado? CalculoDestaMalha(Document doc, IReadOnlyList<FamilyInstance> bicos)
     {
         var gravado = ResultadoGravado.Ler(doc);
-        if (gravado?.Chuveiros is not { Count: > 0 } || gravado.BicosDaRede.Count == 0) return null;
-        var ids = bicos.Select(IdMotor).ToHashSet(StringComparer.Ordinal);
-        return gravado.Bicos == bicos.Count && gravado.BicosDaRede.All(ids.Contains) ? gravado : null;
+        if (gravado?.Chuveiros is not { Count: > 0 }) return null;
+        var ids = bicos.Select(b => b.Id.Value).ToHashSet();
+        return gravado.Chuveiros.Count == bicos.Count && gravado.Chuveiros.All(c => ids.Contains(c.Elemento)) ? gravado : null;
     }
 
     static List<FamilyInstance> BicosDaArea(List<FamilyInstance> bicos, ResultadoGravado? calculo)
     {
         if (calculo is null) return bicos;
-        var ids = calculo.Chuveiros.Select(c => c.Id).ToHashSet(StringComparer.Ordinal);
-        var daArea = bicos.Where(b => ids.Contains(IdMotor(b))).ToList();
+        var ids = calculo.DaArea.Select(c => c.Elemento).ToHashSet();
+        var daArea = bicos.Where(b => ids.Contains(b.Id.Value)).ToList();
         return daArea.Count > 0 ? daArea : bicos;
     }
 
-    static string IdMotor(FamilyInstance bico) => "E" + bico.Id.Value;
 
     static Level Nivel(Document doc, IReadOnlyList<FamilyInstance> bicos)
     {
@@ -387,7 +386,8 @@ static class GeradorFolhas
     static FamilyInstance? PintarCritico(Document doc, View planta, View3D iso, IReadOnlyList<FamilyInstance> bicos, ResultadoGravado? calculo)
     {
         if (calculo?.ChuveiroCritico is not { Length: > 0 } id) return null;
-        var bico = bicos.FirstOrDefault(b => IdMotor(b) == id);
+        var dado = calculo.Chuveiros.FirstOrDefault(c => c.Id == id);
+        var bico = dado is null ? null : bicos.FirstOrDefault(b => b.Id.Value == dado.Elemento);
         if (bico is null) return null;
 
         var grafico = new OverrideGraphicSettings();
@@ -404,7 +404,6 @@ static class GeradorFolhas
         iso.SetElementOverrides(bico.Id, grafico);
         if (bico.Location is LocationPoint ponto)
         {
-            var dado = calculo.Chuveiros.FirstOrDefault(c => c.Id == id);
             var texto = dado is null
                 ? "Bico crítico"
                 : $"Bico crítico\n{dado.PressaoKPa / 100:0.00} bar\n{dado.VazaoLmin:0} L/min";
@@ -434,7 +433,7 @@ static class GeradorFolhas
         var criticoTxt = critico is null ? calculo.ChuveiroCritico : "destaque em vermelho";
         return $"""
             {(calculo.Atende ? "ATENDE" : "NÃO ATENDE")}
-            Área de operação: {calculo.Chuveiros.Count} bicos
+            Área de operação: {calculo.DaArea.Count()} bicos
             Bico crítico: {criticoTxt}
             Fonte: {calculo.PressaoNecessariaKPa / 100:0.00} bar, {calculo.VazaoChuveirosLmin:0} L/min
             {linhaDiametro}

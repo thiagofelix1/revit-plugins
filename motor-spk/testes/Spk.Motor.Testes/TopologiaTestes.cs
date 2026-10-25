@@ -90,6 +90,19 @@ public class TopologiaTestes
     }
 
     [Fact]
+    public void Numeracao_comeca_na_fonte_e_cresce_com_a_distancia()
+    {
+        Trecho[] trechos = [T("V", "a"), T("a", "b"), T("a", "c"), T("c", "d")];
+
+        var numero = Topologia.Numerar("V", trechos);
+
+        Assert.Equal(1, numero["V"]);
+        Assert.Equal(2, numero["a"]);
+        Assert.Equal([3, 4], new[] { numero["b"], numero["c"] }.Order());
+        Assert.Equal(5, numero["d"]);
+    }
+
+    [Fact]
     public void Sem_vga_a_fonte_e_a_ponta_mais_baixa_do_grupo_com_mais_bicos()
     {
         var nos = Indice([

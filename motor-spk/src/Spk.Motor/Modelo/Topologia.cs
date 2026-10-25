@@ -152,6 +152,29 @@ public static class Topologia
         return (fonte, melhor);
     }
 
+    /// <summary>
+    /// Numeração dos nós a partir da fonte (1), em largura: o número cresce com a distância em trechos até a fonte,
+    /// como os pontos de referência de um memorial. Empates na ordem do nó vizinho, para sair sempre igual.
+    /// </summary>
+    public static Dictionary<string, int> Numerar(string fonte, IEnumerable<Trecho> trechos)
+    {
+        var adj = Adjacencia(trechos);
+        var numero = new Dictionary<string, int>(StringComparer.Ordinal) { [fonte] = 1 };
+        var fila = new Queue<string>();
+        fila.Enqueue(fonte);
+        while (fila.Count > 0)
+        {
+            var n = fila.Dequeue();
+            foreach (var vizinho in Vizinhos(adj, n).Distinct().OrderBy(v => v, StringComparer.Ordinal))
+            {
+                if (numero.ContainsKey(vizinho)) continue;
+                numero[vizinho] = numero.Count + 1;
+                fila.Enqueue(vizinho);
+            }
+        }
+        return numero;
+    }
+
     static double Transversal(No no, double dx, double dy) => -dy * no.X + dx * no.Y;
 
     static Dictionary<string, List<string>> Adjacencia(IEnumerable<Trecho> trechos)
