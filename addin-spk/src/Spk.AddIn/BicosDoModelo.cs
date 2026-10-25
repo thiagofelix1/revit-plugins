@@ -36,8 +36,13 @@ static class BicosDoModelo
             string.Join("\n", linhas.Select(l => $"{l.Tipo}: K {l.FatorK:0.##} L/min/bar½, área {l.AreaCobertura:0.##} m²")), false);
     }
 
+    /// <summary>
+    /// Os bicos da malha gerada. Só a categoria Sprinklers: o gerador marca também tês e cotovelos com SPK-GERADO, e sem
+    /// esse filtro as 15 conexões da malha de exemplo entravam no cálculo como bicos (27 em vez de 12).
+    /// </summary>
     public static List<FamilyInstance> Gerados(Document doc) =>
         new FilteredElementCollector(doc)
+            .OfCategory(BuiltInCategory.OST_Sprinklers)
             .OfClass(typeof(FamilyInstance))
             .Cast<FamilyInstance>()
             .Where(DadosEsboco.EhGerado)
