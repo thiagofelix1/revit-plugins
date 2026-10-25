@@ -38,8 +38,19 @@ static class MapeamentoGravado
     public const string Chave = "Mapeamento";
 
     public static IReadOnlyList<LinhaMapeamento> Carregar(Document doc) =>
-        ArmazenamentoSpk.Ler<List<LinhaMapeamento>>(doc, Chave)
-        ?? throw new InvalidOperationException("Não há mapeamento confirmado neste projeto. Rode \"Famílias\" e confirme a tela.");
+        Tentar(doc) ?? throw new InvalidOperationException("Não há mapeamento confirmado neste projeto. Rode \"Famílias\" e confirme a tela.");
+
+    public static IReadOnlyList<LinhaMapeamento>? Tentar(Document doc) => ArmazenamentoSpk.Ler<List<LinhaMapeamento>>(doc, Chave);
+
+    /// <summary>Instâncias das famílias confirmadas como Fonte/VGA.</summary>
+    public static List<FamilyInstance> Vgas(Document doc)
+    {
+        var fontes = Tentar(doc)?.Where(l => l.Papel == "Fonte").ToList() ?? [];
+        if (fontes.Count == 0) return [];
+        return new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance)).Cast<FamilyInstance>()
+            .Where(fi => fontes.Any(l => fi.Symbol?.Family?.Name == l.Familia && fi.Symbol.Name == l.Tipo))
+            .ToList();
+    }
 
     public static void Salvar(Document doc, IReadOnlyList<LinhaMapeamento> linhas) =>
         ArmazenamentoSpk.GravarComTransacao(doc, Chave, linhas.ToList(), "SPK — Mapeamento de famílias");

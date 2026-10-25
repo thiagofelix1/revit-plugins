@@ -20,6 +20,7 @@ namespace Spk.AddIn.Commands;
 public class DescobrirFamiliasCommand : ExternalCommand
 {
     static readonly string[] PalavrasChuveiro = ["chuveiro", "sprinkler", "spk", "esfr"];
+    static readonly string[] PalavrasVga = ["vga", "governo", "alarme", "alarm"];
 
     public override void Execute()
     {
@@ -42,6 +43,18 @@ public class DescobrirFamiliasCommand : ExternalCommand
             .GroupBy(fi => (Categoria: fi.Category?.Name ?? "sem categoria", Familia: fi.Symbol.Family.Name, Tipo: fi.Symbol.Name))
             .ToList();
 
+        var candidatosVga = instancias
+            .Where(fi => fi.Symbol is { } simbolo
+                         && fi.Category?.Id.Value == (long)BuiltInCategory.OST_PipeAccessory
+                         && PalavrasVga.Any(p => $"{simbolo.Family.Name} {simbolo.Name}".ToLowerInvariant().Contains(p)))
+            .GroupBy(fi => (Categoria: fi.Category?.Name ?? "sem categoria", Familia: fi.Symbol.Family.Name, Tipo: fi.Symbol.Name))
+            .ToList();
+
+        relatorio.AppendLine();
+        relatorio.AppendLine($"Candidatos a VGA (acessório com vga/governo/alarme no nome): {candidatosVga.Count}");
+        foreach (var grupo in candidatosVga.Take(10))
+            relatorio.AppendLine($"  {grupo.Key.Familia} / {grupo.Key.Tipo} — {grupo.Count()} instância(s)");
+
         relatorio.AppendLine();
         relatorio.AppendLine($"Candidatos a chuveiro (nome da família contém chuveiro/sprinkler/spk/esfr): {candidatosChuveiro.Count} combinações categoria+família+tipo");
         foreach (var grupo in candidatosChuveiro.Take(15))
@@ -60,7 +73,7 @@ public class DescobrirFamiliasCommand : ExternalCommand
         File.WriteAllText(caminho, relatorio.ToString());
 
         TaskDialog.Show("Spk — Descobrir famílias", $"""
-            Tubos: {tubos.Count}  |  Sistemas: {sistemas.Count}  |  Candidatos a chuveiro: {candidatosChuveiro.Count}  |  Categorias no modelo: {categorias.Count}
+            Tubos: {tubos.Count}  |  Sistemas: {sistemas.Count}  |  Candidatos a chuveiro: {candidatosChuveiro.Count}  |  VGAs: {candidatosVga.Count}  |  Categorias no modelo: {categorias.Count}
 
             Relatório completo gravado em:
             {caminho}
@@ -68,7 +81,7 @@ public class DescobrirFamiliasCommand : ExternalCommand
             Abrindo a janela de confirmação...
             """);
 
-        if (candidatosChuveiro.Count == 0) return;
+        if (candidatosChuveiro.Count == 0 && candidatosVga.Count == 0) return;
 
         var candidatos = candidatosChuveiro.Select(grupo =>
         {
@@ -89,6 +102,9 @@ public class DescobrirFamiliasCommand : ExternalCommand
                 parametroFatorK: fatorK.Nome, valorFatorK: valorK,
                 parametroAreaCobertura: area.Nome, valorAreaCobertura: area.Valor, notaFatorK: notaK);
         }).ToList();
+        candidatos.AddRange(candidatosVga.Select(grupo => CandidatoFamilia.Criar(
+            grupo.Key.Categoria, grupo.Key.Familia, grupo.Key.Tipo, grupo.Count(),
+            NomesDeParametros(grupo.First()).Split(", "), PapelFamilia.Fonte, parametroFatorK: "", parametroAreaCobertura: "")));
 
         var janela = new JanelaMapeamento(candidatos);
         if (janela.ShowDialog() != true || janela.Resultado is not { } confirmado) return;

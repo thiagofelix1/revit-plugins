@@ -70,7 +70,14 @@ public class CalcularRedeCommand : ExternalCommand
             };
             if (previa.Show() != TaskDialogResult.Ok) return;
 
-            var lida = LeitorRede.Montar(doc, bicos, dados.FatorC);
+            var vgas = gerados.Count > 0 ? [] : MapeamentoGravado.Vgas(doc);
+            var fonte = vgas.Count switch
+            {
+                0 => null,
+                1 => vgas[0],
+                _ => EscolherVga(Application.ActiveUIDocument!, vgas),
+            };
+            var lida = LeitorRede.Montar(doc, bicos, dados.FatorC, fonte, vgas.Select(v => v.Id).ToList());
             var projeto = dados.CriarProjeto(gerados.Count > 0 ? "Malha gerada" : "Rede lida do modelo", lida.Rede);
             var relatorio = CalculoSpk.Executar(projeto);
 
@@ -114,10 +121,26 @@ public class CalcularRedeCommand : ExternalCommand
                 {pasta}
                 """);
         }
-        catch (Exception e) when (e is not Autodesk.Revit.Exceptions.OperationCanceledException)
+        catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+        {
+        }
+        catch (Exception e)
         {
             TaskDialog.Show("SPK — Calcular", e.Message);
         }
+    }
+
+    static FamilyInstance EscolherVga(UIDocument ui, List<FamilyInstance> vgas)
+    {
+        var referencia = ui.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.Element,
+            new SoEstes(vgas.Select(v => v.Id).ToHashSet()), $"Há {vgas.Count} VGAs. Clique na VGA do setor que quer calcular.");
+        return (FamilyInstance)ui.Document.GetElement(referencia);
+    }
+
+    sealed class SoEstes(HashSet<ElementId> ids) : Autodesk.Revit.UI.Selection.ISelectionFilter
+    {
+        public bool AllowElement(Element elemento) => ids.Contains(elemento.Id);
+        public bool AllowReference(Reference referencia, XYZ ponto) => false;
     }
 
     static List<FamilyInstance> BicosGerados(Document doc) =>

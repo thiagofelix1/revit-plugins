@@ -16,12 +16,19 @@ static class LeitorRede
 
     public sealed record RedeLida(Rede Rede, IReadOnlyList<string> Avisos, int Tubos);
 
-    public static RedeLida Montar(Document doc, IReadOnlyList<BicoLido> bicos, double fatorC)
+    /// <param name="fonte">A VGA do setor. Nula: a fonte é a ponta de tubo mais baixa da rede.</param>
+    /// <param name="vgas">Todas as VGAs do modelo. A leitura não passa por elas, o que separa um setor do outro.</param>
+    public static RedeLida Montar(Document doc, IReadOnlyList<BicoLido> bicos, double fatorC,
+        FamilyInstance? fonte = null, IReadOnlyCollection<ElementId>? vgas = null)
     {
         if (bicos.Count == 0) throw new InvalidOperationException("Nenhum bico com fator K e área de cobertura.");
 
         var idsBico = new HashSet<ElementId>(bicos.Select(b => b.Instancia.Id));
-        var naRede = Alcançaveis(doc, idsBico);
+        var limites = new HashSet<ElementId>(vgas ?? []);
+        if (fonte is not null) limites.Add(fonte.Id);
+        var naRede = Alcançaveis(doc, idsBico, limites);
+        if (fonte is not null && !naRede.Contains(fonte.Id))
+            throw new InvalidOperationException("A VGA escolhida não está ligada por tubos aos bicos confirmados.");
         var avisos = new List<string>
         {
             $"Fator C = {fatorC:0} em todos os tubos (Dados do projeto, Tabela 30).",
@@ -112,16 +119,45 @@ static class LeitorRede
         if (ligados.Count == 0) throw new InvalidOperationException("Nenhum bico confirmado está ligado a um tubo.");
         if (trechos.Count == 0) throw new InvalidOperationException("Não há tubos na rede ligada aos bicos.");
 
-        var (dx, dy) = DirecaoDosRamais(trechos, nos);
-        var chuveiros = Ramais(ligados, nos, dx, dy);
-        var componente = MaiorComponente(nos, trechos, chuveiros);
-        if (componente.Chuveiros.Count < chuveiros.Count)
-            avisos.Add($"{chuveiros.Count - componente.Chuveiros.Count} bicos ficaram de fora: o tubo deles não encontra o restante da rede.");
-        var cotaFonte = componente.Nos.First(n => n.Id == componente.Fonte).Z;
-        avisos.Add($"Fonte adotada: nó {componente.Fonte}, cota {cotaFonte:0.00} m. {componente.Chuveiros.Count} bicos estão ligados a ela.");
+        var nosDeBico = ligados.Select(b => IdBico(b.Instancia)).ToHashSet(StringComparer.Ordinal);
+        var nosDeVga = limites.Select(IdPeca).ToHashSet(StringComparer.Ordinal);
+        string noFonte;
+        HashSet<string> setor;
+        if (fonte is not null)
+        {
+            noFonte = IdPeca(fonte.Id);
+            setor = Topologia.SetorDaVga(noFonte, trechos, nosDeBico, nosDeVga);
+        }
+        else
+        {
+            (noFonte, setor) = Topologia.MaiorComponente(nos, trechos, nosDeBico);
+        }
 
-        var rede = new Rede(componente.Fonte, componente.Nos, componente.Trechos, componente.Chuveiros);
-        return new RedeLida(rede, avisos, componente.Trechos.Count);
+        var nosSetor = nos.Values.Where(n => setor.Contains(n.Id)).ToList();
+        var trechosSetor = trechos.Where(t => setor.Contains(t.De) && setor.Contains(t.Para)).ToList();
+        var doSetor = ligados.Where(b => setor.Contains(IdBico(b.Instancia))).ToList();
+        if (doSetor.Count < ligados.Count)
+            avisos.Add(fonte is null
+                ? $"{ligados.Count - doSetor.Count} bicos ficaram de fora: o tubo deles não encontra o restante da rede."
+                : $"{ligados.Count - doSetor.Count} bicos são de outra VGA ou de rede solta e ficaram fora deste setor.");
+
+        var (dx, dy) = Topologia.DirecaoDosRamais(trechosSetor, nos);
+        var ramalDe = Topologia.RamalDeCadaBico(doSetor.Select(b => IdBico(b.Instancia)), trechosSetor, nos, dx, dy);
+        var chuveiros = doSetor.Select(b => new Chuveiro($"E{b.Instancia.Id.Value}", IdBico(b.Instancia), b.FatorK, b.AreaCobertura)
+        {
+            Ramal = $"R{ramalDe[IdBico(b.Instancia)]}",
+            PressaoMinima = b.PressaoMinima,
+        }).ToList();
+
+        var cotaFonte = nos[noFonte].Z;
+        avisos.Add(fonte is null
+            ? $"Fonte adotada: ponta de tubo mais baixa (nó {noFonte}, cota {cotaFonte:0.00} m). " +
+              "Para calcular a partir da VGA, marque a família dela como Fonte em Famílias."
+            : $"Fonte: VGA \"{fonte.Symbol?.Family?.Name}\" (id {fonte.Id.Value}), cota {cotaFonte:0.00} m.");
+        avisos.Add($"{chuveiros.Count} bicos em {ramalDe.Values.Distinct().Count()} ramais.");
+
+        var rede = new Rede(noFonte, nosSetor, trechosSetor, chuveiros);
+        return new RedeLida(rede, avisos, trechosSetor.Count);
     }
 
     static readonly int[] DnsTabelados = [25, 32, 40, 50, 65, 80, 100, 125, 150, 200];
@@ -277,7 +313,8 @@ static class LeitorRede
         return null;
     }
 
-    static HashSet<ElementId> Alcançaveis(Document doc, HashSet<ElementId> idsBico)
+    /// <summary>Tudo que os bicos alcançam pelos conectores. Os limites (VGAs) entram, mas a busca não passa por eles.</summary>
+    static HashSet<ElementId> Alcançaveis(Document doc, HashSet<ElementId> idsBico, HashSet<ElementId> limites)
     {
         var visitados = new HashSet<ElementId>();
         var fila = new Queue<ElementId>(idsBico);
@@ -285,6 +322,7 @@ static class LeitorRede
         {
             var id = fila.Dequeue();
             if (!visitados.Add(id)) continue;
+            if (limites.Contains(id)) continue;
             var elemento = doc.GetElement(id);
             if (elemento is null) continue;
             foreach (var conector in Conectores(elemento))
@@ -399,7 +437,7 @@ static class LeitorRede
         }
 
         if (tubos.Count == 0)
-            return "Nenhum bico confirmado está ligado a um tubo. O modelo aberto não tem tubos do Revit, nem em vínculos carregados.";
+            return "Nenhum bico confirmado está ligado a um tubo. O modelo aberto não tem tubos de sistema de incêndio, nem em vínculos carregados.";
 
         var grade = new Dictionary<(int X, int Y, int Z), List<int>>();
         for (var i = 0; i < tubos.Count; i++) IndexarTubo(grade, tubos[i].Curva, i);
@@ -430,7 +468,7 @@ static class LeitorRede
         if (sementes.Count == 0)
         {
             var mm = double.IsPositiveInfinity(menor) ? 0 : Milimetros(menor);
-            return $"Nenhum bico confirmado está ligado a um tubo. Há {tubos.Count} tubos no modelo e nos vínculos. "
+            return $"Nenhum bico confirmado está ligado a um tubo. Há {tubos.Count} tubos de incêndio no modelo e nos vínculos. "
                    + (mm <= 0
                        ? "Nenhum tubo chegou perto dos bicos."
                        : $"O bico mais próximo de um tubo está a {mm:0} mm, além do limite de 500 mm.");
@@ -501,7 +539,7 @@ static class LeitorRede
             return porta;
         }
 
-        var existente = NoProximo(pes, nosPerto, nos, 0.08);
+        var existente = NoProximo(pes, nosPerto, nos, ToleranciaPonta);
         if (existente is not null) return existente;
 
         var chave = Chave(pes);
@@ -566,7 +604,7 @@ static class LeitorRede
 
     static IEnumerable<int> VizinhosDePonta(int indice, Curve curva, List<TuboPronto> tubos, Dictionary<(int X, int Y, int Z), List<int>> grade)
     {
-        var limite = Pes(0.20);
+        var limite = Pes(ToleranciaPonta);
         var vistos = new HashSet<int>();
         foreach (var ponta in new[] { curva.GetEndPoint(0), curva.GetEndPoint(1) })
         {
@@ -584,14 +622,27 @@ static class LeitorRede
         }
     }
 
+    /// <summary>Pontas a até esta distância são tratadas como ligadas, em m. A mesma para seguir e para fundir nós.</summary>
+    const double ToleranciaPonta = 0.15;
+
+    /// <summary>Só tubos de sistema de incêndio: água fria, esgoto e outros vínculos não entram na rede por proximidade.</summary>
     static void ColetarTubos(Document origem, Transform? transformacao, ElementId? vinculo, List<TuboPronto> tubos, ref bool usouNominal)
     {
         foreach (var tubo in new FilteredElementCollector(origem).OfClass(typeof(Pipe)).Cast<Pipe>())
         {
             if (tubo.Location is not LocationCurve local) continue;
+            if (!EhIncendio(origem, tubo)) continue;
             var curva = transformacao is null ? local.Curve : local.Curve.CreateTransformed(transformacao);
             tubos.Add(new TuboPronto(curva, Metros(curva.Length), DiametroMm(tubo, ref usouNominal)));
         }
+    }
+
+    static bool EhIncendio(Document doc, Pipe tubo)
+    {
+        var tipo = tubo.get_Parameter(BuiltInParameter.RBS_PIPING_SYSTEM_TYPE_PARAM)?.AsElementId();
+        if (tipo is null || doc.GetElement(tipo) is not PipingSystemType sistema) return false;
+        return sistema.SystemClassification is MEPSystemClassification.FireProtectWet or MEPSystemClassification.FireProtectDry
+            or MEPSystemClassification.FireProtectPreaction or MEPSystemClassification.FireProtectOther;
     }
 
     static void ColetarPortas(Document origem, Transform? transformacao, ElementId? vinculo,
@@ -690,138 +741,6 @@ static class LeitorRede
     }
 
     sealed record Segmento(string De, string Para, double T0, double T1, double Comprimento, double Diametro);
-
-    sealed record ComponenteRede(string Fonte, List<No> Nos, List<Trecho> Trechos, List<Chuveiro> Chuveiros);
-
-    /// <summary>
-    /// Vários bicos podem cair em trechos soltos. O cálculo usa só o grupo que tem mais bicos
-    /// e escolhe a fonte dentro desse grupo.
-    /// </summary>
-    static ComponenteRede MaiorComponente(Dictionary<string, No> nos, List<Trecho> trechos, List<Chuveiro> chuveiros)
-    {
-        var adj = new Dictionary<string, List<string>>();
-        void Ligar(string a, string b)
-        {
-            if (!adj.TryGetValue(a, out var lista)) adj[a] = lista = [];
-            lista.Add(b);
-        }
-        foreach (var trecho in trechos)
-        {
-            Ligar(trecho.De, trecho.Para);
-            Ligar(trecho.Para, trecho.De);
-        }
-        foreach (var id in nos.Keys)
-            if (!adj.ContainsKey(id)) adj[id] = [];
-
-        var noDeBico = new HashSet<string>(chuveiros.Select(c => c.No));
-        var visto = new HashSet<string>();
-        List<string>? melhor = null;
-        var melhorQtd = -1;
-        foreach (var inicio in nos.Keys)
-        {
-            if (!visto.Add(inicio)) continue;
-            var comp = new List<string>();
-            var fila = new Queue<string>();
-            fila.Enqueue(inicio);
-            var qtd = 0;
-            while (fila.Count > 0)
-            {
-                var n = fila.Dequeue();
-                comp.Add(n);
-                if (noDeBico.Contains(n)) qtd++;
-                if (!adj.TryGetValue(n, out var vizinhos)) continue;
-                foreach (var vizinho in vizinhos)
-                    if (visto.Add(vizinho)) fila.Enqueue(vizinho);
-            }
-            if (qtd > melhorQtd) { melhorQtd = qtd; melhor = comp; }
-        }
-
-        if (melhor is null || melhorQtd == 0)
-            throw new InvalidOperationException("Os bicos não formam uma rede contínua com os tubos encontrados.");
-
-        var conjunto = new HashSet<string>(melhor);
-        var nosComp = nos.Values.Where(n => conjunto.Contains(n.Id)).ToList();
-        var trechosComp = trechos.Where(t => conjunto.Contains(t.De) && conjunto.Contains(t.Para)).ToList();
-        var chComp = chuveiros.Where(c => conjunto.Contains(c.No)).ToList();
-        var grau = new Dictionary<string, int>();
-        foreach (var trecho in trechosComp)
-        {
-            grau[trecho.De] = grau.GetValueOrDefault(trecho.De) + 1;
-            grau[trecho.Para] = grau.GetValueOrDefault(trecho.Para) + 1;
-        }
-
-        var fonte = nosComp
-            .Where(n => !n.Id.StartsWith('S') && grau.GetValueOrDefault(n.Id) == 1)
-            .OrderBy(n => n.Z)
-            .ThenBy(n => n.Id, StringComparer.Ordinal)
-            .Select(n => n.Id)
-            .FirstOrDefault()
-            ?? nosComp.Where(n => !n.Id.StartsWith('S')).OrderBy(n => n.Z).Select(n => n.Id).FirstOrDefault()
-            ?? throw new InvalidOperationException("A rede dos bicos não tem uma ponta de tubo para servir de fonte.");
-
-        return new ComponenteRede(fonte, nosComp, trechosComp, chComp);
-    }
-
-    static (double Dx, double Dy) DirecaoDosRamais(List<Trecho> trechos, Dictionary<string, No> nos)
-    {
-        double dx = 0, dy = 0;
-        var tem = false;
-        foreach (var trecho in trechos)
-        {
-            if (trecho.Comprimento < 1) continue;
-            var a = nos[trecho.De];
-            var b = nos[trecho.Para];
-            double vx = b.X - a.X, vy = b.Y - a.Y;
-            var norma = Math.Sqrt(vx * vx + vy * vy);
-            if (norma < 1e-6) continue;
-            vx /= norma;
-            vy /= norma;
-            if (!tem) { dx = vx; dy = vy; tem = true; }
-            else
-            {
-                if (vx * dx + vy * dy < 0) { vx = -vx; vy = -vy; }
-                dx += vx;
-                dy += vy;
-            }
-        }
-
-        var n = Math.Sqrt(dx * dx + dy * dy);
-        return n < 1e-6 ? (1, 0) : (dx / n, dy / n);
-    }
-
-    /// <summary>Agrupa bicos cuja posição transversal difere menos de 0,45 m: cada grupo é um ramal.</summary>
-    static List<Chuveiro> Ramais(List<BicoLido> bicos, Dictionary<string, No> nos, double dx, double dy)
-    {
-        var ordenados = bicos
-            .Select(b => (Bico: b, No: nos[IdBico(b.Instancia)]))
-            .OrderBy(p => -dy * p.No.X + dx * p.No.Y)
-            .ToList();
-
-        var grupos = new List<List<(BicoLido Bico, No No)>>();
-        foreach (var ponto in ordenados)
-        {
-            var offset = -dy * ponto.No.X + dx * ponto.No.Y;
-            if (grupos.Count == 0 || offset - Offset(grupos[^1][^1].No, dx, dy) > 0.45)
-                grupos.Add([]);
-            grupos[^1].Add(ponto);
-        }
-
-        var chuveiros = new List<Chuveiro>();
-        for (var i = 0; i < grupos.Count; i++)
-        {
-            foreach (var ponto in grupos[i])
-            {
-                chuveiros.Add(new Chuveiro($"E{ponto.Bico.Instancia.Id.Value}", ponto.No.Id, ponto.Bico.FatorK, ponto.Bico.AreaCobertura)
-                {
-                    Ramal = $"R{i}",
-                    PressaoMinima = ponto.Bico.PressaoMinima,
-                });
-            }
-        }
-        return chuveiros;
-    }
-
-    static double Offset(No no, double dx, double dy) => -dy * no.X + dx * no.Y;
 
     static double DiametroMm(Pipe tubo, ref bool usouNominal)
     {
