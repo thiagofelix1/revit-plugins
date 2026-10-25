@@ -121,6 +121,8 @@ Pronto quando uma malha gerada de 12 bicos ESFR K 360, com pressão mínima 2,83
 
 Só depois do critério da etapa 5. O carimbo é o da família que o escritório já usa. O plugin não desenha o carimbo.
 
+A análise detalhada de cada prancha da Nova Era (conteúdo, mecanismo do Revit, o que existe e o que falta) está em [pranchas-referencia.md](pranchas-referencia.md).
+
 | Folha | O que o plugin cria | Depende de |
 |---|---|---|
 | Cobertura e forro | Vista de planta por nível, filtros por pressão, etiquetas de diâmetro, vazão e pressão, retângulo da área crítica | Etapa 5 gravada no modelo |
