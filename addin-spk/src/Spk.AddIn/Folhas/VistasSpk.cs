@@ -184,7 +184,8 @@ static class VistasSpk
         if (!AplicarTemplate(doc, vista, template))
         {
             EstiloPadrao(doc, vista, soARede: true);
-            vista.DetailLevel = ViewDetailLevel.Coarse;
+            // Médio: tubo continua em linha simples, e o bico aparece; muitas famílias de sprinkler escondem a geometria no Baixo.
+            vista.DetailLevel = ViewDetailLevel.Medium;
         }
 
         var centro = caixa.Centro;
