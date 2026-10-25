@@ -70,7 +70,7 @@ public class RedeExemploCommand : ExternalCommand
     {
         var ids = new FilteredElementCollector(doc)
             .WhereElementIsNotElementType()
-            .Where(e => e.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.AsString() == DadosEsboco.Marca)
+            .Where(DadosEsboco.EhGerado)
             .Select(e => e.Id)
             .ToList();
         if (ids.Count > 0) doc.Delete(ids);

@@ -40,8 +40,6 @@ static class BicosDoModelo
         new FilteredElementCollector(doc)
             .OfClass(typeof(FamilyInstance))
             .Cast<FamilyInstance>()
-            .Where(fi =>
-                fi.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.AsString() == DadosEsboco.Marca
-                || fi.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString() == DadosEsboco.Marca)
+            .Where(DadosEsboco.EhGerado)
             .ToList();
 }
