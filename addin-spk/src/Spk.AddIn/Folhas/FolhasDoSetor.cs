@@ -48,7 +48,7 @@ static class FolhasDoSetor
         var nivel = LeituraSetores.NivelDaMaioria(doc, bicos.Select(b => b.Elemento!));
         var recorte = rede.Expandir(VistasSpk.Pes(2.0));
         var planta = VistasSpk.Planta(doc, $"{PranchaSpk.PrefixoVista}{setor} — Planta", nivel, recorte, VistasSpk.TemplatePlanta, avisos);
-        Tentar(avisos, "Escala da planta", () => planta.Scale = regiaoPlanta.Escala(recorte.Max.X - recorte.Min.X, recorte.Max.Y - recorte.Min.Y));
+        PranchaSpk.Tentar(avisos, "Escala da planta", () => planta.Scale = regiaoPlanta.Escala(recorte.Max.X - recorte.Min.X, recorte.Max.Y - recorte.Min.Y));
         var escala = planta.Scale;
         double NoModelo(double mmNoPapel) => VistasSpk.Pes(mmNoPapel * escala / 1000);
 
@@ -57,10 +57,10 @@ static class FolhasDoSetor
             pontos.Where(p => p.Ponto is not null).Select(p => p.Ponto!).ToList(), direcao);
         if (cantos is not null)
         {
-            Tentar(avisos, "Hachura da área de cálculo", () => PranchaSpk.RegiaoPreenchida(doc, planta,
+            PranchaSpk.Tentar(avisos, "Hachura da área de cálculo", () => PranchaSpk.RegiaoPreenchida(doc, planta,
                 PranchaSpk.TipoDeRegiao(doc, TipoHachura, PranchaSpk.Padrao(doc, PadraoHachura, 3, Math.PI / 4), Vermelho), [cantos], nivel));
             var topo = cantos.OrderByDescending(c => c.Y).ThenBy(c => c.X).First();
-            Tentar(avisos, "Rótulo da área", () => PranchaSpk.Nota(doc, planta, topo + new XYZ(0, NoModelo(4), 0),
+            PranchaSpk.Tentar(avisos, "Rótulo da área", () => PranchaSpk.Nota(doc, planta, topo + new XYZ(0, NoModelo(4), 0),
                 $"ÁREA DE CÁLCULO — {daArea.Count} chuveiros"));
         }
 
@@ -68,16 +68,16 @@ static class FolhasDoSetor
         {
             if (dado.Id == gravado.ChuveiroCritico) continue;
             var posicao = ponto! + new XYZ(NoModelo(1.5), NoModelo(1.5), 0);
-            Tentar(avisos, "Número de bico", () => PranchaSpk.Nota(doc, planta, posicao, dado.Id));
+            PranchaSpk.Tentar(avisos, "Número de bico", () => PranchaSpk.Nota(doc, planta, posicao, dado.Id));
         }
 
         if (critico.Elemento is { } bicoCritico)
         {
             var pintura = PranchaSpk.Pintura(doc, Vermelho, 8, preencher: true);
-            Tentar(avisos, "Bico crítico na planta", () => planta.SetElementOverrides(bicoCritico.Id, pintura));
+            PranchaSpk.Tentar(avisos, "Bico crítico na planta", () => planta.SetElementOverrides(bicoCritico.Id, pintura));
             if (bicoCritico.Location is LocationPoint lp)
-                Tentar(avisos, "Rótulo do bico crítico", () => PranchaSpk.Nota(doc, planta, lp.Point + new XYZ(NoModelo(1.5), NoModelo(1.5), 0),
-                    $"{critico.Dado.Id} — CRÍTICO\n{Bar(critico.Dado.PressaoKPa)} bar · {critico.Dado.VazaoLmin:0} L/min"));
+                PranchaSpk.Tentar(avisos, "Rótulo do bico crítico", () => PranchaSpk.Nota(doc, planta, lp.Point + new XYZ(NoModelo(1.5), NoModelo(1.5), 0),
+                    $"{critico.Dado.Id} — CRÍTICO\n{PranchaSpk.Bar(critico.Dado.PressaoKPa)} bar · {critico.Dado.VazaoLmin:0} L/min"));
         }
 
         var etiquetas = EtiquetarTubos(doc, planta, tubos, NoModelo(12), avisos);
@@ -89,24 +89,30 @@ static class FolhasDoSetor
             VistasSpk.Template3d);
         var laranja = PranchaSpk.Pintura(doc, Laranja, 6, preencher: true);
         foreach (var (dado, elemento) in daArea)
-            Tentar(avisos, "Bico da área no 3D", () => iso.SetElementOverrides(elemento!.Id,
+            PranchaSpk.Tentar(avisos, "Bico da área no 3D", () => iso.SetElementOverrides(elemento!.Id,
                 dado.Id == gravado.ChuveiroCritico ? PranchaSpk.Pintura(doc, Vermelho, 8, true) : laranja));
 
         ViewSection? corte = null;
-        Tentar(avisos, "Corte do setor", () => corte = VistasSpk.Corte(doc, $"{PranchaSpk.PrefixoVista}{setor} — Corte", rede, direcao,
+        PranchaSpk.Tentar(avisos, "Corte do setor", () => corte = VistasSpk.Corte(doc, $"{PranchaSpk.PrefixoVista}{setor} — Corte", rede, direcao,
             VistasSpk.TemplateCorte));
 
         doc.Regenerate();
-        Tentar(avisos, "Recorte do 3D", () => VistasSpk.Recortar3d(iso, rede.Expandir(VistasSpk.Pes(0.3), VistasSpk.Pes(0.3))));
+        PranchaSpk.Tentar(avisos, "Recorte do 3D", () => VistasSpk.Recortar3d(iso, rede.Expandir(VistasSpk.Pes(0.3), VistasSpk.Pes(0.3))));
         var (largura3d, altura3d) = VistasSpk.Extensao(iso);
-        Tentar(avisos, "Escala do 3D", () => iso.Scale = regiao3d.Escala(largura3d, altura3d));
+        PranchaSpk.Tentar(avisos, "Escala do 3D", () => iso.Scale = regiao3d.Escala(largura3d, altura3d));
+        var escala3d = iso.Scale;
+        PranchaSpk.Tentar(avisos, "Travar o 3D para etiquetar", () =>
+        {
+            iso.SaveOrientationAndLock();
+            FolhasIsometrico.Etiquetar(doc, iso, tubos.Select(t => t.Id).ToHashSet(), VistasSpk.Pes(Math.Max(1.0, 12.0 * escala3d / 1000)), avisos);
+        });
 
         var chave = MapaChave(contexto, setor, bicos.Select(b => b.Elemento!.Id).ToHashSet(), nivel, regiaoChave, avisos);
 
         PranchaSpk.Colocar(doc, folha, planta, regiaoPlanta.Centro, avisos);
         PranchaSpk.Colocar(doc, folha, iso, regiao3d.Centro, avisos);
         if (chave is not null) PranchaSpk.Colocar(doc, folha, chave, regiaoChave.Centro, avisos);
-        Tentar(avisos, "Quadro de resultado", () => PranchaSpk.Nota(doc, folha, regiaoNota.CantoSuperiorEsquerdo,
+        PranchaSpk.Tentar(avisos, "Quadro de resultado", () => PranchaSpk.Nota(doc, folha, regiaoNota.CantoSuperiorEsquerdo,
             Quadro(gravado, setor, daArea.Count, critico.Dado), regiaoNota.Largura * 0.95));
         var folhas = new List<ElementId> { folha.Id };
 
@@ -118,9 +124,9 @@ static class FolhasDoSetor
             var utilCorte = PranchaSpk.Area(folhaCorte).Parte(0.03, 0.08, 0.97, 0.97);
             var regiaoCorte = utilCorte.Parte(0, 0.15, 1, 1);
             var (larguraCorte, alturaCorte) = VistasSpk.Extensao(vistaCorte);
-            Tentar(avisos, "Escala do corte", () => vistaCorte.Scale = regiaoCorte.Escala(larguraCorte, alturaCorte));
+            PranchaSpk.Tentar(avisos, "Escala do corte", () => vistaCorte.Scale = regiaoCorte.Escala(larguraCorte, alturaCorte));
             PranchaSpk.Colocar(doc, folhaCorte, vistaCorte, regiaoCorte.Centro, avisos);
-            Tentar(avisos, "Nota do corte", () => PranchaSpk.Nota(doc, folhaCorte, utilCorte.Parte(0, 0, 0.6, 0.13).CantoSuperiorEsquerdo,
+            PranchaSpk.Tentar(avisos, "Nota do corte", () => PranchaSpk.Nota(doc, folhaCorte, utilCorte.Parte(0, 0, 0.6, 0.13).CantoSuperiorEsquerdo,
                 $"Corte no sentido dos ramais — {setor}. Mostra a descida, a subgeral e os ramais de perfil.",
                 utilCorte.Largura * 0.55));
             folhas.Add(folhaCorte.Id);
@@ -144,16 +150,14 @@ static class FolhasDoSetor
             $"Área de cálculo: {naArea} chuveiros (hachura)",
         };
         if (critico is not null)
-            linhas.Add($"Bico crítico: nº {critico.Id} — {Bar(critico.PressaoKPa)} bar, {critico.VazaoLmin:0} L/min");
-        linhas.Add($"Pressão necessária na fonte: {Bar(gravado.PressaoNecessariaKPa)} bar");
+            linhas.Add($"Bico crítico: nº {critico.Id} — {PranchaSpk.Bar(critico.PressaoKPa)} bar, {critico.VazaoLmin:0} L/min");
+        linhas.Add($"Pressão necessária na fonte: {PranchaSpk.Bar(gravado.PressaoNecessariaKPa)} bar");
         linhas.Add($"Vazão dos chuveiros: {gravado.VazaoChuveirosLmin:0} L/min");
         if (gravado.VazaoTotalLmin > gravado.VazaoChuveirosLmin + 0.5)
             linhas.Add($"Vazão total com hidrantes: {gravado.VazaoTotalLmin:0} L/min");
         linhas.Add("Números dos bicos = nós do memorial de cálculo.");
         return string.Join("\n", linhas.Where(l => !string.IsNullOrWhiteSpace(l)));
     }
-
-    static string Bar(double kPa) => (kPa / 100).ToString("0.00", Entrada.Cultura);
 
     /// <summary>
     /// Retângulo da área de operação, alinhado aos ramais: cobre os bicos da área com meio espaçamento de folga para cada
@@ -208,7 +212,7 @@ static class FolhasDoSetor
         var recorte = caixa.Expandir(VistasSpk.Pes(3.0));
         var vista = VistasSpk.Planta(doc, $"{PranchaSpk.PrefixoVista}{setor} — Mapa-chave", nivel, recorte, VistasSpk.TemplateSetorizacao, avisos);
         VistasSpk.EsconderRede(vista);
-        Tentar(avisos, "Escala do mapa-chave", () => vista.Scale = Math.Max(500, regiao.Escala(recorte.Max.X - recorte.Min.X, recorte.Max.Y - recorte.Min.Y)));
+        PranchaSpk.Tentar(avisos, "Escala do mapa-chave", () => vista.Scale = Math.Max(500, regiao.Escala(recorte.Max.X - recorte.Min.X, recorte.Max.Y - recorte.Min.Y)));
         foreach (var s in noNivel)
         {
             var esteSetor = s.Bicos.Any(b => bicosDoSetor.Contains(b.Id));
@@ -246,7 +250,7 @@ static class FolhasDoSetor
             var ok = false;
             if (tipo != ElementId.InvalidElementId)
             {
-                Tentar(avisos, "Etiqueta de tubo", () =>
+                PranchaSpk.Tentar(avisos, "Etiqueta de tubo", () =>
                 {
                     IndependentTag.Create(doc, tipo, planta.Id, new Reference(tubo), false, TagOrientation.Horizontal, meio);
                     ok = true;
@@ -259,7 +263,7 @@ static class FolhasDoSetor
                 var angulo = Math.Atan2(h.Y, h.X);
                 if (angulo > Math.PI / 2) angulo -= Math.PI;
                 if (angulo <= -Math.PI / 2) angulo += Math.PI;
-                Tentar(avisos, "Diâmetro em texto", () =>
+                PranchaSpk.Tentar(avisos, "Diâmetro em texto", () =>
                 {
                     PranchaSpk.Nota(doc, planta, meio, $"Ø{VistasSpk.Milimetros(dn):0}", rotacao: angulo);
                     ok = true;
@@ -292,24 +296,12 @@ static class FolhasDoSetor
             var baixo = a.Z < b.Z ? a : b;
             if (bicos.Any(p => Math.Abs(p.X - baixo.X) < raioBico && Math.Abs(p.Y - baixo.Y) < raioBico)) continue;
             var texto = linha.Evaluate(0.5, true).Z < cotaRede ? "DESCE" : "SOBE";
-            Tentar(avisos, "Marca de descida", () =>
+            PranchaSpk.Tentar(avisos, "Marca de descida", () =>
             {
                 PranchaSpk.Nota(doc, planta, new XYZ(baixo.X + afastamento, baixo.Y - afastamento, 0), texto);
                 feitas++;
             });
         }
         return feitas;
-    }
-
-    static void Tentar(IList<string> avisos, string oQue, Action acao)
-    {
-        try
-        {
-            acao();
-        }
-        catch (Exception e) when (e is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException)
-        {
-            avisos.Add($"{oQue}: {e.Message}");
-        }
     }
 }

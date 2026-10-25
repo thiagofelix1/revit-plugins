@@ -44,7 +44,8 @@ public class SpkApplication : IExternalApplication
             "Abre o último memorial de cálculo (.docx) gerado.");
         Botao<FolhasCommand>(resultados,
             "Folhas", Icones.Folha,
-            "Monta a planta do setor, o isométrico e o corte da descida da malha gerada, e exporta o PDF.");
+            "Monta a setorização das VGAs, o isométrico geral e as folhas do último setor calculado (planta com a área de " +
+            "cálculo, 3D e corte), e exporta o PDF.");
         Avancado(resultados);
         Margem(resultados);
 

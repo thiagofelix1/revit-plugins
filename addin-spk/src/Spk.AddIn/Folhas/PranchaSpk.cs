@@ -168,6 +168,22 @@ static class PranchaSpk
         return laco;
     }
 
+    /// <summary>Roda uma anotação ou ajuste que pode falhar sem derrubar a folha: a falha vira aviso para o engenheiro.</summary>
+    public static void Tentar(IList<string> avisos, string oQue, Action acao)
+    {
+        try
+        {
+            acao();
+        }
+        catch (Exception e) when (e is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException)
+        {
+            avisos.Add($"{oQue}: {e.Message}");
+        }
+    }
+
+    /// <summary>kPa em bar com vírgula, como nas folhas e no memorial.</summary>
+    public static string Bar(double kPa) => (kPa / 100).ToString("0.00", Entrada.Cultura);
+
     /// <summary>Nome de vista ou folha sem os caracteres que o Revit recusa.</summary>
     public static string NomeSeguro(string nome)
     {

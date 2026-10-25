@@ -14,10 +14,11 @@ namespace Spk.AddIn.Commands;
 [Transaction(TransactionMode.Manual)]
 public class FolhasCommand : ExternalCommand
 {
-    /// <summary>Na ordem do PDF, como no jogo da Nova Era: setorização (009), setor calculado (014).</summary>
+    /// <summary>Na ordem do PDF, como no jogo da Nova Era: setorização (009), isométrico (013), setor calculado (014).</summary>
     static readonly (string Nome, Func<ContextoFolhas, FolhasGeradas> Gerar)[] Conjuntos =
     [
         ("Setorização", FolhasSetorizacao.Gerar),
+        ("Isométrico geral", FolhasIsometrico.Gerar),
         ("Setor calculado", FolhasDoSetor.Gerar),
     ];
 
