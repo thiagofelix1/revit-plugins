@@ -56,6 +56,7 @@ public static class BuscaAreaMaisDesfavoravel
         var candidatos = GerarCandidatos(ramais, total, porRamal);
         if (candidatos.Count == 0)
         {
+            // Nenhuma posição completa: calcula o que cabe só para o memorial mostrar. CalculoSpk reprova essa área.
             var parciais = new List<string>();
             foreach (var ramal in ramais)
             {
