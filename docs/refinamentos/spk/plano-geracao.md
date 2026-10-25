@@ -82,7 +82,7 @@ O contorno deixa de ser um retângulo digitado e passa a vir do modelo.
 - [ ] Ler o contorno da cobertura e o do forro (piso, telhado ou ambiente fechado). Ignorar contorno aberto.
 - [ ] Dois planos independentes: bico de telhado e bico de forro não caem no mesmo setor sem regra explícita.
 - [ ] Respeitar afastamento de parede e espaçamento máximo. A primeira versão não desvia de viga nem de terça.
-- [ ] Parâmetros do esboço numa janela: classe, K em L/min/bar½, área em m², pressão mínima, C do tubo. K americano (5,6) não entra direto. A tela mostra a unidade, como na confirmação de famílias.
+- [x] Parâmetros do esboço numa janela: K em L/min/bar½, área em m², DN. Classe, pressão mínima e C do tubo ficam em Dados do projeto, que é critério do engenheiro. K abaixo de 40 é recusado no cálculo como provável K americano.
 
 Pronto quando um galpão retangular simples, desenhado no Revit, recebe os bicos sem editar coordenada à mão.
 
@@ -90,8 +90,8 @@ Pronto quando um galpão retangular simples, desenhado no Revit, recebe os bicos
 
 - [ ] Dividir a área pelo limite da Tabela 8 (coluna por pavimento).
 - [ ] Cortar de preferência numa linha de estrutura, quando houver pilar ou viga no caminho.
-- [ ] Um sistema de tubulação por VGA, com nome visível no Revit.
-- [ ] A fonte de cada setor é a VGA, não a ponta de tubo mais baixa.
+- [ ] Um sistema de tubulação por VGA, com nome visível no Revit. Hoje o setor é o parâmetro compartilhado "SPK Setor" gravado ao calcular, com o nome da VGA (marca ou comentário).
+- [x] A fonte de cada setor é a VGA, não a ponta de tubo mais baixa. A leitura não atravessa outras VGAs; com várias, Calcular pede para clicar na do setor.
 
 Pronto quando dois retângulos grandes viram dois sistemas, e o cálculo de um não mistura bico do outro.
 
@@ -100,9 +100,9 @@ Pronto quando dois retângulos grandes viram dois sistemas, e o cálculo de um n
 Espinha de peixe primeiro. Grelha fica para depois.
 
 - [ ] Ramal na fila de bicos, subgeral cruzando os ramais, geral até a VGA.
-- [ ] Diâmetro inicial único e conhecido (um DN informado na janela), para o cálculo ter diâmetro interno real.
-- [ ] Comprimento equivalente das conexões criadas entra no trecho. Sem isso a pressão na fonte sai baixa, como na amostragem.
-- [ ] C do tubo vem da janela. O padrão de ensaio é 120.
+- [x] Diâmetro inicial único e conhecido (DN em Dados do esboço), para o cálculo ter diâmetro interno real.
+- [x] Comprimento equivalente das conexões entra no trecho: cotovelo pelo ângulo, tê e cruzeta só no ramo que desvia, válvulas pelo nome da família.
+- [x] C do tubo vem de Dados do projeto. O padrão de ensaio é 120.
 
 Pronto quando a rede gerada, lida de volta pelos conectores, reproduz o grafo que o gerador acabou de criar: mesmo número de bicos, de tubos e de ramais.
 
@@ -110,10 +110,10 @@ Pronto quando a rede gerada, lida de volta pelos conectores, reproduz o grafo qu
 
 O motor não muda. Muda só a origem da rede.
 
-- [ ] Busca da área mais desfavorável na rede gerada.
-- [ ] Se não atender, a lista de verificações diz o item. A primeira versão não muda diâmetro sozinha.
-- [ ] Resultados gravados no modelo: pressão e vazão no bico, pressão, vazão e velocidade no tubo.
-- [ ] Memorial `.docx` do setor, o mesmo gerador de hoje.
+- [x] Busca da área mais desfavorável na rede gerada. Área que não cabe nos ramais reprova (decisão de 25/10/2026).
+- [x] Se não atender, a lista de verificações diz o item. A primeira versão não muda diâmetro sozinha.
+- [x] Resultados gravados no modelo: número de cálculo, setor, área de cálculo, pressão e vazão no bico; setor, vazão e velocidade no tubo (parâmetros compartilhados "SPK …").
+- [x] Memorial `.docx` do setor, o mesmo gerador de hoje, com a numeração que aparece nas folhas.
 
 Pronto quando uma malha gerada de 12 bicos ESFR K 360, com pressão mínima 2,83 bar, entrega o bico crítico nessa pressão e a vazão de um bico perto de 603 a 606 L/min. A vazão dos doze fica na ordem de 7 500 L/min. A pressão na fonte depende dos diâmetros e dos comprimentos equivalentes. Ela não precisa bater 14,50 bar enquanto o traçado não for o da Nova Era.
 
@@ -132,19 +132,25 @@ A análise detalhada de cada prancha da Nova Era (conteúdo, mecanismo do Revit,
 | Detalhe típico | Instância do detalhe do escritório, colocado na folha | Família já carregada |
 | PDF | Exportar as folhas criadas | As vistas acima |
 
-O botão Folhas, no painel Resultados, lê a malha marcada `SPK-GERADO`:
+O botão Folhas, no painel Resultados, gera o que o modelo permite, cada conjunto numa subtransação (se um falha, os outros ficam e o motivo aparece no fim):
 
-- SPK-010, planta do setor, com o retângulo em volta dos bicos e o bico crítico em vermelho quando o último cálculo for dessa malha.
-- SPK-013, isométrico enquadrado na malha.
-- SPK-012, corte olhando no sentido dos ramais, para a descida aparecer de perfil.
+- **SPK-SETORES** (009): uma planta por nível com a hachura colorida de cada VGA, todas na mesma escala, e a legenda numa vista de desenho. Os setores são lidos pelo mesmo leitor do cálculo, uma VGA por vez; o contorno é a união das coberturas dos bicos (`Contorno`, no motor).
+- **SPK-ISO** (013): tudo o que está ligado aos bicos por conector, sem a tubulação de outros sistemas, travado e com etiqueta de diâmetro nos tubos mais longos.
+- **SPK-<setor>-01** (014): planta do último setor calculado com a área de cálculo hachurada, bicos da área numerados como no memorial, bico crítico com pressão e vazão, etiquetas de diâmetro, DESCE/SOBE; 3D do setor etiquetado; mapa-chave do nível quando há mais de um setor; quadro de resultado.
+- **SPK-<setor>-02**: corte no sentido dos ramais.
 - PDF `SPK-folhas.pdf` na pasta `SPK` ao lado do arquivo. Se o projeto não foi salvo, o PDF vai para a pasta temporária do cálculo.
 
-O carimbo é o da família já carregada no projeto. A setorização (009) espera mais de uma VGA. O detalhe típico da válvula continua sendo a família do escritório: o plugin ainda não posiciona esse bloco.
+Escala, recorte e intervalo de vista saem da rede. Se o projeto tiver templates de vista chamados "SPK Planta", "SPK 3D", "SPK Corte" e "SPK Setorização", eles são aplicados; sem eles, o plugin usa um estilo padrão (tubulação em vermelho). O carimbo é o primeiro carregado no projeto. O detalhe típico da válvula continua sendo a família do escritório: o plugin ainda não posiciona esse bloco.
 
-- [ ] Uma folha de planta do setor, com o retângulo da área crítica.
-- [ ] Uma folha de isométrico do mesmo setor.
-- [ ] Uma folha de setorização, quando houver mais de uma VGA.
-- [ ] PDF dessas folhas numa pasta do projeto.
+Tudo isto compila para o Revit 2025–2027, mas ainda **não foi rodado dentro do Revit**. O roteiro de teste está em [roteiro-teste.md](roteiro-teste.md).
+
+- [x] Uma folha de planta do setor, com a área de cálculo hachurada (a testar no Revit).
+- [x] Uma folha de isométrico do mesmo setor e um isométrico geral (a testar no Revit).
+- [x] Uma folha de setorização, com uma cor por VGA (a testar no Revit).
+- [x] PDF dessas folhas numa pasta do projeto.
+- [ ] Etiqueta "Ø + comprimento" e "Nº de cálculo" como famílias de etiqueta do kit do escritório; hoje a etiqueta de tubo é a padrão do projeto e o número do bico é texto.
+- [ ] Cotas encadeadas entre ramais e bicos, tabela de sprinklers, rede sob telhado inclinado (010).
+- [ ] Cortes do prédio, família da VGA e folga ESFR (012); layout por ambiente (011).
 
 ## 7. Dimensionar
 

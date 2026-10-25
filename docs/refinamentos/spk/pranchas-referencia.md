@@ -8,12 +8,12 @@ As folhas foram feitas **no Revit**, no mesmo `NEPN-INC-EX-GER-SPK-R01.rvt`: tí
 
 | Prancha | Conteúdo principal | Hoje | Peça que falta primeiro |
 |---|---|---|---|
-| 009 Setorização das VGAs | 3 plantas 1:300 com hachura colorida por VGA e legenda | Nada | Setores (um sistema por VGA) e região preenchida por setor |
+| 009 Setorização das VGAs | 3 plantas 1:300 com hachura colorida por VGA e legenda | SPK-SETORES: planta por nível, hachura por VGA, legenda em vista de desenho | Recorte do contorno pelas paredes; sistema de tubulação por VGA |
 | 010 Sprinklers telhado | 2 plantas 1:200 da malha ESFR, mapa-chave 1:1000, tabela de sprinklers, 2 cortes 1:200 | Planta enquadrada, retângulo, bico crítico | Etiquetas de diâmetro, DESCE/DRENO, cotas, rede inclinada sob o telhado |
 | 011 Sprinklers em forro | 5 plantas recortadas por ambiente 1:200, detalhe de escada 1:50 + 2 cortes, 2 mapas-chave | Nada | Layout por ambiente (Room), outros tipos de bico |
 | 012 Detalhe VGAs e cortes | 5 cortes do prédio 1:200, identificador de cortes 1:1000, detalhe da VGA 1:10 com balões, 3D do barrilete | Um corte da descida, escala fixa | Família do conjunto da VGA, cortes posicionados, cotas de altura e folga |
-| 013 Isométrico | 3D do sistema inteiro, da casa de bombas às pontas; tabelas de bomba; legenda; notas | Isométrico da malha gerada | Geral até a casa de bombas, etiquetas Ø em 3D, legenda e notas |
-| 014 Planta e 3D da VGA 4 | Planta do setor 1:300 com a área de cálculo hachurada e numerada, 3D do setor com "Ø + comprimento", detalhe do registro de recalque | Planta do setor, retângulo, nota do bico crítico | Numeração de cálculo nos bicos, hachura da área, etiquetas "Ø100 71,11 m" |
+| 013 Isométrico | 3D do sistema inteiro, da casa de bombas às pontas; tabelas de bomba; legenda; notas | SPK-ISO: tudo o que está ligado aos bicos, travado, etiquetas Ø | Traçar a geral até a casa de bombas; tabelas de bomba; legenda do kit |
+| 014 Planta e 3D da VGA 4 | Planta do setor 1:300 com a área de cálculo hachurada e numerada, 3D do setor com "Ø + comprimento", detalhe do registro de recalque | SPK-<setor>-01/02: área hachurada, numeração do memorial, crítico, Ø, DESCE, 3D etiquetado, mapa-chave, corte | Etiqueta "Ø + comprimento" e "Nº" do kit do escritório; registro de recalque |
 
 ## 009 — Setorização das VGAs
 
@@ -115,6 +115,8 @@ As folhas foram feitas **no Revit**, no mesmo `NEPN-INC-EX-GER-SPK-R01.rvt`: tí
 - Hachura da área de cálculo pelo contorno dos bicos da área mais desfavorável, não pela malha toda.
 - Uma folha destas **por VGA**: o jogo de folhas sai do número de setores, não fixo em SPK-010/012/013.
 - O registro de recalque é detalhe típico do template.
+
+> Atualização de 25/10/2026: o "Hoje" da tabela acima é o código do ramo `noite/correcoes-e-folhas`, compilado mas ainda não rodado no Revit. As seções abaixo descrevem a análise original.
 
 ## Fundações que servem a todas as folhas
 
