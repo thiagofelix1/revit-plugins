@@ -63,7 +63,10 @@ public class FolhasCommand : ExternalCommand
                     TaskDialog.Show("SPK — Folhas", string.Join("\n\n", textos));
                     return;
                 }
-                transacao.Commit();
+                if (transacao.Commit() != TransactionStatus.Committed)
+                    throw new InvalidOperationException(
+                        "O Revit desfez as folhas ao confirmar (um erro do modelo, não um aviso). Nada foi alterado.\n\n" +
+                        string.Join("\n\n", textos));
             }
 
             var pdf = Exportar(doc, folhas);
