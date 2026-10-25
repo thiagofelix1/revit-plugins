@@ -41,11 +41,13 @@ public sealed class PadraoEscritorio
                ?? ElementId.InvalidElementId;
     }
 
-    public IEnumerable<View> VistasDeLegenda(Document doc)
+    /// <summary>Lista pronta, não consulta preguiçosa: quem coloca as legendas cria viewports no meio do laço.</summary>
+    public List<View> VistasDeLegenda(Document doc)
     {
         var nomes = Legendas.ToHashSet(StringComparer.Ordinal);
         return new FilteredElementCollector(doc).OfClass(typeof(View)).Cast<View>()
-            .Where(v => !v.IsTemplate && v.ViewType == ViewType.Legend && nomes.Contains(v.Name));
+            .Where(v => !v.IsTemplate && v.ViewType == ViewType.Legend && nomes.Contains(v.Name))
+            .ToList();
     }
 
     public string Resumo()

@@ -28,8 +28,9 @@ static class FolhasIsometrico
         var folha = PranchaSpk.Recriar(doc, Numero, "Sprinklers — isométrico geral");
         doc.Regenerate();
         var util = PranchaSpk.Util(folha);
-        var regiaoIso = util.Parte(0, 0, 0.74, 1);
-        var regiaoNota = util.Parte(0.76, 0.40, 1, 1);
+        // Notas embaixo à esquerda, como o quadro da folha do setor: o alto da coluna direita pode ser área do carimbo.
+        var regiaoIso = util.Parte(0, 0.17, 0.74, 1);
+        var regiaoNota = util.Parte(0, 0, 0.6, 0.15);
 
         var iso = VistasSpk.Isometrico(doc, $"{PranchaSpk.PrefixoVista}Isométrico geral", caixa.Expandir(VistasSpk.Pes(0.5), VistasSpk.Pes(0.5)),
             VistasSpk.Template3d);
@@ -44,12 +45,12 @@ static class FolhasIsometrico
         PranchaSpk.Tentar(avisos, "Travar o isométrico para etiquetar", () =>
         {
             iso.SaveOrientationAndLock();
-            etiquetas = Etiquetar(doc, iso, rede, VistasSpk.Pes(Math.Max(3.0, 15.0 * escala / 1000)), avisos);
+            etiquetas = Etiquetar(doc, iso, rede, VistasSpk.Pes(Math.Max(1.0, 12.0 * escala / 1000)), avisos);
         });
         NomearVgas(doc, iso, avisos);
 
         PranchaSpk.Colocar(doc, folha, iso, regiaoIso.Centro, avisos);
-        PranchaSpk.ColocarLegendas(doc, folha, util.Parte(0.76, 0, 1, 0.38), avisos);
+        PranchaSpk.ColocarLegendas(doc, folha, util.Parte(0.76, 0, 1, 0.6), avisos);
         PranchaSpk.Tentar(avisos, "Notas do isométrico", () => PranchaSpk.Nota(doc, folha, regiaoNota.CantoSuperiorEsquerdo,
             Notas(contexto, rede.Count), regiaoNota.Largura * 0.95));
 
