@@ -109,7 +109,7 @@ public class FolhasCommand : ExternalCommand
             : Path.Combine(Path.GetDirectoryName(doc.PathName)!, "SPK");
         Directory.CreateDirectory(pasta);
         var onde = string.IsNullOrEmpty(doc.PathName)
-            ? "O projeto ainda não foi salvo. O PDF foi para a pasta temporária."
+            ? @"O projeto ainda não foi salvo. O PDF foi para Documentos\SPK\calculo."
             : "PDF ao lado do projeto, na pasta SPK.";
 
         try

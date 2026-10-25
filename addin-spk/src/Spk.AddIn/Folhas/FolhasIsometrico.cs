@@ -27,7 +27,7 @@ static class FolhasIsometrico
 
         var folha = PranchaSpk.Recriar(doc, Numero, "Sprinklers — isométrico geral");
         doc.Regenerate();
-        var util = PranchaSpk.Area(folha).Parte(0.03, 0.05, 0.97, 0.97);
+        var util = PranchaSpk.Util(folha);
         var regiaoIso = util.Parte(0, 0, 0.74, 1);
         var regiaoNota = util.Parte(0.76, 0.40, 1, 1);
 

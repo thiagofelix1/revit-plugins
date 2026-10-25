@@ -20,7 +20,7 @@ static class FolhasSetorizacao
 
         var folha = PranchaSpk.Recriar(doc, Numero, "Sprinklers — setorização das VGAs");
         doc.Regenerate();
-        var util = PranchaSpk.Area(folha).Parte(0.03, 0.05, 0.97, 0.97);
+        var util = PranchaSpk.Util(folha);
         var areaPlantas = util.Parte(0, 0, 0.78, 1);
         var areaLegenda = util.Parte(0.80, 0.40, 1, 1);
         var colunas = niveis.Count switch { 1 => 1, <= 4 => 2, _ => 3 };
@@ -52,12 +52,9 @@ static class FolhasSetorizacao
                 LeituraSetores.Desenhar(doc, vista, setor, nivel, cheio: false, setor.Nome, avisos);
         }
 
-        var (legenda, largura, altura) = Legenda(doc, setores, avisos);
         foreach (var (vista, celula, _) in plantas)
             PranchaSpk.Colocar(doc, folha, vista, celula.Parte(0, 0.08, 1, 1).Centro, avisos);
-        if (legenda is not null)
-            PranchaSpk.Colocar(doc, folha, legenda,
-                new XYZ(areaLegenda.X0 + largura / 2, areaLegenda.Y1 - altura / 2, 0), avisos);
+        Legenda(doc, folha, areaLegenda, setores, avisos);
 
         var texto = $"{Numero}  {folha.Name}\n{plantas.Count} planta(s) 1:{escala}, {setores.Count} setor(es): " +
                     string.Join(", ", setores.Select(s => $"{s.Nome} ({s.Bicos.Count} bicos)")) + ".";
@@ -65,46 +62,61 @@ static class FolhasSetorizacao
         return new FolhasGeradas(texto, [folha.Id]);
     }
 
+    const double Linha = 9, AmostraL = 12, AmostraA = 6;
+
     /// <summary>
-    /// Vista de desenho com uma amostra da hachura de cada setor e o nome. Devolve também o tamanho no papel, em pés, para
-    /// posicionar na folha.
+    /// Legenda das cores no alto da área: direto na folha, em coordenadas de papel. Se o Revit recusar região preenchida
+    /// na folha, vai numa vista de desenho colocada no mesmo lugar (vista de legenda a API não cria).
     /// </summary>
-    static (ViewDrafting? Vista, double Largura, double Altura) Legenda(Document doc, IReadOnlyList<SetorLido> setores, IList<string> avisos)
+    static void Legenda(Document doc, ViewSheet folha, Regiao area, IReadOnlyList<SetorLido> setores, IList<string> avisos)
     {
         const string nome = PranchaSpk.PrefixoVista + "Legenda de setores";
+        VistasSpk.ApagarSeExistir(doc, nome);
+        var naFolha = new SubTransaction(doc);
+        naFolha.Start();
         try
         {
-            VistasSpk.ApagarSeExistir(doc, nome);
+            DesenharLegenda(doc, folha, setores, new XYZ(area.X0, area.Y1 - VistasSpk.Pes(0.012), 0), 1);
+            naFolha.Commit();
+            return;
+        }
+        catch (Exception e) when (e is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException)
+        {
+            naFolha.RollBack();
+            avisos.Add("Legenda na folha recusada, foi para uma vista de desenho: " + e.Message);
+        }
+
+        try
+        {
             var vista = ViewDrafting.Create(doc, VistasSpk.Tipo(doc, ViewFamily.Drafting).Id);
             vista.Name = nome;
             try { vista.Scale = 10; }
             catch (Autodesk.Revit.Exceptions.ApplicationException) { }
-            var escala = vista.Scale;
-            double M(double mm) => VistasSpk.Pes(mm * escala / 1000);
-
-            const double linha = 9, amostraL = 12, amostraA = 6;
-            PranchaSpk.Nota(doc, vista, new XYZ(0, M(8), 0), "SETORIZAÇÃO DAS VGAs");
-            for (var k = 0; k < setores.Count; k++)
-            {
-                var setor = setores[k];
-                var y = -k * linha;
-                var amostra = new List<XYZ>
-                {
-                    new(0, M(y - amostraA), 0), new(M(amostraL), M(y - amostraA), 0), new(M(amostraL), M(y), 0), new(0, M(y), 0),
-                };
-                var tipo = PranchaSpk.TipoDeRegiao(doc, $"SPK Setor — {PranchaSpk.NomeSeguro(setor.Nome)}",
-                    PranchaSpk.Padrao(doc, "SPK setor", 4, Math.PI / 4), setor.Cor);
-                PranchaSpk.RegiaoPreenchida(doc, vista, tipo, [amostra], null);
-                PranchaSpk.Nota(doc, vista, new XYZ(M(amostraL + 3), M(y - 1), 0), $"{setor.Nome} — {setor.Bicos.Count} chuveiros");
-            }
+            DesenharLegenda(doc, vista, setores, XYZ.Zero, vista.Scale);
             var largura = VistasSpk.Pes(0.070);
-            var altura = VistasSpk.Pes((setores.Count * linha + 12) / 1000);
-            return (vista, largura, altura);
+            var altura = VistasSpk.Pes((setores.Count * Linha + 12) / 1000);
+            PranchaSpk.Colocar(doc, folha, vista, new XYZ(area.X0 + largura / 2, area.Y1 - altura / 2, 0), avisos);
         }
         catch (Exception e) when (e is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException)
         {
             avisos.Add("Legenda: " + e.Message);
-            return (null, 0, 0);
+        }
+    }
+
+    /// <summary>Título e, por setor, uma amostra da hachura com o nome. Medidas em mm no papel, a partir do canto <paramref name="origem" />.</summary>
+    static void DesenharLegenda(Document doc, View vista, IReadOnlyList<SetorLido> setores, XYZ origem, int escala)
+    {
+        XYZ P(double xMm, double yMm) => origem + new XYZ(VistasSpk.Pes(xMm * escala / 1000), VistasSpk.Pes(yMm * escala / 1000), 0);
+        PranchaSpk.Nota(doc, vista, P(0, 8), "SETORIZAÇÃO DAS VGAs");
+        for (var k = 0; k < setores.Count; k++)
+        {
+            var setor = setores[k];
+            var y = -k * Linha;
+            var tipo = PranchaSpk.TipoDeRegiao(doc, $"SPK Setor — {PranchaSpk.NomeSeguro(setor.Nome)}",
+                PranchaSpk.Padrao(doc, "SPK setor", 4, Math.PI / 4), setor.Cor);
+            PranchaSpk.RegiaoPreenchida(doc, vista, tipo,
+                [new List<XYZ> { P(0, y - AmostraA), P(AmostraL, y - AmostraA), P(AmostraL, y), P(0, y) }], null);
+            PranchaSpk.Nota(doc, vista, P(AmostraL + 3, y - 1), $"{setor.Nome} — {setor.Bicos.Count} chuveiros");
         }
     }
 }

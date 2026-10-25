@@ -38,7 +38,7 @@ static class FolhasDoSetor
         // direita fica para o carimbo.
         var folha = PranchaSpk.Recriar(doc, $"{PranchaSpk.PrefixoNumero}{codigo}-01", $"Sprinklers — {setor} — planta e isométrico");
         doc.Regenerate();
-        var util = PranchaSpk.Area(folha).Parte(0.03, 0.05, 0.97, 0.97);
+        var util = PranchaSpk.Util(folha);
         var regiaoPlanta = util.Parte(0, 0.17, 0.64, 1);
         var regiaoNota = util.Parte(0, 0, 0.64, 0.15);
         var lateral = util.Parte(0.66, 0, 1, 1);
@@ -121,7 +121,7 @@ static class FolhasDoSetor
         {
             var folhaCorte = PranchaSpk.Recriar(doc, $"{PranchaSpk.PrefixoNumero}{codigo}-02", $"Sprinklers — {setor} — corte");
             doc.Regenerate();
-            var utilCorte = PranchaSpk.Area(folhaCorte).Parte(0.03, 0.08, 0.97, 0.97);
+            var utilCorte = PranchaSpk.Util(folhaCorte);
             var regiaoCorte = utilCorte.Parte(0, 0.15, 1, 1);
             var (larguraCorte, alturaCorte) = VistasSpk.Extensao(vistaCorte);
             PranchaSpk.Tentar(avisos, "Escala do corte", () => vistaCorte.Scale = regiaoCorte.Escala(larguraCorte, alturaCorte));

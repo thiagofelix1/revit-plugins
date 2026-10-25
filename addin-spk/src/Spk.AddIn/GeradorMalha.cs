@@ -376,10 +376,15 @@ static class GeradorMalha
     static bool Colineares(Connector a, Connector b) =>
         Math.Abs(Math.Abs(a.CoordinateSystem.BasisZ.DotProduct(b.CoordinateSystem.BasisZ)) - 1) < 0.05;
 
+    /// <summary>
+    /// O nível da planta aberta; fora de uma planta, o mais perto da cota zero (o térreo). O mais baixo seria o de
+    /// fundação nos modelos do Revit, que têm "Sapata" e "Laje" abaixo do Nível 1.
+    /// </summary>
     static Level? Nivel(Document doc)
     {
         if (doc.ActiveView is ViewPlan planta && planta.GenLevel is { } doView) return doView;
-        return new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().OrderBy(n => n.Elevation).FirstOrDefault();
+        return new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>()
+            .OrderBy(n => Math.Abs(n.ProjectElevation)).ThenByDescending(n => n.ProjectElevation).FirstOrDefault();
     }
 
     static PipingSystemType? Sistema(Document doc)

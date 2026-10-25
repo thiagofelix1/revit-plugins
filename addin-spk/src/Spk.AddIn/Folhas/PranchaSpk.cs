@@ -42,6 +42,12 @@ static class PranchaSpk
         return new Regiao(contorno.Min.U, contorno.Min.V, contorno.Max.U, contorno.Max.V);
     }
 
+    /// <summary>
+    /// A parte da folha onde o plugin desenha: tira uma margem e a coluna da direita (16%), onde fica o carimbo do Revit
+    /// e o da Nova Era. Num carimbo só no canto de baixo, sobra uma faixa livre, mas nada fica por cima dele.
+    /// </summary>
+    public static Regiao Util(ViewSheet folha) => Area(folha).Parte(0.03, 0.05, 0.84, 0.97);
+
     public static Viewport? Colocar(Document doc, ViewSheet folha, View vista, XYZ centro, IList<string> avisos)
     {
         if (!Viewport.CanAddViewToSheet(doc, folha.Id, vista.Id))
