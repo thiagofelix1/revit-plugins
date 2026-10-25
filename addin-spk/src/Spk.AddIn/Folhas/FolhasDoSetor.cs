@@ -13,8 +13,9 @@ static class FolhasDoSetor
     const string PadraoHachura = "SPK diagonal";
     const int MaximoEtiquetas = 300;
 
-    public static FolhasGeradas Gerar(Document doc)
+    public static FolhasGeradas Gerar(ContextoFolhas contexto)
     {
+        var doc = contexto.Doc;
         var gravado = ResultadoGravado.Ler(doc)
                       ?? throw new InvalidOperationException("Rode Calcular antes das folhas: elas mostram o último setor calculado.");
         var bicos = gravado.Chuveiros
@@ -33,16 +34,18 @@ static class FolhasDoSetor
         var daArea = bicos.Where(b => b.Dado.NaArea).ToList();
         var critico = bicos.FirstOrDefault(b => b.Dado.Id == gravado.ChuveiroCritico);
 
-        // Folha 01: planta à esquerda, 3D e quadro de resultado à direita. O canto de baixo à direita fica para o carimbo.
+        // Folha 01: planta à esquerda com o quadro de resultado embaixo; 3D e mapa-chave à direita. O canto de baixo à
+        // direita fica para o carimbo.
         var folha = PranchaSpk.Recriar(doc, $"{PranchaSpk.PrefixoNumero}{codigo}-01", $"Sprinklers — {setor} — planta e isométrico");
         doc.Regenerate();
         var util = PranchaSpk.Area(folha).Parte(0.03, 0.05, 0.97, 0.97);
-        var regiaoPlanta = util.Parte(0, 0, 0.64, 1);
+        var regiaoPlanta = util.Parte(0, 0.17, 0.64, 1);
+        var regiaoNota = util.Parte(0, 0, 0.64, 0.15);
         var lateral = util.Parte(0.66, 0, 1, 1);
-        var regiao3d = lateral.Parte(0, 0.50, 1, 1);
-        var regiaoNota = lateral.Parte(0, 0.25, 1, 0.48);
+        var regiao3d = lateral.Parte(0, 0.58, 1, 1);
+        var regiaoChave = lateral.Parte(0, 0.30, 1, 0.56);
 
-        var nivel = Nivel(doc, rede);
+        var nivel = LeituraSetores.NivelDaMaioria(doc, bicos.Select(b => b.Elemento!));
         var recorte = rede.Expandir(VistasSpk.Pes(2.0));
         var planta = VistasSpk.Planta(doc, $"{PranchaSpk.PrefixoVista}{setor} — Planta", nivel, recorte, VistasSpk.TemplatePlanta, avisos);
         Tentar(avisos, "Escala da planta", () => planta.Scale = regiaoPlanta.Escala(recorte.Max.X - recorte.Min.X, recorte.Max.Y - recorte.Min.Y));
@@ -54,7 +57,8 @@ static class FolhasDoSetor
             pontos.Where(p => p.Ponto is not null).Select(p => p.Ponto!).ToList(), direcao);
         if (cantos is not null)
         {
-            Tentar(avisos, "Hachura da área de cálculo", () => Hachurar(doc, planta, cantos, nivel));
+            Tentar(avisos, "Hachura da área de cálculo", () => PranchaSpk.RegiaoPreenchida(doc, planta,
+                PranchaSpk.TipoDeRegiao(doc, TipoHachura, PranchaSpk.Padrao(doc, PadraoHachura, 3, Math.PI / 4), Vermelho), [cantos], nivel));
             var topo = cantos.OrderByDescending(c => c.Y).ThenBy(c => c.X).First();
             Tentar(avisos, "Rótulo da área", () => PranchaSpk.Nota(doc, planta, topo + new XYZ(0, NoModelo(4), 0),
                 $"ÁREA DE CÁLCULO — {daArea.Count} chuveiros"));
@@ -97,8 +101,11 @@ static class FolhasDoSetor
         var (largura3d, altura3d) = VistasSpk.Extensao(iso);
         Tentar(avisos, "Escala do 3D", () => iso.Scale = regiao3d.Escala(largura3d, altura3d));
 
+        var chave = MapaChave(contexto, setor, bicos.Select(b => b.Elemento!.Id).ToHashSet(), nivel, regiaoChave, avisos);
+
         PranchaSpk.Colocar(doc, folha, planta, regiaoPlanta.Centro, avisos);
         PranchaSpk.Colocar(doc, folha, iso, regiao3d.Centro, avisos);
+        if (chave is not null) PranchaSpk.Colocar(doc, folha, chave, regiaoChave.Centro, avisos);
         Tentar(avisos, "Quadro de resultado", () => PranchaSpk.Nota(doc, folha, regiaoNota.CantoSuperiorEsquerdo,
             Quadro(gravado, setor, daArea.Count, critico.Dado), regiaoNota.Largura * 0.95));
         var folhas = new List<ElementId> { folha.Id };
@@ -148,14 +155,6 @@ static class FolhasDoSetor
 
     static string Bar(double kPa) => (kPa / 100).ToString("0.00", Entrada.Cultura);
 
-    /// <summary>O nível mais alto que ainda fica abaixo da rede; a planta é desse nível.</summary>
-    static Level Nivel(Document doc, Caixa rede)
-    {
-        var niveis = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().OrderBy(n => n.ProjectElevation).ToList();
-        if (niveis.Count == 0) throw new InvalidOperationException("O projeto não tem nível.");
-        return niveis.LastOrDefault(n => n.ProjectElevation <= rede.Min.Z + VistasSpk.Pes(0.05)) ?? niveis[0];
-    }
-
     /// <summary>
     /// Retângulo da área de operação, alinhado aos ramais: cobre os bicos da área com meio espaçamento de folga para cada
     /// lado. O espaçamento sai dos bicos do setor inteiro. Cantos em sentido anti-horário.
@@ -186,56 +185,36 @@ static class FolhasDoSetor
     }
 
     /// <summary>
-    /// Região hachurada na planta. O Revit exige as curvas no plano da vista; como esse plano varia com o projeto, tenta a
-    /// cota do nível e depois zero.
+    /// Planta do nível em escala pequena com a hachura de todos os setores e o deste em cor cheia, como o mapa-chave das
+    /// folhas da Nova Era. Sem setores lidos (rede sem VGA mapeada) não há mapa-chave.
     /// </summary>
-    static void Hachurar(Document doc, View planta, IReadOnlyList<XYZ> cantos, Level nivel)
+    static ViewPlan? MapaChave(ContextoFolhas contexto, string setor, HashSet<ElementId> bicosDoSetor, Level nivel, Regiao regiao,
+        IList<string> avisos)
     {
-        var tipo = TipoDeHachura(doc);
-        Autodesk.Revit.Exceptions.ApplicationException? erro = null;
-        foreach (var z in new[] { nivel.ProjectElevation, 0.0 })
+        IReadOnlyList<SetorLido> setores;
+        try
         {
-            var laco = new CurveLoop();
-            for (var i = 0; i < cantos.Count; i++)
-            {
-                var a = cantos[i];
-                var b = cantos[(i + 1) % cantos.Count];
-                laco.Append(Line.CreateBound(new XYZ(a.X, a.Y, z), new XYZ(b.X, b.Y, z)));
-            }
-            try
-            {
-                FilledRegion.Create(doc, tipo, planta.Id, [laco]);
-                return;
-            }
-            catch (Autodesk.Revit.Exceptions.ApplicationException e)
-            {
-                erro = e;
-            }
+            setores = contexto.Setores;
         }
-        throw erro!;
-    }
+        catch (Exception e) when (e is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException)
+        {
+            avisos.Add("Mapa-chave: " + e.Message);
+            return null;
+        }
+        var noNivel = setores.Where(s => s.Contornos.ContainsKey(nivel.Id)).ToList();
+        if (noNivel.Count < 2 || LeituraSetores.CaixaNoNivel(noNivel, nivel) is not { } caixa) return null;
 
-    static ElementId TipoDeHachura(Document doc)
-    {
-        var tipos = new FilteredElementCollector(doc).OfClass(typeof(FilledRegionType)).Cast<FilledRegionType>().ToList();
-        if (tipos.FirstOrDefault(t => t.Name == TipoHachura) is { } existente) return existente.Id;
-        var modelo = tipos.FirstOrDefault() ?? throw new InvalidOperationException("O projeto não tem tipo de região preenchida.");
-        var novo = (FilledRegionType)modelo.Duplicate(TipoHachura);
-        novo.ForegroundPatternId = PadraoDiagonal(doc);
-        novo.ForegroundPatternColor = Vermelho;
-        novo.BackgroundPatternId = ElementId.InvalidElementId;
-        novo.IsMasking = false;
-        return novo.Id;
-    }
-
-    static ElementId PadraoDiagonal(Document doc)
-    {
-        if (FillPatternElement.GetFillPatternElementByName(doc, FillPatternTarget.Drafting, PadraoHachura) is { } existente)
-            return existente.Id;
-        // Hachura de desenho: espaçamento no papel, 3 mm, a 45°.
-        var padrao = new FillPattern(PadraoHachura, FillPatternTarget.Drafting, FillPatternHostOrientation.ToView, Math.PI / 4,
-            VistasSpk.Pes(0.003));
-        return FillPatternElement.Create(doc, padrao).Id;
+        var doc = contexto.Doc;
+        var recorte = caixa.Expandir(VistasSpk.Pes(3.0));
+        var vista = VistasSpk.Planta(doc, $"{PranchaSpk.PrefixoVista}{setor} — Mapa-chave", nivel, recorte, VistasSpk.TemplateSetorizacao, avisos);
+        VistasSpk.EsconderRede(vista);
+        Tentar(avisos, "Escala do mapa-chave", () => vista.Scale = Math.Max(500, regiao.Escala(recorte.Max.X - recorte.Min.X, recorte.Max.Y - recorte.Min.Y)));
+        foreach (var s in noNivel)
+        {
+            var esteSetor = s.Bicos.Any(b => bicosDoSetor.Contains(b.Id));
+            LeituraSetores.Desenhar(doc, vista, s, nivel, cheio: esteSetor, esteSetor ? s.Nome.ToUpperInvariant() : s.Nome, avisos);
+        }
+        return vista;
     }
 
     /// <summary>

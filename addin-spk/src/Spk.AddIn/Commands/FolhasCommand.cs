@@ -14,8 +14,10 @@ namespace Spk.AddIn.Commands;
 [Transaction(TransactionMode.Manual)]
 public class FolhasCommand : ExternalCommand
 {
-    static readonly (string Nome, Func<Document, FolhasGeradas> Gerar)[] Conjuntos =
+    /// <summary>Na ordem do PDF, como no jogo da Nova Era: setorização (009), setor calculado (014).</summary>
+    static readonly (string Nome, Func<ContextoFolhas, FolhasGeradas> Gerar)[] Conjuntos =
     [
+        ("Setorização", FolhasSetorizacao.Gerar),
         ("Setor calculado", FolhasDoSetor.Gerar),
     ];
 
@@ -27,6 +29,7 @@ public class FolhasCommand : ExternalCommand
             var doc = ui.Document;
             SairDasVistasDoPlugin(ui);
 
+            var contexto = new ContextoFolhas(doc);
             var textos = new List<string>();
             var folhas = new List<ElementId>();
             using (var transacao = new Transaction(doc, "SPK — Folhas"))
@@ -41,7 +44,7 @@ public class FolhasCommand : ExternalCommand
                     sub.Start();
                     try
                     {
-                        var gerado = gerar(doc);
+                        var gerado = gerar(contexto);
                         sub.Commit();
                         folhas.AddRange(gerado.Folhas);
                         textos.Add($"{nome}\n{gerado.Texto}");

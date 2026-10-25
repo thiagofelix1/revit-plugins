@@ -86,6 +86,88 @@ static class PranchaSpk
         return grafico;
     }
 
+    /// <summary>Hachura de desenho em linhas paralelas, com espaçamento no papel. Reaproveita a que já existir com o nome.</summary>
+    public static ElementId Padrao(Document doc, string nome, double espacamentoMm, double angulo)
+    {
+        if (FillPatternElement.GetFillPatternElementByName(doc, FillPatternTarget.Drafting, nome) is { } existente)
+            return existente.Id;
+        var padrao = new FillPattern(nome, FillPatternTarget.Drafting, FillPatternHostOrientation.ToView, angulo,
+            VistasSpk.Pes(espacamentoMm / 1000));
+        return FillPatternElement.Create(doc, padrao).Id;
+    }
+
+    /// <summary>Tipo de região preenchida com este nome, padrão e cor. Se já existe, atualiza padrão e cor.</summary>
+    public static ElementId TipoDeRegiao(Document doc, string nome, ElementId padrao, Color cor)
+    {
+        var tipos = new FilteredElementCollector(doc).OfClass(typeof(FilledRegionType)).Cast<FilledRegionType>().ToList();
+        var tipo = tipos.FirstOrDefault(t => t.Name == nome);
+        if (tipo is null)
+        {
+            var modelo = tipos.FirstOrDefault() ?? throw new InvalidOperationException("O projeto não tem tipo de região preenchida.");
+            tipo = (FilledRegionType)modelo.Duplicate(nome);
+        }
+        tipo.ForegroundPatternId = padrao;
+        tipo.ForegroundPatternColor = cor;
+        tipo.BackgroundPatternId = ElementId.InvalidElementId;
+        tipo.IsMasking = false;
+        return tipo.Id;
+    }
+
+    /// <summary>
+    /// Região preenchida com estes laços (externos e furos). O Revit exige as curvas no plano da vista e esse plano varia
+    /// com o projeto, então tenta a cota do nível e depois zero. Se os laços juntos forem recusados, cria um por um.
+    /// </summary>
+    public static void RegiaoPreenchida(Document doc, View vista, ElementId tipo, IReadOnlyList<IReadOnlyList<XYZ>> lacos, Level? nivel)
+    {
+        var cotas = nivel is null ? [0.0] : new[] { nivel.ProjectElevation, 0.0 };
+        Autodesk.Revit.Exceptions.ApplicationException? erro = null;
+        foreach (var z in cotas)
+        {
+            try
+            {
+                FilledRegion.Create(doc, tipo, vista.Id, lacos.Select(l => Laco(l, z)).ToList());
+                return;
+            }
+            catch (Autodesk.Revit.Exceptions.ApplicationException e)
+            {
+                erro = e;
+            }
+        }
+
+        if (lacos.Count > 1)
+        {
+            var feitos = 0;
+            foreach (var laco in lacos.Where(l => Motor.Modelo.Contorno.Area(l.Select(p => (p.X, p.Y)).ToList()) > 0))
+            foreach (var z in cotas)
+            {
+                try
+                {
+                    FilledRegion.Create(doc, tipo, vista.Id, [Laco(laco, z)]);
+                    feitos++;
+                    break;
+                }
+                catch (Autodesk.Revit.Exceptions.ApplicationException e)
+                {
+                    erro = e;
+                }
+            }
+            if (feitos > 0) return;
+        }
+        throw erro!;
+    }
+
+    static CurveLoop Laco(IReadOnlyList<XYZ> pontos, double z)
+    {
+        var laco = new CurveLoop();
+        for (var i = 0; i < pontos.Count; i++)
+        {
+            var a = pontos[i];
+            var b = pontos[(i + 1) % pontos.Count];
+            laco.Append(Line.CreateBound(new XYZ(a.X, a.Y, z), new XYZ(b.X, b.Y, z)));
+        }
+        return laco;
+    }
+
     /// <summary>Nome de vista ou folha sem os caracteres que o Revit recusa.</summary>
     public static string NomeSeguro(string nome)
     {

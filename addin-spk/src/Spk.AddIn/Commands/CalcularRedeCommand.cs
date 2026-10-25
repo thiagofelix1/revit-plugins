@@ -28,32 +28,8 @@ public class CalcularRedeCommand : ExternalCommand
             var dados = DadosProjetoUi.Obter(doc);
             if (dados is null) return;
 
-            var gerados = BicosGerados(doc);
-            List<LeitorRede.BicoLido> bicos;
-            string resumo;
-            if (gerados.Count > 0)
-            {
-                var esboco = DadosEsboco.Carregar(doc);
-                bicos = gerados.Select(fi => new LeitorRede.BicoLido(fi, esboco.FatorK, esboco.AreaM2)).ToList();
-                resumo = $"Malha gerada: {bicos.Count} bicos, K {esboco.FatorK:0.##} L/min/bar½, área {esboco.AreaM2:0.##} m².";
-            }
-            else
-            {
-                var linhas = MapeamentoGravado.Carregar(doc).Where(l => l.EhChuveiroComMedidas).ToList();
-                if (linhas.Count == 0)
-                    throw new InvalidOperationException("Gere uma malha ou confirme em Famílias os bicos com fator K e área maiores que zero.");
-                bicos = new FilteredElementCollector(doc)
-                    .OfClass(typeof(FamilyInstance))
-                    .Cast<FamilyInstance>()
-                    .Select(fi => (Instancia: fi, Linha: linhas.FirstOrDefault(l =>
-                        fi.Symbol?.Family?.Name == l.Familia && fi.Symbol.Name == l.Tipo)))
-                    .Where(p => p.Linha is not null)
-                    .Select(p => new LeitorRede.BicoLido(p.Instancia, p.Linha!.FatorK, p.Linha.AreaCobertura))
-                    .ToList();
-                if (bicos.Count == 0)
-                    throw new InvalidOperationException("O modelo aberto não tem as famílias confirmadas no mapeamento.");
-                resumo = string.Join("\n", linhas.Select(l => $"{l.Tipo}: K {l.FatorK:0.##} L/min/bar½, área {l.AreaCobertura:0.##} m²"));
-            }
+            var leitura = BicosDoModelo.Ler(doc);
+            var bicos = leitura.Bicos;
 
             var kAmericano = bicos.Where(b => b.FatorK < MenorKMetrico).Select(b => b.FatorK).Distinct().ToList();
             if (kAmericano.Count > 0)
@@ -64,13 +40,13 @@ public class CalcularRedeCommand : ExternalCommand
             var previa = new TaskDialog("SPK — Calcular")
             {
                 MainInstruction = $"{bicos.Count} bicos entram no cálculo",
-                MainContent = $"{dados.Resumo()}\n{resumo}\n\nPara mudar a classe ou a base, cancele e use Dados do projeto. " +
+                MainContent = $"{dados.Resumo()}\n{leitura.Resumo}\n\nPara mudar a classe ou a base, cancele e use Dados do projeto. " +
                               "O Revit fica ocupado até o fim; numa rede grande pode levar alguns minutos.",
                 CommonButtons = TaskDialogCommonButtons.Ok | TaskDialogCommonButtons.Cancel,
             };
             if (previa.Show() != TaskDialogResult.Ok) return;
 
-            var vgas = gerados.Count > 0 ? [] : MapeamentoGravado.Vgas(doc);
+            var vgas = leitura.Gerados ? [] : MapeamentoGravado.Vgas(doc);
             var fonte = vgas.Count switch
             {
                 0 => null,
@@ -78,7 +54,7 @@ public class CalcularRedeCommand : ExternalCommand
                 _ => EscolherVga(Application.ActiveUIDocument!, vgas),
             };
             var lida = LeitorRede.Montar(doc, bicos, dados.FatorC, fonte, vgas.Select(v => v.Id).ToList());
-            var projeto = dados.CriarProjeto(gerados.Count > 0 ? "Malha gerada" : "Rede lida do modelo", lida.Rede);
+            var projeto = dados.CriarProjeto(leitura.Gerados ? "Malha gerada" : "Rede lida do modelo", lida.Rede);
             var relatorio = CalculoSpk.Executar(projeto);
 
             var pasta = PastasSpk.Calculo;
@@ -190,13 +166,4 @@ public class CalcularRedeCommand : ExternalCommand
         public bool AllowElement(Element elemento) => ids.Contains(elemento.Id);
         public bool AllowReference(Reference referencia, XYZ ponto) => false;
     }
-
-    static List<FamilyInstance> BicosGerados(Document doc) =>
-        new FilteredElementCollector(doc)
-            .OfClass(typeof(FamilyInstance))
-            .Cast<FamilyInstance>()
-            .Where(fi =>
-                fi.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.AsString() == DadosEsboco.Marca
-                || fi.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString() == DadosEsboco.Marca)
-            .ToList();
 }

@@ -84,6 +84,13 @@ static class VistasSpk
         }
     }
 
+    /// <summary>Esconde tubos, conexões, acessórios e bicos: o mapa-chave e a setorização mostram só a hachura sobre a arquitetura.</summary>
+    public static void EsconderRede(View vista)
+    {
+        if (vista.ViewTemplateId != ElementId.InvalidElementId) return;
+        foreach (var c in CategoriasDaRede) Esconder(vista, new ElementId(c), true);
+    }
+
     static void Esconder(View vista, ElementId categoria, bool esconder)
     {
         try
@@ -121,7 +128,10 @@ static class VistasSpk
         return planta;
     }
 
-    /// <summary>Corte da planta 0,30 m acima do ponto mais alto da rede, contado a partir do nível da vista.</summary>
+    /// <summary>
+    /// Corte da planta 0,30 m acima do ponto mais alto da rede, contado a partir do nível da vista. Se a rede fica abaixo
+    /// do nível (bico lançado no nível de cima com deslocamento negativo), o fundo desce até ela.
+    /// </summary>
     static void AjustarIntervalo(ViewPlan planta, Level nivel, Caixa caixa, IList<string> avisos)
     {
         try
@@ -133,9 +143,10 @@ static class VistasSpk
             intervalo.SetLevelId(PlanViewPlane.CutPlane, nivel.Id);
             intervalo.SetOffset(PlanViewPlane.CutPlane, corte);
             intervalo.SetLevelId(PlanViewPlane.BottomClipPlane, nivel.Id);
-            intervalo.SetOffset(PlanViewPlane.BottomClipPlane, 0);
+            var fundo = Math.Min(0, caixa.Min.Z - nivel.ProjectElevation - Pes(0.30));
+            intervalo.SetOffset(PlanViewPlane.BottomClipPlane, fundo);
             intervalo.SetLevelId(PlanViewPlane.ViewDepthPlane, nivel.Id);
-            intervalo.SetOffset(PlanViewPlane.ViewDepthPlane, 0);
+            intervalo.SetOffset(PlanViewPlane.ViewDepthPlane, fundo);
             planta.SetViewRange(intervalo);
         }
         catch (Autodesk.Revit.Exceptions.ApplicationException e)
