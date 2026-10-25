@@ -106,6 +106,17 @@ public class DescobrirFamiliasCommand : ExternalCommand
             grupo.Key.Categoria, grupo.Key.Familia, grupo.Key.Tipo, grupo.Count(),
             NomesDeParametros(grupo.First()).Split(", "), PapelFamilia.Fonte, parametroFatorK: "", parametroAreaCobertura: "")));
 
+        // Os outros acessórios entram ignorados: se a VGA do escritório tem outro nome, o engenheiro marca como Fonte aqui.
+        var jaListados = candidatosVga.Select(g => g.Key).ToHashSet();
+        candidatos.AddRange(instancias
+            .Where(fi => fi.Symbol is not null && fi.Category?.Id.Value == (long)BuiltInCategory.OST_PipeAccessory)
+            .GroupBy(fi => (Categoria: fi.Category?.Name ?? "sem categoria", Familia: fi.Symbol.Family.Name, Tipo: fi.Symbol.Name))
+            .Where(g => !jaListados.Contains(g.Key))
+            .OrderBy(g => g.Key.Familia)
+            .Select(grupo => CandidatoFamilia.Criar(
+                grupo.Key.Categoria, grupo.Key.Familia, grupo.Key.Tipo, grupo.Count(),
+                NomesDeParametros(grupo.First()).Split(", "), PapelFamilia.Ignorar, parametroFatorK: "", parametroAreaCobertura: "")));
+
         var janela = new JanelaMapeamento(candidatos);
         if (janela.ShowDialog() != true || janela.Resultado is not { } confirmado) return;
 
