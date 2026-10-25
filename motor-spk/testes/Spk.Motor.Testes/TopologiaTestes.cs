@@ -117,4 +117,30 @@ public class TopologiaTestes
         Assert.Contains("S2", grupo);
         Assert.DoesNotContain("S3", grupo);
     }
+
+    [Fact]
+    public void Subgeral_perpendicular_nao_entorta_a_direcao_dos_ramais()
+    {
+        // 3 ramais em X de 9 m e uma subgeral em Y de 6 m: a direção é X, sem inclinação.
+        var segmentos = Enumerable.Range(0, 9).Select(_ => (3.0, 0.0)).Concat([(0.0, 3.0), (0.0, -3.0)]);
+
+        var (dx, dy) = Topologia.EixoDominante(segmentos);
+
+        Assert.Equal(1, dx, 9);
+        Assert.Equal(0, dy, 9);
+    }
+
+    [Fact]
+    public void Malha_girada_da_a_direcao_girada_com_sentido_positivo()
+    {
+        var a = Math.PI / 6;
+        var ramal = (-3 * Math.Cos(a), -3 * Math.Sin(a));
+        var subgeral = (-3 * Math.Sin(a), 3 * Math.Cos(a));
+        var segmentos = Enumerable.Repeat(ramal, 8).Concat(Enumerable.Repeat(subgeral, 3));
+
+        var (dx, dy) = Topologia.EixoDominante(segmentos);
+
+        Assert.Equal(Math.Cos(a), dx, 9);
+        Assert.Equal(Math.Sin(a), dy, 9);
+    }
 }

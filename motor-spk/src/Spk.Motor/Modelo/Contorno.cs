@@ -6,8 +6,11 @@ namespace Spk.Motor.Modelo;
 /// </summary>
 public static class Contorno
 {
-    /// <summary>Mediana das distâncias entre posições vizinhas, agrupando as que ficam a menos de <paramref name="tolerancia" />.</summary>
-    public static double Passo(IEnumerable<double> posicoes, double tolerancia = 0.10, double padrao = 3.0)
+    /// <summary>
+    /// Mediana das distâncias entre posições vizinhas, agrupando as que ficam a menos de <paramref name="tolerancia" />.
+    /// Meio metro absorve bico fora de prumo no modelo; nenhum espaçamento de norma chega perto disso.
+    /// </summary>
+    public static double Passo(IEnumerable<double> posicoes, double tolerancia = 0.5, double padrao = 3.0)
     {
         var grupos = new List<double>();
         foreach (var p in posicoes.OrderBy(p => p))
@@ -32,7 +35,7 @@ public static class Contorno
         return DeRetangulos(retangulos, vaoMaximo);
     }
 
-    static double Limitar(double meio) => Math.Max(0.5, Math.Min(meio, 2.5));
+    static double Limitar(double meio) => Math.Max(0.9, Math.Min(meio, 2.5));
 
     /// <summary>União dos retângulos (u0, v0, u1, v1) rasterizada, com fechamento morfológico e traçado das bordas.</summary>
     public static List<List<(double U, double V)>> DeRetangulos(IReadOnlyList<(double U0, double V0, double U1, double V1)> retangulos,

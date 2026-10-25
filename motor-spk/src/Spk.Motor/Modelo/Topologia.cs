@@ -6,35 +6,37 @@ namespace Spk.Motor.Modelo;
 /// </summary>
 public static class Topologia
 {
-    /// <summary>Direção horizontal média dos trechos de 1 m ou mais, com os sentidos alinhados entre si.</summary>
-    public static (double Dx, double Dy) DirecaoDosRamais(IEnumerable<Trecho> trechos, IReadOnlyDictionary<string, No> nos)
-    {
-        double dx = 0, dy = 0;
-        var tem = false;
-        foreach (var trecho in trechos)
+    /// <summary>Direção dos ramais: o eixo horizontal com mais comprimento de trechos de 1 m ou mais.</summary>
+    public static (double Dx, double Dy) DirecaoDosRamais(IEnumerable<Trecho> trechos, IReadOnlyDictionary<string, No> nos) =>
+        EixoDominante(trechos.Where(t => t.Comprimento >= 1).Select(t =>
         {
-            if (trecho.Comprimento < 1) continue;
-            var a = nos[trecho.De];
-            var b = nos[trecho.Para];
-            double vx = b.X - a.X, vy = b.Y - a.Y;
-            var norma = Math.Sqrt(vx * vx + vy * vy);
-            if (norma < 1e-6) continue;
-            vx /= norma;
-            vy /= norma;
-            if (!tem)
-            {
-                dx = vx;
-                dy = vy;
-                tem = true;
-                continue;
-            }
-            if (vx * dx + vy * dy < 0) { vx = -vx; vy = -vy; }
-            dx += vx;
-            dy += vy;
+            var a = nos[t.De];
+            var b = nos[t.Para];
+            return (b.X - a.X, b.Y - a.Y);
+        }));
+
+    /// <summary>
+    /// Eixo horizontal dominante de um conjunto de segmentos (dx, dy), pesando pelo comprimento. Soma em ângulo dobrado:
+    /// segmentos perpendiculares se anulam em vez de entortar a média, então ramais em X com subgeral em Y dão
+    /// exatamente X. Sentido normalizado para x positivo (ou y positivo, se vertical).
+    /// </summary>
+    public static (double Dx, double Dy) EixoDominante(IEnumerable<(double Dx, double Dy)> segmentos)
+    {
+        double c = 0, s = 0;
+        foreach (var (dx, dy) in segmentos)
+        {
+            var comprimento = Math.Sqrt(dx * dx + dy * dy);
+            if (comprimento < 1e-6) continue;
+            // L·cos 2θ e L·sin 2θ, com cos θ = dx/L e sin θ = dy/L.
+            c += (dx * dx - dy * dy) / comprimento;
+            s += 2 * dx * dy / comprimento;
         }
 
-        var n = Math.Sqrt(dx * dx + dy * dy);
-        return n < 1e-6 ? (1, 0) : (dx / n, dy / n);
+        if (Math.Sqrt(c * c + s * s) < 1e-9) return (1, 0);
+        var angulo = Math.Atan2(s, c) / 2;
+        double x = Math.Cos(angulo), y = Math.Sin(angulo);
+        if (x < -1e-9 || (Math.Abs(x) <= 1e-9 && y < 0)) { x = -x; y = -y; }
+        return (x, y);
     }
 
     /// <summary>

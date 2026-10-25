@@ -177,16 +177,9 @@ static class FolhasDoSetor
         return [P(u0, v0), P(u1, v0), P(u1, v1), P(u0, v1)];
     }
 
-    /// <summary>Mediana das distâncias entre posições vizinhas (agrupadas a 10 cm). Sem vizinhos, 3 m.</summary>
-    static double Passo(IEnumerable<double> valores)
-    {
-        var tolerancia = VistasSpk.Pes(0.10);
-        var grupos = new List<double>();
-        foreach (var v in valores.OrderBy(v => v))
-            if (grupos.Count == 0 || v - grupos[^1] > tolerancia) grupos.Add(v);
-        var passos = grupos.Zip(grupos.Skip(1), (a, b) => b - a).OrderBy(p => p).ToList();
-        return passos.Count == 0 ? VistasSpk.Pes(3.0) : passos[passos.Count / 2];
-    }
+    /// <summary>O mesmo passo do contorno da setorização, em pés.</summary>
+    static double Passo(IEnumerable<double> valores) =>
+        VistasSpk.Pes(Spk.Motor.Modelo.Contorno.Passo(valores.Select(VistasSpk.Metros)));
 
     /// <summary>
     /// Planta do nível em escala pequena com a hachura de todos os setores e o deste em cor cheia, como o mapa-chave das

@@ -71,4 +71,13 @@ public class ContornoTestes
         Assert.Equal(3, Contorno.Passo([0, 0.02, 3, 3.05, 6, 9.6]), 1);
         Assert.Equal(3, Contorno.Passo([5, 5, 5]), 6);
     }
+
+    [Fact]
+    public void Bicos_fora_de_prumo_ainda_formam_um_contorno_so()
+    {
+        var desvio = new[] { 0.0, 0.2, -0.15, 0.1, -0.2 };
+        var bicos = Grade(5, 3).Select((b, k) => (b.U + desvio[k % 5], b.V + desvio[(k + 2) % 5])).ToList();
+
+        Assert.Single(Contorno.DosBicos(bicos));
+    }
 }

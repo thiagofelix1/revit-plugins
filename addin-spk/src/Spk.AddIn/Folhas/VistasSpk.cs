@@ -84,11 +84,15 @@ static class VistasSpk
         }
     }
 
-    /// <summary>Esconde tubos, conexões, acessórios e bicos: o mapa-chave e a setorização mostram só a hachura sobre a arquitetura.</summary>
+    /// <summary>
+    /// Esconde tubos, conexões, acessórios, bicos e as marcas de corte, elevação e chamada: o mapa-chave e a setorização
+    /// mostram só a hachura sobre a arquitetura.
+    /// </summary>
     public static void EsconderRede(View vista)
     {
         if (vista.ViewTemplateId != ElementId.InvalidElementId) return;
-        foreach (var c in CategoriasDaRede) Esconder(vista, new ElementId(c), true);
+        foreach (var c in CategoriasDaRede.Concat([BuiltInCategory.OST_Sections, BuiltInCategory.OST_Elev, BuiltInCategory.OST_Callouts]))
+            Esconder(vista, new ElementId(c), true);
     }
 
     static void Esconder(View vista, ElementId categoria, bool esconder)
@@ -276,25 +280,17 @@ static class VistasSpk
         return corte;
     }
 
-    /// <summary>Direção horizontal dos ramais pelos tubos de 1 m ou mais, com os sentidos alinhados.</summary>
+    /// <summary>Direção dos ramais: o eixo horizontal com mais comprimento de tubo (1 m ou mais), o mesmo critério do cálculo.</summary>
     public static XYZ DirecaoDosRamais(IEnumerable<Element> tubos)
     {
-        double dx = 0, dy = 0;
-        var tem = false;
-        foreach (var tubo in tubos)
-        {
-            if (tubo.Location is not LocationCurve { Curve: Line linha }) continue;
-            var v = linha.GetEndPoint(1) - linha.GetEndPoint(0);
-            var h = new XYZ(v.X, v.Y, 0);
-            if (h.GetLength() < Pes(1)) continue;
-            h = h.Normalize();
-            if (!tem) { dx = h.X; dy = h.Y; tem = true; continue; }
-            if (h.X * dx + h.Y * dy < 0) h = h.Negate();
-            dx += h.X;
-            dy += h.Y;
-        }
-        var n = Math.Sqrt(dx * dx + dy * dy);
-        return n < 1e-9 ? XYZ.BasisX : new XYZ(dx / n, dy / n, 0);
+        var segmentos = tubos
+            .Select(t => (t.Location as LocationCurve)?.Curve as Line)
+            .OfType<Line>()
+            .Select(l => l.GetEndPoint(1) - l.GetEndPoint(0))
+            .Where(v => Math.Sqrt(v.X * v.X + v.Y * v.Y) >= Pes(1))
+            .Select(v => (v.X, v.Y));
+        var (dx, dy) = Spk.Motor.Modelo.Topologia.EixoDominante(segmentos);
+        return new XYZ(dx, dy, 0);
     }
 
     public static Caixa? CaixaDe(IEnumerable<Element> elementos)
