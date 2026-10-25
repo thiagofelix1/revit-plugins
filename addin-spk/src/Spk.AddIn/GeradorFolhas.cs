@@ -26,10 +26,16 @@ static class GeradorFolhas
         var dados = DadosEsboco.Carregar();
         var calculo = CalculoDestaMalha(bicos);
         var daArea = BicosDaArea(bicos, calculo);
-        var caixaRede = Caixa(bicos.Concat<Element>(tubos))
+        var elementos = bicos.Concat<Element>(tubos).ToList();
+        var caixaRede = Caixa(elementos)
                         ?? throw new InvalidOperationException("Não foi possível medir a malha.");
         var caixaArea = Expandir(Caixa(daArea) ?? caixaRede, dados);
-        var tudo = Unir(caixaRede, caixaArea, Pes(1.5));
+        var noPlano = CaixaNoPlano(elementos) ?? caixaRede;
+        var margem = Pes(1.2);
+        var contorno = new Caixa3d(
+            new XYZ(noPlano.Min.X - margem, noPlano.Min.Y - margem, noPlano.Min.Z),
+            new XYZ(noPlano.Max.X + margem, noPlano.Max.Y + margem, noPlano.Max.Z));
+        var tudo = Unir(Unir(caixaRede, caixaArea, Pes(1.5)), contorno, Pes(0.6));
 
         var nivel = Nivel(doc, bicos);
         var planta = Planta(doc, nivel);
@@ -43,9 +49,9 @@ static class GeradorFolhas
         Enquadrar3d(iso, tudo);
         LimparPintura(planta, bicos);
         LimparPintura(iso, bicos);
-        Retangulo(doc, planta, caixaArea);
+        Retangulo(doc, planta, contorno);
         var critico = PintarCritico(doc, planta, iso, bicos, calculo);
-        Nota(doc, planta, new XYZ(caixaArea.Min.X, caixaArea.Max.Y + Pes(0.6), 0),
+        Nota(doc, planta, new XYZ(contorno.Min.X, contorno.Max.Y + Pes(1.0), 0),
             calculo is null ? "Malha gerada" : "Área de operação");
 
         ViewSection? corte = null;
@@ -316,10 +322,18 @@ static class GeradorFolhas
         var centro = caixa.Centro;
         var distancia = Math.Max((caixa.Max - caixa.Min).GetLength(), Pes(8)) * 2;
         var olho = centro + new XYZ(1, -1, 0.75).Normalize() * distancia;
-        vista.SetOrientation(new ViewOrientation3D(olho, XYZ.BasisZ, (centro - olho).Normalize()));
+        vista.SetOrientation(OlharPara(centro, olho));
         var secao = new BoundingBoxXYZ { Min = caixa.Min, Max = caixa.Max };
         vista.SetSectionBox(secao);
         vista.IsSectionBoxActive = true;
+    }
+
+    static ViewOrientation3D OlharPara(XYZ centro, XYZ olho)
+    {
+        var frente = (centro - olho).Normalize();
+        var cima = XYZ.BasisZ - frente * frente.DotProduct(XYZ.BasisZ);
+        if (cima.GetLength() < 1e-6) cima = XYZ.BasisY;
+        return new ViewOrientation3D(olho, cima.Normalize(), frente);
     }
 
     static void Enquadrar3d(View3D vista, Caixa3d caixa)
@@ -360,7 +374,7 @@ static class GeradorFolhas
         };
         var grafico = new OverrideGraphicSettings();
         grafico.SetProjectionLineColor(new Color(198, 40, 40));
-        grafico.SetProjectionLineWeight(6);
+        grafico.SetProjectionLineWeight(3);
         for (var i = 0; i < cantos.Length; i++)
         {
             var linha = doc.Create.NewDetailCurve(planta, Line.CreateBound(cantos[i], cantos[(i + 1) % cantos.Length]));
@@ -429,7 +443,9 @@ static class GeradorFolhas
     {
         var tipo = doc.GetDefaultElementTypeId(ElementTypeGroup.TextNoteType);
         if (tipo == ElementId.InvalidElementId || string.IsNullOrWhiteSpace(texto)) return;
-        TextNote.Create(doc, vista.Id, posicao, 0, texto.Trim(), new TextNoteOptions(tipo)
+        var quebras = texto.Trim().Replace("\r\n", "\n").Replace('\r', '\n').Replace("\n", "\r");
+        // Largura no papel, em pés. Zero fica abaixo do mínimo interno e o Revit recusa a nota.
+        TextNote.Create(doc, vista.Id, posicao, 0.4, quebras, new TextNoteOptions(tipo)
         {
             HorizontalAlignment = HorizontalTextAlignment.Left,
         });
@@ -540,6 +556,39 @@ static class GeradorFolhas
             x1 = Math.Max(x1, caixa.Max.X);
             y1 = Math.Max(y1, caixa.Max.Y);
             z1 = Math.Max(z1, caixa.Max.Z);
+        }
+
+        return algum ? new Caixa3d(new XYZ(x0, y0, z0), new XYZ(x1, y1, z1)) : null;
+    }
+
+    static Caixa3d? CaixaNoPlano(IEnumerable<Element> elementos)
+    {
+        double x0 = double.MaxValue, y0 = double.MaxValue, z0 = double.MaxValue;
+        double x1 = double.MinValue, y1 = double.MinValue, z1 = double.MinValue;
+        var algum = false;
+        void Acumular(XYZ ponto)
+        {
+            algum = true;
+            x0 = Math.Min(x0, ponto.X);
+            y0 = Math.Min(y0, ponto.Y);
+            z0 = Math.Min(z0, ponto.Z);
+            x1 = Math.Max(x1, ponto.X);
+            y1 = Math.Max(y1, ponto.Y);
+            z1 = Math.Max(z1, ponto.Z);
+        }
+
+        foreach (var elemento in elementos)
+        {
+            switch (elemento.Location)
+            {
+                case LocationPoint ponto:
+                    Acumular(ponto.Point);
+                    break;
+                case LocationCurve curva:
+                    Acumular(curva.Curve.GetEndPoint(0));
+                    Acumular(curva.Curve.GetEndPoint(1));
+                    break;
+            }
         }
 
         return algum ? new Caixa3d(new XYZ(x0, y0, z0), new XYZ(x1, y1, z1)) : null;

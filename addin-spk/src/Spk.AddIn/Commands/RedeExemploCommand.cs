@@ -158,7 +158,7 @@ public class RedeExemploCommand : ExternalCommand
         var centro = (min + max) / 2;
         var distancia = Math.Max((max - min).GetLength(), Pes(8)) * 2;
         var olho = centro + new XYZ(1, -1, 0.75).Normalize() * distancia;
-        iso.SetOrientation(new ViewOrientation3D(olho, XYZ.BasisZ, (centro - olho).Normalize()));
+        iso.SetOrientation(OlharPara(centro, olho));
 
         var crop = planta.CropBox;
         var inverso = crop.Transform.Inverse;
@@ -169,6 +169,14 @@ public class RedeExemploCommand : ExternalCommand
         planta.CropBox = crop;
         planta.CropBoxActive = true;
         planta.CropBoxVisible = false;
+    }
+
+    static ViewOrientation3D OlharPara(XYZ centro, XYZ olho)
+    {
+        var frente = (centro - olho).Normalize();
+        var cima = XYZ.BasisZ - frente * frente.DotProduct(XYZ.BasisZ);
+        if (cima.GetLength() < 1e-6) cima = XYZ.BasisY;
+        return new ViewOrientation3D(olho, cima.Normalize(), frente);
     }
 
     static (XYZ Min, XYZ Max)? Medir(Document doc, IList<ElementId> ids)
