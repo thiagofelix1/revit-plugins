@@ -520,6 +520,7 @@ static class LeitorRede
 
         var fila = new Queue<int>(sementes.Select(s => s.Indice).Distinct());
         var visitados = new HashSet<int>();
+        var derivacoes = new List<(int Indice, double T, string No)>();
         while (fila.Count > 0)
         {
             var i = fila.Dequeue();
@@ -531,11 +532,21 @@ static class LeitorRede
             tubo.Partes.Add(new Segmento(n0, n1, 0, 1, Math.Max(tubo.Comprimento, 0.001), tubo.Diametro));
             foreach (var vizinho in VizinhosDePonta(i, tubo.Curva, tubos, grade))
                 if (!visitados.Contains(vizinho)) fila.Enqueue(vizinho);
+            foreach (var (ponta, no) in new[] { (tubo.Curva.GetEndPoint(0), n0), (tubo.Curva.GetEndPoint(1), n1) })
+            foreach (var (j, t) in DerivacoesNaPonta(i, ponta, tubos, grade))
+            {
+                derivacoes.Add((j, t, no));
+                if (!visitados.Contains(j)) fila.Enqueue(j);
+            }
         }
 
+        // Primeiro as derivações (ramal que encosta no meio da subgeral), depois os bicos: os dois cortam o tubo em
+        // partes, e cada um acha a parte que contém o seu ponto.
+        foreach (var derivacao in derivacoes.Distinct())
+            InserirNo(tubos[derivacao.Indice], derivacao.T, derivacao.No, nos);
         foreach (var grupo in sementes.GroupBy(s => s.Indice))
             foreach (var semente in grupo.OrderByDescending(s => s.T))
-                InserirBico(tubos[semente.Indice], semente.T, semente.IdBico, nos);
+                InserirNo(tubos[semente.Indice], semente.T, semente.IdBico, nos);
 
         foreach (var tubo in tubos)
             foreach (var parte in tubo.Partes)
@@ -545,7 +556,8 @@ static class LeitorRede
         return "";
     }
 
-    static void InserirBico(TuboPronto tubo, double t, string idBico, Dictionary<string, No> nos)
+    /// <summary>Corta o tubo no ponto <paramref name="t" /> (0 a 1) e liga ali o nó. Perto das pontas, liga o nó à ponta.</summary>
+    static void InserirNo(TuboPronto tubo, double t, string idBico, Dictionary<string, No> nos)
     {
         if (!nos.ContainsKey(idBico) || tubo.Partes.Count == 0) return;
         var i = tubo.Partes.FindIndex(p => t >= p.T0 - 1e-4 && t <= p.T1 + 1e-4);
@@ -644,6 +656,31 @@ static class LeitorRede
             }
         }
         return melhor;
+    }
+
+    /// <summary>
+    /// Tubos em que esta ponta encosta no meio, a até a tolerância mais o raio do outro tubo: derivação sem cortar o
+    /// tubo, como os ramais na subgeral de 71 m da Nova Era. Ponta com ponta fica com <see cref="VizinhosDePonta" />.
+    /// </summary>
+    static IEnumerable<(int Indice, double T)> DerivacoesNaPonta(int indice, XYZ ponta, List<TuboPronto> tubos,
+        Dictionary<(int X, int Y, int Z), List<int>> grade)
+    {
+        var vistos = new HashSet<int>();
+        foreach (var celula in Vizinhanca(ponta))
+        {
+            if (!grade.TryGetValue(celula, out var lista)) continue;
+            foreach (var outro in lista)
+            {
+                if (outro == indice || !vistos.Add(outro)) continue;
+                var alvo = tubos[outro];
+                var projecao = alvo.Curva.Project(ponta);
+                if (projecao is null || projecao.Distance > Pes(ToleranciaPonta + alvo.Diametro / 2000)) continue;
+                var t = ParametroNormalizado(alvo.Curva, projecao.Parameter);
+                var aoLongo = t * alvo.Comprimento;
+                if (aoLongo <= ToleranciaPonta || alvo.Comprimento - aoLongo <= ToleranciaPonta) continue;
+                yield return (outro, t);
+            }
+        }
     }
 
     static IEnumerable<int> VizinhosDePonta(int indice, Curve curva, List<TuboPronto> tubos, Dictionary<(int X, int Y, int Z), List<int>> grade)
