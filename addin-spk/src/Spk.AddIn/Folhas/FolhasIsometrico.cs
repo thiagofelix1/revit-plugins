@@ -22,6 +22,7 @@ static class FolhasIsometrico
         var inicio = Inicio(doc);
         if (inicio.Count == 0) throw new InvalidOperationException("O modelo não tem bicos de sprinkler.");
         var rede = Conectados(doc, inicio);
+        IncluirRedeLida(contexto, rede, avisos);
         var caixa = VistasSpk.CaixaDe(rede.Select(doc.GetElement).OfType<Element>())
                     ?? throw new InvalidOperationException("Não foi possível medir a rede.");
 
@@ -96,6 +97,28 @@ static class FolhasIsometrico
             }
         }
         return vistos;
+    }
+
+    /// <summary>
+    /// Num modelo sem conexões ligadas (Nova Era), seguir conectores só acha os bicos. Os tubos que a leitura por
+    /// proximidade associou a cada setor e ao último cálculo completam a rede.
+    /// </summary>
+    static void IncluirRedeLida(ContextoFolhas contexto, HashSet<ElementId> rede, IList<string> avisos)
+    {
+        try
+        {
+            foreach (var setor in contexto.Setores)
+            {
+                rede.UnionWith(setor.Tubos.Select(t => t.Id));
+                rede.UnionWith(setor.Bicos.Select(b => b.Id));
+            }
+        }
+        catch (Exception e) when (e is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException)
+        {
+            avisos.Add("Rede lida dos setores: " + e.Message);
+        }
+        if (ResultadoGravado.Ler(contexto.Doc) is { } calculo)
+            rede.UnionWith(calculo.Tubos.Select(id => new ElementId(id)));
     }
 
     static bool DaRede(Element elemento) =>

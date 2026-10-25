@@ -109,7 +109,9 @@ static class LeitorRede
         {
             foreach (var no in nos.Keys.Where(id => !id.StartsWith('S')).ToList()) nos.Remove(no);
             trechos.Clear();
-            var diagnostico = AnexarPorProximidade(doc, bicos, nos, trechos, ref seq, ref usouNominal, fatorC, out var semClassificacao);
+            tuboDoTrecho.Clear();
+            var diagnostico = AnexarPorProximidade(doc, bicos, nos, trechos, tuboDoTrecho, ref seq, ref usouNominal, fatorC,
+                out var semClassificacao);
             grau.Clear();
             foreach (var trecho in trechos)
             {
@@ -465,7 +467,7 @@ static class LeitorRede
     /// sistema, como na Nova Era), usa todos e devolve <paramref name="semClassificacao" />.
     /// </summary>
     static string AnexarPorProximidade(Document doc, IReadOnlyList<BicoLido> bicos, Dictionary<string, No> nos, List<Trecho> trechos,
-        ref int seq, ref bool usouNominal, double fatorC, out bool semClassificacao)
+        Dictionary<string, ElementId> tuboDoTrecho, ref int seq, ref bool usouNominal, double fatorC, out bool semClassificacao)
     {
         semClassificacao = false;
         var tubos = Tubos(doc, soIncendio: true, ref usouNominal);
@@ -548,10 +550,15 @@ static class LeitorRede
             foreach (var semente in grupo.OrderByDescending(s => s.T))
                 InserirNo(tubos[semente.Indice], semente.T, semente.IdBico, nos);
 
+        // Cada trecho guarda o tubo de onde veio: as folhas etiquetam e o cálculo grava vazão e velocidade nele.
         foreach (var tubo in tubos)
             foreach (var parte in tubo.Partes)
-                if (parte.De != parte.Para && parte.Comprimento > 1e-4)
-                    trechos.Add(new Trecho($"G{seq++}", parte.De, parte.Para, parte.Diametro, parte.Comprimento, fatorC));
+            {
+                if (parte.De == parte.Para || parte.Comprimento <= 1e-4) continue;
+                var id = $"G{seq++}";
+                trechos.Add(new Trecho(id, parte.De, parte.Para, parte.Diametro, parte.Comprimento, fatorC));
+                if (tubo.Elemento is { } elemento) tuboDoTrecho[id] = elemento;
+            }
 
         return "";
     }
@@ -743,7 +750,7 @@ static class LeitorRede
             if (tubo.Location is not LocationCurve local) continue;
             if (soIncendio && !EhIncendio(origem, tubo)) continue;
             var curva = transformacao is null ? local.Curve : local.Curve.CreateTransformed(transformacao);
-            tubos.Add(new TuboPronto(curva, Metros(curva.Length), DiametroMm(tubo, ref usouNominal)));
+            tubos.Add(new TuboPronto(curva, Metros(curva.Length), DiametroMm(tubo, ref usouNominal), vinculo is null ? tubo.Id : null));
         }
     }
 
@@ -842,9 +849,11 @@ static class LeitorRede
         lista.Add(id);
     }
 
-    sealed class TuboPronto(Curve curva, double comprimento, double diametro)
+    /// <param name="elemento">O tubo no modelo aberto; nulo se vem de vínculo, onde não dá para gravar nem etiquetar.</param>
+    sealed class TuboPronto(Curve curva, double comprimento, double diametro, ElementId? elemento)
     {
         public Curve Curva { get; } = curva;
+        public ElementId? Elemento { get; } = elemento;
         public double Comprimento { get; } = comprimento;
         public double Diametro { get; } = diametro;
         public List<Segmento> Partes { get; } = [];
