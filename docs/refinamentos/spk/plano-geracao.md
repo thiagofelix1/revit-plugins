@@ -138,7 +138,7 @@ O botão Folhas, no painel Resultados, gera o que o modelo permite, cada conjunt
 - **SPK-ISO** (013): tudo o que está ligado aos bicos por conector, sem a tubulação de outros sistemas, travado e com etiqueta de diâmetro nos tubos mais longos.
 - **SPK-<setor>-01** (014): planta do último setor calculado com a área de cálculo hachurada, bicos da área numerados como no memorial, bico crítico com pressão e vazão, etiquetas de diâmetro, DESCE/SOBE; 3D do setor etiquetado; mapa-chave do nível quando há mais de um setor; quadro de resultado.
 - **SPK-<setor>-02**: corte no sentido dos ramais.
-- PDF `SPK-folhas.pdf` na pasta `SPK` ao lado do arquivo. Se o projeto não foi salvo, o PDF vai para a pasta temporária do cálculo.
+- PDF `SPK-folhas.pdf` na pasta `SPK` ao lado do arquivo. Se o projeto não foi salvo, o PDF vai para `DocumentosSPKlculo`, a mesma pasta do memorial.
 
 Escala, recorte e intervalo de vista saem da rede. Se o projeto tiver templates de vista chamados "SPK Planta", "SPK 3D", "SPK Corte" e "SPK Setorização", eles são aplicados; sem eles, o plugin usa um estilo padrão (tubulação em vermelho). O carimbo é o primeiro carregado no projeto. O detalhe típico da válvula continua sendo a família do escritório: o plugin ainda não posiciona esse bloco.
 
