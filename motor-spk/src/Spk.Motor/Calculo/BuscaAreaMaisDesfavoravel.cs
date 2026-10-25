@@ -54,7 +54,23 @@ public static class BuscaAreaMaisDesfavoravel
         total = Math.Min(total, rede.Chuveiros.Count);
 
         var candidatos = GerarCandidatos(ramais, total, porRamal);
-        if (candidatos.Count == 0) throw new InvalidOperationException("Nenhuma posição válida para a área de operação.");
+        if (candidatos.Count == 0)
+        {
+            var parciais = new List<string>();
+            foreach (var ramal in ramais)
+            {
+                foreach (var ponto in ramal.Take(porRamal))
+                {
+                    if (parciais.Count >= total) break;
+                    parciais.Add(ponto.Chuveiro.Id);
+                }
+                if (parciais.Count >= total) break;
+            }
+            if (parciais.Count == 0)
+                throw new InvalidOperationException(
+                    $"Nenhuma posição válida para a área de operação. Há {rede.Chuveiros.Count} bicos em {ramais.Count} ramais; o critério pede {total}, com no máximo {porRamal} por ramal.");
+            candidatos.Add(parciais);
+        }
 
         var avaliados = new ConcurrentBag<CandidatoArea>();
         Parallel.ForEach(candidatos, new ParallelOptions { MaxDegreeOfParallelism = op.MaximoParalelismo }, ids =>

@@ -60,6 +60,8 @@ public static class CalculoSpk
                 VazaoAdicionalNaFonte = vazaoHidrantes,
             });
             resultado = busca.MaisDesfavoravel;
+            if (projeto.Base is BaseNumeroFixo fixo && resultado.Chuveiros.Count < fixo.Total)
+                avisos.Add($"A rede ligada não forma a área de {fixo.Total} bicos ({fixo.PorRamal} por ramal). O cálculo usou {resultado.Chuveiros.Count} bicos.");
         }
 
         if (projeto.Base is BaseDensidadeArea { Ajuste: { } ajuste }) avisos.AddRange(ajuste.Avisos);

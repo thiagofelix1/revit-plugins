@@ -1,0 +1,93 @@
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using Color = System.Windows.Media.Color;
+using Freezable = System.Windows.Freezable;
+using Point = System.Windows.Point;
+
+namespace Spk.AddIn;
+
+/// <summary>Ícones da faixa de opções desenhados num quadro de 32×32 e rasterizados no tamanho pedido.</summary>
+static class Icones
+{
+    static readonly Brush Vermelho = Congelado(new SolidColorBrush(Color.FromRgb(0xC6, 0x28, 0x28)));
+    static readonly Brush Grafite = Congelado(new SolidColorBrush(Color.FromRgb(0x37, 0x47, 0x4F)));
+
+    public static ImageSource Gerar(Action<DrawingContext> desenhar, int tamanho)
+    {
+        const double escala = 2;
+        const double margem = 2;
+        var pixels = (int)(tamanho * escala);
+        var visual = new DrawingVisual();
+        using (var dc = visual.RenderOpen())
+        {
+            dc.PushTransform(new ScaleTransform(pixels / 32.0, pixels / 32.0));
+            var interno = (32 - 2 * margem) / 32.0;
+            dc.PushTransform(new TranslateTransform(margem, margem));
+            dc.PushTransform(new ScaleTransform(interno, interno));
+            desenhar(dc);
+            dc.Pop();
+            dc.Pop();
+            dc.Pop();
+        }
+
+        var bitmap = new RenderTargetBitmap(pixels, pixels, 96 * escala, 96 * escala, PixelFormats.Pbgra32);
+        bitmap.Render(visual);
+        bitmap.Freeze();
+        return bitmap;
+    }
+
+    public static void Lupa(DrawingContext dc)
+    {
+        dc.DrawEllipse(Brushes.White, Caneta(Grafite, 3), new Point(13, 13), 9, 9);
+        dc.DrawEllipse(Vermelho, null, new Point(13, 13), 3.5, 3.5);
+        dc.DrawLine(Caneta(Vermelho, 4.5), new Point(20, 20), new Point(28.5, 28.5));
+    }
+
+    public static void Executar(DrawingContext dc)
+    {
+        var triangulo = Geometry.Parse("M 9,4 L 28,16 L 9,28 Z");
+        dc.DrawGeometry(Vermelho, Caneta(Vermelho, 2), triangulo);
+    }
+
+    public static void Documento(DrawingContext dc)
+    {
+        dc.DrawGeometry(Brushes.White, Caneta(Grafite, 2.5), Geometry.Parse("M 7,3 L 19,3 L 26,10 L 26,29 L 7,29 Z"));
+        dc.DrawGeometry(null, Caneta(Grafite, 2), Geometry.Parse("M 19,3 L 19,10 L 26,10"));
+        var linha = Caneta(Vermelho, 2.5);
+        foreach (var y in new[] { 15.0, 19.5, 24.0 })
+            dc.DrawLine(linha, new Point(11, y), new Point(22, y));
+    }
+
+    public static void Formulario(DrawingContext dc)
+    {
+        dc.DrawRectangle(Brushes.White, Caneta(Grafite, 2.5), new System.Windows.Rect(7, 4, 18, 24));
+        var linha = Caneta(Vermelho, 2);
+        foreach (var y in new[] { 11.0, 16.0, 21.0 })
+            dc.DrawLine(linha, new Point(11, y), new Point(21, y));
+    }
+
+    public static void Folha(DrawingContext dc)
+    {
+        dc.DrawRectangle(Brushes.White, Caneta(Grafite, 2), new System.Windows.Rect(6, 3, 18, 14));
+        dc.DrawRectangle(null, Caneta(Vermelho, 1.6), new System.Windows.Rect(9, 6, 12, 7));
+        dc.DrawRectangle(Brushes.White, Caneta(Grafite, 2), new System.Windows.Rect(8, 12, 18, 14));
+    }
+
+    public static void Malha(DrawingContext dc)
+    {
+        var caneta = Caneta(Grafite, 2);
+        dc.DrawLine(caneta, new Point(6, 16), new Point(26, 16));
+        dc.DrawLine(caneta, new Point(8, 8), new Point(8, 24));
+        foreach (var x in new[] { 8.0, 14.0, 20.0, 26.0 })
+            dc.DrawEllipse(Vermelho, null, new Point(x, 16), 2.2, 2.2);
+    }
+
+    static Pen Caneta(Brush cor, double espessura) =>
+        Congelado(new Pen(cor, espessura) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round, LineJoin = PenLineJoin.Round });
+
+    static T Congelado<T>(T objeto) where T : Freezable
+    {
+        objeto.Freeze();
+        return objeto;
+    }
+}

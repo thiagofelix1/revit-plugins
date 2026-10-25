@@ -1,15 +1,13 @@
-using System.Globalization;
 using System.Text;
 using Spk.Motor.Calculo;
 using Spk.Motor.Normas;
+using static Spk.Motor.Relatorios.Formatacao;
 
 namespace Spk.Motor.Relatorios;
 
 /// <summary>Memorial de cálculo em Markdown, na ordem dos dados pedidos pela NBR 9.1 a 9.3.</summary>
 public static class Memorial
 {
-    static readonly CultureInfo Br = CultureInfo.GetCultureInfo("pt-BR");
-
     public static string Gerar(RelatorioSpk rel)
     {
         var p = rel.Projeto;
@@ -120,16 +118,4 @@ public static class Memorial
 
         return sb.ToString();
     }
-
-    static string F(double v, int casas) => v.ToString("N" + casas, Br);
-
-    static string NomeClasse(ClasseRisco c) => c switch
-    {
-        ClasseRisco.Leve => "Risco leve",
-        ClasseRisco.Ordinario1 => "Risco ordinário grupo 1",
-        ClasseRisco.Ordinario2 => "Risco ordinário grupo 2",
-        ClasseRisco.Extraordinario1 => "Risco extraordinário grupo 1",
-        ClasseRisco.Extraordinario2 => "Risco extraordinário grupo 2",
-        _ => "Armazenamento (IT-24)",
-    };
 }

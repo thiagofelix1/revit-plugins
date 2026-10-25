@@ -60,6 +60,7 @@ static int Calcular(string origem, string pasta)
 
     Directory.CreateDirectory(pasta);
     File.WriteAllText(Path.Combine(pasta, "memorial.md"), Memorial.Gerar(rel));
+    File.WriteAllBytes(Path.Combine(pasta, "memorial.docx"), MemorialDocx.Gerar(rel));
     File.WriteAllText(Path.Combine(pasta, "resultado.json"), JsonSerializer.Serialize(new
     {
         rel.Atende,
