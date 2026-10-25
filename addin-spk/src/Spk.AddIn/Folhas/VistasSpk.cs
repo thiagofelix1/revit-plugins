@@ -70,6 +70,9 @@ static class VistasSpk
                 var mostrar = CategoriasDaRede.Any(c => categoria.Id.Value == (long)c);
                 Esconder(vista, categoria.Id, !mostrar);
             }
+            // Isométrico de desenho: sem o contorno da caixa de corte, sem níveis e eixos atravessando a rede.
+            foreach (var c in new[] { BuiltInCategory.OST_SectionBox, BuiltInCategory.OST_Levels, BuiltInCategory.OST_Grids })
+                Esconder(vista, new ElementId(c), true);
         }
         else
         {
