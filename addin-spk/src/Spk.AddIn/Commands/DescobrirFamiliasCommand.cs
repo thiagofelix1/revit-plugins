@@ -75,11 +75,19 @@ public class DescobrirFamiliasCommand : ExternalCommand
             var elemento = grupo.First();
             var fatorK = LerMedida(elemento, SugestaoDeParametro.PalavrasFatorK);
             var area = LerMedida(elemento, SugestaoDeParametro.PalavrasArea);
+            var valorK = fatorK.Valor;
+            string? notaK = null;
+            if (LinhaMapeamento.Numero(fatorK.Valor) is { } lido)
+            {
+                var (metrico, nota) = ConversaoFatorK.ParaMetrico(lido);
+                notaK = nota;
+                if (nota is not null) valorK = metrico.ToString("0.#", Entrada.Cultura);
+            }
             return CandidatoFamilia.Criar(
                 grupo.Key.Categoria, grupo.Key.Familia, grupo.Key.Tipo, grupo.Count(),
                 NomesDeParametros(elemento).Split(", "),
-                parametroFatorK: fatorK.Nome, valorFatorK: fatorK.Valor,
-                parametroAreaCobertura: area.Nome, valorAreaCobertura: area.Valor);
+                parametroFatorK: fatorK.Nome, valorFatorK: valorK,
+                parametroAreaCobertura: area.Nome, valorAreaCobertura: area.Valor, notaFatorK: notaK);
         }).ToList();
 
         var janela = new JanelaMapeamento(candidatos);

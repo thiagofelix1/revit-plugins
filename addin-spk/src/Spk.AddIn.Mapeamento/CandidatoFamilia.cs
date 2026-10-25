@@ -60,9 +60,12 @@ public sealed class CandidatoFamilia : INotifyPropertyChanged
         set { _valorAreaCobertura = value; OnPropertyChanged(nameof(ValorAreaCobertura)); }
     }
 
+    /// <summary>Preenchida quando o K lido da família foi convertido de gpm/psi½.</summary>
+    public string? NotaFatorK { get; init; }
+
     public string OrigemFatorK => string.IsNullOrWhiteSpace(ParametroFatorK)
         ? "Nenhum parâmetro de fator K encontrado. Informe o valor em L/min/bar½."
-        : $"Preenchido a partir do parâmetro \"{ParametroFatorK}\". O número continua editável.";
+        : $"Preenchido a partir do parâmetro \"{ParametroFatorK}\". {NotaFatorK} O número continua editável.";
 
     public string OrigemAreaCobertura => string.IsNullOrWhiteSpace(ParametroAreaCobertura)
         ? "Nenhum parâmetro de área encontrado. Informe a área de cobertura em m²."
@@ -76,7 +79,7 @@ public sealed class CandidatoFamilia : INotifyPropertyChanged
     public static CandidatoFamilia Criar(string categoria, string familia, string tipo, int quantidadeInstancias,
         IReadOnlyList<string> parametrosDisponiveis, PapelFamilia papelSugerido = PapelFamilia.Chuveiro,
         string? parametroFatorK = null, string? valorFatorK = null,
-        string? parametroAreaCobertura = null, string? valorAreaCobertura = null)
+        string? parametroAreaCobertura = null, string? valorAreaCobertura = null, string? notaFatorK = null)
     {
         var candidato = new CandidatoFamilia
         {
@@ -85,6 +88,7 @@ public sealed class CandidatoFamilia : INotifyPropertyChanged
             Tipo = tipo,
             QuantidadeInstancias = quantidadeInstancias,
             ParametrosDisponiveis = parametrosDisponiveis,
+            NotaFatorK = notaFatorK,
         };
         candidato.Papel = papelSugerido;
         candidato.ParametroFatorK = parametroFatorK ?? SugestaoDeParametro.Sugerir(parametrosDisponiveis, SugestaoDeParametro.PalavrasFatorK);
