@@ -40,6 +40,7 @@ static class FolhasSetorizacao
             plantas.Add((planta, celula, recorte));
         }
 
+        if (plantas.Count == 0) throw new InvalidOperationException("Nenhum setor tem contorno num nível do projeto.");
         // Escala comum: a maior que alguma planta precise, como as três plantas 1:300 da NEPN-INC-009.
         var escala = plantas.Max(p => p.Celula.Parte(0, 0.08, 1, 1).Escala(p.Recorte.Max.X - p.Recorte.Min.X, p.Recorte.Max.Y - p.Recorte.Min.Y));
         foreach (var (vista, _, _) in plantas)
