@@ -23,8 +23,8 @@ static class GeradorFolhas
             throw new InvalidOperationException("Não há malha marcada. Use Rede de exemplo ou Gerar antes das folhas.");
 
         var tubos = TubosDaRede(doc, bicos);
-        var dados = DadosEsboco.Carregar();
-        var calculo = CalculoDestaMalha(bicos);
+        var dados = DadosEsboco.Carregar(doc);
+        var calculo = CalculoDestaMalha(doc, bicos);
         var daArea = BicosDaArea(bicos, calculo);
         var elementos = bicos.Concat<Element>(tubos).ToList();
         var caixaRede = Caixa(elementos)
@@ -49,10 +49,11 @@ static class GeradorFolhas
         Enquadrar3d(iso, tudo);
         LimparPintura(planta, bicos);
         LimparPintura(iso, bicos);
-        Retangulo(doc, planta, contorno);
+        var retangulo = calculo is null ? contorno : caixaArea;
+        Retangulo(doc, planta, retangulo);
         var critico = PintarCritico(doc, planta, iso, bicos, calculo);
-        Nota(doc, planta, new XYZ(contorno.Min.X, contorno.Max.Y + Pes(1.0), 0),
-            calculo is null ? "Malha gerada" : "Área de operação");
+        Nota(doc, planta, new XYZ(retangulo.Min.X, retangulo.Max.Y + Pes(1.0), 0),
+            calculo is null ? "Malha gerada" : $"Área de operação — {daArea.Count} bicos");
 
         ViewSection? corte = null;
         string? avisoCorte = null;
@@ -147,12 +148,13 @@ static class GeradorFolhas
         _ => null,
     };
 
-    static ResultadoGravado? CalculoDestaMalha(IReadOnlyList<FamilyInstance> bicos)
+    /// <summary>O último cálculo, só se foi feito com estes mesmos bicos. Rede alterada depois disso pede novo cálculo.</summary>
+    static ResultadoGravado? CalculoDestaMalha(Document doc, IReadOnlyList<FamilyInstance> bicos)
     {
-        var gravado = ResultadoGravado.Ler();
-        if (gravado?.Chuveiros is not { Count: > 0 }) return null;
+        var gravado = ResultadoGravado.Ler(doc);
+        if (gravado?.Chuveiros is not { Count: > 0 } || gravado.BicosDaRede.Count == 0) return null;
         var ids = bicos.Select(IdMotor).ToHashSet(StringComparer.Ordinal);
-        return gravado.Chuveiros.Any(c => ids.Contains(c.Id)) ? gravado : null;
+        return gravado.Bicos == bicos.Count && gravado.BicosDaRede.All(ids.Contains) ? gravado : null;
     }
 
     static List<FamilyInstance> BicosDaArea(List<FamilyInstance> bicos, ResultadoGravado? calculo)

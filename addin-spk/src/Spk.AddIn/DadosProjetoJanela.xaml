@@ -1,0 +1,101 @@
+<Window x:Class="Spk.AddIn.DadosProjetoJanela"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SPK — Dados do projeto" Width="520" SizeToContent="Height"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize" FontSize="13">
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Cancelar" Width="100" Height="30" Margin="0,0,8,0" IsCancel="True" Click="Cancelar_Click"/>
+            <Button Content="Confirmar" Width="100" Height="30" IsDefault="True" FontWeight="Bold" Click="Confirmar_Click"/>
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap" Margin="0,0,0,12" Foreground="#37474F"
+                   Text="Critérios de projeto. O plugin não escolhe a classe de risco nem a demanda de hidrantes: o cálculo usa exatamente o que estiver confirmado aqui, e isso vai para o memorial."/>
+        <StackPanel>
+            <GroupBox Header="Classificação" Padding="8" Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="220"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Classe de risco" VerticalAlignment="Center" Margin="0,4"/>
+                    <ComboBox x:Name="Classe" Grid.Column="1" Margin="0,4"/>
+                    <TextBlock Grid.Row="1" Text="Base de cálculo" VerticalAlignment="Center" Margin="0,4"/>
+                    <ComboBox x:Name="Base" Grid.Row="1" Grid.Column="1" Margin="0,4" SelectionChanged="Base_SelectionChanged"/>
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Área de operação" Padding="8" Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="220"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock x:Name="RotuloArea" Text="Área de operação (m²)" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox x:Name="Area" Grid.Column="1" Margin="0,4" Padding="4"/>
+                    <TextBlock x:Name="RotuloDensidade" Grid.Row="1" Text="Densidade (L/min/m²)" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox x:Name="Densidade" Grid.Row="1" Grid.Column="1" Margin="0,4" Padding="4"/>
+                    <TextBlock x:Name="RotuloPressao" Grid.Row="2" Text="Pressão mínima ESFR (kPa)" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox x:Name="Pressao" Grid.Row="2" Grid.Column="1" Margin="0,4" Padding="4"/>
+                    <TextBlock Grid.Row="3" Text="Item da norma / IT" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox x:Name="Item" Grid.Row="3" Grid.Column="1" Margin="0,4" Padding="4"/>
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Hidrantes e reserva" Padding="8" Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="220"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Demanda de hidrantes (L/min)" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox x:Name="Hidrantes" Grid.Column="1" Margin="0,4" Padding="4"/>
+                    <TextBlock Grid.Row="1" Text="Duração (min)" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox x:Name="Duracao" Grid.Row="1" Grid.Column="1" Margin="0,4" Padding="4"/>
+                    <TextBlock Grid.Row="2" Grid.ColumnSpan="2" TextWrapping="Wrap" Foreground="#6B6B6B" FontSize="12" Margin="0,4,0,0"
+                               Text="Em branco: Tabela 29 da NBR. Em armazenamento os dois são obrigatórios (IT-24)."/>
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Tubulação e abastecimento" Padding="8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="220"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Fator C (Tabela 30)" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox x:Name="FatorC" Grid.Column="1" Margin="0,4" Padding="4"/>
+                    <TextBlock Grid.Row="1" Text="Pressão estática (kPa)" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox x:Name="Estatica" Grid.Row="1" Grid.Column="1" Margin="0,4" Padding="4"/>
+                    <TextBlock Grid.Row="2" Text="Pressão residual (kPa)" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox x:Name="Residual" Grid.Row="2" Grid.Column="1" Margin="0,4" Padding="4"/>
+                    <TextBlock Grid.Row="3" Text="Vazão na pressão residual (L/min)" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox x:Name="VazaoResidual" Grid.Row="3" Grid.Column="1" Margin="0,4" Padding="4"/>
+                    <TextBlock Grid.Row="4" Grid.ColumnSpan="2" TextWrapping="Wrap" Foreground="#6B6B6B" FontSize="12" Margin="0,4,0,0"
+                               Text="Abastecimento opcional: os três campos juntos, ou nenhum. 1 bar = 100 kPa; 1 m.c.a. ≈ 9,8 kPa."/>
+                </Grid>
+            </GroupBox>
+        </StackPanel>
+    </DockPanel>
+</Window>

@@ -29,7 +29,9 @@ public class RedeExemploCommand : ExternalCommand
             {
                 ApagarExemplo(doc);
                 GarantirNivel(doc);
-                var gerado = GeradorMalha.Gerar(doc, XYZ.Zero, new DadosEsboco());
+                var esboco = new DadosEsboco();
+                esboco.Salvar(doc);
+                var gerado = GeradorMalha.Gerar(doc, XYZ.Zero, esboco);
                 var nivel = (Level)doc.GetElement(gerado.NivelId);
                 planta = GarantirPlanta(doc, nivel);
                 vista3d = Garantir3d(doc);

@@ -1,22 +1,23 @@
 using System.IO;
 using Autodesk.Revit.Attributes;
-using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Nice3point.Revit.Toolkit.External;
 using Spk.Motor.Calculo;
-using Spk.Motor.Normas;
 using Spk.Motor.Relatorios;
 
 namespace Spk.AddIn.Commands;
 
 /// <summary>
-/// Lê os bicos confirmados que têm fator K e área, monta a rede ligada a eles e calcula.
-/// Nesta validação isso seleciona o ESFR K 360 / 12 m² e deixa de fora K 5,6 com área 0 e anotações.
+/// Lê os bicos (da malha gerada ou das famílias confirmadas), monta a rede ligada a eles e calcula
+/// com os critérios de "Dados do projeto". Grava o resultado no modelo e o memorial em disco.
 /// </summary>
 [UsedImplicitly]
-[Transaction(TransactionMode.ReadOnly)]
+[Transaction(TransactionMode.Manual)]
 public class CalcularRedeCommand : ExternalCommand
 {
+    /// <summary>Abaixo disso o número só pode ser K americano (gpm/psi½); o menor K métrico usual é 57.</summary>
+    const double MenorKMetrico = 40;
+
     public override void Execute()
     {
         try
@@ -24,20 +25,23 @@ public class CalcularRedeCommand : ExternalCommand
             var doc = Application.ActiveUIDocument?.Document
                       ?? throw new InvalidOperationException("Abra um projeto antes de calcular.");
 
+            var dados = DadosProjetoUi.Obter(doc);
+            if (dados is null) return;
+
             var gerados = BicosGerados(doc);
             List<LeitorRede.BicoLido> bicos;
             string resumo;
             if (gerados.Count > 0)
             {
-                var dados = DadosEsboco.Carregar();
-                bicos = gerados.Select(fi => new LeitorRede.BicoLido(fi, dados.FatorK, dados.AreaM2, dados.PressaoMinimaKPa)).ToList();
-                resumo = $"Malha gerada: {bicos.Count} bicos, K {dados.FatorK:0.##} L/min/bar½, área {dados.AreaM2:0.##} m².";
+                var esboco = DadosEsboco.Carregar(doc);
+                bicos = gerados.Select(fi => new LeitorRede.BicoLido(fi, esboco.FatorK, esboco.AreaM2)).ToList();
+                resumo = $"Malha gerada: {bicos.Count} bicos, K {esboco.FatorK:0.##} L/min/bar½, área {esboco.AreaM2:0.##} m².";
             }
             else
             {
-                var linhas = MapeamentoGravado.Carregar().Where(l => l.EhChuveiroComMedidas).ToList();
+                var linhas = MapeamentoGravado.Carregar(doc).Where(l => l.EhChuveiroComMedidas).ToList();
                 if (linhas.Count == 0)
-                    throw new InvalidOperationException("Gere uma malha ou confirme famílias com fator K e área maiores que zero.");
+                    throw new InvalidOperationException("Gere uma malha ou confirme em Famílias os bicos com fator K e área maiores que zero.");
                 bicos = new FilteredElementCollector(doc)
                     .OfClass(typeof(FamilyInstance))
                     .Cast<FamilyInstance>()
@@ -48,38 +52,34 @@ public class CalcularRedeCommand : ExternalCommand
                     .ToList();
                 if (bicos.Count == 0)
                     throw new InvalidOperationException("O modelo aberto não tem as famílias confirmadas no mapeamento.");
-                resumo = string.Join("\n", linhas.Select(l => $"{l.Tipo}: K {l.FatorK:0.##}, área {l.AreaCobertura:0.##} m²"));
+                resumo = string.Join("\n", linhas.Select(l => $"{l.Tipo}: K {l.FatorK:0.##} L/min/bar½, área {l.AreaCobertura:0.##} m²"));
             }
+
+            var kAmericano = bicos.Where(b => b.FatorK < MenorKMetrico).Select(b => b.FatorK).Distinct().ToList();
+            if (kAmericano.Count > 0)
+                throw new InvalidOperationException(
+                    $"Fator K {string.Join(", ", kAmericano.Select(k => k.ToString("0.##")))} parece estar em gpm/psi½. " +
+                    "O cálculo usa L/min/bar½ (K 5,6 → 80; K 25,2 → 360). Corrija em Famílias ou em Dados do esboço.");
 
             var previa = new TaskDialog("SPK — Calcular")
             {
                 MainInstruction = $"{bicos.Count} bicos entram no cálculo",
-                MainContent = resumo + "\n\nO Revit fica ocupado até o fim. Numa rede grande pode levar alguns minutos.",
+                MainContent = $"{dados.Resumo()}\n{resumo}\n\nPara mudar a classe ou a base, cancele e use Dados do projeto. " +
+                              "O Revit fica ocupado até o fim; numa rede grande pode levar alguns minutos.",
                 CommonButtons = TaskDialogCommonButtons.Ok | TaskDialogCommonButtons.Cancel,
             };
             if (previa.Show() != TaskDialogResult.Ok) return;
 
-            var lida = LeitorRede.Montar(doc, bicos);
-            var esfr = bicos.All(b => b.FatorK >= 200);
-            var pressaoMinima = bicos.Select(b => b.PressaoMinima).FirstOrDefault(p => p is > 0) ?? 283;
-            var projeto = new ProjetoSpk(
-                gerados.Count > 0 ? "Malha gerada" : "Rede lida do modelo",
-                lida.Rede,
-                esfr ? ClasseRisco.Armazenamento : ClasseRisco.Ordinario2,
-                esfr
-                    ? BaseDeProjeto.Esfr(pressaoMinima, "esboço ou mapeamento confirmado")
-                    : BaseDeProjeto.PelaFigura42(ClasseRisco.Ordinario2, 140))
-            {
-                VazaoHidrantes = esfr ? 0 : null,
-                DuracaoMinutos = esfr ? 60 : null,
-            };
-
+            var lida = LeitorRede.Montar(doc, bicos, dados.FatorC);
+            var projeto = dados.CriarProjeto(gerados.Count > 0 ? "Malha gerada" : "Rede lida do modelo", lida.Rede);
             var relatorio = CalculoSpk.Executar(projeto);
+
             var pasta = PastasSpk.Calculo;
             Directory.CreateDirectory(pasta);
             File.WriteAllText(Path.Combine(pasta, "memorial.md"), Memorial.Gerar(relatorio));
             File.WriteAllBytes(Path.Combine(pasta, "memorial.docx"), MemorialDocx.Gerar(relatorio));
-            new ResultadoGravado
+
+            var gravado = new ResultadoGravado
             {
                 Atende = relatorio.Atende,
                 PressaoNecessariaKPa = relatorio.Resultado.PressaoNecessaria,
@@ -87,6 +87,7 @@ public class CalcularRedeCommand : ExternalCommand
                 ChuveiroCritico = relatorio.Resultado.ChuveiroCritico,
                 Bicos = bicos.Count,
                 Tubos = lida.Tubos,
+                BicosDaRede = lida.Rede.Chuveiros.Select(c => c.Id).ToList(),
                 Chuveiros = relatorio.Resultado.Chuveiros.Select(c => new BicoGravado
                 {
                     Id = c.Id,
@@ -94,30 +95,28 @@ public class CalcularRedeCommand : ExternalCommand
                     PressaoKPa = c.Pressao,
                     VazaoLmin = c.Vazao,
                 }).ToList(),
-            }.Salvar();
+            };
+            ArmazenamentoSpk.GravarComTransacao(doc, ResultadoGravado.Chave, gravado, "SPK — Resultado do cálculo");
 
             var critico = relatorio.Resultado.Chuveiros.First(c => c.Id == relatorio.Resultado.ChuveiroCritico);
-            TaskDialog.Show("SPK — Rede do modelo", $"""
+            var falhas = relatorio.Verificacoes.Where(v => !v.Atende).Select(v => $"• {v.Descricao} ({v.Item}): {v.Detalhe}").ToList();
+            TaskDialog.Show("SPK — Calcular", $"""
                 {(relatorio.Atende ? "ATENDE" : "NÃO ATENDE")}
-
-                Bicos no modelo: {bicos.Count}    Tubos: {lida.Tubos}
-                Áreas avaliadas: {relatorio.Busca?.CandidatosAvaliados ?? 1}
-
+                {(falhas.Count > 0 ? string.Join("\n", falhas) + "\n" : "")}
+                Bicos: {bicos.Count}    Tubos: {lida.Tubos}    Áreas avaliadas: {relatorio.Busca?.CandidatosAvaliados ?? 1}
                 Pressão na fonte: {relatorio.Resultado.PressaoNecessaria:0.0} kPa ({relatorio.Resultado.PressaoNecessaria / 100:0.00} bar)
                 Vazão dos bicos: {relatorio.Resultado.VazaoChuveiros:0} L/min
                 Bico crítico: {critico.Id} a {critico.Pressao / 100:0.00} bar ({critico.Vazao:0} L/min)
 
-                Referência do memorial, só os 12 bicos da área: 2,83 bar e cerca de 7 564 L/min.
-                {string.Join(" ", relatorio.Avisos)}
-                {string.Join(" ", lida.Avisos)}
+                {string.Join("\n", relatorio.Avisos.Concat(lida.Avisos))}
 
                 Memorial em:
                 {pasta}
                 """);
         }
-        catch (Exception e) when (e is not OperationCanceledException)
+        catch (Exception e) when (e is not Autodesk.Revit.Exceptions.OperationCanceledException)
         {
-            TaskDialog.Show("SPK — Calcular rede", e.Message);
+            TaskDialog.Show("SPK — Calcular", e.Message);
         }
     }
 

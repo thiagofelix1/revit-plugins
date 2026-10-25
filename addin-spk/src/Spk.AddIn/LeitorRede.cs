@@ -10,13 +10,11 @@ namespace Spk.AddIn;
 /// </summary>
 static class LeitorRede
 {
-    public const double FatorC = 120;
-
     public sealed record BicoLido(FamilyInstance Instancia, double FatorK, double AreaCobertura, double? PressaoMinima = null);
 
     public sealed record RedeLida(Rede Rede, IReadOnlyList<string> Avisos, int Tubos);
 
-    public static RedeLida Montar(Document doc, IReadOnlyList<BicoLido> bicos)
+    public static RedeLida Montar(Document doc, IReadOnlyList<BicoLido> bicos, double fatorC)
     {
         if (bicos.Count == 0) throw new InvalidOperationException("Nenhum bico com fator K e área de cobertura.");
 
@@ -24,7 +22,7 @@ static class LeitorRede
         var naRede = Alcançaveis(doc, idsBico);
         var avisos = new List<string>
         {
-            "Fator C = 120 em todos os tubos (aço galvanizado molhado, Tabela 30).",
+            $"Fator C = {fatorC:0} em todos os tubos (Dados do projeto, Tabela 30).",
             "Comprimentos equivalentes de conexões não entram nesta leitura.",
         };
 
@@ -64,11 +62,11 @@ static class LeitorRede
                 if (fracao <= 1e-6) continue;
                 Garantir(nos, a.No, a.Ponto);
                 Garantir(nos, b.No, b.Ponto);
-                trechos.Add(new Trecho($"T{seq++}", a.No, b.No, diametro, Math.Max(comprimento * fracao, 0.001), FatorC));
+                trechos.Add(new Trecho($"T{seq++}", a.No, b.No, diametro, Math.Max(comprimento * fracao, 0.001), fatorC));
             }
         }
 
-        var ligacoesDeBico = LigarBicos(bicos, idsBico, nos, trechos, ref seq);
+        var ligacoesDeBico = LigarBicos(bicos, idsBico, nos, trechos, ref seq, fatorC);
         if (ligacoesDeBico > 0)
             avisos.Add($"{ligacoesDeBico} bico(s) ligam na conexão, não na ponta do tubo. Esse trecho curto entrou com diâmetro interno de 25 mm.");
 
@@ -87,7 +85,7 @@ static class LeitorRede
         {
             foreach (var no in nos.Keys.Where(id => !id.StartsWith('S')).ToList()) nos.Remove(no);
             trechos.Clear();
-            var diagnostico = AnexarPorProximidade(doc, bicos, nos, trechos, ref seq, ref usouNominal);
+            var diagnostico = AnexarPorProximidade(doc, bicos, nos, trechos, ref seq, ref usouNominal, fatorC);
             grau.Clear();
             foreach (var trecho in trechos)
             {
@@ -181,7 +179,7 @@ static class LeitorRede
     /// <summary>
     /// O bico quase sempre liga num cotovelo ou tê, não na ponta do tubo. Sem este trecho o nó do bico fica solto.
     /// </summary>
-    static int LigarBicos(IReadOnlyList<BicoLido> bicos, HashSet<ElementId> idsBico, Dictionary<string, No> nos, List<Trecho> trechos, ref int seq)
+    static int LigarBicos(IReadOnlyList<BicoLido> bicos, HashSet<ElementId> idsBico, Dictionary<string, No> nos, List<Trecho> trechos, ref int seq, double fatorC)
     {
         var pares = new HashSet<string>(trechos.Select(t => Par(t.De, t.Para)));
         var ligados = 0;
@@ -208,7 +206,7 @@ static class LeitorRede
                     var a = nos[idS];
                     var b = nos[destino];
                     var distancia = Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y) + (a.Z - b.Z) * (a.Z - b.Z));
-                    trechos.Add(new Trecho($"L{seq++}", idS, destino, 25, Math.Max(distancia, 0.001), FatorC));
+                    trechos.Add(new Trecho($"L{seq++}", idS, destino, 25, Math.Max(distancia, 0.001), fatorC));
                     entrou = true;
                 }
             }
@@ -226,7 +224,7 @@ static class LeitorRede
     /// Quando o conector do bico não está ligado, encosta o bico no tubo mais próximo (até 0,50 m)
     /// e puxa os tubos contínuos, soldando pontas a até 8 cm e portas da mesma conexão.
     /// </summary>
-    static string AnexarPorProximidade(Document doc, IReadOnlyList<BicoLido> bicos, Dictionary<string, No> nos, List<Trecho> trechos, ref int seq, ref bool usouNominal)
+    static string AnexarPorProximidade(Document doc, IReadOnlyList<BicoLido> bicos, Dictionary<string, No> nos, List<Trecho> trechos, ref int seq, ref bool usouNominal, double fatorC)
     {
         var tubos = new List<TuboPronto>();
         ColetarTubos(doc, null, null, tubos, ref usouNominal);
@@ -297,7 +295,7 @@ static class LeitorRede
         foreach (var tubo in tubos)
             foreach (var parte in tubo.Partes)
                 if (parte.De != parte.Para && parte.Comprimento > 1e-4)
-                    trechos.Add(new Trecho($"G{seq++}", parte.De, parte.Para, parte.Diametro, parte.Comprimento, FatorC));
+                    trechos.Add(new Trecho($"G{seq++}", parte.De, parte.Para, parte.Diametro, parte.Comprimento, fatorC));
 
         return "";
     }
@@ -653,7 +651,7 @@ static class LeitorRede
                 chuveiros.Add(new Chuveiro($"E{ponto.Bico.Instancia.Id.Value}", ponto.No.Id, ponto.Bico.FatorK, ponto.Bico.AreaCobertura)
                 {
                     Ramal = $"R{i}",
-                    PressaoMinima = ponto.Bico.PressaoMinima ?? (ponto.Bico.FatorK >= 200 ? 283 : null),
+                    PressaoMinima = ponto.Bico.PressaoMinima,
                 });
             }
         }

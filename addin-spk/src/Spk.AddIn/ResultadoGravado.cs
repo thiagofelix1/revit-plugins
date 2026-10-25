@@ -1,41 +1,25 @@
-using System.IO;
-using System.Text.Json;
-
 namespace Spk.AddIn;
 
-/// <summary>Último cálculo gravado em disco. As folhas leem isto para achar o bico crítico.</summary>
+/// <summary>Último cálculo, gravado no modelo. As folhas leem isto para achar a área e o bico crítico.</summary>
 public sealed class ResultadoGravado
 {
+    public const string Chave = "Resultado";
+
     public bool Atende { get; set; }
     public double PressaoNecessariaKPa { get; set; }
     public double VazaoChuveirosLmin { get; set; }
     public string? ChuveiroCritico { get; set; }
     public int Bicos { get; set; }
     public int Tubos { get; set; }
+
+    /// <summary>Ids do motor de todos os bicos calculados (não só os da área), para saber se a rede mudou.</summary>
+    public List<string> BicosDaRede { get; set; } = [];
+
     public List<BicoGravado> Chuveiros { get; set; } = [];
 
-    public static string Caminho => Path.Combine(PastasSpk.Calculo, "resultado.json");
+    public void Salvar(Document doc) => ArmazenamentoSpk.Gravar(doc, Chave, this);
 
-    static readonly JsonSerializerOptions Json = new() { WriteIndented = true };
-
-    public void Salvar()
-    {
-        Directory.CreateDirectory(PastasSpk.Calculo);
-        File.WriteAllText(Caminho, JsonSerializer.Serialize(this, Json));
-    }
-
-    public static ResultadoGravado? Ler()
-    {
-        if (!File.Exists(Caminho)) return null;
-        try
-        {
-            return JsonSerializer.Deserialize<ResultadoGravado>(File.ReadAllText(Caminho), Json);
-        }
-        catch (JsonException)
-        {
-            return null;
-        }
-    }
+    public static ResultadoGravado? Ler(Document doc) => ArmazenamentoSpk.Ler<ResultadoGravado>(doc, Chave);
 }
 
 public sealed class BicoGravado

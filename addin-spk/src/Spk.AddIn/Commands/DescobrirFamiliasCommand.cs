@@ -1,6 +1,5 @@
 using System.IO;
 using System.Text;
-using System.Text.Json;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Plumbing;
@@ -14,10 +13,10 @@ namespace Spk.AddIn.Commands;
 ///     Varre o modelo aberto e relata o que existe antes de escrever qualquer extração de rede:
 ///     tubos (classe Pipe, confiável independente de nomenclatura), sistemas de tubulação (candidatos a
 ///     fonte/VGA), famílias cujo nome sugere chuveiro, e todas as categorias de instância presentes
-///     (para o caso de a busca por palavra não achar nada). Não altera o modelo.
+///     (para o caso de a busca por palavra não achar nada). Só grava no modelo o mapeamento confirmado.
 /// </summary>
 [UsedImplicitly]
-[Transaction(TransactionMode.ReadOnly)]
+[Transaction(TransactionMode.Manual)]
 public class DescobrirFamiliasCommand : ExternalCommand
 {
     static readonly string[] PalavrasChuveiro = ["chuveiro", "sprinkler", "spk", "esfr"];
@@ -86,20 +85,19 @@ public class DescobrirFamiliasCommand : ExternalCommand
         var janela = new JanelaMapeamento(candidatos);
         if (janela.ShowDialog() != true || janela.Resultado is not { } confirmado) return;
 
-        var mapeamentoPath = Path.Combine(PastasSpk.Raiz, "mapeamento.json");
-        File.WriteAllText(mapeamentoPath, JsonSerializer.Serialize(confirmado.Select(c => new
+        MapeamentoGravado.Salvar(doc, confirmado.Select(c => new LinhaMapeamento
         {
-            c.Categoria,
-            c.Familia,
-            c.Tipo,
+            Categoria = c.Categoria,
+            Familia = c.Familia,
+            Tipo = c.Tipo,
             Papel = c.Papel.ToString(),
-            c.ParametroFatorK,
-            c.ValorFatorK,
-            c.ParametroAreaCobertura,
-            c.ValorAreaCobertura,
-        }), new JsonSerializerOptions { WriteIndented = true }));
+            ParametroFatorK = c.ParametroFatorK,
+            ValorFatorK = c.ValorFatorK,
+            ParametroAreaCobertura = c.ParametroAreaCobertura,
+            ValorAreaCobertura = c.ValorAreaCobertura,
+        }).ToList());
 
-        TaskDialog.Show("Spk — Mapeamento confirmado", $"Mapeamento gravado em:\n{mapeamentoPath}");
+        TaskDialog.Show("Spk — Mapeamento confirmado", "Mapeamento gravado neste projeto. Agora use Calcular.");
     }
 
     static string NomesDeParametros(Element elemento) =>

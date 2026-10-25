@@ -15,9 +15,12 @@ public class SpkApplication : IExternalApplication
         application.CreateRibbonTab(Aba);
 
         var projeto = application.CreateRibbonPanel(Aba, "Projeto");
+        Botao<DadosProjetoCommand>(projeto,
+            "Dados do\nprojeto", Icones.Formulario,
+            "Classe de risco, base de cálculo, hidrantes, reserva, fator C e abastecimento. Escolhidos pelo engenheiro.");
         Botao<DadosEsbocoCommand>(projeto,
             "Dados do\nesboço", Icones.Formulario,
-            "Ramais, espaçamento, fator K em L/min/bar½, área, pressão mínima e C do tubo.");
+            "Geometria da malha: ramais, espaçamentos, altura, fator K em L/min/bar½ e área por bico.");
         Botao<DescobrirFamiliasCommand>(projeto,
             "Famílias", Icones.Lupa,
             "Para um modelo que já veio desenhado: confirma quais famílias são bicos e o fator K.");

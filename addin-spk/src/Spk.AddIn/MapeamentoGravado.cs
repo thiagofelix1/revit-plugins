@@ -1,17 +1,18 @@
 using System.Globalization;
-using System.IO;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace Spk.AddIn;
 
-/// <summary>Linha confirmada em Descobrir famílias. O JSON usa os nomes das propriedades em PascalCase.</summary>
+/// <summary>Linha confirmada em Descobrir famílias.</summary>
 sealed class LinhaMapeamento
 {
+    public string Categoria { get; set; } = "";
     public string Familia { get; set; } = "";
     public string Tipo { get; set; } = "";
     public string Papel { get; set; } = "";
+    public string ParametroFatorK { get; set; } = "";
     public string ValorFatorK { get; set; } = "";
+    public string ParametroAreaCobertura { get; set; } = "";
     public string ValorAreaCobertura { get; set; } = "";
 
     public bool EhChuveiroComMedidas =>
@@ -31,36 +32,15 @@ sealed class LinhaMapeamento
     }
 }
 
+/// <summary>Mapeamento de famílias confirmado, gravado no modelo.</summary>
 static class MapeamentoGravado
 {
-    static readonly JsonSerializerOptions Json = new() { PropertyNameCaseInsensitive = true };
+    public const string Chave = "Mapeamento";
 
-    /// <summary>
-    /// O Revit às vezes grava em uma pasta temporária da sessão, não na temp padrão.
-    /// Fica com o mapeamento.json mais recente entre os dois lugares.
-    /// </summary>
-    public static IReadOnlyList<LinhaMapeamento> Carregar()
-    {
-        var caminho = MaisRecente();
-        if (caminho is null) throw new FileNotFoundException(
-            "Não há mapeamento confirmado. Rode \"Descobrir famílias\" e confirme a tela.");
+    public static IReadOnlyList<LinhaMapeamento> Carregar(Document doc) =>
+        ArmazenamentoSpk.Ler<List<LinhaMapeamento>>(doc, Chave)
+        ?? throw new InvalidOperationException("Não há mapeamento confirmado neste projeto. Rode \"Famílias\" e confirme a tela.");
 
-        var linhas = JsonSerializer.Deserialize<List<LinhaMapeamento>>(File.ReadAllText(caminho), Json)
-                     ?? throw new InvalidOperationException("O mapeamento está vazio.");
-        return linhas;
-    }
-
-    static string? MaisRecente()
-    {
-        var candidatos = new List<string> { Path.Combine(PastasSpk.Raiz, "mapeamento.json") };
-        var local = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Temp");
-        if (Directory.Exists(local))
-        {
-            candidatos.Add(Path.Combine(local, "spk-addin", "mapeamento.json"));
-            foreach (var pasta in Directory.EnumerateDirectories(local))
-                candidatos.Add(Path.Combine(pasta, "spk-addin", "mapeamento.json"));
-        }
-
-        return candidatos.Where(File.Exists).OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault();
-    }
+    public static void Salvar(Document doc, IReadOnlyList<LinhaMapeamento> linhas) =>
+        ArmazenamentoSpk.GravarComTransacao(doc, Chave, linhas.ToList(), "SPK — Mapeamento de famílias");
 }
