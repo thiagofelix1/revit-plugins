@@ -49,6 +49,7 @@ static class FolhasIsometrico
         NomearVgas(doc, iso, avisos);
 
         PranchaSpk.Colocar(doc, folha, iso, regiaoIso.Centro, avisos);
+        PranchaSpk.ColocarLegendas(doc, folha, util.Parte(0.76, 0, 1, 0.38), avisos);
         PranchaSpk.Tentar(avisos, "Notas do isométrico", () => PranchaSpk.Nota(doc, folha, regiaoNota.CantoSuperiorEsquerdo,
             Notas(contexto, rede.Count), regiaoNota.Largura * 0.95));
 
@@ -113,10 +114,7 @@ static class FolhasIsometrico
     /// <summary>Etiqueta de diâmetro nos tubos de pelo menos <paramref name="minimo" />, numa vista 3D já travada.</summary>
     public static int Etiquetar(Document doc, View vista, HashSet<ElementId> rede, double minimo, IList<string> avisos)
     {
-        var tipo = doc.GetDefaultFamilyTypeId(new ElementId(BuiltInCategory.OST_PipeTags));
-        if (tipo == ElementId.InvalidElementId)
-            tipo = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_PipeTags).WhereElementIsElementType().FirstElementId()
-                   ?? ElementId.InvalidElementId;
+        var tipo = PranchaSpk.EtiquetaDeTubo(doc);
         if (tipo == ElementId.InvalidElementId)
         {
             avisos.Add("O projeto não tem etiqueta de tubo carregada; o isométrico ficou sem diâmetros.");

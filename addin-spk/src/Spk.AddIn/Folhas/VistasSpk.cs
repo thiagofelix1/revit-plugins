@@ -36,6 +36,16 @@ static class VistasSpk
     /// <summary>Aplica o template do escritório, se o projeto tiver um com este nome. Devolve se aplicou.</summary>
     public static bool AplicarTemplate(Document doc, View vista, string nome)
     {
+        // O padrão do escritório troca o template de cada papel; sem ele, vale o nome fixo "SPK …".
+        var padrao = PadraoEscritorio.Carregar(doc);
+        nome = nome switch
+        {
+            TemplatePlanta => padrao.TemplatePlanta ?? nome,
+            Template3d => padrao.Template3d ?? nome,
+            TemplateCorte => padrao.TemplateCorte ?? nome,
+            TemplateSetorizacao => padrao.TemplateSetorizacao ?? nome,
+            _ => nome,
+        };
         var template = new FilteredElementCollector(doc).OfClass(typeof(View)).Cast<View>()
             .FirstOrDefault(v => v.IsTemplate && v.Name == nome);
         if (template is null)

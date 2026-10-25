@@ -1,0 +1,68 @@
+<Window x:Class="Spk.AddIn.PadraoJanela"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SPK — Padrão do escritório" Width="620" SizeToContent="Height"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize" FontSize="13">
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Cancelar" Width="100" Height="30" Margin="0,0,8,0" IsCancel="True" Click="Cancelar_Click"/>
+            <Button Content="Importar" Width="100" Height="30" IsDefault="True" FontWeight="Bold" Click="Importar_Click"/>
+        </StackPanel>
+        <TextBlock x:Name="Explicacao" DockPanel.Dock="Top" TextWrapping="Wrap" Margin="0,0,0,12" Foreground="#37474F"/>
+        <StackPanel>
+            <GroupBox Header="Famílias" Padding="8" Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="170"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Carimbo" VerticalAlignment="Center" Margin="0,4"/>
+                    <ComboBox x:Name="Carimbo" Grid.Column="1" Margin="0,4"/>
+                    <TextBlock Grid.Row="1" Text="Etiqueta de tubo" VerticalAlignment="Center" Margin="0,4"/>
+                    <ComboBox x:Name="EtiquetaTubo" Grid.Row="1" Grid.Column="1" Margin="0,4"/>
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Templates de vista" Padding="8" Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="170"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Planta do setor" VerticalAlignment="Center" Margin="0,4"/>
+                    <ComboBox x:Name="TemplatePlanta" Grid.Column="1" Margin="0,4"/>
+                    <TextBlock Grid.Row="1" Text="3D e isométrico" VerticalAlignment="Center" Margin="0,4"/>
+                    <ComboBox x:Name="Template3d" Grid.Row="1" Grid.Column="1" Margin="0,4"/>
+                    <TextBlock Grid.Row="2" Text="Corte" VerticalAlignment="Center" Margin="0,4"/>
+                    <ComboBox x:Name="TemplateCorte" Grid.Row="2" Grid.Column="1" Margin="0,4"/>
+                    <TextBlock Grid.Row="3" Text="Setorização" VerticalAlignment="Center" Margin="0,4"/>
+                    <ComboBox x:Name="TemplateSetorizacao" Grid.Row="3" Grid.Column="1" Margin="0,4"/>
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Legendas e notas colocadas nas folhas" Padding="8">
+                <StackPanel>
+                    <TextBlock TextWrapping="Wrap" Foreground="#607D8B" Margin="0,0,0,6"
+                               Text="Vistas de legenda do arquivo de origem. As marcadas são copiadas e entram nas folhas do setor e no isométrico."/>
+                    <ListBox x:Name="Legendas" Height="150">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <CheckBox Content="{Binding Nome}" IsChecked="{Binding Marcada}" Margin="0,2"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+    </DockPanel>
+</Window>

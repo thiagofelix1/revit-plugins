@@ -24,6 +24,10 @@ public class SpkApplication : IExternalApplication
         Botao<DescobrirFamiliasCommand>(projeto,
             "Famílias", Icones.Lupa,
             "Para um modelo que já veio desenhado: confirma quais famílias são bicos e o fator K.");
+        Botao<ImportarPadraoCommand>(projeto,
+            "Padrão do\nescritório", Icones.Folha,
+            "Copia de outro projeto aberto (a Nova Era, por exemplo) o carimbo, a etiqueta de tubo, os templates de vista e as " +
+            "legendas. As folhas passam a usar esse padrão.");
         Margem(projeto);
 
         var rede = application.CreateRibbonPanel(Aba, "Rede");

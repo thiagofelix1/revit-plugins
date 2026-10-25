@@ -96,6 +96,19 @@ Crie no projeto templates de vista com estes nomes. O plugin aplica cada um quan
 
 Se o template controlar a escala, o plugin não consegue mudá-la e avisa.
 
+## 5. Padrão do escritório (fase 1)
+
+Traz da Nova Era o carimbo, a etiqueta de tubo, os templates de vista e as legendas, para as folhas saírem no visual do escritório.
+
+| Passo | O que fazer | O que deve acontecer |
+|---|---|---|
+| 5.1 | Abra o projeto de teste **e** o da Nova Era na mesma sessão do Revit. Volte para o projeto de teste | — |
+| 5.2 | **Padrão do escritório** (painel Projeto) | Janela com o carimbo e a etiqueta de tubo mais usados na Nova Era já sugeridos, os templates com "SPK", "sprinkler" ou "-INC" no nome sugeridos por papel, e a lista de legendas. Confira e ajuste. |
+| 5.3 | **Importar** | Resumo do que foi copiado. Se uma legenda não vier inteira, o aviso diz o motivo; o mais provável é pedir uma legenda qualquer no projeto de teste para o plugin duplicar (Vista > Legendas > Legenda). |
+| 5.4 | **Folhas** | Folhas com o carimbo da Nova Era, diâmetros com a etiqueta do escritório (planta e 3D), vistas com os templates escolhidos e as legendas marcadas à direita, embaixo do mapa-chave (folha do setor) e embaixo das notas (isométrico). |
+
+Rodar **Padrão do escritório** de novo troca as escolhas; legendas já importadas têm o conteúdo atualizado.
+
 ## O que ainda não existe
 
 - O número do bico é uma nota de texto, não uma etiqueta. A etiqueta de tubo é a padrão do projeto, que mostra só o diâmetro, sem o comprimento.

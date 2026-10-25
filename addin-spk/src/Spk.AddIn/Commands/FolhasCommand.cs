@@ -131,20 +131,4 @@ public class FolhasCommand : ExternalCommand
             return "As folhas ficaram no projeto. Feche o PDF aberto e rode Folhas de novo para gravar o arquivo.";
         }
     }
-
-    sealed class EngolirAvisos : IFailuresPreprocessor
-    {
-        public FailureProcessingResult PreprocessFailures(FailuresAccessor accessor)
-        {
-            if (accessor.GetSeverity() == FailureSeverity.Error)
-                return FailureProcessingResult.Continue;
-            foreach (var aviso in accessor.GetFailureMessages())
-            {
-                if (aviso.GetSeverity() == FailureSeverity.Warning)
-                    accessor.DeleteWarning(aviso);
-            }
-
-            return FailureProcessingResult.Continue;
-        }
-    }
 }

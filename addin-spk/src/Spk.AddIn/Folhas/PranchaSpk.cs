@@ -24,7 +24,14 @@ static class PranchaSpk
 
     public static bool TemCarimbo(Document doc) => Carimbo(doc) != ElementId.InvalidElementId;
 
-    static ElementId Carimbo(Document doc) =>
+    /// <summary>O carimbo do padrão do escritório; sem ele, o primeiro carregado no projeto.</summary>
+    static ElementId Carimbo(Document doc)
+    {
+        var doPadrao = PadraoEscritorio.Tipo(doc, BuiltInCategory.OST_TitleBlocks, PadraoEscritorio.Carregar(doc).Carimbo);
+        return doPadrao != ElementId.InvalidElementId ? doPadrao : PrimeiroCarimbo(doc);
+    }
+
+    static ElementId PrimeiroCarimbo(Document doc) =>
         new FilteredElementCollector(doc)
             .OfCategory(BuiltInCategory.OST_TitleBlocks)
             .WhereElementIsElementType()
@@ -47,6 +54,51 @@ static class PranchaSpk
     /// e o da Nova Era. Num carimbo só no canto de baixo, sobra uma faixa livre, mas nada fica por cima dele.
     /// </summary>
     public static Regiao Util(ViewSheet folha) => Area(folha).Parte(0.03, 0.05, 0.84, 0.97);
+
+    /// <summary>A etiqueta de tubo do padrão do escritório; sem ela, a padrão do projeto; sem esta, qualquer uma carregada.</summary>
+    public static ElementId EtiquetaDeTubo(Document doc)
+    {
+        var doPadrao = PadraoEscritorio.Tipo(doc, BuiltInCategory.OST_PipeTags, PadraoEscritorio.Carregar(doc).EtiquetaTubo);
+        if (doPadrao != ElementId.InvalidElementId) return doPadrao;
+        var padrao = doc.GetDefaultFamilyTypeId(new ElementId(BuiltInCategory.OST_PipeTags));
+        if (padrao != ElementId.InvalidElementId) return padrao;
+        return new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_PipeTags).WhereElementIsElementType().FirstElementId()
+               ?? ElementId.InvalidElementId;
+    }
+
+    /// <summary>
+    /// As legendas do padrão do escritório empilhadas de cima para baixo na região, alinhadas à esquerda. Vista de legenda
+    /// pode estar em várias folhas. Devolve quantas couberam.
+    /// </summary>
+    public static int ColocarLegendas(Document doc, ViewSheet folha, Regiao regiao, IList<string> avisos)
+    {
+        var topo = regiao.Y1;
+        var colocadas = 0;
+        foreach (var legenda in PadraoEscritorio.Carregar(doc).VistasDeLegenda(doc))
+        {
+            try
+            {
+                var viewport = Viewport.Create(doc, folha.Id, legenda.Id, regiao.Centro);
+                doc.Regenerate();
+                var caixa = viewport.GetBoxOutline();
+                double largura = caixa.MaximumPoint.X - caixa.MinimumPoint.X, altura = caixa.MaximumPoint.Y - caixa.MinimumPoint.Y;
+                if (topo - altura < regiao.Y0 || largura > regiao.Largura * 1.05)
+                {
+                    doc.Delete(viewport.Id);
+                    avisos.Add($"A legenda {legenda.Name} não coube em {folha.SheetNumber}.");
+                    continue;
+                }
+                viewport.SetBoxCenter(new XYZ(regiao.X0 + largura / 2, topo - altura / 2, 0));
+                topo -= altura + VistasSpk.Pes(0.005);
+                colocadas++;
+            }
+            catch (Autodesk.Revit.Exceptions.ApplicationException e)
+            {
+                avisos.Add($"Legenda {legenda.Name}: {e.Message}");
+            }
+        }
+        return colocadas;
+    }
 
     public static Viewport? Colocar(Document doc, ViewSheet folha, View vista, XYZ centro, IList<string> avisos)
     {

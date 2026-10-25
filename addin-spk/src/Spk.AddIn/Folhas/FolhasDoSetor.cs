@@ -112,6 +112,7 @@ static class FolhasDoSetor
         PranchaSpk.Colocar(doc, folha, planta, regiaoPlanta.Centro, avisos);
         PranchaSpk.Colocar(doc, folha, iso, regiao3d.Centro, avisos);
         if (chave is not null) PranchaSpk.Colocar(doc, folha, chave, regiaoChave.Centro, avisos);
+        PranchaSpk.ColocarLegendas(doc, folha, lateral.Parte(0, 0, 1, 0.28), avisos);
         PranchaSpk.Tentar(avisos, "Quadro de resultado", () => PranchaSpk.Nota(doc, folha, regiaoNota.CantoSuperiorEsquerdo,
             Quadro(gravado, setor, daArea.Count, critico.Dado), regiaoNota.Largura * 0.95));
         var folhas = new List<ElementId> { folha.Id };
@@ -220,10 +221,7 @@ static class FolhasDoSetor
     /// </summary>
     static int EtiquetarTubos(Document doc, View planta, IEnumerable<MEPCurve> tubos, double minimo, IList<string> avisos)
     {
-        var tipo = doc.GetDefaultFamilyTypeId(new ElementId(BuiltInCategory.OST_PipeTags));
-        if (tipo == ElementId.InvalidElementId)
-            tipo = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_PipeTags).WhereElementIsElementType().FirstElementId()
-                   ?? ElementId.InvalidElementId;
+        var tipo = PranchaSpk.EtiquetaDeTubo(doc);
         if (tipo == ElementId.InvalidElementId)
             avisos.Add("O projeto não tem etiqueta de tubo carregada; os diâmetros saíram como texto.");
 
