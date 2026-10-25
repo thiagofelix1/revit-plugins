@@ -1,46 +1,72 @@
 using System.IO;
 using Autodesk.Revit.Attributes;
-using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Nice3point.Revit.Toolkit.External;
+using Spk.AddIn.Folhas;
 
 namespace Spk.AddIn.Commands;
 
-/// <summary>Monta as folhas da malha gerada e exporta o PDF.</summary>
+/// <summary>
+/// Monta as folhas que o modelo permite e exporta o PDF. Cada conjunto roda em subtransação: se um falha, os outros ficam
+/// e o motivo aparece no fim.
+/// </summary>
 [UsedImplicitly]
 [Transaction(TransactionMode.Manual)]
 public class FolhasCommand : ExternalCommand
 {
+    static readonly (string Nome, Func<Document, FolhasGeradas> Gerar)[] Conjuntos =
+    [
+        ("Setor calculado", FolhasDoSetor.Gerar),
+    ];
+
     public override void Execute()
     {
         try
         {
             var ui = Application.ActiveUIDocument ?? throw new InvalidOperationException("Abra um projeto antes de gerar as folhas.");
             var doc = ui.Document;
-            SairDaFolha(ui);
+            SairDasVistasDoPlugin(ui);
 
-            GeradorFolhas.Resultado gerado;
-            using var transacao = new Transaction(doc, "SPK — Folhas");
-            var opcoes = transacao.GetFailureHandlingOptions();
-            opcoes.SetFailuresPreprocessor(new EngolirAvisos());
-            transacao.SetFailureHandlingOptions(opcoes);
-            transacao.Start();
-            try
+            var textos = new List<string>();
+            var folhas = new List<ElementId>();
+            using (var transacao = new Transaction(doc, "SPK — Folhas"))
             {
-                gerado = GeradorFolhas.Gerar(doc);
+                var opcoes = transacao.GetFailureHandlingOptions();
+                opcoes.SetFailuresPreprocessor(new EngolirAvisos());
+                transacao.SetFailureHandlingOptions(opcoes);
+                transacao.Start();
+                foreach (var (nome, gerar) in Conjuntos)
+                {
+                    using var sub = new SubTransaction(doc);
+                    sub.Start();
+                    try
+                    {
+                        var gerado = gerar(doc);
+                        sub.Commit();
+                        folhas.AddRange(gerado.Folhas);
+                        textos.Add($"{nome}\n{gerado.Texto}");
+                    }
+                    catch (Exception e) when (e is not Autodesk.Revit.Exceptions.OperationCanceledException)
+                    {
+                        if (sub.GetStatus() == TransactionStatus.Started) sub.RollBack();
+                        textos.Add($"{nome}: não gerado. {e.Message}");
+                    }
+                }
+
+                if (folhas.Count == 0)
+                {
+                    transacao.RollBack();
+                    TaskDialog.Show("SPK — Folhas", string.Join("\n\n", textos));
+                    return;
+                }
                 transacao.Commit();
             }
-            catch
-            {
-                if (transacao.GetStatus() == TransactionStatus.Started) transacao.RollBack();
-                throw;
-            }
 
-            var pdf = Exportar(doc, gerado.Folhas);
-            if (doc.GetElement(gerado.FolhaPlanta) is ViewSheet planta)
-                ui.ActiveView = planta;
+            var pdf = Exportar(doc, folhas);
+            if (doc.GetElement(folhas[0]) is ViewSheet primeira)
+                ui.ActiveView = primeira;
 
-            TaskDialog.Show("SPK — Folhas", gerado.Texto + "\n\n" + pdf);
+            TaskDialog.Show("SPK — Folhas", string.Join("\n\n", textos) + "\n\n" + pdf);
         }
         catch (Autodesk.Revit.Exceptions.OperationCanceledException)
         {
@@ -51,16 +77,23 @@ public class FolhasCommand : ExternalCommand
         }
     }
 
-    static void SairDaFolha(UIDocument ui)
+    /// <summary>O Revit não apaga a vista ativa. As vistas e folhas do plugin são recriadas, então sai delas antes.</summary>
+    static void SairDasVistasDoPlugin(UIDocument ui)
     {
-        if (ui.ActiveView is not ViewSheet folha) return;
-        if (folha.SheetNumber is not (GeradorFolhas.NumeroPlanta or GeradorFolhas.NumeroIso or GeradorFolhas.NumeroCorte))
-            return;
-
+        if (!DoPlugin(ui.ActiveView)) return;
         var outra = new FilteredElementCollector(ui.Document).OfClass(typeof(View)).Cast<View>()
-            .FirstOrDefault(v => !v.IsTemplate && v.Id != folha.Id && v.ViewType is ViewType.FloorPlan or ViewType.ThreeD);
-        if (outra is not null) ui.ActiveView = outra;
+                        .FirstOrDefault(v => !v.IsTemplate && !DoPlugin(v)
+                                             && v.ViewType is ViewType.FloorPlan or ViewType.ThreeD or ViewType.CeilingPlan or ViewType.Section)
+                    ?? throw new InvalidOperationException("Abra uma vista que não seja do SPK (uma planta qualquer) e rode Folhas de novo.");
+        ui.ActiveView = outra;
     }
+
+    static bool DoPlugin(View? vista) => vista switch
+    {
+        ViewSheet folha => folha.SheetNumber.StartsWith(PranchaSpk.PrefixoNumero, StringComparison.Ordinal),
+        null => false,
+        _ => vista.Name.StartsWith(PranchaSpk.PrefixoVista, StringComparison.Ordinal),
+    };
 
     static string Exportar(Document doc, IList<ElementId> folhas)
     {

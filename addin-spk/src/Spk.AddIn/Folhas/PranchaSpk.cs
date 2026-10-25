@@ -1,0 +1,131 @@
+namespace Spk.AddIn.Folhas;
+
+/// <summary>Folhas, viewports e notas. Coordenadas de folha em pés, como o Revit.</summary>
+static class PranchaSpk
+{
+    /// <summary>A1 deitado, para quando o projeto não tem carimbo.</summary>
+    static readonly Regiao A1 = new(0, 0, VistasSpk.Pes(0.841), VistasSpk.Pes(0.594));
+
+    public const string PrefixoNumero = "SPK-";
+    public const string PrefixoVista = "SPK — ";
+
+    /// <summary>Apaga a folha com este número, se existir, e cria outra com o carimbo do projeto.</summary>
+    public static ViewSheet Recriar(Document doc, string numero, string nome)
+    {
+        var ids = new FilteredElementCollector(doc).OfClass(typeof(ViewSheet)).Cast<ViewSheet>()
+            .Where(s => s.SheetNumber == numero).Select(s => s.Id).ToList();
+        if (ids.Count > 0) doc.Delete(ids);
+
+        var folha = ViewSheet.Create(doc, Carimbo(doc));
+        folha.SheetNumber = numero;
+        folha.Name = nome;
+        return folha;
+    }
+
+    public static bool TemCarimbo(Document doc) => Carimbo(doc) != ElementId.InvalidElementId;
+
+    static ElementId Carimbo(Document doc) =>
+        new FilteredElementCollector(doc)
+            .OfCategory(BuiltInCategory.OST_TitleBlocks)
+            .WhereElementIsElementType()
+            .ToElementIds()
+            .FirstOrDefault()
+        ?? ElementId.InvalidElementId;
+
+    /// <summary>A área útil da folha. Chamar depois de Regenerate, para o contorno do carimbo já valer.</summary>
+    public static Regiao Area(ViewSheet folha)
+    {
+        var contorno = folha.Outline;
+        var largura = contorno.Max.U - contorno.Min.U;
+        var altura = contorno.Max.V - contorno.Min.V;
+        if (largura < 0.3 || altura < 0.3) return A1;
+        return new Regiao(contorno.Min.U, contorno.Min.V, contorno.Max.U, contorno.Max.V);
+    }
+
+    public static Viewport? Colocar(Document doc, ViewSheet folha, View vista, XYZ centro, IList<string> avisos)
+    {
+        if (!Viewport.CanAddViewToSheet(doc, folha.Id, vista.Id))
+        {
+            avisos.Add($"A vista {vista.Name} já está em outra folha e não entrou em {folha.SheetNumber}.");
+            return null;
+        }
+        return Viewport.Create(doc, folha.Id, vista.Id, centro);
+    }
+
+    /// <summary>
+    /// Nota de texto. Sem <paramref name="largura" /> a nota não quebra linha. A largura é no papel, em pés; zero fica abaixo
+    /// do mínimo interno e o Revit recusa.
+    /// </summary>
+    public static TextNote? Nota(Document doc, View vista, XYZ posicao, string texto, double? largura = null, double rotacao = 0)
+    {
+        var tipo = doc.GetDefaultElementTypeId(ElementTypeGroup.TextNoteType);
+        if (tipo == ElementId.InvalidElementId || string.IsNullOrWhiteSpace(texto)) return null;
+        var quebras = texto.Trim().Replace("\r\n", "\n").Replace('\r', '\n').Replace("\n", "\r");
+        var opcoes = new TextNoteOptions(tipo) { HorizontalAlignment = HorizontalTextAlignment.Left, Rotation = rotacao };
+        return largura is { } l
+            ? TextNote.Create(doc, vista.Id, posicao, l, quebras, opcoes)
+            : TextNote.Create(doc, vista.Id, posicao, quebras, opcoes);
+    }
+
+    public static ElementId Solido(Document doc) =>
+        new FilteredElementCollector(doc).OfClass(typeof(FillPatternElement)).Cast<FillPatternElement>()
+            .FirstOrDefault(p => p.GetFillPattern()?.IsSolidFill == true)?.Id
+        ?? ElementId.InvalidElementId;
+
+    public static OverrideGraphicSettings Pintura(Document doc, Color cor, int espessura, bool preencher)
+    {
+        var grafico = new OverrideGraphicSettings()
+            .SetProjectionLineColor(cor)
+            .SetProjectionLineWeight(espessura);
+        var solido = preencher ? Solido(doc) : ElementId.InvalidElementId;
+        if (solido != ElementId.InvalidElementId)
+        {
+            grafico.SetSurfaceForegroundPatternId(solido);
+            grafico.SetSurfaceForegroundPatternColor(cor);
+        }
+        return grafico;
+    }
+
+    /// <summary>Nome de vista ou folha sem os caracteres que o Revit recusa.</summary>
+    public static string NomeSeguro(string nome)
+    {
+        const string proibidos = "\\:{}[]|;<>?`~";
+        var limpo = new string(nome.Select(c => proibidos.Contains(c) ? '-' : c).ToArray()).Trim();
+        return limpo.Length > 0 ? limpo : "Setor";
+    }
+
+    /// <summary>Código curto do setor para o número da folha: só letras e algarismos, no máximo 12.</summary>
+    public static string Codigo(string setor)
+    {
+        var limpo = new string(RemoverAcentos(setor).Where(char.IsLetterOrDigit).Take(12).ToArray()).ToUpperInvariant();
+        return limpo.Length > 0 ? limpo : "SETOR";
+    }
+
+    static string RemoverAcentos(string texto)
+    {
+        var decomposto = texto.Normalize(System.Text.NormalizationForm.FormD);
+        return new string(decomposto.Where(c =>
+            System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark).ToArray());
+    }
+}
+
+/// <summary>O que um gerador de folhas fez: o texto para o engenheiro e as folhas, na ordem do PDF.</summary>
+sealed record FolhasGeradas(string Texto, IList<ElementId> Folhas);
+
+/// <summary>Retângulo na folha, em pés. <see cref="Parte" /> recorta por frações da largura e da altura.</summary>
+readonly record struct Regiao(double X0, double Y0, double X1, double Y1)
+{
+    public double Largura => X1 - X0;
+    public double Altura => Y1 - Y0;
+    public double LarguraMm => VistasSpk.Milimetros(Largura);
+    public double AlturaMm => VistasSpk.Milimetros(Altura);
+    public XYZ Centro => new((X0 + X1) / 2, (Y0 + Y1) / 2, 0);
+    public XYZ CantoSuperiorEsquerdo => new(X0, Y1, 0);
+
+    public Regiao Parte(double fx0, double fy0, double fx1, double fy1) => new(
+        X0 + Largura * fx0, Y0 + Altura * fy0, X0 + Largura * fx1, Y0 + Altura * fy1);
+
+    /// <summary>A menor escala em que a extensão (pés de modelo) cabe aqui, com 5% de folga.</summary>
+    public int Escala(double larguraModelo, double alturaModelo) =>
+        VistasSpk.EscalaQueCabe(larguraModelo, alturaModelo, LarguraMm * 0.95, AlturaMm * 0.95);
+}
