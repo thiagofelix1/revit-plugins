@@ -109,7 +109,7 @@ static class LeitorRede
         {
             foreach (var no in nos.Keys.Where(id => !id.StartsWith('S')).ToList()) nos.Remove(no);
             trechos.Clear();
-            var diagnostico = AnexarPorProximidade(doc, bicos, nos, trechos, ref seq, ref usouNominal, fatorC);
+            var diagnostico = AnexarPorProximidade(doc, bicos, nos, trechos, ref seq, ref usouNominal, fatorC, out var semClassificacao);
             grau.Clear();
             foreach (var trecho in trechos)
             {
@@ -119,6 +119,9 @@ static class LeitorRede
             ligados = bicos.Where(b => grau.GetValueOrDefault(IdBico(b.Instancia)) > 0).ToList();
             if (ligados.Count == 0) throw new InvalidOperationException(diagnostico);
             avisos.Add("Os bicos não estavam conectados ao tubo no Revit. Cada um entrou no tubo mais próximo, até 0,50 m.");
+            if (semClassificacao)
+                avisos.Add("Nenhum tubo de sistema de incêndio chegava aos bicos, então entraram tubos de qualquer sistema. " +
+                           "Confira no Revit a classificação do sistema dos tubos de sprinkler (deveria ser proteção contra incêndio).");
         }
 
         var soltos = bicos.Count - ligados.Count;
@@ -457,24 +460,31 @@ static class LeitorRede
 
     /// <summary>
     /// Quando o conector do bico não está ligado, encosta o bico no tubo mais próximo (até 0,50 m)
-    /// e puxa os tubos contínuos, soldando pontas a até 8 cm e portas da mesma conexão.
+    /// e puxa os tubos contínuos, soldando pontas a até 8 cm e portas da mesma conexão. Tenta primeiro só os tubos de
+    /// sistema de incêndio; se nenhum chega aos bicos (modelo com os tubos de sprinkler classificados como outro
+    /// sistema, como na Nova Era), usa todos e devolve <paramref name="semClassificacao" />.
     /// </summary>
-    static string AnexarPorProximidade(Document doc, IReadOnlyList<BicoLido> bicos, Dictionary<string, No> nos, List<Trecho> trechos, ref int seq, ref bool usouNominal, double fatorC)
+    static string AnexarPorProximidade(Document doc, IReadOnlyList<BicoLido> bicos, Dictionary<string, No> nos, List<Trecho> trechos,
+        ref int seq, ref bool usouNominal, double fatorC, out bool semClassificacao)
     {
-        var tubos = new List<TuboPronto>();
-        ColetarTubos(doc, null, null, tubos, ref usouNominal);
-        foreach (var vinculo in new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance)).Cast<RevitLinkInstance>())
+        semClassificacao = false;
+        var tubos = Tubos(doc, soIncendio: true, ref usouNominal);
+        var grade = Grade(tubos);
+        var tubosDeIncendio = tubos.Count;
+        if (!AlgumPerto(bicos, nos, tubos, grade))
         {
-            var vinculado = vinculo.GetLinkDocument();
-            if (vinculado is null) continue;
-            ColetarTubos(vinculado, vinculo.GetTotalTransform(), vinculo.Id, tubos, ref usouNominal);
+            var todos = Tubos(doc, soIncendio: false, ref usouNominal);
+            var gradeTodos = Grade(todos);
+            if (AlgumPerto(bicos, nos, todos, gradeTodos))
+            {
+                tubos = todos;
+                grade = gradeTodos;
+                semClassificacao = true;
+            }
         }
 
         if (tubos.Count == 0)
-            return "Nenhum bico confirmado está ligado a um tubo. O modelo aberto não tem tubos de sistema de incêndio, nem em vínculos carregados.";
-
-        var grade = new Dictionary<(int X, int Y, int Z), List<int>>();
-        for (var i = 0; i < tubos.Count; i++) IndexarTubo(grade, tubos[i].Curva, i);
+            return "Nenhum bico confirmado está ligado a um tubo. O modelo aberto não tem tubos, nem em vínculos carregados.";
 
         var portas = new Dictionary<(int X, int Y, int Z), List<(string No, XYZ Ponto)>>();
         ColetarPortas(doc, null, null, portas, nos);
@@ -502,7 +512,7 @@ static class LeitorRede
         if (sementes.Count == 0)
         {
             var mm = double.IsPositiveInfinity(menor) ? 0 : Milimetros(menor);
-            return $"Nenhum bico confirmado está ligado a um tubo. Há {tubos.Count} tubos de incêndio no modelo e nos vínculos. "
+            return $"Nenhum bico confirmado está ligado a um tubo. Há {tubos.Count} tubos no modelo e nos vínculos ({tubosDeIncendio} de incêndio). "
                    + (mm <= 0
                        ? "Nenhum tubo chegou perto dos bicos."
                        : $"O bico mais próximo de um tubo está a {mm:0} mm, além do limite de 500 mm.");
@@ -659,13 +669,42 @@ static class LeitorRede
     /// <summary>Pontas a até esta distância são tratadas como ligadas, em m. A mesma para seguir e para fundir nós.</summary>
     const double ToleranciaPonta = 0.15;
 
-    /// <summary>Só tubos de sistema de incêndio: água fria, esgoto e outros vínculos não entram na rede por proximidade.</summary>
-    static void ColetarTubos(Document origem, Transform? transformacao, ElementId? vinculo, List<TuboPronto> tubos, ref bool usouNominal)
+    static List<TuboPronto> Tubos(Document doc, bool soIncendio, ref bool usouNominal)
+    {
+        var tubos = new List<TuboPronto>();
+        ColetarTubos(doc, null, null, tubos, soIncendio, ref usouNominal);
+        foreach (var vinculo in new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance)).Cast<RevitLinkInstance>())
+        {
+            var vinculado = vinculo.GetLinkDocument();
+            if (vinculado is null) continue;
+            ColetarTubos(vinculado, vinculo.GetTotalTransform(), vinculo.Id, tubos, soIncendio, ref usouNominal);
+        }
+        return tubos;
+    }
+
+    static Dictionary<(int X, int Y, int Z), List<int>> Grade(List<TuboPronto> tubos)
+    {
+        var grade = new Dictionary<(int X, int Y, int Z), List<int>>();
+        for (var i = 0; i < tubos.Count; i++) IndexarTubo(grade, tubos[i].Curva, i);
+        return grade;
+    }
+
+    static bool AlgumPerto(IReadOnlyList<BicoLido> bicos, Dictionary<string, No> nos, List<TuboPronto> tubos,
+        Dictionary<(int X, int Y, int Z), List<int>> grade) =>
+        bicos.Any(b => nos.TryGetValue(IdBico(b.Instancia), out var no)
+                       && TuboMaisProximo(grade, tubos, EmPes(no)) is { } perto && perto.Distancia <= Pes(0.50));
+
+    /// <summary>
+    /// Com <paramref name="soIncendio" />, só tubos de sistema de incêndio: água fria, esgoto e outros vínculos não entram
+    /// na rede por proximidade.
+    /// </summary>
+    static void ColetarTubos(Document origem, Transform? transformacao, ElementId? vinculo, List<TuboPronto> tubos, bool soIncendio,
+        ref bool usouNominal)
     {
         foreach (var tubo in new FilteredElementCollector(origem).OfClass(typeof(Pipe)).Cast<Pipe>())
         {
             if (tubo.Location is not LocationCurve local) continue;
-            if (!EhIncendio(origem, tubo)) continue;
+            if (soIncendio && !EhIncendio(origem, tubo)) continue;
             var curva = transformacao is null ? local.Curve : local.Curve.CreateTransformed(transformacao);
             tubos.Add(new TuboPronto(curva, Metros(curva.Length), DiametroMm(tubo, ref usouNominal)));
         }
