@@ -9,6 +9,13 @@ public sealed class OpcoesSolver
     /// <summary>Critério de parada: Σ|ΔQ| / Σ|Q|.</summary>
     public double ToleranciaRelativa { get; init; } = 1e-9;
 
+    /// <summary>
+    /// Parada por estagnação: a mudança relativa já está abaixo disto e parou de cair à metade de uma iteração para
+    /// outra. Em rede grande, com trechos curtíssimos nas emendas, a precisão do gradiente conjugado não deixa chegar a
+    /// <see cref="ToleranciaRelativa" />, e sem isto o solver rodava todas as iterações com a resposta já pronta.
+    /// </summary>
+    public double ToleranciaEstagnacao { get; init; } = 1e-6;
+
     public static OpcoesSolver Padrao { get; } = new();
 }
 
@@ -376,6 +383,7 @@ public sealed class MotorHidraulico
 
         var convergiu = false;
         var it = 0;
+        var razaoAnterior = double.MaxValue;
         while (it < op.MaximoIteracoes)
         {
             it++;
@@ -460,11 +468,13 @@ public sealed class MotorHidraulico
                 qc[c] = novo;
             }
 
-            if (somaDq <= op.ToleranciaRelativa * Math.Max(somaQ, 1e-9))
+            var razao = somaDq / Math.Max(somaQ, 1e-9);
+            if (razao <= op.ToleranciaRelativa || (razao <= op.ToleranciaEstagnacao && razao >= 0.5 * razaoAnterior))
             {
                 convergiu = true;
                 break;
             }
+            razaoAnterior = razao;
         }
 
         return new Solucao { Carga = carga, VazaoTrechos = q, VazaoChuveiros = qc, Iteracoes = it, Convergiu = convergiu };
