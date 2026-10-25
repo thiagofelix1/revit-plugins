@@ -27,8 +27,32 @@ static class ParametrosSpk
         new(Velocidade, "SPK Velocidade (m/s)", SpecTypeId.Number, [BuiltInCategory.OST_PipeCurves]),
     ];
 
-    /// <summary>Cria e vincula os que faltam. Precisa de transação aberta. Devolve o motivo se não conseguiu.</summary>
+    /// <summary>
+    /// Cria e vincula os que faltam e deixa todos variarem entre grupos. Precisa de transação aberta. Devolve o motivo se
+    /// não conseguiu.
+    /// </summary>
     public static string? Garantir(Document doc)
+    {
+        var aviso = Criar(doc);
+        PermitirVariarEntreGrupos(doc);
+        return aviso;
+    }
+
+    /// <summary>
+    /// Bico e tubo dentro de grupo só aceitam valor próprio se o parâmetro "varia entre grupos". Sem isso o Revit recusa
+    /// a transação inteira ("alterações nos grupos são somente permitidas no modo de edição"), como na Nova Era.
+    /// </summary>
+    static void PermitirVariarEntreGrupos(Document doc)
+    {
+        foreach (var d in Definicoes)
+        {
+            if (SharedParameterElement.Lookup(doc, d.Id)?.GetDefinition() is not { VariesAcrossGroups: false } definicao) continue;
+            try { definicao.SetAllowVaryBetweenGroups(doc, true); }
+            catch (Autodesk.Revit.Exceptions.ApplicationException) { }
+        }
+    }
+
+    static string? Criar(Document doc)
     {
         var faltando = Definicoes.Where(d => SharedParameterElement.Lookup(doc, d.Id) is null).ToList();
         if (faltando.Count == 0) return null;
@@ -78,8 +102,11 @@ static class ParametrosSpk
 
     public static bool LerSimNao(Element elemento, Guid id) => elemento.get_Parameter(id)?.AsInteger() == 1;
 
+    /// <summary>Membro de grupo só recebe valor se o parâmetro varia entre grupos; senão o Revit derruba a transação.</summary>
     static void Definir(Element elemento, Guid id, Action<Parameter> definir)
     {
-        if (elemento.get_Parameter(id) is { IsReadOnly: false } parametro) definir(parametro);
+        if (elemento.get_Parameter(id) is not { IsReadOnly: false } parametro) return;
+        if (elemento.GroupId != ElementId.InvalidElementId && parametro.Definition is InternalDefinition { VariesAcrossGroups: false }) return;
+        definir(parametro);
     }
 }

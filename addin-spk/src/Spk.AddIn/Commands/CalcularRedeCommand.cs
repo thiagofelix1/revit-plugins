@@ -74,7 +74,7 @@ public class CalcularRedeCommand : ExternalCommand
                 Vazão dos bicos: {relatorio.Resultado.VazaoChuveiros:0} L/min
                 Bico crítico: {critico.Id} a {critico.Pressao / 100:0.00} bar ({critico.Vazao:0} L/min)
 
-                {string.Join("\n", relatorio.Avisos.Concat(lida.Avisos))}
+                {string.Join("\n", relatorio.Avisos.Concat(lida.Avisos).Append(avisoParametros).OfType<string>())}
 
                 Memorial em:
                 {pasta}
@@ -150,7 +150,8 @@ public class CalcularRedeCommand : ExternalCommand
             Tubos = lida.Tubos.Values.Distinct().Select(i => i.Value).ToList(),
         }.Salvar(doc);
 
-        transacao.Commit();
+        if (transacao.Commit() != TransactionStatus.Committed)
+            return "O Revit desfez a gravação dos resultados no modelo. O memorial foi gerado, mas as folhas não vão mostrar este cálculo.";
         return aviso;
     }
 
