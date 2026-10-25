@@ -84,11 +84,11 @@ public class SpkApplication : IExternalApplication
     /// A API pública deixa o botão grande na largura do ícone. A faixa nativa usa botões mais largos
     /// e uma folga nas laterais do painel; isso se ajusta em AdWindows.
     /// </summary>
+    /// <remarks>Campos internos do Revit: se uma versão mudar o nome, o botão fica com a largura padrão em vez de derrubar a aba.</remarks>
     static void Largura(PushButton botao)
     {
-        var item = (Autodesk.Windows.RibbonItem)typeof(RibbonItem)
-            .GetField("m_RibbonItem", BindingFlags.Instance | BindingFlags.NonPublic)!
-            .GetValue(botao)!;
+        if (typeof(RibbonItem).GetField("m_RibbonItem", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(botao)
+            is not Autodesk.Windows.RibbonItem item) return;
         item.MinWidth = 84;
         item.ShowText = true;
         item.Size = Autodesk.Windows.RibbonItemSize.Large;
@@ -96,9 +96,8 @@ public class SpkApplication : IExternalApplication
 
     static void Margem(RibbonPanel painel)
     {
-        var adPanel = (Autodesk.Windows.RibbonPanel)typeof(RibbonPanel)
-            .GetField("m_RibbonPanel", BindingFlags.Instance | BindingFlags.NonPublic)!
-            .GetValue(painel)!;
+        if (typeof(RibbonPanel).GetField("m_RibbonPanel", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(painel)
+            is not Autodesk.Windows.RibbonPanel adPanel) return;
         var itens = adPanel.Source.Items;
         itens.Insert(0, Espaco(10));
         itens.Add(Espaco(10));

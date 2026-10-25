@@ -14,7 +14,7 @@ static class GeradorMalha
     {
         var nivel = Nivel(doc) ?? throw new InvalidOperationException("O projeto não tem nível. Abra uma planta ou crie um nível.");
         var tipoTubo = TipoComTe(doc);
-        var diametro = DiametroComTe(doc, tipoTubo);
+        var diametro = DiametroComTe(doc, tipoTubo, dados.DnTubo);
         var tipoSistema = Sistema(doc) ?? throw new InvalidOperationException("O projeto não tem sistema de tubulação.");
         var simbolo = SimboloDeBico(doc) ?? throw new InvalidOperationException(
             "O projeto não tem família de sprinkler carregada. Carregue uma e rode Gerar de novo.");
@@ -146,12 +146,13 @@ static class GeradorMalha
                    "Nenhum tipo de tubo tem tê na preferência de roteamento. Abra o tipo de tubo e inclua um tê para o diâmetro usado.");
     }
 
-    static double? DiametroComTe(Document doc, PipeType tipo)
+    /// <summary>O DN pedido; se o tipo de tubo não tiver tê nele, o DN com tê mais próximo.</summary>
+    static double? DiametroComTe(Document doc, PipeType tipo, int dnPedido)
     {
         var regras = tipo.RoutingPreferenceManager;
         var n = regras.GetNumberOfRules(RoutingPreferenceRuleGroupType.Junctions);
-        double[] preferidosMm = [150, 100, 80, 65, 50, 40, 32, 25];
-        foreach (var mm in preferidosMm)
+        double[] usuaisMm = [25, 32, 40, 50, 65, 80, 100, 125, 150, 200];
+        foreach (var mm in usuaisMm.Prepend(dnPedido).Distinct().OrderBy(d => Math.Abs(d - dnPedido)))
         {
             var pes = UnitUtils.ConvertToInternalUnits(mm / 1000.0, UnitTypeId.Meters);
             if (TemTeNesseDiametro(doc, regras, n, pes)) return pes;

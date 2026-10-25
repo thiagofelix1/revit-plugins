@@ -17,6 +17,7 @@ public partial class DadosEsbocoJanela : Window
         DropBico.Text = Entrada.F(dados.DropM);
         FatorK.Text = Entrada.F(dados.FatorK);
         Area.Text = Entrada.F(dados.AreaM2);
+        Dn.Text = dados.DnTubo.ToString(Entrada.Cultura);
     }
 
     void Salvar_Click(object sender, RoutedEventArgs e)
@@ -33,6 +34,7 @@ public partial class DadosEsbocoJanela : Window
                 DropM = Entrada.Numero(DropBico.Text, "Drop", 0.05, 3),
                 FatorK = Entrada.Numero(FatorK.Text, "Fator K (L/min/bar½)", 40, 500),
                 AreaM2 = Entrada.Numero(Area.Text, "Área de cobertura", 0.5, 40),
+                DnTubo = Entrada.Inteiro(Dn.Text, "DN dos tubos", 20, 300),
             };
             DialogResult = true;
         }

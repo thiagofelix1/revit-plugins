@@ -21,6 +21,9 @@ public sealed class DadosEsboco
 
     public double AreaM2 { get; set; } = 12;
 
+    /// <summary>DN único da malha gerada, em mm. O dimensionamento por trecho é da Fase 2.</summary>
+    public int DnTubo { get; set; } = 65;
+
     public static DadosEsboco Carregar(Document doc) => ArmazenamentoSpk.Ler<DadosEsboco>(doc, Chave) ?? new DadosEsboco();
 
     public void Salvar(Document doc) => ArmazenamentoSpk.Gravar(doc, Chave, this);
