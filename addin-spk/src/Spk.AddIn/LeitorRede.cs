@@ -553,6 +553,17 @@ static class LeitorRede
                        : $"O bico mais próximo de um tubo está a {mm:0} mm, além do limite de 500 mm.");
         }
 
+        // Tubos cuja ponta encosta em cada peça (conexão ou válvula): a leitura atravessa a peça, porque de um lado e do
+        // outro dela as pontas ficam longe demais para se juntarem sozinhas (válvula de 4", tê de 150).
+        var tubosDaPeca = new Dictionary<string, List<int>>(StringComparer.Ordinal);
+        for (var i = 0; i < tubos.Count; i++)
+            foreach (var ponta in new[] { tubos[i].Curva.GetEndPoint(0), tubos[i].Curva.GetEndPoint(1) })
+                if (PortaProxima(ponta, portas, 0.15) is { } peca)
+                {
+                    if (!tubosDaPeca.TryGetValue(peca, out var lista)) tubosDaPeca[peca] = lista = [];
+                    lista.Add(i);
+                }
+
         var fila = new Queue<int>(sementes.Select(s => s.Indice).Distinct());
         var visitados = new HashSet<int>();
         var derivacoes = new List<(int Indice, double T, string No)>();
@@ -567,6 +578,10 @@ static class LeitorRede
             tubo.Partes.Add(new Segmento(n0, n1, 0, 1, Math.Max(tubo.Comprimento, 0.001), tubo.Diametro));
             foreach (var vizinho in VizinhosDePonta(i, tubo.Curva, tubos, grade))
                 if (!visitados.Contains(vizinho)) fila.Enqueue(vizinho);
+            foreach (var no in new[] { n0, n1 })
+                if (tubosDaPeca.TryGetValue(no, out var doOutroLado))
+                    foreach (var j in doOutroLado)
+                        if (!visitados.Contains(j)) fila.Enqueue(j);
             foreach (var (ponta, no) in new[] { (tubo.Curva.GetEndPoint(0), n0), (tubo.Curva.GetEndPoint(1), n1) })
             foreach (var (j, t) in DerivacoesNaPonta(i, ponta, tubos, grade))
             {
