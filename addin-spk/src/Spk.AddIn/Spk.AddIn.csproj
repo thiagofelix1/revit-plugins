@@ -16,6 +16,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <!-- Capítulos do Guia do SPK, lidos por Ajuda\TextoDoGuia.cs. -->
+        <EmbeddedResource Include="Ajuda\*.md"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\..\motor-spk\src\Spk.Motor\Spk.Motor.csproj"/>
         <ProjectReference Include="..\Spk.AddIn.Mapeamento\Spk.AddIn.Mapeamento.csproj"/>
     </ItemGroup>

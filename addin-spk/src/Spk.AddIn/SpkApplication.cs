@@ -8,7 +8,7 @@ namespace Spk.AddIn;
 /// <summary>Cria a aba "SPK" na faixa de opções: Modelo → Cálculo → Resultados.</summary>
 public class SpkApplication : IExternalApplication
 {
-    const string Aba = "SPK";
+    public const string Aba = "SPK";
 
     public Result OnStartup(UIControlledApplication application)
     {
@@ -33,7 +33,8 @@ public class SpkApplication : IExternalApplication
         var rede = application.CreateRibbonPanel(Aba, "Rede");
         Botao<RedeExemploCommand>(rede,
             "Rede de\nexemplo", Icones.Malha,
-            "Apaga a malha de exemplo anterior, cria os 12 bicos ligados e abre a planta e o 3D enquadrados.");
+            "Escolhe um cenário de teste (malha simples, espinha de peixe, grelha, 2 pavimentos, risco leve), apaga a malha " +
+            "gerada anterior, cria a rede ligada e abre a planta e o 3D enquadrados.");
         Botao<GerarMalhaCommand>(rede,
             "Gerar", Icones.Malha,
             "Cria uma malha retangular de bicos e tubos já conectados, no ponto que você clicar.");
@@ -52,6 +53,13 @@ public class SpkApplication : IExternalApplication
             "cálculo, 3D e corte), e exporta o PDF.");
         Avancado(resultados);
         Margem(resultados);
+
+        var ajuda = application.CreateRibbonPanel(Aba, "Ajuda");
+        Botao<GuiaCommand>(ajuda,
+            "Guia", Icones.Livro,
+            "O que já foi feito no projeto aberto e o que falta, com atalho para cada etapa; passo a passo, como preparar o " +
+            "modelo, em que o cálculo se baseia e o que as folhas trazem.");
+        Margem(ajuda);
 
         Automacao.TesteAutomatico.Registrar(application);
         return Result.Succeeded;

@@ -82,6 +82,19 @@ static class Icones
             dc.DrawEllipse(Vermelho, null, new Point(x, 16), 2.2, 2.2);
     }
 
+    public static void Livro(DrawingContext dc)
+    {
+        var caneta = Caneta(Grafite, 2.2);
+        dc.DrawGeometry(Brushes.White, caneta, Geometry.Parse("M 16,8 C 12,5 7,5 3,6 L 3,26 C 7,25 12,25 16,28 Z"));
+        dc.DrawGeometry(Brushes.White, caneta, Geometry.Parse("M 16,8 C 20,5 25,5 29,6 L 29,26 C 25,25 20,25 16,28 Z"));
+        var linha = Caneta(Vermelho, 1.8);
+        foreach (var y in new[] { 12.0, 16.5, 21.0 })
+        {
+            dc.DrawLine(linha, new Point(6.5, y - 1), new Point(12.5, y));
+            dc.DrawLine(linha, new Point(19.5, y), new Point(25.5, y - 1));
+        }
+    }
+
     static Pen Caneta(Brush cor, double espessura) =>
         Congelado(new Pen(cor, espessura) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round, LineJoin = PenLineJoin.Round });
 
