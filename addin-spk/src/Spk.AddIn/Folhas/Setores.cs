@@ -29,6 +29,11 @@ static class LeituraSetores
 
     const string PadraoSetor = "SPK setor";
 
+    /// <summary>Sem VGA: pedaço de rede com menos bicos que isto é sobra de modelagem, não setor.</summary>
+    const int MinimoBicos = 4;
+
+    const int MaximoSetores = 15;
+
     public static List<SetorLido> Ler(Document doc, List<string> avisos)
     {
         var leitura = BicosDoModelo.Ler(doc);
@@ -36,7 +41,32 @@ static class LeituraSetores
         var lidas = new List<LeitorRede.RedeLida>();
         if (vgas.Count == 0)
         {
-            lidas.Add(LeitorRede.Montar(doc, leitura.Bicos, 120));
+            // Sem VGA, cada pedaço de rede é um setor; a primeira leitura diz quantos são, do maior para o menor.
+            var primeira = LeitorRede.Montar(doc, leitura.Bicos, 120);
+            lidas.Add(primeira);
+            var pequenos = 0;
+            for (var k = 1; k < Math.Min(primeira.TotalDeSetores, MaximoSetores); k++)
+            {
+                try
+                {
+                    var lida = LeitorRede.Montar(doc, leitura.Bicos, 120, indiceSetor: k);
+                    if (lida.Bicos.Count < MinimoBicos)
+                    {
+                        pequenos = primeira.TotalDeSetores - k;
+                        break;
+                    }
+                    lidas.Add(lida);
+                }
+                catch (InvalidOperationException e)
+                {
+                    avisos.Add($"Setor {k + 1}: {e.Message}");
+                }
+            }
+            if (primeira.TotalDeSetores > MaximoSetores)
+                avisos.Add($"A rede tem {primeira.TotalDeSetores} pedaços; só os {MaximoSetores} maiores entraram na setorização.");
+            if (pequenos > 0)
+                avisos.Add($"{pequenos} pedaço(s) de rede com menos de {MinimoBicos} bicos ficaram fora da setorização " +
+                           "(bico ou trecho sem ligação com o resto da rede).");
         }
         else
         {

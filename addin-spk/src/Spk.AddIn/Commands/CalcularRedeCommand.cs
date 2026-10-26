@@ -53,7 +53,14 @@ public class CalcularRedeCommand : ExternalCommand
                 1 => vgas[0],
                 _ => EscolherVga(Application.ActiveUIDocument!, vgas),
             };
-            var lida = LeitorRede.Montar(doc, bicos, dados.FatorC, fonte, vgas.Select(v => v.Id).ToList());
+            ElementId? doSetor = null;
+            if (!leitura.Gerados && vgas.Count == 0)
+            {
+                var (seguir, escolhido) = EscolherSetor(Application.ActiveUIDocument!);
+                if (!seguir) return;
+                doSetor = escolhido;
+            }
+            var lida = LeitorRede.Montar(doc, bicos, dados.FatorC, fonte, vgas.Select(v => v.Id).ToList(), doSetor);
             var projeto = dados.CriarProjeto(leitura.Gerados ? "Malha gerada" : "Rede lida do modelo", lida.Rede);
             var relatorio = CalculoSpk.Executar(projeto);
 
@@ -153,6 +160,42 @@ public class CalcularRedeCommand : ExternalCommand
         if (transacao.Commit() != TransactionStatus.Committed)
             return "O Revit desfez a gravação dos resultados no modelo. O memorial foi gerado, mas as folhas não vão mostrar este cálculo.";
         return aviso;
+    }
+
+    /// <summary>
+    /// Sem VGA no modelo, cada pedaço de rede é um setor. O engenheiro clica num bico ou tubo do que quer calcular, ou
+    /// fica com o de mais bicos (elemento nulo). Cancelar devolve <c>Seguir = false</c>.
+    /// </summary>
+    static (bool Seguir, ElementId? Elemento) EscolherSetor(UIDocument ui)
+    {
+        var dialogo = new TaskDialog("SPK — Calcular")
+        {
+            MainInstruction = "Qual setor calcular?",
+            MainContent = "O modelo não tem VGA marcada em Famílias. Cada rede sem ligação com as outras é tratada como um setor, " +
+                          "com a entrada na ponta mais baixa da descida.",
+            CommonButtons = TaskDialogCommonButtons.Cancel,
+        };
+        dialogo.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Clicar num bico ou tubo do setor");
+        dialogo.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Calcular o setor com mais bicos");
+        switch (dialogo.Show())
+        {
+            case TaskDialogResult.CommandLink1:
+                var referencia = ui.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.Element, new BicoOuTubo(),
+                    "Clique num bico ou tubo do setor que quer calcular.");
+                return (true, referencia.ElementId);
+            case TaskDialogResult.CommandLink2:
+                return (true, null);
+            default:
+                return (false, null);
+        }
+    }
+
+    sealed class BicoOuTubo : Autodesk.Revit.UI.Selection.ISelectionFilter
+    {
+        public bool AllowElement(Element elemento) => elemento.Category?.Id.Value is long id
+            && (id == (long)BuiltInCategory.OST_Sprinklers || id == (long)BuiltInCategory.OST_PipeCurves);
+
+        public bool AllowReference(Reference referencia, XYZ ponto) => false;
     }
 
     static FamilyInstance EscolherVga(UIDocument ui, List<FamilyInstance> vgas)

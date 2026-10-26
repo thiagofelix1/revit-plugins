@@ -143,4 +143,30 @@ public class TopologiaTestes
         Assert.Equal(Math.Cos(a), dx, 9);
         Assert.Equal(Math.Sin(a), dy, 9);
     }
+
+    [Fact]
+    public void Redes_separadas_viram_um_setor_cada_com_a_fonte_na_ponta_mais_baixa()
+    {
+        // Dois setores sem ligação entre si (VGA não desenhada): 3 bicos no primeiro, 2 no segundo.
+        var nos = Indice([
+            new No("A0", 0, 0, 0), new No("A1", 0, 0, 5), new No("A2", 3, 0, 5), new No("A3", 6, 0, 5),
+            new No("SA1", 0, 0, 4.7), new No("SA2", 3, 0, 4.7), new No("SA3", 6, 0, 4.7),
+            new No("B0", 50, 0, 1), new No("B1", 50, 0, 5), new No("B2", 53, 0, 5),
+            new No("SB1", 50, 0, 4.7), new No("SB2", 53, 0, 4.7),
+            new No("SOLTO", 90, 0, 5),
+        ]);
+        var trechos = new[]
+        {
+            T("A0", "A1"), T("A1", "A2"), T("A2", "A3"), T("A1", "SA1"), T("A2", "SA2"), T("A3", "SA3"),
+            T("B0", "B1"), T("B1", "B2"), T("B1", "SB1"), T("B2", "SB2"),
+        };
+        var bicos = new HashSet<string> { "SA1", "SA2", "SA3", "SB1", "SB2" };
+
+        var componentes = Topologia.Componentes(nos, trechos, bicos);
+
+        Assert.Equal(2, componentes.Count);
+        Assert.Equal(("A0", 3), (componentes[0].Fonte, componentes[0].Bicos));
+        Assert.Equal(("B0", 2), (componentes[1].Fonte, componentes[1].Bicos));
+        Assert.Contains("SB2", componentes[1].Nos);
+    }
 }

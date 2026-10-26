@@ -109,49 +109,65 @@ public static class Topologia
     }
 
     /// <summary>
-    /// Sem VGA: o grupo de nós ligados com mais bicos, e como fonte a ponta de tubo (grau 1) mais baixa dele.
+    /// O pedaço de rede com mais bicos e a sua fonte, a ponta de tubo mais baixa. É o primeiro de
+    /// <see cref="Componentes" />.
     /// </summary>
     public static (string Fonte, HashSet<string> Nos) MaiorComponente(IReadOnlyDictionary<string, No> nos, IEnumerable<Trecho> trechos,
         ISet<string> nosDeBico)
     {
+        var componentes = Componentes(nos, trechos, nosDeBico);
+        if (componentes.Count == 0) throw new InvalidOperationException("Os bicos não formam uma rede contínua com os tubos encontrados.");
+        return (componentes[0].Fonte, componentes[0].Nos);
+    }
+
+    /// <summary>
+    /// Cada pedaço de rede contínuo que tem bico, com a sua fonte: a ponta de tubo (nó de grau 1, que não é bico) mais
+    /// baixa, onde a descida encontraria a VGA. Num modelo sem as VGAs desenhadas, cada setor fica um pedaço separado.
+    /// Ordem: mais bicos primeiro; empate pela posição da fonte, para a numeração dos setores sair sempre igual.
+    /// </summary>
+    public static List<(string Fonte, HashSet<string> Nos, int Bicos)> Componentes(IReadOnlyDictionary<string, No> nos,
+        IEnumerable<Trecho> trechos, ISet<string> nosDeBico)
+    {
         var lista = trechos.ToList();
         var adj = Adjacencia(lista);
-        var visto = new HashSet<string>(StringComparer.Ordinal);
-        HashSet<string>? melhor = null;
-        var melhorQtd = 0;
-        foreach (var inicio in nos.Keys)
-        {
-            if (!visto.Add(inicio)) continue;
-            var comp = new HashSet<string>(StringComparer.Ordinal) { inicio };
-            var fila = new Queue<string>(comp);
-            var qtd = 0;
-            while (fila.Count > 0)
-            {
-                var n = fila.Dequeue();
-                if (nosDeBico.Contains(n)) qtd++;
-                foreach (var vizinho in Vizinhos(adj, n))
-                    if (visto.Add(vizinho) && comp.Add(vizinho)) fila.Enqueue(vizinho);
-            }
-            if (qtd > melhorQtd) { melhorQtd = qtd; melhor = comp; }
-        }
-
-        if (melhor is null) throw new InvalidOperationException("Os bicos não formam uma rede contínua com os tubos encontrados.");
-
         var grau = new Dictionary<string, int>(StringComparer.Ordinal);
-        foreach (var trecho in lista.Where(t => melhor.Contains(t.De) && melhor.Contains(t.Para)))
+        foreach (var trecho in lista)
         {
             grau[trecho.De] = (grau.TryGetValue(trecho.De, out var g1) ? g1 : 0) + 1;
             grau[trecho.Para] = (grau.TryGetValue(trecho.Para, out var g2) ? g2 : 0) + 1;
         }
 
-        var candidatos = melhor.Where(id => !nosDeBico.Contains(id)).Select(id => nos[id]).ToList();
-        var fonte = candidatos
-                        .Where(n => grau.TryGetValue(n.Id, out var g) && g == 1)
-                        .OrderBy(n => n.Z).ThenBy(n => n.Id, StringComparer.Ordinal)
-                        .Select(n => n.Id).FirstOrDefault()
-                    ?? candidatos.OrderBy(n => n.Z).ThenBy(n => n.Id, StringComparer.Ordinal).Select(n => n.Id).FirstOrDefault()
-                    ?? throw new InvalidOperationException("A rede dos bicos não tem uma ponta de tubo para servir de fonte.");
-        return (fonte, melhor);
+        var visto = new HashSet<string>(StringComparer.Ordinal);
+        var componentes = new List<(string Fonte, HashSet<string> Nos, int Bicos)>();
+        foreach (var inicio in nos.Keys.OrderBy(k => k, StringComparer.Ordinal))
+        {
+            if (!visto.Add(inicio)) continue;
+            var comp = new HashSet<string>(StringComparer.Ordinal) { inicio };
+            var fila = new Queue<string>(comp);
+            var bicos = 0;
+            while (fila.Count > 0)
+            {
+                var n = fila.Dequeue();
+                if (nosDeBico.Contains(n)) bicos++;
+                foreach (var vizinho in Vizinhos(adj, n))
+                    if (visto.Add(vizinho) && comp.Add(vizinho)) fila.Enqueue(vizinho);
+            }
+            if (bicos == 0) continue;
+
+            var candidatos = comp.Where(id => !nosDeBico.Contains(id)).Select(id => nos[id]).ToList();
+            var fonte = candidatos
+                            .Where(n => grau.TryGetValue(n.Id, out var g) && g == 1)
+                            .OrderBy(n => n.Z).ThenBy(n => n.Id, StringComparer.Ordinal)
+                            .Select(n => n.Id).FirstOrDefault()
+                        ?? candidatos.OrderBy(n => n.Z).ThenBy(n => n.Id, StringComparer.Ordinal).Select(n => n.Id).FirstOrDefault();
+            if (fonte is null) continue;
+            componentes.Add((fonte, comp, bicos));
+        }
+
+        return componentes
+            .OrderByDescending(c => c.Bicos)
+            .ThenBy(c => nos[c.Fonte].X).ThenBy(c => nos[c.Fonte].Y)
+            .ToList();
     }
 
     /// <summary>

@@ -16,13 +16,16 @@ static class LeitorRede
 
     /// <param name="Bicos">Número do bico no cálculo → instância no Revit.</param>
     /// <param name="Tubos">Id do trecho no cálculo → tubo no Revit (vários trechos podem estar no mesmo tubo).</param>
+    /// <param name="TotalDeSetores">Sem VGA: quantos pedaços de rede com bico existem; cada um é um setor.</param>
     public sealed record RedeLida(Rede Rede, IReadOnlyList<string> Avisos, string Setor,
-        IReadOnlyDictionary<string, ElementId> Bicos, IReadOnlyDictionary<string, ElementId> Tubos);
+        IReadOnlyDictionary<string, ElementId> Bicos, IReadOnlyDictionary<string, ElementId> Tubos, int TotalDeSetores = 1);
 
-    /// <param name="fonte">A VGA do setor. Nula: a fonte é a ponta de tubo mais baixa da rede.</param>
+    /// <param name="fonte">A VGA do setor. Nula: cada pedaço de rede é um setor, com a fonte na ponta de tubo mais baixa.</param>
     /// <param name="vgas">Todas as VGAs do modelo. A leitura não passa por elas, o que separa um setor do outro.</param>
+    /// <param name="elementoDoSetor">Sem VGA: um bico ou tubo do setor a calcular. Nulo: o setor com mais bicos.</param>
+    /// <param name="indiceSetor">Sem VGA: o setor pela ordem (0 é o de mais bicos). Tem precedência sobre o elemento.</param>
     public static RedeLida Montar(Document doc, IReadOnlyList<BicoLido> bicos, double fatorC,
-        FamilyInstance? fonte = null, IReadOnlyCollection<ElementId>? vgas = null)
+        FamilyInstance? fonte = null, IReadOnlyCollection<ElementId>? vgas = null, ElementId? elementoDoSetor = null, int? indiceSetor = null)
     {
         if (bicos.Count == 0) throw new InvalidOperationException("Nenhum bico com fator K e área de cobertura.");
 
@@ -135,6 +138,8 @@ static class LeitorRede
         var nosDeVga = limites.Select(IdPeca).ToHashSet(StringComparer.Ordinal);
         string noFonte;
         HashSet<string> setor;
+        var totalDeSetores = 1;
+        var indiceEscolhido = 0;
         if (fonte is not null)
         {
             noFonte = IdPeca(fonte.Id);
@@ -142,16 +147,24 @@ static class LeitorRede
         }
         else
         {
-            (noFonte, setor) = Topologia.MaiorComponente(nos, trechos, nosDeBico);
+            var componentes = Topologia.Componentes(nos, trechos, nosDeBico);
+            if (componentes.Count == 0) throw new InvalidOperationException("Os bicos não formam uma rede contínua com os tubos encontrados.");
+            indiceEscolhido = IndiceDoSetor(componentes, elementoDoSetor, indiceSetor, trechos, tuboDoTrecho);
+            (noFonte, setor, _) = componentes[indiceEscolhido];
+            totalDeSetores = componentes.Count;
         }
 
         var nosSetor = nos.Values.Where(n => setor.Contains(n.Id)).ToList();
         var trechosSetor = trechos.Where(t => setor.Contains(t.De) && setor.Contains(t.Para)).ToList();
         var doSetor = ligados.Where(b => setor.Contains(IdBico(b.Instancia))).ToList();
         if (doSetor.Count < ligados.Count)
-            avisos.Add(fonte is null
-                ? $"{ligados.Count - doSetor.Count} bicos ficaram de fora: o tubo deles não encontra o restante da rede."
-                : $"{ligados.Count - doSetor.Count} bicos são de outra VGA ou de rede solta e ficaram fora deste setor.");
+            avisos.Add(fonte is not null
+                ? $"{ligados.Count - doSetor.Count} bicos são de outra VGA ou de rede solta e ficaram fora deste setor."
+                : totalDeSetores > 1
+                    ? $"A rede tem {totalDeSetores} setores sem ligação entre si (VGA não desenhada no modelo). Este é o setor " +
+                      $"{indiceEscolhido + 1}; os outros {ligados.Count - doSetor.Count} bicos são dos demais. Para calcular outro, rode " +
+                      "Calcular e clique num bico dele."
+                    : $"{ligados.Count - doSetor.Count} bicos ficaram de fora: o tubo deles não encontra o restante da rede.");
 
         var (dx, dy) = Topologia.DirecaoDosRamais(trechosSetor, nos);
         var ramalDe = Topologia.RamalDeCadaBico(doSetor.Select(b => IdBico(b.Instancia)), trechosSetor, nos, dx, dy);
@@ -185,10 +198,29 @@ static class LeitorRede
         var bicosPorNo = doSetor.ToDictionary(b => IdBico(b.Instancia), b => b.Instancia.Id, StringComparer.Ordinal);
         var chuveirosNumerados = chuveiros.Select(c => c with { Id = N(c.No), No = N(c.No) }).ToList();
         var bicosNumerados = chuveiros.ToDictionary(c => N(c.No), c => bicosPorNo[c.No], StringComparer.Ordinal);
-        var setorNome = fonte is null ? "Malha" : NomeDaVga(fonte);
+        var setorNome = fonte is not null ? NomeDaVga(fonte) : totalDeSetores > 1 ? $"Setor {indiceEscolhido + 1}" : "Malha";
 
         var rede = new Rede(N(noFonte), nosSetor.Select(n => n with { Id = N(n.Id) }), trechosNumerados, chuveirosNumerados);
-        return new RedeLida(rede, avisos, setorNome, bicosNumerados, tubos);
+        return new RedeLida(rede, avisos, setorNome, bicosNumerados, tubos, totalDeSetores);
+    }
+
+    /// <summary>
+    /// Qual pedaço de rede calcular: pelo índice, pelo bico ou tubo clicado, ou o de mais bicos. O tubo é achado pelos
+    /// trechos que vieram dele.
+    /// </summary>
+    static int IndiceDoSetor(List<(string Fonte, HashSet<string> Nos, int Bicos)> componentes, ElementId? elemento, int? indice,
+        List<Trecho> trechos, Dictionary<string, ElementId> tuboDoTrecho)
+    {
+        if (indice is { } i)
+            return i >= 0 && i < componentes.Count ? i : throw new InvalidOperationException($"A rede tem {componentes.Count} setores, não {i + 1}.");
+        if (elemento is null) return 0;
+
+        var nosDoElemento = new HashSet<string>(StringComparer.Ordinal) { IdBico(elemento), IdPeca(elemento) };
+        foreach (var trecho in trechos)
+            if (tuboDoTrecho.TryGetValue(trecho.Id, out var tubo) && tubo == elemento)
+                nosDoElemento.Add(trecho.De);
+        var k = componentes.FindIndex(c => c.Nos.Overlaps(nosDoElemento));
+        return k >= 0 ? k : throw new InvalidOperationException("O elemento clicado não está em nenhum setor que o plugin conseguiu ler.");
     }
 
     /// <summary>Marca, comentário ou nome do tipo da VGA, o que estiver preenchido primeiro.</summary>
@@ -903,7 +935,8 @@ static class LeitorRede
                 yield return conector;
     }
 
-    static string IdBico(Element elemento) => "S" + elemento.Id.Value;
+    static string IdBico(Element elemento) => IdBico(elemento.Id);
+    static string IdBico(ElementId id) => "S" + id.Value;
     static string IdPeca(ElementId id) => "F" + id.Value;
 
     static string Chave(XYZ ponto) =>
