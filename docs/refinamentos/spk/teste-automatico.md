@@ -68,8 +68,16 @@ Duas telas aparecem antes do plugin carregar e o teste não consegue responder:
 
 ## Cenários de regressão
 
+Os cinco cenários da Rede de exemplo (`"exemplo": "<começo do nome>"`), cada um numa cópia do Projeto2 (que tem tubo com tê), com cálculo e folhas. Resultado de 26/10/2026:
+
 | Cenário | Esperado |
 |---|---|
-| Malha de exemplo (cópia do Projeto2) | 12 bicos, ATENDE, crítico a 2,83 bar e 606 L/min, 4 folhas, etiquetas, 1 descida |
+| Simples (12 ESFR) | 1 setor, 12 bicos, ATENDE, 1.757,6 kPa, crítico a 2,83 bar e 606 L/min, 4 folhas, 15 etiquetas, 1 descida |
+| Depósito (espinha de peixe, 2 setores) | 2 setores de 80 bicos, ATENDE, 777,2 kPa, 28 áreas avaliadas, setorização com 2 cores e mapa-chave |
+| Galpão (grelha, ordinário 2) | 1 setor de 56 bicos em anel, ATENDE, 284,5 kPa, crítico no limite da densidade (97,2 L/min) |
+| Edifício de 2 pavimentos (ordinário 1) | 2 setores de 30 bicos, um por nível, ATENDE, 286,7 kPa, setorização com 2 plantas |
+| Residência / escritório (risco leve) | 1 setor de 30 bicos, ATENDE, 346,5 kPa |
+
+O resultado esperado é o desta rodada: serve para pegar mudança involuntária, não é conferência de engenharia.
 
 Os cenários de projeto real entram quando houver um projeto bem conectado e conferido pelo engenheiro (ver [aprendizados-nova-era.md](aprendizados-nova-era.md)).

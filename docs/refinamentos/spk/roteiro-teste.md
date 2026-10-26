@@ -26,7 +26,7 @@ Use um projeto novo (modelo de arquitetura ou de sistemas, tanto faz).
 
 | Passo | O que fazer | O que deve acontecer |
 |---|---|---|
-| 1.1 | **Rede de exemplo** | 12 bicos (3 ramais × 4) ligados por tubos, planta e 3D enquadrados. |
+| 1.1 | **Rede de exemplo**, cenário **Simples**, com "gravar critérios" desmarcado | 12 bicos (3 ramais × 4) ligados por tubos, planta e 3D enquadrados. Os outros cenários (espinha de peixe com 2 setores, grelha, edifício de 2 pavimentos, risco leve) trazem os critérios deles se a caixa ficar marcada. |
 | 1.2 | **Calcular** | Como o projeto ainda não tem critérios, abre a janela **Dados do projeto** antes de qualquer coisa. |
 | 1.3 | Na janela, escolha Armazenamento e a base ESFR; pressão mínima `283` kPa; item `IT-24 Tabela 5.3.4.3.1`; deixe hidrantes em branco e confirme | Recusa: em armazenamento, hidrantes e duração são obrigatórios. |
 | 1.4 | Preencha hidrantes (por exemplo `1900`) e duração (`60`) e confirme | A janela fecha e aparece a prévia "12 bicos entram no cálculo", com o resumo dos critérios e do bico (K 360, área 12 m²). |
