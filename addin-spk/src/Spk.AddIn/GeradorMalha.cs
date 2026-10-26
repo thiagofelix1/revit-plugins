@@ -105,11 +105,16 @@ static class GeradorMalha
             if (xFim is { } fim) trechos.Add((anterior, y, fim, y, false));
         }
 
-        // A subgeral passando pelos pontos de encontro, de baixo para cima.
-        void Subgeral(double x, IEnumerable<double> ys)
+        // A subgeral passando pelos pontos de encontro, de baixo para cima. A ponta que acaba num cotovelo com um ramal
+        // fica no diâmetro do ramal (a subgeral reduz até ali): o Revit não liga cotovelo entre dois diâmetros.
+        void Subgeral(double x, IEnumerable<double> ys, bool reduzInicio = false, bool reduzFim = false)
         {
             var lista = ys.OrderBy(y => y).ToList();
-            for (var k = 1; k < lista.Count; k++) trechos.Add((x, lista[k - 1], x, lista[k], true));
+            for (var k = 1; k < lista.Count; k++)
+            {
+                var ponta = (k == 1 && reduzInicio) || (k == lista.Count - 1 && reduzFim);
+                trechos.Add((x, lista[k - 1], x, lista[k], !ponta));
+            }
         }
 
         var n = dados.BicosPorRamal;
@@ -127,7 +132,7 @@ static class GeradorMalha
                     Ramal(y + deslocamento, x0, esquerda);
                 }
                 var inicio = y0 - sy / 2;
-                Subgeral(x0, ysRamais.Concat(ysRamais.Select(y => y + deslocamento)).Append(inicio));
+                Subgeral(x0, ysRamais.Concat(ysRamais.Select(y => y + deslocamento)).Append(inicio), reduzFim: true);
                 return new Desenho(bicos, trechos, (x0, inicio));
             }
             case Arranjo.Grelha:
@@ -136,8 +141,8 @@ static class GeradorMalha
                 var xEsquerda = x0 - sx;
                 var xDireita = x0 + n * sx;
                 foreach (var y in ysRamais) Ramal(y, xEsquerda, xs, xDireita);
-                Subgeral(xEsquerda, ysRamais);
-                Subgeral(xDireita, ysRamais);
+                Subgeral(xEsquerda, ysRamais, reduzFim: true);
+                Subgeral(xDireita, ysRamais, reduzInicio: true, reduzFim: true);
                 return new Desenho(bicos, trechos, (xEsquerda, y0));
             }
             default:
@@ -145,7 +150,7 @@ static class GeradorMalha
                 var xs = Enumerable.Range(0, n).Select(i => x0 + i * sx).ToList();
                 var xSubgeral = x0 - sx;
                 foreach (var y in ysRamais) Ramal(y, xSubgeral, xs);
-                Subgeral(xSubgeral, ysRamais);
+                Subgeral(xSubgeral, ysRamais, reduzFim: true);
                 return new Desenho(bicos, trechos, (xSubgeral, y0));
             }
         }
