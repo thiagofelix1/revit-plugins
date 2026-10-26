@@ -101,16 +101,24 @@ static class FolhasIsometrico
 
     /// <summary>
     /// Num modelo sem conexões ligadas (Nova Era), seguir conectores só acha os bicos. Os tubos que a leitura por
-    /// proximidade associou a cada setor e ao último cálculo completam a rede.
+    /// proximidade associou a cada setor e ao último cálculo completam a rede, e os bicos ficam só os dos setores lidos.
     /// </summary>
     static void IncluirRedeLida(ContextoFolhas contexto, HashSet<ElementId> rede, IList<string> avisos)
     {
         try
         {
+            var bicosLidos = new HashSet<ElementId>();
             foreach (var setor in contexto.Setores)
             {
                 rede.UnionWith(setor.Tubos.Select(t => t.Id));
-                rede.UnionWith(setor.Bicos.Select(b => b.Id));
+                bicosLidos.UnionWith(setor.Bicos.Select(b => b.Id));
+            }
+            // Bico que nenhum setor alcançou ficaria solto no desenho, sem tubo: sai do isométrico.
+            if (bicosLidos.Count > 0)
+            {
+                var doc = contexto.Doc;
+                rede.RemoveWhere(id => doc.GetElement(id)?.Category?.Id.Value == (long)BuiltInCategory.OST_Sprinklers && !bicosLidos.Contains(id));
+                rede.UnionWith(bicosLidos);
             }
         }
         catch (Exception e) when (e is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException)

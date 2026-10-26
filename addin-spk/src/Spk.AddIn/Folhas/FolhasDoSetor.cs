@@ -266,17 +266,21 @@ static class FolhasDoSetor
     }
 
     /// <summary>
-    /// "DESCE" ou "SOBE" nos tubos verticais de 0,8 m ou mais que não são o tubinho de um bico: abaixo da cota média dos
-    /// horizontais é descida para a rede de baixo, acima é subida.
+    /// "DESCE" no tubo vertical que sai da rede para baixo (a ponta de baixo abaixo do tubo horizontal mais baixo, rumo à
+    /// VGA) e "SOBE" no que sai para cima. Trechos verticais entre tubos da própria rede, como o degrau entre subgeral e
+    /// ramal num telhado inclinado, e o tubinho de cada bico não são marcados. Uma marca por prumada.
     /// </summary>
     static int MarcarDescidas(Document doc, View planta, IReadOnlyList<MEPCurve> tubos, IReadOnlyList<XYZ> bicos, double afastamento,
         IList<string> avisos)
     {
         var linhas = tubos.Select(t => t.Location).OfType<LocationCurve>().Select(l => l.Curve).OfType<Line>().ToList();
-        var cotas = linhas.Where(l => Math.Abs(l.Direction.Z) < 0.1).Select(l => l.Evaluate(0.5, true).Z).OrderBy(z => z).ToList();
-        if (cotas.Count == 0) return 0;
-        var cotaRede = cotas[cotas.Count / 2];
+        var horizontais = linhas.Where(l => Math.Abs(l.Direction.Z) < 0.1).ToList();
+        if (horizontais.Count == 0) return 0;
+        var folga = VistasSpk.Pes(0.30);
+        var piso = horizontais.Min(l => Math.Min(l.GetEndPoint(0).Z, l.GetEndPoint(1).Z)) - folga;
+        var teto = horizontais.Max(l => Math.Max(l.GetEndPoint(0).Z, l.GetEndPoint(1).Z)) + folga;
         var raioBico = VistasSpk.Pes(0.15);
+        var marcadas = new List<XYZ>();
 
         var feitas = 0;
         foreach (var linha in linhas)
@@ -285,8 +289,14 @@ static class FolhasDoSetor
             var a = linha.GetEndPoint(0);
             var b = linha.GetEndPoint(1);
             var baixo = a.Z < b.Z ? a : b;
+            var alto = a.Z < b.Z ? b : a;
+            string texto;
+            if (baixo.Z < piso) texto = "DESCE";
+            else if (alto.Z > teto) texto = "SOBE";
+            else continue;
             if (bicos.Any(p => Math.Abs(p.X - baixo.X) < raioBico && Math.Abs(p.Y - baixo.Y) < raioBico)) continue;
-            var texto = linha.Evaluate(0.5, true).Z < cotaRede ? "DESCE" : "SOBE";
+            if (marcadas.Any(m => Math.Abs(m.X - baixo.X) < folga && Math.Abs(m.Y - baixo.Y) < folga)) continue;
+            marcadas.Add(baixo);
             PranchaSpk.Tentar(avisos, "Marca de descida", () =>
             {
                 PranchaSpk.Nota(doc, planta, new XYZ(baixo.X + afastamento, baixo.Y - afastamento, 0), texto);
