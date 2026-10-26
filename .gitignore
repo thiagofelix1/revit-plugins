@@ -13,3 +13,6 @@ obj/
 *.user
 .vs/
 TestResults/
+
+# Pacotes para enviar (gerados a partir de bin/)
+dist/
