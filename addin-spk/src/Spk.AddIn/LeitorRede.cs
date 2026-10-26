@@ -583,8 +583,20 @@ static class LeitorRede
                     lista.Add(i);
                 }
 
+        // Peças encostadas umas nas outras (flange, válvula, conexão) formam um grupo: o tubo de um lado chega à peça mais
+        // próxima dele, que nem sempre é a válvula. A leitura atravessa o grupo inteiro e, no fim, liga as peças entre si.
+        var (grupoDaPeca, pares) = PecasEncostadas(portas);
+        var tubosDoGrupo = new Dictionary<string, List<int>>(StringComparer.Ordinal);
+        foreach (var (peca, lista) in tubosDaPeca)
+        {
+            var grupo = grupoDaPeca.GetValueOrDefault(peca, peca);
+            if (!tubosDoGrupo.TryGetValue(grupo, out var doGrupo)) tubosDoGrupo[grupo] = doGrupo = [];
+            doGrupo.AddRange(lista);
+        }
+
         var fila = new Queue<int>(sementes.Select(s => s.Indice).Distinct());
         var visitados = new HashSet<int>();
+        var gruposVisitados = new HashSet<string>(StringComparer.Ordinal);
         var derivacoes = new List<(int Indice, double T, string No)>();
         while (fila.Count > 0)
         {
@@ -598,9 +610,13 @@ static class LeitorRede
             foreach (var vizinho in VizinhosDePonta(i, tubo.Curva, tubos, grade))
                 if (!visitados.Contains(vizinho)) fila.Enqueue(vizinho);
             foreach (var no in new[] { n0, n1 })
-                if (tubosDaPeca.TryGetValue(no, out var doOutroLado))
-                    foreach (var j in doOutroLado)
-                        if (!visitados.Contains(j)) fila.Enqueue(j);
+            {
+                var grupo = grupoDaPeca.GetValueOrDefault(no, no);
+                if (!tubosDoGrupo.TryGetValue(grupo, out var doOutroLado)) continue;
+                gruposVisitados.Add(grupo);
+                foreach (var j in doOutroLado)
+                    if (!visitados.Contains(j)) fila.Enqueue(j);
+            }
             foreach (var (ponta, no) in new[] { (tubo.Curva.GetEndPoint(0), n0), (tubo.Curva.GetEndPoint(1), n1) })
             foreach (var (j, t) in DerivacoesNaPonta(i, ponta, tubos, grade))
             {
@@ -626,6 +642,16 @@ static class LeitorRede
                 trechos.Add(new Trecho(id, parte.De, parte.Para, parte.Diametro, parte.Comprimento, fatorC));
                 if (tubo.Elemento is { } elemento) tuboDoTrecho[id] = elemento;
             }
+
+        // Liga as peças encostadas dos grupos que a rede atravessou: é assim que a válvula entre dois flanges vira um nó da
+        // rede e pode separar um setor do outro. Trecho curto, no diâmetro do maior tubo que chega ao grupo.
+        foreach (var (a, b) in pares)
+        {
+            var grupo = grupoDaPeca[a];
+            if (!gruposVisitados.Contains(grupo)) continue;
+            var diametro = tubosDoGrupo.TryGetValue(grupo, out var doGrupo) && doGrupo.Count > 0 ? doGrupo.Max(i => tubos[i].Diametro) : 100;
+            trechos.Add(new Trecho($"P{seq++}", a, b, diametro, 0.05, fatorC));
+        }
 
         return "";
     }
@@ -656,6 +682,42 @@ static class LeitorRede
         var tMeio = parte.T0 + intervalo * frac;
         tubo.Partes[i] = parte with { Para = idBico, T1 = tMeio, Comprimento = compA };
         tubo.Partes.Insert(i + 1, new Segmento(idBico, parte.Para, tMeio, parte.T1, compB, parte.Diametro));
+    }
+
+    /// <summary>
+    /// Pares de peças com conectores a até 15 cm um do outro, e o grupo de cada peça (a primeira peça do grupo, por
+    /// união). Peça sozinha não aparece.
+    /// </summary>
+    static (Dictionary<string, string> Grupo, List<(string A, string B)> Pares) PecasEncostadas(
+        Dictionary<(int X, int Y, int Z), List<(string No, XYZ Ponto)>> portas)
+    {
+        var limite = Pes(ToleranciaPonta);
+        var pares = new HashSet<(string, string)>();
+        foreach (var lista in portas.Values)
+        foreach (var (no, ponto) in lista)
+        foreach (var celula in Vizinhanca(ponto))
+        {
+            if (!portas.TryGetValue(celula, out var outras)) continue;
+            foreach (var (outro, pontoOutro) in outras)
+                if (string.CompareOrdinal(no, outro) < 0 && ponto.DistanceTo(pontoOutro) <= limite)
+                    pares.Add((no, outro));
+        }
+
+        var pai = new Dictionary<string, string>(StringComparer.Ordinal);
+        string Raiz(string x)
+        {
+            while (pai.TryGetValue(x, out var p) && p != x) x = p;
+            return x;
+        }
+        foreach (var (a, b) in pares)
+        {
+            pai.TryAdd(a, a);
+            pai.TryAdd(b, b);
+            var (ra, rb) = (Raiz(a), Raiz(b));
+            if (ra != rb) pai[rb] = ra;
+        }
+        var grupo = pai.Keys.ToDictionary(k => k, Raiz, StringComparer.Ordinal);
+        return (grupo, pares.ToList());
     }
 
     static string NoDaPonta(XYZ pes, Dictionary<(int X, int Y, int Z), List<(string No, XYZ Ponto)>> portas,
