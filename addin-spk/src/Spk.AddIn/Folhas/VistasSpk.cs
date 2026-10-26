@@ -108,6 +108,37 @@ static class VistasSpk
             Esconder(vista, new ElementId(c), true);
     }
 
+    /// <summary>Troca o template ligado por uma cópia das configurações dele na própria vista.</summary>
+    static void Desvincular(Document doc, View vista)
+    {
+        if (doc.GetElement(vista.ViewTemplateId) is not View template) return;
+        vista.ViewTemplateId = ElementId.InvalidElementId;
+        vista.ApplyViewTemplateParameters(template);
+    }
+
+    /// <summary>
+    /// Liga as etiquetas de tubo na vista. Se o template do escritório as esconde, a vista deixa de seguir o template e
+    /// fica com uma cópia das configurações dele, com as etiquetas ligadas: sem isso, as etiquetas são criadas e não
+    /// aparecem. A escala e o recorte já ajustados continuam os mesmos.
+    /// </summary>
+    public static void MostrarEtiquetas(Document doc, View vista)
+    {
+        var etiquetas = new ElementId(BuiltInCategory.OST_PipeTags);
+        if (!vista.AreAnnotationCategoriesHidden && !vista.GetCategoryHidden(etiquetas)) return;
+        if (vista.ViewTemplateId != ElementId.InvalidElementId)
+        {
+            var escala = vista.Scale;
+            var recortada = vista.CropBoxActive;
+            Desvincular(doc, vista);
+            try { vista.Scale = escala; }
+            catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+            vista.CropBoxActive = recortada;
+        }
+
+        vista.AreAnnotationCategoriesHidden = false;
+        Esconder(vista, etiquetas, false);
+    }
+
     static void Esconder(View vista, ElementId categoria, bool esconder)
     {
         try
@@ -191,7 +222,13 @@ static class VistasSpk
         ApagarSeExistir(doc, nome);
         var vista = View3D.CreateIsometric(doc, Tipo(doc, ViewFamily.ThreeDimensional).Id);
         vista.Name = nome;
-        if (!AplicarTemplate(doc, vista, template))
+        if (AplicarTemplate(doc, vista, template))
+        {
+            // Com o template do escritório ligado, as etiquetas criadas no 3D travado sumiam sem aviso antes do fim da
+            // transação. O 3D é do SPK e é recriado a cada rodada: fica com uma cópia das configurações do template.
+            Desvincular(doc, vista);
+        }
+        else
         {
             EstiloPadrao(doc, vista, soARede: true);
             // Médio: tubo continua em linha simples, e o bico aparece; muitas famílias de sprinkler escondem a geometria no Baixo.

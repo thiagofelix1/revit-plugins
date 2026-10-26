@@ -174,6 +174,7 @@ static class TesteAutomatico
                         Folhas = folhas.Folhas.Select(id => doc!.GetElement(id) is ViewSheet s ? $"{s.SheetNumber}  {s.Name}" : id.ToString()).ToList(),
                         Pdf = folhas.Pdf,
                         Textos = folhas.Textos.ToList(),
+                        Vistas = Diagnostico.Vistas(doc!),
                     };
                     return folhas.Texto();
                 });
@@ -376,6 +377,38 @@ static class TesteAutomatico
     static string Seguro(string nome) => string.Concat(nome.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '-' : c));
 }
 
+/// <summary>Estado das vistas do SPK depois das folhas: o que a vista mostra das etiquetas e por quê.</summary>
+static class Diagnostico
+{
+    public static List<string> Vistas(Document doc) =>
+        new FilteredElementCollector(doc).OfClass(typeof(View)).Cast<View>()
+            .Where(v => !v.IsTemplate && v.Name.StartsWith(Folhas.PranchaSpk.PrefixoVista, StringComparison.Ordinal)
+                        && v.ViewType is ViewType.ThreeD or ViewType.FloorPlan)
+            .Select(v => Linha(doc, v))
+            .ToList();
+
+    static string Linha(Document doc, View v)
+    {
+        var etiquetas = new ElementId(BuiltInCategory.OST_PipeTags);
+        var donas = new FilteredElementCollector(doc).OfClass(typeof(IndependentTag)).Cast<IndependentTag>()
+            .Where(t => t.OwnerViewId == v.Id).ToList();
+        var visiveis = new FilteredElementCollector(doc, v.Id).OfClass(typeof(IndependentTag)).GetElementCount();
+        var categorias = donas.GroupBy(t => t.Category?.Name ?? "?").Select(g => $"{g.Key}×{g.Count()}");
+        var exemplo = donas.FirstOrDefault();
+        var template = doc.GetElement(v.ViewTemplateId)?.Name ?? "-";
+        var sobreposicao = v.GetCategoryOverrides(etiquetas);
+        var filtros = v.GetFilters().Select(f => $"{doc.GetElement(f)?.Name}(vis={v.GetFilterVisibility(f)})");
+        return $"{v.Name} | {v.ViewType} | template={template} | escala={v.Scale} | anotacoesEscondidas={v.AreAnnotationCategoriesHidden} " +
+               $"| pipeTagsEscondida={v.GetCategoryHidden(etiquetas)} | travada={(v as View3D)?.IsLocked} | tags donas={donas.Count} visiveis={visiveis} " +
+               $"[{string.Join(",", categorias)}] | texto1={exemplo?.TagText} cabeca1={Fmt(exemplo?.TagHeadPosition)} " +
+               $"| cor={sobreposicao.ProjectionLineColor?.IsValid} halftone={sobreposicao.Halftone} transp={sobreposicao.Transparency} " +
+               $"| estilo={v.DisplayStyle} detalhe={v.DetailLevel} | filtros=[{string.Join(",", filtros)}] " +
+               $"| recorteAnot={v.get_Parameter(BuiltInParameter.VIEWER_ANNOTATION_CROP_ACTIVE)?.AsInteger()} recorte={v.CropBoxActive}";
+    }
+
+    static string Fmt(XYZ? p) => p is null ? "-" : $"({p.X:0.0},{p.Y:0.0},{p.Z:0.0})";
+}
+
 sealed class FilaDeTestes
 {
     public List<Cenario> Cenarios { get; set; } = [];
@@ -491,4 +524,5 @@ sealed class ResumoFolhas
     public List<string> Folhas { get; set; } = [];
     public string? Pdf { get; set; }
     public List<string> Textos { get; set; } = [];
+    public List<string>? Vistas { get; set; }
 }

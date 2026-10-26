@@ -53,13 +53,13 @@ static class FolhasDoSetor
         double NoModelo(double mmNoPapel) => VistasSpk.Pes(mmNoPapel * escala / 1000);
 
         var pontos = bicos.Select(b => (b.Dado, Ponto: (b.Elemento!.Location as LocationPoint)?.Point)).ToList();
-        var cantos = AreaDeCalculo(pontos.Where(p => p.Dado.NaArea && p.Ponto is not null).Select(p => p.Ponto!).ToList(),
+        var lacos = AreaDeCalculo(pontos.Where(p => p.Dado.NaArea && p.Ponto is not null).Select(p => p.Ponto!).ToList(),
             pontos.Where(p => p.Ponto is not null).Select(p => p.Ponto!).ToList(), direcao);
-        if (cantos is not null)
+        if (lacos.Count > 0)
         {
             PranchaSpk.Tentar(avisos, "Hachura da área de cálculo", () => PranchaSpk.RegiaoPreenchida(doc, planta,
-                PranchaSpk.TipoDeRegiao(doc, TipoHachura, PranchaSpk.Padrao(doc, PadraoHachura, 3, Math.PI / 4), Vermelho), [cantos], nivel));
-            var topo = cantos.OrderByDescending(c => c.Y).ThenBy(c => c.X).First();
+                PranchaSpk.TipoDeRegiao(doc, TipoHachura, PranchaSpk.Padrao(doc, PadraoHachura, 3, Math.PI / 4), Vermelho), lacos, nivel));
+            var topo = lacos.SelectMany(l => l).OrderByDescending(c => c.Y).ThenBy(c => c.X).First();
             PranchaSpk.Tentar(avisos, "Rótulo da área", () => PranchaSpk.Nota(doc, planta, topo + new XYZ(0, NoModelo(4), 0),
                 $"ÁREA DE CÁLCULO — {daArea.Count} chuveiros"));
         }
@@ -97,6 +97,10 @@ static class FolhasDoSetor
             VistasSpk.TemplateCorte));
 
         doc.Regenerate();
+        var doSetor = elementos.Select(e => e.Id).ToHashSet();
+        EsconderOutrosSetores(doc, iso, doSetor, avisos);
+        if (corte is not null) EsconderOutrosSetores(doc, corte, doSetor, avisos);
+        EsconderOutrosCortes(doc, planta, $"{PranchaSpk.PrefixoVista}{setor} — Corte", avisos);
         PranchaSpk.Tentar(avisos, "Recorte do 3D", () => VistasSpk.Recortar3d(iso, rede.Expandir(VistasSpk.Pes(0.3), VistasSpk.Pes(0.3))));
         var (largura3d, altura3d) = VistasSpk.Extensao(iso);
         PranchaSpk.Tentar(avisos, "Escala do 3D", () => iso.Scale = regiao3d.Escala(largura3d, altura3d));
@@ -164,23 +168,58 @@ static class FolhasDoSetor
     /// Retângulo da área de operação, alinhado aos ramais: cobre os bicos da área com meio espaçamento de folga para cada
     /// lado. O espaçamento sai dos bicos do setor inteiro. Cantos em sentido anti-horário.
     /// </summary>
-    static List<XYZ>? AreaDeCalculo(IReadOnlyList<XYZ> daArea, IReadOnlyList<XYZ> todos, XYZ d)
+    /// <summary>
+    /// Laços da hachura: a união da cobertura de cada bico da área (meio passo para cada lado, o passo medido em todos os
+    /// bicos do setor). A área de 12 bicos em ramais de 5 fica em "L" (5 + 5 + 2), e a hachura não cobre os bicos de fora.
+    /// </summary>
+    static List<List<XYZ>> AreaDeCalculo(IReadOnlyList<XYZ> daArea, IReadOnlyList<XYZ> todos, XYZ d)
     {
-        if (daArea.Count == 0) return null;
+        if (daArea.Count == 0) return [];
         var t = new XYZ(-d.Y, d.X, 0);
-        var meioU = Passo(todos.Select(p => p.DotProduct(d))) / 2;
-        var meioV = Passo(todos.Select(p => p.DotProduct(t))) / 2;
-        var u0 = daArea.Min(p => p.DotProduct(d)) - meioU;
-        var u1 = daArea.Max(p => p.DotProduct(d)) + meioU;
-        var v0 = daArea.Min(p => p.DotProduct(t)) - meioV;
-        var v1 = daArea.Max(p => p.DotProduct(t)) + meioV;
-        XYZ P(double u, double v) => d * u + t * v;
-        return [P(u0, v0), P(u1, v0), P(u1, v1), P(u0, v1)];
+        double U(XYZ p) => VistasSpk.Metros(p.DotProduct(d));
+        double V(XYZ p) => VistasSpk.Metros(p.DotProduct(t));
+        var meioU = Spk.Motor.Modelo.Contorno.Passo(todos.Select(U)) / 2;
+        var meioV = Spk.Motor.Modelo.Contorno.Passo(todos.Select(V)) / 2;
+        var coberturas = daArea.Select(p => (U(p) - meioU, V(p) - meioV, U(p) + meioU, V(p) + meioV)).ToList();
+        return Spk.Motor.Modelo.Contorno.DeRetangulos(coberturas, vaoMaximo: 0.3)
+            .Select(laco => laco.Select(p => d * VistasSpk.Pes(p.U) + t * VistasSpk.Pes(p.V)).ToList())
+            .ToList();
     }
 
-    /// <summary>O mesmo passo do contorno da setorização, em pés.</summary>
-    static double Passo(IEnumerable<double> valores) =>
-        VistasSpk.Pes(Spk.Motor.Modelo.Contorno.Passo(valores.Select(VistasSpk.Metros)));
+    /// <summary>
+    /// Esconde bicos e tubos que não são do setor, e as conexões e válvulas ligadas só a eles: no corte e no 3D, a rede de
+    /// outro setor que passa dentro do recorte (a descida do pavimento de cima, por exemplo) não aparece. Peça sem ligação
+    /// fica visível, porque num modelo lido por proximidade ela pode ser do setor.
+    /// </summary>
+    static void EsconderOutrosSetores(Document doc, View vista, HashSet<ElementId> doSetor, IList<string> avisos)
+    {
+        var fora = new List<ElementId>();
+        foreach (var categoria in new[] { BuiltInCategory.OST_PipeCurves, BuiltInCategory.OST_Sprinklers })
+        foreach (var elemento in new FilteredElementCollector(doc).OfCategory(categoria).WhereElementIsNotElementType())
+            if (!doSetor.Contains(elemento.Id) && elemento.CanBeHidden(vista)) fora.Add(elemento.Id);
+        foreach (var categoria in new[] { BuiltInCategory.OST_PipeFitting, BuiltInCategory.OST_PipeAccessory })
+        foreach (var elemento in new FilteredElementCollector(doc).OfCategory(categoria).WhereElementIsNotElementType())
+        {
+            if (elemento is not FamilyInstance { MEPModel.ConnectorManager: { } conectores } || !elemento.CanBeHidden(vista)) continue;
+            var ligadas = conectores.Connectors.Cast<Connector>().Where(c => c.IsConnected)
+                .SelectMany(c => c.AllRefs.Cast<Connector>()).Select(r => r.Owner.Id).Where(id => id != elemento.Id).ToList();
+            if (ligadas.Count > 0 && !ligadas.Any(doSetor.Contains)) fora.Add(elemento.Id);
+        }
+        if (fora.Count > 0) PranchaSpk.Tentar(avisos, "Esconder os outros setores", () => vista.HideElements(fora));
+    }
+
+    /// <summary>
+    /// Marcas de corte do SPK que não são o corte deste setor (o corte da Rede de exemplo, cortes de outros setores de
+    /// rodadas anteriores). Cortes do projeto, com outros nomes, ficam como estão.
+    /// </summary>
+    static void EsconderOutrosCortes(Document doc, View planta, string corte, IList<string> avisos)
+    {
+        var outros = new FilteredElementCollector(doc, planta.Id).OfCategory(BuiltInCategory.OST_Viewers).WhereElementIsNotElementType()
+            .Where(e => e.Name.StartsWith(PranchaSpk.PrefixoVista, StringComparison.Ordinal) && e.Name != corte && e.CanBeHidden(planta))
+            .Select(e => e.Id)
+            .ToList();
+        if (outros.Count > 0) PranchaSpk.Tentar(avisos, "Esconder outros cortes na planta", () => planta.HideElements(outros));
+    }
 
     /// <summary>
     /// Planta do nível em escala pequena com a hachura de todos os setores e o deste em cor cheia, como o mapa-chave das
@@ -224,6 +263,8 @@ static class FolhasDoSetor
         var tipo = PranchaSpk.EtiquetaDeTubo(doc);
         if (tipo == ElementId.InvalidElementId)
             avisos.Add("O projeto não tem etiqueta de tubo carregada; os diâmetros saíram como texto.");
+        else
+            PranchaSpk.Tentar(avisos, "Mostrar as etiquetas na planta", () => VistasSpk.MostrarEtiquetas(doc, planta));
 
         var feitas = 0;
         foreach (var tubo in tubos)

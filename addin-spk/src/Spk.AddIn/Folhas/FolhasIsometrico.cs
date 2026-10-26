@@ -159,6 +159,10 @@ static class FolhasIsometrico
             .Where(p => p.Linha is not null && p.Linha.Length >= minimo)
             .OrderByDescending(p => p.Linha!.Length)
             .ToList();
+        PranchaSpk.Tentar(avisos, "Mostrar as etiquetas no 3D", () => VistasSpk.MostrarEtiquetas(doc, vista));
+        if (tubos.Count == 0) return 0;
+        if (ComoEtiquetar(doc, vista, tipo, tubos[0].Tubo, tubos[0].Linha!, avisos) is not { } como) return 0;
+        var (aceito, chamada) = como;
         var feitas = 0;
         foreach (var (tubo, linha) in tubos)
         {
@@ -169,12 +173,82 @@ static class FolhasIsometrico
             }
             PranchaSpk.Tentar(avisos, "Etiqueta no isométrico", () =>
             {
-                IndependentTag.Create(doc, tipo, vista.Id, new Reference(tubo), false, TagOrientation.Horizontal, linha!.Evaluate(0.5, true));
+                IndependentTag.Create(doc, aceito, vista.Id, new Reference(tubo), chamada, TagOrientation.Horizontal, linha!.Evaluate(0.5, true));
                 feitas++;
             });
         }
-        return feitas;
+
+        // O Revit pode apagar etiquetas de 3D sem erro nem aviso; conta o que ficou para não informar etiquetas que não existem.
+        doc.Regenerate();
+        var ficaram = new FilteredElementCollector(doc).OfClass(typeof(IndependentTag)).Cast<IndependentTag>()
+            .Count(t => t.OwnerViewId == vista.Id);
+        if (ficaram < feitas)
+            avisos.Add($"O Revit apagou {feitas - ficaram} das {feitas} etiquetas do 3D \"{vista.Name}\".");
+        return ficaram;
     }
+
+    /// <summary>
+    ///     Como etiquetar o 3D sem que o Revit apague as etiquetas ao regenerar, o que ele faz sem erro nem aviso. Com o
+    ///     template 3D da Nova Era (vista sombreada), a etiqueta sem linha de chamada sumia; em linhas ocultas, o estilo de
+    ///     desenho do isométrico, ela fica. Prova com uma etiqueta só, nesta ordem: a vista como veio do template, a vista em
+    ///     linhas ocultas, a etiqueta com linha de chamada; e, se o tipo do padrão não ficar de jeito nenhum, os outros
+    ///     tipos de etiqueta de tubo do projeto.
+    /// </summary>
+    static (ElementId Tipo, bool Chamada)? ComoEtiquetar(Document doc, View vista, ElementId preferido, MEPCurve tubo, Line linha,
+        IList<string> avisos)
+    {
+        bool Fica(ElementId tipo, bool chamada)
+        {
+            try
+            {
+                var prova = IndependentTag.Create(doc, tipo, vista.Id, new Reference(tubo), chamada, TagOrientation.Horizontal,
+                    linha.Evaluate(0.5, true)).Id;
+                doc.Regenerate();
+                if (doc.GetElement(prova) is null) return false;
+                doc.Delete(prova);
+                return true;
+            }
+            catch (Autodesk.Revit.Exceptions.ApplicationException)
+            {
+                return false;
+            }
+        }
+
+        var candidatos = new[] { preferido }.Concat(new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_PipeTags)
+                .WhereElementIsElementType().ToElementIds().Where(id => id != preferido))
+            .ToList();
+        var recusados = new List<string>();
+        foreach (var tipo in candidatos)
+        {
+            if (Fica(tipo, false)) return Aceito(tipo, false);
+            if (vista.DisplayStyle != DisplayStyle.HLR)
+            {
+                var estilo = vista.DisplayStyle;
+                vista.DisplayStyle = DisplayStyle.HLR;
+                if (Fica(tipo, false)) return Aceito(tipo, false);
+                vista.DisplayStyle = estilo;
+            }
+            if (Fica(tipo, true))
+            {
+                avisos.Add("As etiquetas do 3D saíram com linha de chamada: sem ela o Revit as apagava.");
+                return Aceito(tipo, true);
+            }
+            recusados.Add(NomeDoTipo(doc, tipo));
+        }
+
+        avisos.Add($"Nenhuma etiqueta de tubo do projeto fica no 3D ({string.Join(", ", recusados)}); o isométrico ficou sem diâmetros.");
+        return null;
+
+        (ElementId, bool) Aceito(ElementId tipo, bool chamada)
+        {
+            if (tipo != preferido)
+                avisos.Add($"A etiqueta de tubo {string.Join(", ", recusados)} não fica no 3D; o isométrico usou {NomeDoTipo(doc, tipo)}.");
+            return (tipo, chamada);
+        }
+    }
+
+    static string NomeDoTipo(Document doc, ElementId id) =>
+        doc.GetElement(id) is FamilySymbol s ? $"\"{PadraoEscritorio.Nome(s)}\"" : id.ToString();
 
     static void NomearVgas(Document doc, View vista, IList<string> avisos)
     {

@@ -57,7 +57,7 @@ Sem `fila.json` na pasta, nada disso é ligado: o Revit abre normalmente.
 
 ## O relatório
 
-Por cenário: `Ok`, `Erro` (com a pilha), `Etapas` (nome, segundos, texto do resultado ou erro), `Calculo` (atende, setor, bicos, trechos, pressão, vazão, crítico, falhas, avisos), `Folhas` (números, PDF, textos), `Dialogos` respondidos e `Vgas` com, para cada válvula Fonte, a posição, cada conector (ligado ou não, distância da ponta e do corpo do tubo mais próximo) e um rastreio da cadeia de tubos a partir dela até o primeiro vão.
+Por cenário: `Ok`, `Erro` (com a pilha), `Etapas` (nome, segundos, texto do resultado ou erro), `Calculo` (atende, setor, bicos, trechos, pressão, vazão, crítico, falhas, avisos), `Folhas` (números, PDF, textos e `Vistas`: para cada vista 3D e planta do SPK, template, escala, estilo, se esconde anotações, quantas etiquetas existem e quantas aparecem), `Dialogos` respondidos e `Vgas` com, para cada válvula Fonte, a posição, cada conector (ligado ou não, distância da ponta e do corpo do tubo mais próximo) e um rastreio da cadeia de tubos a partir dela até o primeiro vão.
 
 ## O que ainda pede clique
 
