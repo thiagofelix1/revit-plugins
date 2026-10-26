@@ -33,7 +33,8 @@ static class LeitorRede
         var limites = new HashSet<ElementId>(vgas ?? []);
         if (fonte is not null) limites.Add(fonte.Id);
         var naRede = Alcançaveis(doc, idsBico, limites);
-        if (fonte is not null && !naRede.Contains(fonte.Id))
+        // Num modelo sem conexões ligadas os conectores só alcançam os próprios bicos; a VGA é achada depois, por proximidade.
+        if (fonte is not null && !naRede.Contains(fonte.Id) && naRede.Count > idsBico.Count)
             throw new InvalidOperationException("A VGA escolhida não está ligada por tubos aos bicos confirmados.");
         var avisos = new List<string>
         {
