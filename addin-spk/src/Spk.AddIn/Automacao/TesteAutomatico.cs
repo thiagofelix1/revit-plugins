@@ -144,6 +144,7 @@ static class TesteAutomatico
                 Nome = LeitorRede.NomeDaVga(v),
                 Familia = $"{v.Symbol?.Family?.Name} : {v.Symbol?.Name}",
                 Ponto = (v.Location as LocationPoint)?.Point is { } p ? [Math.Round(p.X * 0.3048, 2), Math.Round(p.Y * 0.3048, 2), Math.Round(p.Z * 0.3048, 2)] : null,
+                Conectores = Conectores(doc!, v),
             }).ToList();
 
             if (cenario.RedeExemplo)
@@ -294,6 +295,40 @@ static class TesteAutomatico
         return string.Join("\n", feitos);
     }
 
+    /// <summary>
+    /// Diagnóstico de cada conector da VGA: onde está, se está ligado no Revit e a que distância fica a ponta e o corpo
+    /// do tubo mais próximo. Mostra por que a leitura por proximidade não passa pela válvula.
+    /// </summary>
+    static List<ConectorLido> Conectores(Document doc, FamilyInstance vga)
+    {
+        var tubos = new FilteredElementCollector(doc).OfClass(typeof(Autodesk.Revit.DB.Plumbing.Pipe)).Cast<Autodesk.Revit.DB.Plumbing.Pipe>()
+            .Select(t => (Tubo: t, Curva: (t.Location as LocationCurve)?.Curve)).Where(t => t.Curva is not null).ToList();
+        var lista = new List<ConectorLido>();
+        if (vga.MEPModel?.ConnectorManager is not { } gerente) return lista;
+        foreach (Connector c in gerente.Connectors)
+        {
+            var o = c.Origin;
+            var ponta = tubos.SelectMany(t => new[] { t.Curva!.GetEndPoint(0), t.Curva.GetEndPoint(1) }.Select(e => (t.Tubo, D: e.DistanceTo(o))))
+                .OrderBy(x => x.D).FirstOrDefault();
+            var corpo = tubos.Select(t => (t.Tubo, D: t.Curva!.Project(o)?.Distance ?? double.MaxValue)).OrderBy(x => x.D).FirstOrDefault();
+            string? ligadoA = null;
+            if (c.IsConnected)
+                foreach (Connector outro in c.AllRefs)
+                    if (outro.Owner is { } dono && dono.Id != vga.Id) ligadoA = $"{dono.Category?.Name} {dono.Id.Value}";
+            lista.Add(new ConectorLido
+            {
+                Ponto = [Math.Round(o.X * 0.3048, 3), Math.Round(o.Y * 0.3048, 3), Math.Round(o.Z * 0.3048, 3)],
+                DiametroMm = c.Shape == ConnectorProfileType.Round ? Math.Round(c.Radius * 2 * 304.8) : 0,
+                LigadoA = ligadoA,
+                PontaDeTuboMaisProximaM = ponta.Tubo is null ? null : Math.Round(ponta.D * 0.3048, 3),
+                TuboDaPonta = ponta.Tubo?.Id.Value,
+                CorpoDeTuboMaisProximoM = corpo.Tubo is null ? null : Math.Round(corpo.D * 0.3048, 3),
+                TuboDoCorpo = corpo.Tubo?.Id.Value,
+            });
+        }
+        return lista;
+    }
+
     static string Seguro(string nome) => string.Concat(nome.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '-' : c));
 }
 
@@ -370,6 +405,19 @@ sealed class VgaLida
 
     /// <summary>Em metros.</summary>
     public double[]? Ponto { get; set; }
+
+    public List<ConectorLido>? Conectores { get; set; }
+}
+
+sealed class ConectorLido
+{
+    public double[] Ponto { get; set; } = [];
+    public double DiametroMm { get; set; }
+    public string? LigadoA { get; set; }
+    public double? PontaDeTuboMaisProximaM { get; set; }
+    public long? TuboDaPonta { get; set; }
+    public double? CorpoDeTuboMaisProximoM { get; set; }
+    public long? TuboDoCorpo { get; set; }
 }
 
 sealed class ResumoCalculo
