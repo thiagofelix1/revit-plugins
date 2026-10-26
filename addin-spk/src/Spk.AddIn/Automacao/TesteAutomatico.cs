@@ -221,7 +221,9 @@ static class TesteAutomatico
         var leitura = BicosDoModelo.Ler(doc);
         var vgas = leitura.Gerados ? [] : MapeamentoGravado.Vgas(doc);
         FamilyInstance? fonte = null;
-        if (pedido.Vga is { } idVga)
+        if (pedido.Setor is not null || pedido.Elemento is not null)
+            vgas = [];
+        else if (pedido.Vga is { } idVga)
             fonte = vgas.FirstOrDefault(v => v.Id.Value == idVga)
                     ?? throw new InvalidOperationException($"A VGA {idVga} não está entre as marcadas como Fonte.");
         else if (vgas.Count == 1)

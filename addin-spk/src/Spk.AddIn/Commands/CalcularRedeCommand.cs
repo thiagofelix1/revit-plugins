@@ -50,7 +50,18 @@ public class CalcularRedeCommand : ExternalCommand
                 doSetor = escolhido;
             }
 
-            var resultado = ServicoCalculo.Executar(doc, dados, leitura, fonte, vgas.Select(v => v.Id).ToList(), doSetor);
+            ServicoCalculo.Resultado resultado;
+            try
+            {
+                resultado = ServicoCalculo.Executar(doc, dados, leitura, fonte, vgas.Select(v => v.Id).ToList(), doSetor);
+            }
+            catch (VgaDesligadaException e)
+            {
+                // A válvula não alcança a rede (vão no modelo): calcula pelo pedaço de rede do setor, se o engenheiro quiser.
+                var (seguir, escolhido) = EscolherSetor(Application.ActiveUIDocument!, e.Message);
+                if (!seguir) return;
+                resultado = ServicoCalculo.Executar(doc, dados, leitura, null, [], escolhido);
+            }
             TaskDialog.Show("SPK — Calcular", resultado.Texto());
         }
         catch (Autodesk.Revit.Exceptions.OperationCanceledException)
@@ -66,13 +77,13 @@ public class CalcularRedeCommand : ExternalCommand
     /// Sem VGA no modelo, cada pedaço de rede é um setor. O engenheiro clica num bico ou tubo do que quer calcular, ou
     /// fica com o de mais bicos (elemento nulo). Cancelar devolve <c>Seguir = false</c>.
     /// </summary>
-    static (bool Seguir, ElementId? Elemento) EscolherSetor(UIDocument ui)
+    static (bool Seguir, ElementId? Elemento) EscolherSetor(UIDocument ui, string? motivo = null)
     {
         var dialogo = new TaskDialog("SPK — Calcular")
         {
             MainInstruction = "Qual setor calcular?",
-            MainContent = "O modelo não tem VGA marcada em Famílias. Cada rede sem ligação com as outras é tratada como um setor, " +
-                          "com a entrada na ponta mais baixa da descida.",
+            MainContent = (motivo ?? "O modelo não tem VGA marcada em Famílias.") +
+                          " Cada rede sem ligação com as outras é tratada como um setor, com a entrada na ponta mais baixa da descida.",
             CommonButtons = TaskDialogCommonButtons.Cancel,
         };
         dialogo.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Clicar num bico ou tubo do setor");

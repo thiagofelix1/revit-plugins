@@ -144,7 +144,14 @@ static class LeitorRede
         if (fonte is not null)
         {
             noFonte = IdPeca(fonte.Id);
-            setor = Topologia.SetorDaVga(noFonte, trechos, nosDeBico, nosDeVga);
+            try
+            {
+                setor = Topologia.SetorDaVga(noFonte, trechos, nosDeBico, nosDeVga);
+            }
+            catch (InvalidOperationException)
+            {
+                throw new VgaDesligadaException(NomeDaVga(fonte), DistanciaAteARede(fonte, nos, trechos));
+            }
         }
         else
         {
@@ -222,6 +229,18 @@ static class LeitorRede
                 nosDoElemento.Add(trecho.De);
         var k = componentes.FindIndex(c => c.Nos.Overlaps(nosDoElemento));
         return k >= 0 ? k : throw new InvalidOperationException("O elemento clicado não está em nenhum setor que o plugin conseguiu ler.");
+    }
+
+    /// <summary>Distância em metros da VGA até o nó mais próximo da rede lida, ou nula se não der para medir.</summary>
+    static double? DistanciaAteARede(FamilyInstance vga, Dictionary<string, No> nos, List<Trecho> trechos)
+    {
+        if (vga.Location is not LocationPoint local) return null;
+        var p = local.Point;
+        double x = Metros(p.X), y = Metros(p.Y), z = Metros(p.Z);
+        var usados = trechos.SelectMany(t => new[] { t.De, t.Para }).Where(id => !id.StartsWith('S')).ToHashSet(StringComparer.Ordinal);
+        if (usados.Count == 0) return null;
+        return usados.Where(nos.ContainsKey).Select(id => nos[id])
+            .Min(n => Math.Sqrt((n.X - x) * (n.X - x) + (n.Y - y) * (n.Y - y) + (n.Z - z) * (n.Z - z)));
     }
 
     /// <summary>Marca, comentário ou nome do tipo da VGA, o que estiver preenchido primeiro.</summary>
@@ -966,4 +985,16 @@ static class LeitorRede
         UnitUtils.ConvertToInternalUnits(no.X, UnitTypeId.Meters),
         UnitUtils.ConvertToInternalUnits(no.Y, UnitTypeId.Meters),
         UnitUtils.ConvertToInternalUnits(no.Z, UnitTypeId.Meters));
+}
+
+/// <summary>
+/// A VGA escolhida não alcança nenhum bico pela rede lida: no modelo há um vão entre ela e a descida do setor, ou ela
+/// não é a válvula de um setor. Quem chama pode cair para a leitura por pedaço de rede.
+/// </summary>
+sealed class VgaDesligadaException(string vga, double? distancia) : InvalidOperationException(
+    $"A VGA {vga} não está ligada a nenhum bico pela rede do modelo" +
+    (distancia is { } d ? $" (o tubo mais próximo da rede lida está a {d:0.0} m dela)" : "") +
+    ". Provavelmente há um vão entre a válvula e a descida do setor no modelo.")
+{
+    public string Vga { get; } = vga;
 }

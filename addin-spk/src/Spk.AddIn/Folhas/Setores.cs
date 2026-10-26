@@ -39,7 +39,33 @@ static class LeituraSetores
         var leitura = BicosDoModelo.Ler(doc);
         var vgas = leitura.Gerados ? [] : MapeamentoGravado.Vgas(doc);
         var lidas = new List<LeitorRede.RedeLida>();
-        if (vgas.Count == 0)
+        if (vgas.Count > 0)
+        {
+            var ids = vgas.Select(v => v.Id).ToList();
+            var desligadas = 0;
+            foreach (var vga in vgas)
+            {
+                try
+                {
+                    lidas.Add(LeitorRede.Montar(doc, leitura.Bicos, 120, vga, ids));
+                }
+                catch (VgaDesligadaException)
+                {
+                    desligadas++;
+                }
+                catch (InvalidOperationException e)
+                {
+                    avisos.Add($"{LeitorRede.NomeDaVga(vga)}: {e.Message}");
+                }
+            }
+            if (desligadas > 0 && lidas.Count == 0)
+                avisos.Add($"Nenhuma das {vgas.Count} VGAs marcadas alcança os bicos pela rede do modelo (há vão entre as válvulas e as " +
+                           "descidas). Os setores foram separados pelos pedaços de rede.");
+            else if (desligadas > 0)
+                avisos.Add($"{desligadas} VGA(s) marcada(s) não alcançam nenhum bico e ficaram fora da setorização.");
+        }
+
+        if (lidas.Count == 0)
         {
             // Sem VGA, cada pedaço de rede é um setor; a primeira leitura diz quantos são, do maior para o menor.
             var primeira = LeitorRede.Montar(doc, leitura.Bicos, 120);
@@ -67,21 +93,6 @@ static class LeituraSetores
             if (pequenos > 0)
                 avisos.Add($"{pequenos} pedaço(s) de rede com menos de {MinimoBicos} bicos ficaram fora da setorização " +
                            "(bico ou trecho sem ligação com o resto da rede).");
-        }
-        else
-        {
-            var ids = vgas.Select(v => v.Id).ToList();
-            foreach (var vga in vgas)
-            {
-                try
-                {
-                    lidas.Add(LeitorRede.Montar(doc, leitura.Bicos, 120, vga, ids));
-                }
-                catch (InvalidOperationException e)
-                {
-                    avisos.Add($"{LeitorRede.NomeDaVga(vga)}: {e.Message}");
-                }
-            }
         }
 
         var niveis = Niveis(doc);
