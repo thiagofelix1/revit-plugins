@@ -324,9 +324,47 @@ static class TesteAutomatico
                 TuboDaPonta = ponta.Tubo?.Id.Value,
                 CorpoDeTuboMaisProximoM = corpo.Tubo is null ? null : Math.Round(corpo.D * 0.3048, 3),
                 TuboDoCorpo = corpo.Tubo?.Id.Value,
+                Rastreio = ponta.Tubo is null ? null : Rastrear(doc, tubos, ponta.Tubo, o),
             });
         }
         return lista;
+    }
+
+    /// <summary>
+    /// A partir do tubo encostado no conector, segue pela outra ponta até o tubo ou peça mais próximo, 12 saltos no
+    /// máximo. Cada linha: tubo, DN, comprimento, cota e a distância até o próximo. O primeiro salto grande mostra o vão.
+    /// </summary>
+    static List<string> Rastrear(Document doc, List<(Autodesk.Revit.DB.Plumbing.Pipe Tubo, Curve? Curva)> tubos,
+        Autodesk.Revit.DB.Plumbing.Pipe inicio, XYZ entrada)
+    {
+        var pecas = new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance)).Cast<FamilyInstance>()
+            .Where(fi => fi.Category?.Id.Value is (long)BuiltInCategory.OST_PipeFitting or (long)BuiltInCategory.OST_PipeAccessory
+                or (long)BuiltInCategory.OST_Sprinklers)
+            .SelectMany(fi => fi.MEPModel?.ConnectorManager?.Connectors.Cast<Connector>().Select(c => (Peca: fi, c.Origin)) ?? [])
+            .ToList();
+        var linhas = new List<string>();
+        var vistos = new HashSet<long>();
+        var atual = inicio;
+        var chegada = entrada;
+        for (var salto = 0; salto < 12 && atual is not null && vistos.Add(atual.Id.Value); salto++)
+        {
+            var curva = ((LocationCurve)atual.Location).Curve;
+            var (a, b) = (curva.GetEndPoint(0), curva.GetEndPoint(1));
+            var saida = a.DistanceTo(chegada) < b.DistanceTo(chegada) ? b : a;
+            var dn = atual.get_Parameter(BuiltInParameter.RBS_PIPE_DIAMETER_PARAM)?.AsDouble() * 304.8 ?? 0;
+            var proximoTubo = tubos.Where(t => t.Tubo.Id != atual.Id && !vistos.Contains(t.Tubo.Id.Value))
+                .Select(t => (t.Tubo, D: Math.Min(t.Curva!.GetEndPoint(0).DistanceTo(saida), t.Curva.GetEndPoint(1).DistanceTo(saida)),
+                    Corpo: t.Curva.Project(saida)?.Distance ?? double.MaxValue))
+                .OrderBy(x => Math.Min(x.D, x.Corpo)).FirstOrDefault();
+            var proximaPeca = pecas.Select(p => (p.Peca, D: p.Origin.DistanceTo(saida))).OrderBy(x => x.D).FirstOrDefault();
+            linhas.Add($"tubo {atual.Id.Value} Ø{dn:0} L={curva.Length * 0.3048:0.00} m, sai em z={saida.Z * 0.3048:0.00}; " +
+                       $"peça mais próxima {proximaPeca.Peca?.Category?.Name} {proximaPeca.Peca?.Id.Value} a {proximaPeca.D * 0.3048:0.000} m; " +
+                       $"tubo mais próximo {proximoTubo.Tubo?.Id.Value} a {proximoTubo.D * 0.3048:0.000} m (corpo {proximoTubo.Corpo * 0.3048:0.000} m)");
+            if (proximoTubo.Tubo is null || Math.Min(proximoTubo.D, proximoTubo.Corpo) * 0.3048 > 0.5) break;
+            chegada = saida;
+            atual = proximoTubo.Tubo;
+        }
+        return linhas;
     }
 
     static string Seguro(string nome) => string.Concat(nome.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '-' : c));
@@ -418,6 +456,7 @@ sealed class ConectorLido
     public long? TuboDaPonta { get; set; }
     public double? CorpoDeTuboMaisProximoM { get; set; }
     public long? TuboDoCorpo { get; set; }
+    public List<string>? Rastreio { get; set; }
 }
 
 sealed class ResumoCalculo
