@@ -147,8 +147,14 @@ static class TesteAutomatico
                 Conectores = Conectores(doc!, v),
             }).ToList();
 
-            if (cenario.RedeExemplo)
-                Etapa(relatorio, "redeExemplo", () => RedeExemploCommand.Criar(doc!).Resumo);
+            if (cenario.RedeExemplo || cenario.Exemplo is not null)
+                Etapa(relatorio, "redeExemplo", () =>
+                {
+                    var escolhido = cenario.Exemplo is { } nome
+                        ? CenariosExemplo.PorNome(nome) ?? throw new InvalidOperationException($"Não há cenário de exemplo \"{nome}\".")
+                        : CenariosExemplo.Simples;
+                    return RedeExemploCommand.Criar(doc!, escolhido, gravarCriterios: cenario.Dados is null).Resumo;
+                });
 
             if (cenario.Calcular is { } pedido)
                 Etapa(relatorio, "calcular", () =>
@@ -389,6 +395,9 @@ sealed class Cenario
     public DadosProjeto? Dados { get; set; }
     public List<AjusteMapeamento>? Mapeamento { get; set; }
     public bool RedeExemplo { get; set; }
+
+    /// <summary>Cenário da Rede de exemplo pelo nome (ou começo do nome). Grava os critérios dele se não houver "dados".</summary>
+    public string? Exemplo { get; set; }
     public PedidoCalculo? Calcular { get; set; }
     public bool Folhas { get; set; }
 }

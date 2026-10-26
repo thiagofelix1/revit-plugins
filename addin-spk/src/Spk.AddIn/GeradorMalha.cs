@@ -5,35 +5,31 @@ using Autodesk.Revit.DB.Structure;
 namespace Spk.AddIn;
 
 /// <summary>
-/// Malha retangular mínima: bicos, ramais, subgeral e descida até a fonte,
-/// com tubos criados de conector a conector.
+/// Malha retangular de bicos, ramais, subgeral e descida até a fonte, em três arranjos (subgeral lateral, espinha de
+/// peixe, grelha), com tubos criados de conector a conector.
 /// </summary>
 static class GeradorMalha
 {
-    public static ResultadoGeracao Gerar(Document doc, XYZ origemNaPlanta, DadosEsboco dados)
+    /// <param name="nivelPedido">O nível da malha. Nulo: o da planta aberta, ou o mais perto da cota zero.</param>
+    public static ResultadoGeracao Gerar(Document doc, XYZ origemNaPlanta, DadosEsboco dados, Level? nivelPedido = null)
     {
-        var nivel = Nivel(doc) ?? throw new InvalidOperationException("O projeto não tem nível. Abra uma planta ou crie um nível.");
+        var nivel = nivelPedido ?? Nivel(doc) ?? throw new InvalidOperationException("O projeto não tem nível. Abra uma planta ou crie um nível.");
         var tipoTubo = TipoComTe(doc);
-        var diametro = DiametroComTe(doc, tipoTubo, dados.DnTubo);
+        var diametroRamal = DiametroComTe(doc, tipoTubo, dados.DnTubo);
+        var diametroSubgeral = DiametroComTe(doc, tipoTubo, dados.DnSubgeral > 0 ? dados.DnSubgeral : dados.DnTubo);
         var tipoSistema = Sistema(doc) ?? throw new InvalidOperationException("O projeto não tem sistema de tubulação.");
         var simbolo = SimboloDeBico(doc) ?? throw new InvalidOperationException(
             "O projeto não tem família de sprinkler carregada. Carregue uma e rode Gerar de novo.");
         if (!simbolo.IsActive) simbolo.Activate();
 
-        var sx = Pes(dados.EspacamentoRamalM);
-        var sy = Pes(dados.EspacamentoEntreRamaisM);
         var zTubo = nivel.Elevation + Pes(dados.AlturaRedeM);
         var zBico = zTubo - Pes(dados.DropM);
-        var x0 = origemNaPlanta.X;
-        var y0 = origemNaPlanta.Y;
-        var xSubgeral = x0 - sx;
+        var desenho = Desenhar(dados, origemNaPlanta.X, origemNaPlanta.Y);
 
         var bicos = new List<FamilyInstance>();
-        for (var j = 0; j < dados.Ramais; j++)
-        for (var i = 0; i < dados.BicosPorRamal; i++)
+        foreach (var (x, y) in desenho.Bicos)
         {
-            var bico = doc.Create.NewFamilyInstance(
-                new XYZ(x0 + i * sx, y0 + j * sy, nivel.Elevation), simbolo, nivel, StructuralType.NonStructural);
+            var bico = doc.Create.NewFamilyInstance(new XYZ(x, y, nivel.Elevation), simbolo, nivel, StructuralType.NonStructural);
             bico.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.Set(DadosEsboco.Marca);
             bico.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.Set(DadosEsboco.Marca);
             bicos.Add(bico);
@@ -44,30 +40,17 @@ static class GeradorMalha
         doc.Regenerate();
 
         var tubos = new List<Pipe>();
-        var porRamal = dados.BicosPorRamal;
-        for (var j = 0; j < dados.Ramais; j++)
+        for (var k = 0; k < bicos.Count; k++)
         {
-            var y = y0 + j * sy;
-            for (var i = 0; i < porRamal; i++)
-            {
-                var bico = bicos[j * porRamal + i];
-                var naPonta = OrigemDoConector(bico) ?? new XYZ(x0 + i * sx, y, zBico);
-                var topo = new XYZ(naPonta.X, naPonta.Y, zTubo);
-                tubos.Add(CriarTubo(doc, tipoSistema.Id, tipoTubo.Id, nivel.Id, topo, naPonta, diametro));
-                if (i > 0)
-                    tubos.Add(CriarTubo(doc, tipoSistema.Id, tipoTubo.Id, nivel.Id,
-                        new XYZ(x0 + (i - 1) * sx, y, zTubo), new XYZ(x0 + i * sx, y, zTubo), diametro));
-            }
-
-            tubos.Add(CriarTubo(doc, tipoSistema.Id, tipoTubo.Id, nivel.Id,
-                new XYZ(xSubgeral, y, zTubo), new XYZ(x0, y, zTubo), diametro));
-            if (j > 0)
-                tubos.Add(CriarTubo(doc, tipoSistema.Id, tipoTubo.Id, nivel.Id,
-                    new XYZ(xSubgeral, y0 + (j - 1) * sy, zTubo), new XYZ(xSubgeral, y, zTubo), diametro));
+            var (x, y) = desenho.Bicos[k];
+            var naPonta = OrigemDoConector(bicos[k]) ?? new XYZ(x, y, zBico);
+            tubos.Add(CriarTubo(doc, tipoSistema.Id, tipoTubo.Id, nivel.Id, new XYZ(naPonta.X, naPonta.Y, zTubo), naPonta, diametroRamal));
         }
-
+        foreach (var t in desenho.Trechos)
+            tubos.Add(CriarTubo(doc, tipoSistema.Id, tipoTubo.Id, nivel.Id,
+                new XYZ(t.X0, t.Y0, zTubo), new XYZ(t.X1, t.Y1, zTubo), t.Subgeral ? diametroSubgeral : diametroRamal));
         tubos.Add(CriarTubo(doc, tipoSistema.Id, tipoTubo.Id, nivel.Id,
-            new XYZ(xSubgeral, y0, zTubo), new XYZ(xSubgeral, y0, nivel.Elevation), diametro));
+            new XYZ(desenho.Descida.X, desenho.Descida.Y, zTubo), new XYZ(desenho.Descida.X, desenho.Descida.Y, nivel.Elevation), diametroSubgeral));
 
         doc.Regenerate();
         var ligacoes = Ligar(doc, tubos, bicos, nivel);
@@ -79,9 +62,93 @@ static class GeradorMalha
             doc.GetElement(conexao)?.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.Set(DadosEsboco.Marca);
             ids.Add(conexao);
         }
-        var mm = diametro is > 0 ? UnitUtils.ConvertFromInternalUnits(diametro.Value, UnitTypeId.Millimeters) : 0;
-        var resumo = $"{bicos.Count} bicos e {tubos.Count} tubos. Conexões criadas: {ligacoes}. Diâmetro {mm:0} mm.";
+        double Mm(double? d) => d is > 0 ? UnitUtils.ConvertFromInternalUnits(d.Value, UnitTypeId.Millimeters) : 0;
+        var resumo = $"{bicos.Count} bicos e {tubos.Count} tubos ({NomeDo(dados.Arranjo)}). Conexões criadas: {ligacoes}. " +
+                     $"Ramais DN {Mm(diametroRamal):0}, subgeral DN {Mm(diametroSubgeral):0}.";
         return new ResultadoGeracao(resumo, ids, nivel.Id);
+    }
+
+    public static string NomeDo(Arranjo arranjo) => arranjo switch
+    {
+        Arranjo.EspinhaDePeixe => "espinha de peixe",
+        Arranjo.Grelha => "grelha",
+        _ => "subgeral lateral",
+    };
+
+    /// <summary>A malha em planta, em pés: onde vão os bicos, os trechos horizontais e a descida até o nível.</summary>
+    sealed record Desenho(
+        List<(double X, double Y)> Bicos,
+        List<(double X0, double Y0, double X1, double Y1, bool Subgeral)> Trechos,
+        (double X, double Y) Descida);
+
+    /// <summary>
+    /// Pontos e trechos de cada arranjo. Todo encontro tem 2 tubos (cotovelo) ou 3 (tê), que é o que <see cref="Ligar" />
+    /// sabe ligar: na espinha de peixe os ramais de um lado ficam deslocados dos do outro, para não haver cruzeta.
+    /// </summary>
+    static Desenho Desenhar(DadosEsboco dados, double x0, double y0)
+    {
+        var sx = Pes(dados.EspacamentoRamalM);
+        var sy = Pes(dados.EspacamentoEntreRamaisM);
+        var bicos = new List<(double X, double Y)>();
+        var trechos = new List<(double X0, double Y0, double X1, double Y1, bool Subgeral)>();
+
+        // Um ramal: da subgeral (xInicio) passando pelos bicos, em ordem; com xFim, segue até a outra subgeral.
+        void Ramal(double y, double xInicio, IReadOnlyList<double> xsBicos, double? xFim = null)
+        {
+            var anterior = xInicio;
+            foreach (var x in xsBicos)
+            {
+                bicos.Add((x, y));
+                trechos.Add((anterior, y, x, y, false));
+                anterior = x;
+            }
+            if (xFim is { } fim) trechos.Add((anterior, y, fim, y, false));
+        }
+
+        // A subgeral passando pelos pontos de encontro, de baixo para cima.
+        void Subgeral(double x, IEnumerable<double> ys)
+        {
+            var lista = ys.OrderBy(y => y).ToList();
+            for (var k = 1; k < lista.Count; k++) trechos.Add((x, lista[k - 1], x, lista[k], true));
+        }
+
+        var n = dados.BicosPorRamal;
+        var ysRamais = Enumerable.Range(0, dados.Ramais).Select(j => y0 + j * sy).ToList();
+        switch (dados.Arranjo)
+        {
+            case Arranjo.EspinhaDePeixe:
+            {
+                var deslocamento = Math.Min(Pes(0.5), sy / 4);
+                var direita = Enumerable.Range(0, n).Select(i => x0 + sx / 2 + i * sx).ToList();
+                var esquerda = Enumerable.Range(0, n).Select(i => x0 - sx / 2 - i * sx).ToList();
+                foreach (var y in ysRamais)
+                {
+                    Ramal(y, x0, direita);
+                    Ramal(y + deslocamento, x0, esquerda);
+                }
+                var inicio = y0 - sy / 2;
+                Subgeral(x0, ysRamais.Concat(ysRamais.Select(y => y + deslocamento)).Append(inicio));
+                return new Desenho(bicos, trechos, (x0, inicio));
+            }
+            case Arranjo.Grelha:
+            {
+                var xs = Enumerable.Range(0, n).Select(i => x0 + i * sx).ToList();
+                var xEsquerda = x0 - sx;
+                var xDireita = x0 + n * sx;
+                foreach (var y in ysRamais) Ramal(y, xEsquerda, xs, xDireita);
+                Subgeral(xEsquerda, ysRamais);
+                Subgeral(xDireita, ysRamais);
+                return new Desenho(bicos, trechos, (xEsquerda, y0));
+            }
+            default:
+            {
+                var xs = Enumerable.Range(0, n).Select(i => x0 + i * sx).ToList();
+                var xSubgeral = x0 - sx;
+                foreach (var y in ysRamais) Ramal(y, xSubgeral, xs);
+                Subgeral(xSubgeral, ysRamais);
+                return new Desenho(bicos, trechos, (xSubgeral, y0));
+            }
+        }
     }
 
     public sealed record ResultadoGeracao(string Resumo, IList<ElementId> Ids, ElementId NivelId);

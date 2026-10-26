@@ -43,9 +43,11 @@ public class CalcularRedeCommand : ExternalCommand
                 _ => EscolherVga(Application.ActiveUIDocument!, vgas),
             };
             ElementId? doSetor = null;
-            if (!leitura.Gerados && vgas.Count == 0)
+            // Sem VGA, cada rede separada é um setor. Na malha gerada só pergunta se o cenário tem mais de uma.
+            if (vgas.Count == 0 && (!leitura.Gerados || LeitorRede.Montar(doc, leitura.Bicos, dados.FatorC).TotalDeSetores > 1))
             {
-                var (seguir, escolhido) = EscolherSetor(Application.ActiveUIDocument!);
+                var (seguir, escolhido) = EscolherSetor(Application.ActiveUIDocument!,
+                    leitura.Gerados ? "A malha gerada tem mais de um setor (redes separadas)." : null);
                 if (!seguir) return;
                 doSetor = escolhido;
             }

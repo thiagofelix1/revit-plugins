@@ -6,7 +6,8 @@ using Nice3point.Revit.Toolkit.External;
 namespace Spk.AddIn.Commands;
 
 /// <summary>
-/// Cria a malha de 12 bicos num ponto fixo, apaga a anterior e abre a planta e o 3D já enquadrados.
+/// Gera um cenário de teste (de 12 bicos ESFR a edifício de 2 pavimentos), apaga a malha gerada anterior e abre a planta
+/// e o 3D enquadrados. O cenário pode gravar também os critérios de projeto que combinam com ele.
 /// </summary>
 [UsedImplicitly]
 [Transaction(TransactionMode.Manual)]
@@ -17,21 +18,21 @@ public class RedeExemploCommand : ExternalCommand
         try
         {
             var ui = Application.ActiveUIDocument ?? throw new InvalidOperationException("Abra um projeto antes de gerar.");
-            var (resumo, ids, vista3d, planta) = Criar(ui.Document);
+            var janela = new CenarioJanela(CenariosExemplo.Todos);
+            if (janela.ShowDialog() != true || janela.Escolhido is not { } cenario) return;
 
+            var (resumo, ids, vista3d, _) = Criar(ui.Document, cenario, janela.GravarCriterios);
             ui.ActiveView = vista3d;
             ui.ShowElements(ids);
             TaskDialog.Show("SPK — Rede de exemplo", $"""
+                {cenario.Nome}
+
                 {resumo}
 
-                A rede é o retângulo no centro da vista 3D "SPK — Rede exemplo":
-                3 tubos paralelos, 4 bicos em cada, um tubo na lateral e uma descida.
-                Ela fica no ponto zero do projeto, 3 m acima do nível.
+                {(janela.GravarCriterios ? "Critérios gravados em Dados do projeto: " + cenario.Criterios.Resumo() : "Dados do projeto não foram alterados.")}
 
-                A planta "SPK — Planta exemplo" mostra o mesmo retângulo visto de cima.
-                Agora use Calcular.
+                A rede está na vista 3D "SPK — Rede exemplo" e na planta "SPK — Planta exemplo". Agora use Calcular.
                 """);
-            _ = planta;
         }
         catch (Exception e)
         {
@@ -39,8 +40,13 @@ public class RedeExemploCommand : ExternalCommand
         }
     }
 
-    /// <summary>A malha de exemplo sem janelas: apaga a anterior, cria a nova e as vistas enquadradas. Usada pelo teste automático.</summary>
-    public static (string Resumo, IList<ElementId> Ids, View3D Vista3d, ViewPlan Planta) Criar(Document doc)
+    /// <summary>O cenário simples, sem mexer nos critérios. Usado pelo teste automático.</summary>
+    public static (string Resumo, IList<ElementId> Ids, View3D Vista3d, ViewPlan Planta) Criar(Document doc) =>
+        Criar(doc, CenariosExemplo.Simples, gravarCriterios: false);
+
+    /// <summary>O cenário sem janelas: apaga a malha gerada anterior, cria as malhas e as vistas enquadradas.</summary>
+    public static (string Resumo, IList<ElementId> Ids, View3D Vista3d, ViewPlan Planta) Criar(Document doc, CenarioExemplo cenario,
+        bool gravarCriterios)
     {
         using var transacao = new Transaction(doc, "SPK — Rede de exemplo");
         EngolirAvisos.Aplicar(transacao);
@@ -48,22 +54,55 @@ public class RedeExemploCommand : ExternalCommand
         try
         {
             ApagarExemplo(doc);
-            GarantirNivel(doc);
-            var esboco = new DadosEsboco();
-            esboco.Salvar(doc);
-            var gerado = GeradorMalha.Gerar(doc, XYZ.Zero, esboco);
-            var nivel = (Level)doc.GetElement(gerado.NivelId);
-            var planta = GarantirPlanta(doc, nivel);
+            var terreo = NivelBase(doc);
+            cenario.Malhas[0].Esboco.Salvar(doc);
+            if (gravarCriterios) cenario.Criterios.Salvar(doc);
+
+            var ids = new List<ElementId>();
+            var resumos = new List<string>();
+            for (var k = 0; k < cenario.Malhas.Count; k++)
+            {
+                var malha = cenario.Malhas[k];
+                var nivel = NivelNaCota(doc, terreo, malha.CotaNivelM);
+                var gerado = GeradorMalha.Gerar(doc, new XYZ(Pes(malha.XM), Pes(malha.YM), 0), malha.Esboco, nivel);
+                ids.AddRange(gerado.Ids);
+                resumos.Add(cenario.Malhas.Count > 1 ? $"Malha {k + 1}, {nivel.Name}: {gerado.Resumo}" : gerado.Resumo);
+            }
+
+            var planta = GarantirPlanta(doc, terreo, cenario.Malhas.Max(m => m.CotaNivelM + m.Esboco.AlturaRedeM));
             var vista3d = Garantir3d(doc);
-            Enquadrar(doc, vista3d, planta, gerado.Ids);
+            Enquadrar(doc, vista3d, planta, ids);
             transacao.Commit();
-            return (gerado.Resumo, gerado.Ids, vista3d, planta);
+            return (string.Join("\n", resumos), ids, vista3d, planta);
         }
         catch
         {
             if (transacao.GetStatus() == TransactionStatus.Started) transacao.RollBack();
             throw;
         }
+    }
+
+    /// <summary>O nível da planta aberta; fora de uma planta, o mais perto da cota zero. Sem nível, cria um.</summary>
+    static Level NivelBase(Document doc)
+    {
+        if (doc.ActiveView is ViewPlan { GenLevel: { } doView }) return doView;
+        return new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>()
+                   .OrderBy(n => Math.Abs(n.ProjectElevation)).ThenByDescending(n => n.ProjectElevation).FirstOrDefault()
+               ?? Level.Create(doc, 0);
+    }
+
+    /// <summary>O nível <paramref name="cotaM" /> metros acima do base; se não existe, cria "SPK +4,00" e afins.</summary>
+    static Level NivelNaCota(Document doc, Level baseNivel, double cotaM)
+    {
+        if (Math.Abs(cotaM) < 1e-6) return baseNivel;
+        var elevacao = baseNivel.Elevation + Pes(cotaM);
+        var existente = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>()
+            .FirstOrDefault(n => Math.Abs(n.Elevation - elevacao) < Pes(0.05));
+        if (existente is not null) return existente;
+        var novo = Level.Create(doc, elevacao);
+        try { novo.Name = $"SPK +{cotaM.ToString("0.00", Entrada.Cultura)}"; }
+        catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+        return novo;
     }
 
     static void ApagarExemplo(Document doc)
@@ -76,15 +115,7 @@ public class RedeExemploCommand : ExternalCommand
         if (ids.Count > 0) doc.Delete(ids);
     }
 
-    static Level GarantirNivel(Document doc)
-    {
-        var nivel = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>()
-            .OrderBy(n => n.Elevation)
-            .FirstOrDefault();
-        return nivel ?? Level.Create(doc, 0);
-    }
-
-    static ViewPlan GarantirPlanta(Document doc, Level nivel)
+    static ViewPlan GarantirPlanta(Document doc, Level nivel, double alturaRedeM)
     {
         var existente = new FilteredElementCollector(doc).OfClass(typeof(ViewPlan)).Cast<ViewPlan>()
             .FirstOrDefault(v => !v.IsTemplate && v.Name == "SPK — Planta exemplo");
@@ -97,7 +128,7 @@ public class RedeExemploCommand : ExternalCommand
         if (existente is not null)
         {
             Preparar(existente);
-            try { AjustarCorte(existente, nivel); }
+            try { AjustarCorte(existente, nivel, alturaRedeM); }
             catch (Autodesk.Revit.Exceptions.ArgumentException) { }
             return existente;
         }
@@ -106,7 +137,7 @@ public class RedeExemploCommand : ExternalCommand
         var planta = ViewPlan.Create(doc, tipo.Id, nivel.Id);
         planta.Name = "SPK — Planta exemplo";
         Preparar(planta);
-        try { AjustarCorte(planta, nivel); }
+        try { AjustarCorte(planta, nivel, alturaRedeM); }
         catch (Autodesk.Revit.Exceptions.ArgumentException) { }
         return planta;
     }
@@ -223,13 +254,15 @@ public class RedeExemploCommand : ExternalCommand
         }
     }
 
-    static void AjustarCorte(ViewPlan planta, Level nivel)
+    /// <summary>Corte da planta 1 m acima da rede mais alta do cenário, para ela aparecer vista de cima.</summary>
+    static void AjustarCorte(ViewPlan planta, Level nivel, double alturaRedeM)
     {
+        var corte = Math.Max(4, alturaRedeM + 1);
         var intervalo = planta.GetViewRange();
-        intervalo.SetLevelId(PlanViewPlane.CutPlane, nivel.Id);
-        intervalo.SetOffset(PlanViewPlane.CutPlane, Pes(4));
         intervalo.SetLevelId(PlanViewPlane.TopClipPlane, nivel.Id);
-        intervalo.SetOffset(PlanViewPlane.TopClipPlane, Pes(6));
+        intervalo.SetOffset(PlanViewPlane.TopClipPlane, Pes(corte + 2));
+        intervalo.SetLevelId(PlanViewPlane.CutPlane, nivel.Id);
+        intervalo.SetOffset(PlanViewPlane.CutPlane, Pes(corte));
         planta.SetViewRange(intervalo);
     }
 
