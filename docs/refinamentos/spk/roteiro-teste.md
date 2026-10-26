@@ -1,6 +1,8 @@
-# Roteiro de teste no Revit — ramo `noite/correcoes-e-folhas`
+# Roteiro de teste no Revit
 
-Tudo o que está aqui compila para o Revit 2025, 2026 e 2027, e o motor passa nos 41 testes. Nada do lado do Revit foi rodado dentro do Revit. Este roteiro diz o que clicar e o que deve aparecer em cada passo. Quando algo não bater, anote o passo, tire um print do diálogo (a lista "Avisos" é o que mais ajuda) e seguimos daí.
+Compila para o Revit 2025, 2026 e 2027, e o motor passa nos 45 testes. As seções 1, 2 e 5 já foram rodadas no Revit (à mão e pelo [teste automático](teste-automatico.md)). Este roteiro diz o que clicar e o que deve aparecer em cada passo. Quando algo não bater, anote o passo e tire um print do diálogo; o texto dos diálogos também fica no journal do Revit, que dá para ler depois.
+
+A Rede de exemplo precisa de um projeto com um tipo de tubo que tenha tê nas preferências de roteamento. O modelo padrão do Revit não tem: use um projeto com as famílias da obra (por exemplo, copiadas da Nova Era).
 
 ## 0. Preparar
 
@@ -77,9 +79,9 @@ Trabalhe numa cópia do `.rvt`, não no original.
 
 | Passo | O que fazer | O que deve acontecer |
 |---|---|---|
-| 3.1 | **Famílias** | Além dos bicos, aparecem candidatas a VGA (acessórios com "VGA", "governo" ou "alarme" no nome) sugeridas como **Fonte**. K em gpm/psi½ aparece já convertido, com a nota da conversão. Confirme. |
+| 3.1 | **Famílias** | Além dos bicos, aparecem os acessórios de tubo: os que têm "VGA", "governo" ou "alarme" no nome já sugeridos como **Fonte**, os outros como Ignorar, para marcar a válvula do setor qualquer que seja o nome. Símbolos 2D (anotações genéricas) devem ficar como Ignorar. K em gpm/psi½ aparece já convertido, com a nota da conversão. Confirme. |
 | 3.2 | **Dados do projeto** | Preencha os critérios reais do setor. |
-| 3.3 | **Calcular** | Com mais de uma VGA, o Revit pede para clicar na VGA do setor. Só as VGAs ficam selecionáveis; Esc cancela sem mensagem. |
+| 3.3 | **Calcular** | Com mais de uma VGA, o Revit pede para clicar na VGA do setor. Só as VGAs ficam selecionáveis; Esc cancela sem mensagem. Sem VGA marcada, ou se a VGA não alcança os bicos pela rede do modelo, o Calcular pergunta qual setor: clicar num bico ou tubo dele, ou o de mais bicos. |
 | 3.4 | Resultado | "Setor: <nome da VGA>" (marca, comentário ou "VGA <id>"). Os bicos de outras VGAs ficam de fora, com aviso. |
 | 3.5 | **Folhas** | SPK-SETORES com uma planta por nível e uma cor por VGA (1 azul, 2 verde, 3 magenta, 4 amarelo, 5 laranja). SPK-ISO com o sistema inteiro ligado aos bicos e a tubulação de outros sistemas escondida. SPK-<VGA>-01 com o mapa-chave do nível e o setor calculado em cor cheia. |
 
@@ -111,6 +113,7 @@ Rodar **Padrão do escritório** de novo troca as escolhas; legendas já importa
 
 ## O que ainda não existe
 
+- **Verificar modelo**: hoje um modelo com conexões desligadas é lido por proximidade, que acerta num setor isolado mas pode juntar setores no prédio inteiro (ver [aprendizados-nova-era.md](aprendizados-nova-era.md)).
 - O número do bico é uma nota de texto, não uma etiqueta. A etiqueta de tubo é a padrão do projeto, que mostra só o diâmetro, sem o comprimento.
 - O contorno do setor na setorização é a união das coberturas dos bicos e não é recortado pelas paredes.
 - Ficaram de fora a geral até a casa de bombas, as tabelas de bomba, as cotas encadeadas, a tabela de sprinklers, a rede sob telhado inclinado (010), os cortes do prédio e a família da VGA (012) e o layout por ambiente (011).

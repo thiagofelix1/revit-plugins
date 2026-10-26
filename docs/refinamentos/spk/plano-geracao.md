@@ -6,6 +6,13 @@ As pranchas de referência são as do Mercantil Nova Era: setorização (009), s
 
 Normas citadas por item, sem reproduzir texto. O motor e o que ele já acertou estão em [motor-prototipo.md](motor-prototipo.md).
 
+## Situação em 26/10/2026
+
+- **Provado no Revit** (à mão e pelo [teste automático](teste-automatico.md)): Rede de exemplo → Calcular → Folhas → PDF, com 12 bicos, ATENDE, crítico a 2,83 bar e 606 L/min, setorização, isométrico, planta e 3D do setor, corte, etiquetas do escritório e padrão do escritório importado (carimbo, etiqueta, templates, legendas).
+- **Sem validação de engenharia**: o conteúdo das folhas e a leitura de um projeto real **bem conectado** (nunca testada; a Nova Era é o caso oposto).
+- **A Nova Era** ensinou os limites da leitura por proximidade: ver [aprendizados-nova-era.md](aprendizados-nova-era.md). Decisão: Verificar modelo + leitura estrita, em vez de adaptar o plugin ao arquivo.
+- **Próximos passos**, nesta ordem: Verificar modelo e leitura estrita; folhas completas (carimbo, tabelas, cotas); validação com projetos reais bem conectados como cenários de regressão; núcleo comum entre plugins, certificado de código e instalador; licenciamento e piloto pago; geração avançada (telhado inclinado, ambientes, geral até a casa de bombas) e dimensionamento.
+
 ## O que já está feito
 
 - [x] Motor hidráulico (Hazen-Williams, árvore, grelha, área mais desfavorável, ESFR de 12 bicos).
@@ -66,12 +73,12 @@ Entrada: um contorno retangular num nível, altura da rede, fator K, área de co
 
 - [x] Faixa na ordem Dados do esboço, Rede de exemplo, Gerar, Calcular, Memorial. Famílias no painel Projeto. O cálculo do galpão fictício fica no menu Avançado.
 - [x] Botão Rede de exemplo: malha no ponto zero, vistas "SPK — Planta exemplo" e "SPK — Rede exemplo", tubos e sprinklers visíveis, 3D enquadrado.
-- [ ] Colocar os bicos num grid, com o espaçamento da janela, usando uma família de sprinkler já carregada no projeto.
-- [ ] Criar ramais, uma subgeral e um trecho até a fonte com `Pipe.Create` entre conectores.
-- [ ] Inserir cotovelo e tê nos encontros, também por conector.
-- [ ] Conferir no próprio modelo que cada bico tem sistema de tubulação preenchido.
-- [ ] Rodar o motor nessa rede, sem aproximação por distância.
-- [ ] A área de operação acha 12 bicos, 4 em cada um de 3 ramais, quando o grid for grande o bastante para isso.
+- [x] Colocar os bicos num grid, com o espaçamento da janela, usando uma família de sprinkler já carregada no projeto.
+- [x] Criar ramais, uma subgeral e um trecho até a fonte com `Pipe.Create` entre conectores.
+- [x] Inserir cotovelo e tê nos encontros, também por conector. Exige um tipo de tubo com tê nas preferências de roteamento; o modelo padrão do Revit não tem.
+- [x] Conferir no próprio modelo que cada bico tem sistema de tubulação preenchido.
+- [x] Rodar o motor nessa rede, sem aproximação por distância (15 conexões com comprimento equivalente).
+- [x] A área de operação acha 12 bicos, 4 em cada um de 3 ramais, quando o grid for grande o bastante para isso.
 
 Pronto quando o comando de calcular a rede não precisa encostar bico em tubo por proximidade, e o aviso de "bicos fora da rede" fica em zero.
 
@@ -144,9 +151,9 @@ Escala, recorte e intervalo de vista saem da rede. Se o projeto tiver templates 
 
 Tudo isto compila para o Revit 2025–2027, mas ainda **não foi rodado dentro do Revit**. O roteiro de teste está em [roteiro-teste.md](roteiro-teste.md).
 
-- [x] Uma folha de planta do setor, com a área de cálculo hachurada (a testar no Revit).
-- [x] Uma folha de isométrico do mesmo setor e um isométrico geral (a testar no Revit).
-- [x] Uma folha de setorização, com uma cor por VGA (a testar no Revit).
+- [x] Uma folha de planta do setor, com a área de cálculo hachurada.
+- [x] Uma folha de isométrico do mesmo setor e um isométrico geral.
+- [x] Uma folha de setorização, com uma cor por VGA (testada com um setor; várias VGAs dependem de um modelo com as VGAs ligadas à rede).
 - [x] PDF dessas folhas numa pasta do projeto.
 - [ ] Etiqueta "Ø + comprimento" e "Nº de cálculo" como famílias de etiqueta do kit do escritório; hoje a etiqueta de tubo é a padrão do projeto e o número do bico é texto.
 - [ ] Cotas encadeadas entre ramais e bicos, tabela de sprinklers, rede sob telhado inclinado (010).
