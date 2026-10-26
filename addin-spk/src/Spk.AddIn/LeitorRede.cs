@@ -605,8 +605,9 @@ static class LeitorRede
             var tubo = tubos[i];
             var n0 = NoDaPonta(tubo.Curva.GetEndPoint(0), portas, nosPerto, nos);
             var n1 = NoDaPonta(tubo.Curva.GetEndPoint(1), portas, nosPerto, nos);
-            if (n0 == n1) continue;
-            tubo.Partes.Add(new Segmento(n0, n1, 0, 1, Math.Max(tubo.Comprimento, 0.001), tubo.Diametro));
+            // Tubo com as duas pontas na mesma peça (comprimento zero, como entre válvula e conexão no barrilete da Nova
+            // Era) não vira trecho, mas a leitura segue através dele.
+            if (n0 != n1) tubo.Partes.Add(new Segmento(n0, n1, 0, 1, Math.Max(tubo.Comprimento, 0.001), tubo.Diametro));
             foreach (var vizinho in VizinhosDePonta(i, tubo.Curva, tubos, grade))
                 if (!visitados.Contains(vizinho)) fila.Enqueue(vizinho);
             foreach (var no in new[] { n0, n1 })
