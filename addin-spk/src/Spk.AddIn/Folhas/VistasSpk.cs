@@ -108,6 +108,21 @@ static class VistasSpk
             Esconder(vista, new ElementId(c), true);
     }
 
+    /// <summary>
+    /// Como no isométrico da NEPN-INC-013: nível de detalhe Fino, em que tubos, conexões e válvulas aparecem com a forma
+    /// real e não em linha simples, e a tubulação pintada de vermelho.
+    /// </summary>
+    static void Tubulacao3d(Document doc, View vista)
+    {
+        vista.DetailLevel = ViewDetailLevel.Fine;
+        var vermelho = PranchaSpk.Pintura(doc, new Color(204, 0, 0), 1, preencher: true);
+        foreach (var c in new[] { BuiltInCategory.OST_PipeCurves, BuiltInCategory.OST_PipeFitting, BuiltInCategory.OST_FlexPipeCurves })
+        {
+            try { vista.SetCategoryOverrides(new ElementId(c), vermelho); }
+            catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+        }
+    }
+
     /// <summary>Troca o template ligado por uma cópia das configurações dele na própria vista.</summary>
     static void Desvincular(Document doc, View vista)
     {
@@ -231,9 +246,8 @@ static class VistasSpk
         else
         {
             EstiloPadrao(doc, vista, soARede: true);
-            // Médio: tubo continua em linha simples, e o bico aparece; muitas famílias de sprinkler escondem a geometria no Baixo.
-            vista.DetailLevel = ViewDetailLevel.Medium;
         }
+        Tubulacao3d(doc, vista);
 
         var centro = caixa.Centro;
         var distancia = Math.Max((caixa.Max - caixa.Min).GetLength(), Pes(8)) * 2;

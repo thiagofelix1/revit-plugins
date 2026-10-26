@@ -2,7 +2,8 @@ namespace Spk.AddIn.Folhas;
 
 /// <summary>
 /// Isométrico geral, no padrão da NEPN-INC-013: o sistema inteiro ligado aos bicos (setores, VGAs, geral e o que mais
-/// estiver conectado), só tubulação, em linha simples. A vista é travada para receber as etiquetas de diâmetro.
+/// estiver conectado), só tubulação, em nível de detalhe Fino e em vermelho. A vista é travada para receber as etiquetas de
+/// diâmetro dos trechos principais.
 /// </summary>
 static class FolhasIsometrico
 {
@@ -143,7 +144,12 @@ static class FolhasIsometrico
             PranchaSpk.Tentar(avisos, "Esconder o que não é da rede", () => vista.HideElements(fora));
     }
 
-    /// <summary>Etiqueta de diâmetro nos tubos de pelo menos <paramref name="minimo" />, numa vista 3D já travada.</summary>
+    /// <summary>
+    ///     Etiqueta de diâmetro com linha de chamada nos trechos principais, como no isométrico da NEPN-INC-013: geral,
+    ///     colunas, subgerais e descidas, uma etiqueta por trecho reto de mesmo diâmetro com pelo menos
+    ///     <paramref name="minimo" />. Ramais que alimentam bicos ficam sem etiqueta no 3D; os diâmetros deles estão na
+    ///     planta do setor. Numa vista 3D já travada.
+    /// </summary>
     public static int Etiquetar(Document doc, View vista, HashSet<ElementId> rede, double minimo, IList<string> avisos)
     {
         var tipo = PranchaSpk.EtiquetaDeTubo(doc);
@@ -153,27 +159,35 @@ static class FolhasIsometrico
             return 0;
         }
 
-        // Os mais longos primeiro: a geral e as subgerais são o que o isométrico precisa mostrar.
         var tubos = rede.Select(doc.GetElement).OfType<MEPCurve>()
             .Select(t => (Tubo: t, Linha: (t.Location as LocationCurve)?.Curve as Line))
-            .Where(p => p.Linha is not null && p.Linha.Length >= minimo)
-            .OrderByDescending(p => p.Linha!.Length)
+            .Where(p => p.Linha is not null)
+            .Select(p => (p.Tubo, Linha: p.Linha!))
             .ToList();
+        // O trecho todo conta para o mínimo: a subgeral picotada pelos tês tem pedaços curtos, mas é longa.
+        var principais = Principais(tubos).Where(p => p.Comprimento >= minimo).OrderByDescending(p => p.Comprimento)
+            .Select(p => (p.Tubo, p.Linha)).ToList();
         PranchaSpk.Tentar(avisos, "Mostrar as etiquetas no 3D", () => VistasSpk.MostrarEtiquetas(doc, vista));
-        if (tubos.Count == 0) return 0;
-        if (ComoEtiquetar(doc, vista, tipo, tubos[0].Tubo, tubos[0].Linha!, avisos) is not { } como) return 0;
-        var (aceito, chamada) = como;
+        if (principais.Count == 0) return 0;
+
+        // Texto acima e à direita do tubo, a 8 mm no papel, ligado a ele pela linha de chamada.
+        var afastamento = VistasSpk.Pes(8.0 * vista.Scale / 1000);
+        XYZ Ponto(Line linha, bool chamada) =>
+            linha.Evaluate(0.5, true) + (chamada ? (vista.UpDirection + vista.RightDirection) * afastamento : XYZ.Zero);
+
+        if (ComoEtiquetar(doc, vista, tipo, principais[0].Tubo, principais[0].Linha, Ponto, avisos) is not { } como) return 0;
+        var (aceito, comChamada) = como;
         var feitas = 0;
-        foreach (var (tubo, linha) in tubos)
+        foreach (var (tubo, linha) in principais)
         {
             if (feitas >= MaximoEtiquetas)
             {
-                avisos.Add($"Só os {MaximoEtiquetas} tubos mais longos receberam etiqueta no isométrico.");
+                avisos.Add($"Só os {MaximoEtiquetas} trechos mais longos receberam etiqueta no isométrico.");
                 break;
             }
             PranchaSpk.Tentar(avisos, "Etiqueta no isométrico", () =>
             {
-                IndependentTag.Create(doc, aceito, vista.Id, new Reference(tubo), chamada, TagOrientation.Horizontal, linha!.Evaluate(0.5, true));
+                IndependentTag.Create(doc, aceito, vista.Id, new Reference(tubo), comChamada, TagOrientation.Horizontal, Ponto(linha, comChamada));
                 feitas++;
             });
         }
@@ -188,21 +202,93 @@ static class FolhasIsometrico
     }
 
     /// <summary>
-    ///     Como etiquetar o 3D sem que o Revit apague as etiquetas ao regenerar, o que ele faz sem erro nem aviso. Com o
-    ///     template 3D da Nova Era (vista sombreada), a etiqueta sem linha de chamada sumia; em linhas ocultas, o estilo de
-    ///     desenho do isométrico, ela fica. Prova com uma etiqueta só, nesta ordem: a vista como veio do template, a vista em
-    ///     linhas ocultas, a etiqueta com linha de chamada; e, se o tipo do padrão não ficar de jeito nenhum, os outros
-    ///     tipos de etiqueta de tubo do projeto.
+    ///     Um tubo por trecho principal. Tubos ligados (direto ou por uma conexão), alinhados e de mesmo diâmetro formam um
+    ///     trecho, representado pelo mais longo, com o comprimento somado do trecho. Fica de fora o trecho que alimenta bico:
+    ///     com um tubo ligado a bico, ou ligado a um braço curto que vai ao bico.
+    /// </summary>
+    static List<(MEPCurve Tubo, Line Linha, double Comprimento)> Principais(List<(MEPCurve Tubo, Line Linha)> tubos)
+    {
+        var indice = new Dictionary<ElementId, int>();
+        for (var i = 0; i < tubos.Count; i++) indice[tubos[i].Tubo.Id] = i;
+        var pai = Enumerable.Range(0, tubos.Count).ToArray();
+        int Raiz(int i)
+        {
+            while (pai[i] != i) i = pai[i] = pai[pai[i]];
+            return i;
+        }
+
+        var vizinhos = tubos.Select(t => Vizinhos(t.Tubo)).ToList();
+        var bracoCurto = VistasSpk.Pes(0.6);
+        var ramal = new bool[tubos.Count];
+        for (var i = 0; i < tubos.Count; i++)
+        {
+            if (vizinhos[i].Bicos > 0) ramal[i] = true;
+            foreach (var id in vizinhos[i].Tubos)
+            {
+                if (!indice.TryGetValue(id, out var j)) continue;
+                if (vizinhos[j].Bicos > 0 && tubos[j].Linha.Length < bracoCurto) ramal[i] = true;
+                if (Alinhados(tubos[i], tubos[j])) pai[Raiz(i)] = Raiz(j);
+            }
+        }
+
+        return Enumerable.Range(0, tubos.Count)
+            .GroupBy(Raiz)
+            .Where(g => !g.Any(i => ramal[i]))
+            .Select(g =>
+            {
+                var maior = tubos[g.OrderByDescending(i => tubos[i].Linha.Length).First()];
+                return (maior.Tubo, maior.Linha, g.Sum(i => tubos[i].Linha.Length));
+            })
+            .ToList();
+    }
+
+    /// <summary>Tubos e bicos ligados a este tubo, direto ou através de uma conexão ou acessório.</summary>
+    static (List<ElementId> Tubos, int Bicos) Vizinhos(MEPCurve tubo)
+    {
+        var tubos = new List<ElementId>();
+        var bicos = 0;
+        void Olhar(Element dono, Element vindoDe, bool atravessar)
+        {
+            if (dono.Id == tubo.Id || dono.Id == vindoDe.Id) return;
+            if (dono is MEPCurve) tubos.Add(dono.Id);
+            else if (dono.Category?.Id.Value == (long)BuiltInCategory.OST_Sprinklers) bicos++;
+            else if (atravessar && dono is FamilyInstance { MEPModel.ConnectorManager: { } conectores })
+                foreach (var outro in Ligados(conectores)) Olhar(outro, dono, false);
+        }
+
+        foreach (var dono in Ligados(tubo.ConnectorManager)) Olhar(dono, tubo, true);
+        return (tubos, bicos);
+    }
+
+    static IEnumerable<Element> Ligados(ConnectorManager conectores) =>
+        conectores.Connectors.Cast<Connector>().Where(c => c.IsConnected)
+            .SelectMany(c => c.AllRefs.Cast<Connector>()).Select(r => r.Owner).OfType<Element>();
+
+    /// <summary>Mesmo diâmetro e na mesma reta.</summary>
+    static bool Alinhados((MEPCurve Tubo, Line Linha) a, (MEPCurve Tubo, Line Linha) b)
+    {
+        if (Math.Abs(Diametro(a.Tubo) - Diametro(b.Tubo)) > VistasSpk.Pes(0.001)) return false;
+        if (a.Linha.Direction.CrossProduct(b.Linha.Direction).GetLength() > 0.02) return false;
+        return Line.CreateUnbound(a.Linha.GetEndPoint(0), a.Linha.Direction).Distance(b.Linha.GetEndPoint(0)) < VistasSpk.Pes(0.03);
+    }
+
+    static double Diametro(MEPCurve tubo) => tubo.get_Parameter(BuiltInParameter.RBS_PIPE_DIAMETER_PARAM)?.AsDouble() ?? 0;
+
+    /// <summary>
+    ///     Como etiquetar o 3D sem que o Revit apague as etiquetas ao regenerar, o que ele faz sem erro nem aviso: na vista
+    ///     sombreada, a etiqueta sem linha de chamada some. Prova com uma etiqueta só, nesta ordem: com linha de chamada,
+    ///     sem ela, e as duas de novo com a vista em linhas ocultas; e, se o tipo do padrão não ficar de jeito nenhum, os
+    ///     outros tipos de etiqueta de tubo do projeto.
     /// </summary>
     static (ElementId Tipo, bool Chamada)? ComoEtiquetar(Document doc, View vista, ElementId preferido, MEPCurve tubo, Line linha,
-        IList<string> avisos)
+        Func<Line, bool, XYZ> ponto, IList<string> avisos)
     {
         bool Fica(ElementId tipo, bool chamada)
         {
             try
             {
                 var prova = IndependentTag.Create(doc, tipo, vista.Id, new Reference(tubo), chamada, TagOrientation.Horizontal,
-                    linha.Evaluate(0.5, true)).Id;
+                    ponto(linha, chamada)).Id;
                 doc.Regenerate();
                 if (doc.GetElement(prova) is null) return false;
                 doc.Delete(prova);
@@ -220,18 +306,15 @@ static class FolhasIsometrico
         var recusados = new List<string>();
         foreach (var tipo in candidatos)
         {
+            if (Fica(tipo, true)) return Aceito(tipo, true);
             if (Fica(tipo, false)) return Aceito(tipo, false);
             if (vista.DisplayStyle != DisplayStyle.HLR)
             {
                 var estilo = vista.DisplayStyle;
                 vista.DisplayStyle = DisplayStyle.HLR;
+                if (Fica(tipo, true)) return Aceito(tipo, true);
                 if (Fica(tipo, false)) return Aceito(tipo, false);
                 vista.DisplayStyle = estilo;
-            }
-            if (Fica(tipo, true))
-            {
-                avisos.Add("As etiquetas do 3D saíram com linha de chamada: sem ela o Revit as apagava.");
-                return Aceito(tipo, true);
             }
             recusados.Add(NomeDoTipo(doc, tipo));
         }
