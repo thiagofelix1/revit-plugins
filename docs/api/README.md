@@ -18,6 +18,7 @@ Leia na ordem se estiver começando; depois use como consulta.
 | [06-apis-por-oportunidade.md](06-apis-por-oportunidade.md) | Quais APIs atendem cada oportunidade de produto (NBR 9050, NBR 9077, NBR 12721, SINAPI, cadernos BIM) |
 | [07-design-automation.md](07-design-automation.md) | Revit na nuvem (APS Automation API): conceitos, restrições, limites, ciclo de vida |
 | [08-ambiente-e-ferramentas.md](08-ambiente-e-ferramentas.md) | Ambiente no Windows com Cursor, templates Nice3point, RevitLookup, agent skills |
+| [09-visualizacao-de-resultados.md](09-visualizacao-de-resultados.md) | Destacar, colorir e desenhar resultados no modelo: `TemporaryGraphicsManager`, filtros de vista, Analysis Visualization Framework, `DirectShape`, `DirectContext3D`, geometria de instância de família |
 | [indices/revit-2027-developers-guide.md](indices/revit-2027-developers-guide.md) | Índice completo do Developer's Guide 2027 (405 páginas, com links) |
 | [indices/design-automation-v3.md](indices/design-automation-v3.md) | Índice completo da Automation API v3 (142 entradas, com links) |
 

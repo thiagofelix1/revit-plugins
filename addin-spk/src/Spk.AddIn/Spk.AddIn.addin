@@ -1,0 +1,14 @@
+<RevitAddIns>
+    <AddIn Type="Application">
+        <Name>Spk.AddIn</Name>
+        <Assembly>Spk.AddIn\Spk.AddIn.dll</Assembly>
+        <AddInId>B2D136F3-98F1-4410-8AB7-C5184C3AAFAD</AddInId>
+        <FullClassName>Spk.AddIn.SpkApplication</FullClassName>
+        <VendorId>Development</VendorId>
+        <VendorDescription></VendorDescription>
+    </AddIn>
+    <ManifestSettings>
+        <UseRevitContext>False</UseRevitContext>
+        <ContextName>Spk.AddIn</ContextName>
+    </ManifestSettings>
+</RevitAddIns>

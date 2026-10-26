@@ -72,7 +72,7 @@ public static class CalculoSpk
             if (curva.Extrapola(q)) avisos.Add("A vazão total passa do último ponto da curva de abastecimento: valor extrapolado.");
         }
 
-        var verificacoes = Verificar(projeto, resultado, vazaoHidrantes, pressaoDisponivel);
+        var verificacoes = Verificar(projeto, resultado, busca, vazaoHidrantes, pressaoDisponivel);
         return new RelatorioSpk(projeto, resultado, busca, vazaoHidrantes, duracao, pressaoDisponivel, verificacoes, avisos);
     }
 
@@ -90,7 +90,7 @@ public static class CalculoSpk
         return (p.VazaoHidrantes ?? tabela.Vazao, p.DuracaoMinutos ?? tabela.DuracaoMinutos);
     }
 
-    static List<Verificacao> Verificar(ProjetoSpk p, ResultadoDemanda r, double vazaoHidrantes, double? pressaoDisponivel)
+    static List<Verificacao> Verificar(ProjetoSpk p, ResultadoDemanda r, ResultadoBusca? busca, double vazaoHidrantes, double? pressaoDisponivel)
     {
         var v = new List<Verificacao>();
         var abertos = r.Chuveiros;
@@ -98,6 +98,17 @@ public static class CalculoSpk
         v.Add(new Verificacao("Convergência do cálculo da rede", "9.4.3.1",
             r.Estado.Convergiu && r.Estado.ErroBalancoMaximo < 0.01,
             $"{r.Estado.Iteracoes} iterações; desequilíbrio máximo de vazão {r.Estado.ErroBalancoMaximo:0.####} L/min por nó"));
+
+        if (busca is not null)
+        {
+            var completa = abertos.Count >= busca.ChuveirosNaArea;
+            v.Add(new Verificacao("Área de operação com o número de chuveiros exigido",
+                p.Base is BaseNumeroFixo numeroFixo ? numeroFixo.Referencia : "9.4.4.2", completa,
+                completa
+                    ? $"{abertos.Count} chuveiros, até {busca.ChuveirosPorRamal} por ramal"
+                    : $"a rede não forma a área: o critério pede {busca.ChuveirosNaArea} chuveiros com até {busca.ChuveirosPorRamal} por ramal, " +
+                      $"e os ramais existentes só comportam {abertos.Count}"));
+        }
 
         var piorPressao = abertos.OrderBy(c => c.Pressao - c.PressaoMinima).First();
         v.Add(new Verificacao("Pressão mínima em todos os chuveiros da área", "9.4.4.10",

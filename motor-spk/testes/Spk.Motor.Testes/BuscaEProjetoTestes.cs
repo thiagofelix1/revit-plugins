@@ -56,6 +56,25 @@ public class BuscaEProjetoTestes
     }
 
     [Fact]
+    public void Area_que_nao_cabe_nos_ramais_reprova()
+    {
+        // ESFR pede 12 chuveiros, 4 por ramal; com 2 ramais só cabem 8.
+        var projeto = new ProjetoSpk("Dois ramais", new GalpaoEspinhaDePeixe { Ramais = 2, ChuveirosPorLado = 6, FatorK = 360 }.Criar(),
+            ClasseRisco.Armazenamento, BaseDeProjeto.Esfr(345, "exemplo"))
+        {
+            VazaoHidrantes = 1900,
+            DuracaoMinutos = 90,
+        };
+
+        var rel = CalculoSpk.Executar(projeto);
+
+        Assert.False(rel.Atende);
+        var area = Assert.Single(rel.Verificacoes, v => v.Descricao == "Área de operação com o número de chuveiros exigido");
+        Assert.False(area.Atende);
+        Assert.True(rel.Resultado.Chuveiros.Count < 12);
+    }
+
+    [Fact]
     public void Projeto_completo_gera_memorial_e_verificacoes()
     {
         var projeto = new ProjetoSpk("Galpão de exemplo — VGA 1", new GalpaoEspinhaDePeixe().Criar(), ClasseRisco.Ordinario2,

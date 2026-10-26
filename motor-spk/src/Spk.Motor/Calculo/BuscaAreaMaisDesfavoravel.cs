@@ -54,17 +54,52 @@ public static class BuscaAreaMaisDesfavoravel
         total = Math.Min(total, rede.Chuveiros.Count);
 
         var candidatos = GerarCandidatos(ramais, total, porRamal);
-        if (candidatos.Count == 0) throw new InvalidOperationException("Nenhuma posição válida para a área de operação.");
+        if (candidatos.Count == 0)
+        {
+            // Nenhuma posição completa: calcula o que cabe só para o memorial mostrar. CalculoSpk reprova essa área.
+            var parciais = new List<string>();
+            foreach (var ramal in ramais)
+            {
+                foreach (var ponto in ramal.Take(porRamal))
+                {
+                    if (parciais.Count >= total) break;
+                    parciais.Add(ponto.Chuveiro.Id);
+                }
+                if (parciais.Count >= total) break;
+            }
+            if (parciais.Count == 0)
+                throw new InvalidOperationException(
+                    $"Nenhuma posição válida para a área de operação. Há {rede.Chuveiros.Count} bicos em {ramais.Count} ramais; o critério pede {total}, com no máximo {porRamal} por ramal.");
+            candidatos.Add(parciais);
+        }
 
         var avaliados = new ConcurrentBag<CandidatoArea>();
-        Parallel.ForEach(candidatos, new ParallelOptions { MaxDegreeOfParallelism = op.MaximoParalelismo }, ids =>
+        var falhas = new ConcurrentBag<(IReadOnlyList<string> Ids, string Motivo)>();
+        Parallel.ForEach(candidatos, new ParallelOptions { MaxDegreeOfParallelism = op.MaximoParalelismo }, (ids, estado) =>
         {
-            var r = motor.CalcularDemanda(ids.Select(id => baseDeProjeto.Requisito(rede.ObterChuveiro(id))).ToList());
-            double? folga = op.Abastecimento is { } curva
-                ? curva.PressaoDisponivel(r.VazaoNecessaria + op.VazaoAdicionalNaFonte) - r.PressaoNecessaria
-                : null;
-            avaliados.Add(new CandidatoArea(ids, r.PressaoNecessaria, r.VazaoNecessaria, folga));
+            try
+            {
+                var r = motor.CalcularDemanda(ids.Select(id => baseDeProjeto.Requisito(rede.ObterChuveiro(id))).ToList());
+                double? folga = op.Abastecimento is { } curva
+                    ? curva.PressaoDisponivel(r.VazaoNecessaria + op.VazaoAdicionalNaFonte) - r.PressaoNecessaria
+                    : null;
+                avaliados.Add(new CandidatoArea(ids, r.PressaoNecessaria, r.VazaoNecessaria, folga));
+            }
+            catch (InvalidOperationException e)
+            {
+                // Uma área que não fecha invalida a busca: a pior pode ser justamente ela. Para já, sem calcular as outras.
+                falhas.Add((ids, e.Message));
+                estado.Stop();
+            }
         });
+
+        if (!falhas.IsEmpty)
+        {
+            var (ids, motivo) = falhas.First();
+            throw new InvalidOperationException(
+                $"{motivo} Aconteceu na área com os chuveiros {string.Join(", ", ids.Take(12))}. " +
+                "Numa rede lida do modelo, isso costuma ser uma ligação errada ou um tubo muito fino no caminho até eles.");
+        }
 
         var ranking = (op.Abastecimento != null
                 ? avaliados.OrderBy(c => c.FolgaAbastecimento)

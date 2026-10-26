@@ -1,0 +1,50 @@
+<Window x:Class="Spk.AddIn.DadosEsbocoJanela"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SPK — Dados do esboço" Height="500" Width="420"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize" FontSize="13">
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Cancelar" Width="100" Height="30" Margin="0,0,8,0" IsCancel="True" Click="Cancelar_Click"/>
+            <Button Content="Salvar" Width="100" Height="30" IsDefault="True" FontWeight="Bold" Click="Salvar_Click"/>
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap" Margin="0,0,0,12" Foreground="#37474F"
+                   Text="Geometria da malha e o bico usado nela. O fator K é em L/min/bar½: K 5,6 americano é cerca de 80, K 25,2 é cerca de 360. Classe, pressão mínima e fator C ficam em Dados do projeto."/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="120"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="Ramais" VerticalAlignment="Center" Margin="0,6"/>
+            <TextBox x:Name="Ramais" Grid.Row="0" Grid.Column="1" Margin="0,6" Padding="4"/>
+            <TextBlock Grid.Row="1" Text="Bicos por ramal" VerticalAlignment="Center" Margin="0,6"/>
+            <TextBox x:Name="BicosPorRamal" Grid.Row="1" Grid.Column="1" Margin="0,6" Padding="4"/>
+            <TextBlock Grid.Row="2" Text="Espaçamento no ramal (m)" VerticalAlignment="Center" Margin="0,6"/>
+            <TextBox x:Name="EspacamentoRamal" Grid.Row="2" Grid.Column="1" Margin="0,6" Padding="4"/>
+            <TextBlock Grid.Row="3" Text="Espaçamento entre ramais (m)" VerticalAlignment="Center" Margin="0,6"/>
+            <TextBox x:Name="EspacamentoEntre" Grid.Row="3" Grid.Column="1" Margin="0,6" Padding="4"/>
+            <TextBlock Grid.Row="4" Text="Altura da rede acima do nível (m)" VerticalAlignment="Center" Margin="0,6"/>
+            <TextBox x:Name="Altura" Grid.Row="4" Grid.Column="1" Margin="0,6" Padding="4"/>
+            <TextBlock Grid.Row="5" Text="Drop do bico (m)" VerticalAlignment="Center" Margin="0,6"/>
+            <TextBox x:Name="DropBico" Grid.Row="5" Grid.Column="1" Margin="0,6" Padding="4"/>
+            <TextBlock Grid.Row="6" Text="Fator K (L/min/bar½)" VerticalAlignment="Center" Margin="0,6"/>
+            <TextBox x:Name="FatorK" Grid.Row="6" Grid.Column="1" Margin="0,6" Padding="4"/>
+            <TextBlock Grid.Row="7" Text="Área de cobertura (m²)" VerticalAlignment="Center" Margin="0,6"/>
+            <TextBox x:Name="Area" Grid.Row="7" Grid.Column="1" Margin="0,6" Padding="4"/>
+            <TextBlock Grid.Row="8" Text="DN dos tubos (mm)" VerticalAlignment="Center" Margin="0,6"/>
+            <TextBox x:Name="Dn" Grid.Row="8" Grid.Column="1" Margin="0,6" Padding="4"/>
+        </Grid>
+    </DockPanel>
+</Window>
