@@ -53,6 +53,7 @@ public class SpkApplication : IExternalApplication
         Avancado(resultados);
         Margem(resultados);
 
+        Automacao.TesteAutomatico.Registrar(application);
         return Result.Succeeded;
     }
 

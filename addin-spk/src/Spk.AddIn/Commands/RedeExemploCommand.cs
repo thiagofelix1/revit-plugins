@@ -17,34 +17,7 @@ public class RedeExemploCommand : ExternalCommand
         try
         {
             var ui = Application.ActiveUIDocument ?? throw new InvalidOperationException("Abra um projeto antes de gerar.");
-            var doc = ui.Document;
-            View3D vista3d;
-            ViewPlan planta;
-            IList<ElementId> ids;
-            string resumo;
-
-            using var transacao = new Transaction(doc, "SPK — Rede de exemplo");
-            transacao.Start();
-            try
-            {
-                ApagarExemplo(doc);
-                GarantirNivel(doc);
-                var esboco = new DadosEsboco();
-                esboco.Salvar(doc);
-                var gerado = GeradorMalha.Gerar(doc, XYZ.Zero, esboco);
-                var nivel = (Level)doc.GetElement(gerado.NivelId);
-                planta = GarantirPlanta(doc, nivel);
-                vista3d = Garantir3d(doc);
-                Enquadrar(doc, vista3d, planta, gerado.Ids);
-                ids = gerado.Ids;
-                resumo = gerado.Resumo;
-                transacao.Commit();
-            }
-            catch
-            {
-                if (transacao.GetStatus() == TransactionStatus.Started) transacao.RollBack();
-                throw;
-            }
+            var (resumo, ids, vista3d, planta) = Criar(ui.Document);
 
             ui.ActiveView = vista3d;
             ui.ShowElements(ids);
@@ -63,6 +36,33 @@ public class RedeExemploCommand : ExternalCommand
         catch (Exception e)
         {
             TaskDialog.Show("SPK — Rede de exemplo", e.Message);
+        }
+    }
+
+    /// <summary>A malha de exemplo sem janelas: apaga a anterior, cria a nova e as vistas enquadradas. Usada pelo teste automático.</summary>
+    public static (string Resumo, IList<ElementId> Ids, View3D Vista3d, ViewPlan Planta) Criar(Document doc)
+    {
+        using var transacao = new Transaction(doc, "SPK — Rede de exemplo");
+        EngolirAvisos.Aplicar(transacao);
+        transacao.Start();
+        try
+        {
+            ApagarExemplo(doc);
+            GarantirNivel(doc);
+            var esboco = new DadosEsboco();
+            esboco.Salvar(doc);
+            var gerado = GeradorMalha.Gerar(doc, XYZ.Zero, esboco);
+            var nivel = (Level)doc.GetElement(gerado.NivelId);
+            var planta = GarantirPlanta(doc, nivel);
+            var vista3d = Garantir3d(doc);
+            Enquadrar(doc, vista3d, planta, gerado.Ids);
+            transacao.Commit();
+            return (gerado.Resumo, gerado.Ids, vista3d, planta);
+        }
+        catch
+        {
+            if (transacao.GetStatus() == TransactionStatus.Started) transacao.RollBack();
+            throw;
         }
     }
 
