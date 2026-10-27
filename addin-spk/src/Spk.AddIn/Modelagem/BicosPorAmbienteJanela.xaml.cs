@@ -1,0 +1,91 @@
+using System.ComponentModel;
+using System.Windows;
+using Spk.AddIn.Arquitetura;
+using Spk.Motor.Modelo;
+using Spk.Motor.Normas;
+
+namespace Spk.AddIn.Modelagem;
+
+public partial class BicosPorAmbienteJanela : Window
+{
+    public sealed class Linha : INotifyPropertyChanged
+    {
+        bool marcado;
+        public required Ambiente Ambiente { get; init; }
+        public string Nivel => Ambiente.Nivel;
+        public string Nome => $"{Ambiente.Numero} {Ambiente.Nome}".Trim();
+        public string Area => Ambiente.Area.ToString("0.0");
+        public string PeDireito => Ambiente.PeDireito is { } pd ? pd.ToString("0.00") : "—";
+        public string Teto => ArquiteturaJanela.TextoDoTeto(Ambiente.OrigemDoTeto);
+
+        public bool Marcado
+        {
+            get => marcado;
+            set
+            {
+                marcado = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Marcado)));
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+    }
+
+    readonly List<Linha> linhas;
+
+    /// <summary>Verdadeiro: posicionar; falso: só conferir os existentes.</summary>
+    public bool Posicionar { get; private set; }
+    public OpcoesBicos? Opcoes { get; private set; }
+    public IReadOnlyList<Ambiente> Escolhidos => linhas.Where(l => l.Marcado).Select(l => l.Ambiente).ToList();
+
+    public BicosPorAmbienteJanela(Edificio edificio, IReadOnlyList<string> tipos, string? tipoPadrao, string resumo, OpcoesBicos opcoes)
+    {
+        InitializeComponent();
+        Resumo.Text = resumo;
+        linhas = edificio.Ambientes.OrderBy(a => a.Piso).ThenBy(a => a.Numero, StringComparer.CurrentCulture)
+            .Select(a => new Linha { Ambiente = a, Marcado = a.Teto is not null }).ToList();
+        Lista.ItemsSource = linhas;
+        Tipo.ItemsSource = tipos;
+        Tipo.SelectedItem = opcoes.Tipo is { } t && tipos.Contains(t) ? t : tipoPadrao ?? tipos.FirstOrDefault();
+        Defletor.Text = Entrada.F(opcoes.DefletorM);
+        AbaixoDaViga.Text = Entrada.F(opcoes.AbaixoDaVigaM);
+        Teto.SelectedIndex = (int)opcoes.Teto;
+        Direcao.SelectedIndex = (int)opcoes.Direcao;
+    }
+
+    void Posicionar_Click(object sender, RoutedEventArgs e) => Fechar(true);
+
+    void Conferir_Click(object sender, RoutedEventArgs e) => Fechar(false);
+
+    void Fechar(bool posicionar)
+    {
+        if (!linhas.Any(l => l.Marcado))
+        {
+            MessageBox.Show(this, "Marque pelo menos um ambiente.", Title, MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        try
+        {
+            Opcoes = new OpcoesBicos
+            {
+                Tipo = Tipo.SelectedItem as string,
+                DefletorM = Entrada.Numero(Defletor.Text, "Defletor abaixo do teto", 0.025, 0.300),
+                AbaixoDaVigaM = Entrada.Numero(AbaixoDaViga.Text, "Defletor abaixo da viga", 0.025, 0.150),
+                Teto = (TipoDeTeto)Math.Max(0, Teto.SelectedIndex),
+                Direcao = (DirecaoDosRamais)Math.Max(0, Direcao.SelectedIndex),
+            };
+            Posicionar = posicionar;
+            DialogResult = true;
+        }
+        catch (Exception ex) when (ex is FormatException or ArgumentOutOfRangeException)
+        {
+            MessageBox.Show(this, ex.Message, Title, MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    void Todos_Click(object sender, RoutedEventArgs e) => linhas.ForEach(l => l.Marcado = true);
+
+    void Nenhum_Click(object sender, RoutedEventArgs e) => linhas.ForEach(l => l.Marcado = false);
+
+    void Cancelar_Click(object sender, RoutedEventArgs e) => DialogResult = false;
+}

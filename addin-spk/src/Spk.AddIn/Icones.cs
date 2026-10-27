@@ -93,6 +93,15 @@ static class Icones
         }
     }
 
+    public static void BicosAmbiente(DrawingContext dc)
+    {
+        // Planta de um ambiente com a grade de bicos.
+        dc.DrawRectangle(Brushes.White, Caneta(Grafite, 2.4), new System.Windows.Rect(3, 5, 26, 22));
+        foreach (var x in new[] { 9.5, 22.5 })
+            foreach (var y in new[] { 10.5, 21.5 })
+                dc.DrawEllipse(Vermelho, null, new Point(x, y), 2.6, 2.6);
+    }
+
     public static void Edificio(DrawingContext dc)
     {
         // Corte de um prédio: lajes, paredes e um forro em vermelho.

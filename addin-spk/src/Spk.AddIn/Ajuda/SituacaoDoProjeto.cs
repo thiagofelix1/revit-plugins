@@ -54,6 +54,7 @@ static class SituacaoDoProjeto
         {
             new AcaoDaEtapa("Arquitetura", "ArquiteturaCommand"),
             new AcaoDaEtapa("Famílias", "DescobrirFamiliasCommand"),
+            new AcaoDaEtapa("Bicos por ambiente", "BicosPorAmbienteCommand"),
             new AcaoDaEtapa("Traçar ramais", "TracarRamalCommand"),
             new AcaoDaEtapa("Ligar bicos", "LigarBicosCommand"),
             new AcaoDaEtapa("Verificar modelo", "VerificarModeloCommand"),

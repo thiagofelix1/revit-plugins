@@ -260,6 +260,20 @@ static class TesteAutomatico
                     return $"{edificio.Ambientes.Count} ambientes e {edificio.Vigas.Count} vigas";
                 });
 
+            if (cenario.BicosPorAmbiente is { } pedidoBicos)
+                Etapa(relatorio, "bicosPorAmbiente", () =>
+                {
+                    var dados = DadosProjeto.Carregar(doc!) ?? throw new InvalidOperationException("Mande \"dados\" no cenário.");
+                    var edificio = Arquitetura.LeituraDoEdificio.Ler(doc!);
+                    var limites = BicosPorAmbiente.Limites(dados, pedidoBicos);
+                    var criados = new List<ElementId>();
+                    var feitos = BicosPorAmbiente.Posicionar(doc!, edificio, edificio.Ambientes, limites, pedidoBicos, criados);
+                    var conferidos = BicosPorAmbiente.Conferir(doc!, edificio, edificio.Ambientes, limites, pedidoBicos);
+                    relatorio.Bicos = feitos.Select(r => "posicionar | " + r.Texto().Replace("\n", " ")).Concat(
+                        conferidos.Select(r => "conferir | " + r.Texto().Replace("\n", " "))).ToList();
+                    return $"{criados.Count} bicos em {feitos.Count(r => r.Recusa is null)} ambientes";
+                });
+
             if (cenario.InspecionarVinculos)
                 relatorio.Vinculos = Diagnostico.Vinculos(doc!);
 
@@ -589,6 +603,9 @@ static class TesteAutomatico
             else if (rc.LigacoesDepois < rc.LigacoesAntes + rc.Ligadas)
                 falhas.Add($"reconexão perdeu ligações: antes {rc.LigacoesAntes}, {rc.Ligadas} feitas, depois {rc.LigacoesDepois}");
         }
+        foreach (var trecho in esperado.TextoDosBicos ?? [])
+            if (!(r.Bicos ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
+                falhas.Add($"bicos por ambiente: \"{trecho}\" não apareceu");
         foreach (var trecho in esperado.TextoDaArquitetura ?? [])
             if (!(r.Arquitetura ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
                 falhas.Add($"arquitetura: \"{trecho}\" não apareceu");
@@ -869,6 +886,9 @@ sealed class Cenario
     /// <summary>Lê a arquitetura e a estrutura (ver LeituraDoEdificio) e põe uma linha por ambiente e por viga no relatório.</summary>
     public bool Arquitetura { get; set; }
 
+    /// <summary>Bicos por ambiente em todos os ambientes, com estas opções; depois confere os bicos que ficaram.</summary>
+    public OpcoesBicos? BicosPorAmbiente { get; set; }
+
     /// <summary>Numeração e código das folhas a gravar no padrão antes de gerar.</summary>
     public AjustePadrao? Padrao { get; set; }
     public Esperado? Esperado { get; set; }
@@ -908,6 +928,9 @@ sealed class Esperado
 
     /// <summary>Trechos que precisam aparecer em alguma linha da leitura da arquitetura.</summary>
     public List<string>? TextoDaArquitetura { get; set; }
+
+    /// <summary>Trechos que precisam aparecer em alguma linha de Bicos por ambiente (posicionar | ... e conferir | ...).</summary>
+    public List<string>? TextoDosBicos { get; set; }
 }
 
 sealed class AjusteMapeamento
@@ -951,6 +974,7 @@ sealed class RelatorioCenario
     public List<string>? Carimbos { get; set; }
     public List<string>? Vinculos { get; set; }
     public List<string>? Arquitetura { get; set; }
+    public List<string>? Bicos { get; set; }
     public List<string>? CarimbosSpk { get; set; }
 
     /// <summary>Só com "esperado" no cenário: se tudo bateu, e o que não bateu.</summary>

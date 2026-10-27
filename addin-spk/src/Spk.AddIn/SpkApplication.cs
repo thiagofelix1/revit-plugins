@@ -36,6 +36,11 @@ public class SpkApplication : IExternalApplication
         Botao<GerarMalhaCommand>(rede,
             "Gerar", Icones.Malha,
             "Cria uma malha de bicos e tubos já conectados, no ponto que você clicar, com a geometria de Dados do esboço.");
+        Botao<BicosPorAmbienteCommand>(rede,
+            "Bicos por\nambiente", Icones.BicosAmbiente,
+            "Posiciona bicos nos ambientes da arquitetura (vínculos ou o próprio arquivo) pela regra da norma: área por bico, " +
+            "distância entre bicos e até a parede (Tabela 2), defletor na altura do forro, da laje ou abaixo da viga. Também " +
+            "confere os bicos que já existem. Ctrl+Z desfaz tudo.");
         Botao<TracarRamalCommand>(rede,
             "Traçar\nramais", Icones.TracarRamal,
             "Traça os ramais de várias fileiras de bicos até a subgeral e liga os bicos: o SPK separa as fileiras, e o ramal fica na " +

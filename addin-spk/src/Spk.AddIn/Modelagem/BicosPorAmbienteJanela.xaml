@@ -1,0 +1,74 @@
+<Window x:Class="Spk.AddIn.Modelagem.BicosPorAmbienteJanela"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SPK — Bicos por ambiente" Width="820" Height="640" MinWidth="640" MinHeight="460"
+        WindowStartupLocation="CenterScreen" FontSize="13" Background="White">
+    <DockPanel Margin="16">
+        <TextBlock x:Name="Resumo" DockPanel.Dock="Top" TextWrapping="Wrap" Foreground="#37474F" Margin="0,0,0,10"/>
+
+        <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
+            <Button DockPanel.Dock="Left" Content="Conferir os bicos existentes" Padding="12,4" Click="Conferir_Click"
+                    ToolTip="Confere os bicos que já estão nos ambientes marcados: espaçamento, área por bico, paredes e altura do defletor. Não muda nada."/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancelar" Width="100" Padding="12,4" Margin="0,0,8,0" IsCancel="True" Click="Cancelar_Click"/>
+                <Button Content="Posicionar bicos" Padding="12,4" FontWeight="Bold" IsDefault="True" Click="Posicionar_Click"/>
+            </StackPanel>
+        </DockPanel>
+
+        <Grid DockPanel.Dock="Bottom" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="120"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Bico" VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <ComboBox x:Name="Tipo" Grid.Column="1" Margin="0,4,16,4"/>
+            <TextBlock Grid.Column="2" Text="Defletor abaixo do teto (m)" VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <TextBox x:Name="Defletor" Grid.Column="3" Margin="0,4" Padding="4"/>
+            <TextBlock Grid.Row="1" Text="Teto" VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <ComboBox x:Name="Teto" Grid.Row="1" Grid.Column="1" Margin="0,4,16,4">
+                <ComboBoxItem Content="Incombustível (obstruído ou não) ou combustível não obstruído"/>
+                <ComboBoxItem Content="Combustível obstruído"/>
+                <ComboBoxItem Content="Combustível com elementos estruturais a menos de 0,90 m"/>
+            </ComboBox>
+            <TextBlock Grid.Row="1" Grid.Column="2" Text="Defletor abaixo da viga (m)" VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <TextBox x:Name="AbaixoDaViga" Grid.Row="1" Grid.Column="3" Margin="0,4" Padding="4"/>
+            <TextBlock Grid.Row="2" Text="Ramais" VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <ComboBox x:Name="Direcao" Grid.Row="2" Grid.Column="1" Margin="0,4,16,4">
+                <ComboBoxItem Content="Ao longo do lado maior de cada ambiente"/>
+                <ComboBoxItem Content="Paralelos ao eixo X do projeto"/>
+                <ComboBoxItem Content="Paralelos ao eixo Y do projeto"/>
+            </ComboBox>
+        </Grid>
+
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+            <Button DockPanel.Dock="Right" Content="Nenhum" Padding="10,2" Margin="6,0,0,0" Click="Nenhum_Click"/>
+            <Button DockPanel.Dock="Right" Content="Todos" Padding="10,2" Click="Todos_Click"/>
+            <TextBlock Text="Ambientes" FontWeight="SemiBold" VerticalAlignment="Center"/>
+        </DockPanel>
+        <ListView x:Name="Lista">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="36">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding Marcado}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Nível" Width="130" DisplayMemberBinding="{Binding Nivel}"/>
+                    <GridViewColumn Header="Ambiente" Width="230" DisplayMemberBinding="{Binding Nome}"/>
+                    <GridViewColumn Header="Área (m²)" Width="80" DisplayMemberBinding="{Binding Area}"/>
+                    <GridViewColumn Header="Pé-direito" Width="90" DisplayMemberBinding="{Binding PeDireito}"/>
+                    <GridViewColumn Header="Teto" Width="140" DisplayMemberBinding="{Binding Teto}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </DockPanel>
+</Window>
