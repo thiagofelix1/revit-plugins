@@ -17,6 +17,7 @@ static class Cenas
         "ramalComBicosSoltos" => RamalComBicosSoltos(doc),
         "subgeralComBicosSoltos" => SubgeralComBicosSoltos(doc),
         "subgeralComFileiras" => SubgeralComFileiras(doc),
+        "arquiteturaVinculada" => ArquiteturaVinculada(doc),
         _ => throw new InvalidOperationException($"Cena desconhecida: \"{nome}\"."),
     };
 
@@ -79,6 +80,101 @@ static class Cenas
         var bicos = Bicos(doc, nivel, zSubgeral - M(0.3), posicoes.ToArray());
         transacao.Commit();
         return new Cena("Subgeral de 12 m com descida e 3 fileiras de 4 bicos soltos, dos dois lados (1 de lado).", bicos, [subgeral]);
+    }
+
+    /// <summary>
+    /// Gera dois modelos e os vincula ao projeto, deslocados 20 m em X e 10 m em Y (para testar a transformação):
+    /// arquitetura com duas salas de 6 × 8 m (paredes de 4 m), forro a 2,80 m só na sala A e laje no nível 4 m sobre as
+    /// duas; e estrutura com uma viga sobre a sala B, no nível 4 m. Os arquivos ficam na pasta de saída do teste.
+    /// </summary>
+    static Cena ArquiteturaVinculada(Document doc)
+    {
+        var app = doc.Application;
+        var pasta = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "SPK", "testes", "saida");
+        System.IO.Directory.CreateDirectory(pasta);
+        var arquivoArq = System.IO.Path.Combine(pasta, "vinculo-arquitetura.rvt");
+        var arquivoEst = System.IO.Path.Combine(pasta, "vinculo-estrutura.rvt");
+        double M(double metros) => GeradorMalha.Pes(metros);
+
+        var arq = app.NewProjectDocument(Template(app, "DefaultBRAPTB.rte"));
+        using (var t = new Transaction(arq, "SPK — arquitetura de teste"))
+        {
+            t.Start();
+            var (terreo, superior) = Niveis(arq);
+            var tipoParede = arq.GetDefaultElementTypeId(ElementTypeGroup.WallType);
+            XYZ P(double x, double y) => new(M(x), M(y), terreo.Elevation);
+            foreach (var (a, b) in new[] { (P(0, 0), P(12, 0)), (P(12, 0), P(12, 8)), (P(12, 8), P(0, 8)), (P(0, 8), P(0, 0)), (P(6, 0), P(6, 8)) })
+                Wall.Create(arq, Line.CreateBound(a, b), tipoParede, terreo.Id, M(4), 0, false, false);
+            arq.Regenerate();
+            var salaA = arq.Create.NewRoom(terreo, new UV(M(3), M(4)));
+            salaA.get_Parameter(BuiltInParameter.ROOM_NAME).Set("Sala A");
+            salaA.get_Parameter(BuiltInParameter.ROOM_NUMBER).Set("101");
+            var salaB = arq.Create.NewRoom(terreo, new UV(M(9), M(4)));
+            salaB.get_Parameter(BuiltInParameter.ROOM_NAME).Set("Depósito B");
+            salaB.get_Parameter(BuiltInParameter.ROOM_NUMBER).Set("102");
+
+            var tipoForro = new FilteredElementCollector(arq).OfClass(typeof(CeilingType)).FirstElementId();
+            if (tipoForro == ElementId.InvalidElementId) throw new InvalidOperationException("O template de arquitetura não tem tipo de forro.");
+            var forro = Ceiling.Create(arq, [Retangulo(M(0.1), M(0.1), M(5.9), M(7.9), terreo.Elevation)], tipoForro, terreo.Id);
+            forro.get_Parameter(BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM).Set(M(2.8));
+            var tipoLaje = arq.GetDefaultElementTypeId(ElementTypeGroup.FloorType);
+            Floor.Create(arq, [Retangulo(0, 0, M(12), M(8), superior.Elevation)], tipoLaje, superior.Id);
+            t.Commit();
+        }
+        arq.SaveAs(arquivoArq, new SaveAsOptions { OverwriteExistingFile = true });
+        arq.Close(false);
+
+        var est = app.NewProjectDocument(Template(app, "Structural Analysis-DefaultBRAPTB.rte"));
+        using (var t = new Transaction(est, "SPK — estrutura de teste"))
+        {
+            t.Start();
+            var (_, superior) = Niveis(est);
+            var simbolo = new FilteredElementCollector(est).OfCategory(BuiltInCategory.OST_StructuralFraming).OfClass(typeof(FamilySymbol))
+                .Cast<FamilySymbol>().FirstOrDefault() ?? throw new InvalidOperationException("O template de estrutura não tem família de viga.");
+            if (!simbolo.IsActive) simbolo.Activate();
+            est.Create.NewFamilyInstance(Line.CreateBound(new XYZ(M(9), 0, superior.Elevation), new XYZ(M(9), M(8), superior.Elevation)),
+                simbolo, superior, Autodesk.Revit.DB.Structure.StructuralType.Beam);
+            t.Commit();
+        }
+        est.SaveAs(arquivoEst, new SaveAsOptions { OverwriteExistingFile = true });
+        est.Close(false);
+
+        using (var t = new Transaction(doc, "SPK — vínculos de teste"))
+        {
+            t.Start();
+            foreach (var arquivo in new[] { arquivoArq, arquivoEst })
+            {
+                var tipo = RevitLinkType.Create(doc, ModelPathUtils.ConvertUserVisiblePathToModelPath(arquivo), new RevitLinkOptions(false));
+                var instancia = RevitLinkInstance.Create(doc, tipo.ElementId);
+                ElementTransformUtils.MoveElement(doc, instancia.Id, new XYZ(M(20), M(10), 0));
+            }
+            t.Commit();
+        }
+        return new Cena("Arquitetura (2 salas, forro na A, laje sobre as duas) e estrutura (1 viga) vinculadas, deslocadas 20 m e 10 m.", [], []);
+    }
+
+    static string Template(Autodesk.Revit.ApplicationServices.Application app, string nome)
+    {
+        var pasta = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Autodesk",
+            $"RVT {app.VersionNumber}", "Templates");
+        var arquivo = System.IO.Directory.GetFiles(pasta, nome, System.IO.SearchOption.AllDirectories).FirstOrDefault();
+        return arquivo ?? throw new InvalidOperationException($"Template \"{nome}\" não encontrado em {pasta}.");
+    }
+
+    /// <summary>O nível mais baixo e um nível a 4 m acima dele (criado se não houver).</summary>
+    static (Level Terreo, Level Superior) Niveis(Document doc)
+    {
+        var niveis = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().OrderBy(n => n.Elevation).ToList();
+        var terreo = niveis.First();
+        var alvo = terreo.Elevation + GeradorMalha.Pes(4);
+        var superior = niveis.FirstOrDefault(n => Math.Abs(n.Elevation - alvo) < 0.01) ?? Level.Create(doc, alvo);
+        return (terreo, superior);
+    }
+
+    static CurveLoop Retangulo(double x0, double y0, double x1, double y1, double z)
+    {
+        var p = new[] { new XYZ(x0, y0, z), new XYZ(x1, y0, z), new XYZ(x1, y1, z), new XYZ(x0, y1, z) };
+        return CurveLoop.Create(Enumerable.Range(0, 4).Select(i => (Curve)Line.CreateBound(p[i], p[(i + 1) % 4])).ToList());
     }
 
     static void ApagarMalhaGerada(Document doc)

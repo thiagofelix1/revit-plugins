@@ -93,6 +93,19 @@ static class Icones
         }
     }
 
+    public static void Edificio(DrawingContext dc)
+    {
+        // Corte de um prédio: lajes, paredes e um forro em vermelho.
+        var parede = Caneta(Grafite, 2.2);
+        dc.DrawLine(Caneta(Grafite, 3), new Point(3, 28), new Point(29, 28));
+        dc.DrawLine(parede, new Point(5, 28), new Point(5, 6));
+        dc.DrawLine(parede, new Point(27, 28), new Point(27, 6));
+        dc.DrawLine(Caneta(Grafite, 3), new Point(3, 6), new Point(29, 6));
+        dc.DrawLine(Caneta(Grafite, 3), new Point(3, 17), new Point(29, 17));
+        dc.DrawLine(Caneta(Vermelho, 2), new Point(5, 10), new Point(27, 10));
+        dc.DrawLine(Caneta(Vermelho, 2), new Point(5, 21), new Point(27, 21));
+    }
+
     public static void Diametros(DrawingContext dc)
     {
         // Tubo que afina a cada derivação, como o ramal dimensionado.

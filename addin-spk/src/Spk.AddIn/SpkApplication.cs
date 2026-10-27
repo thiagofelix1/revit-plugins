@@ -26,6 +26,10 @@ public class SpkApplication : IExternalApplication
         Botao<DescobrirFamiliasCommand>(projeto,
             "Famílias", Icones.Lupa,
             "Para um modelo que já veio desenhado: confirma quais famílias são bicos (fator K e área) e qual válvula é a VGA de cada setor.");
+        Botao<ArquiteturaCommand>(projeto,
+            "Arquitetura", Icones.Edificio,
+            "Lê a arquitetura e a estrutura, do arquivo e dos vínculos (Revit ou IFC): ambientes com pé-direito e o que forma o " +
+            "teto de cada um (forro, laje ou telhado), e as vigas. Mostra o que o SPK enxerga; não muda nada no modelo.");
         Margem(projeto);
 
         var rede = application.CreateRibbonPanel(Aba, "Rede");

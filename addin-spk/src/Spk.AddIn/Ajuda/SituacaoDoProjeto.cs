@@ -52,7 +52,10 @@ static class SituacaoDoProjeto
     {
         var acoes = new[]
         {
+            new AcaoDaEtapa("Arquitetura", "ArquiteturaCommand"),
             new AcaoDaEtapa("Famílias", "DescobrirFamiliasCommand"),
+            new AcaoDaEtapa("Traçar ramais", "TracarRamalCommand"),
+            new AcaoDaEtapa("Ligar bicos", "LigarBicosCommand"),
             new AcaoDaEtapa("Verificar modelo", "VerificarModeloCommand"),
             new AcaoDaEtapa("Gerar", "GerarMalhaCommand"),
             new AcaoDaEtapa("Rede de exemplo", "RedeExemploCommand"),

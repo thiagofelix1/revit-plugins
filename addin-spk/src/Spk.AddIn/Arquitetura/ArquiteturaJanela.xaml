@@ -1,0 +1,26 @@
+<Window x:Class="Spk.AddIn.Arquitetura.ArquiteturaJanela"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SPK — Arquitetura e estrutura" Width="900" Height="620" MinWidth="620" MinHeight="400"
+        WindowStartupLocation="CenterScreen" FontSize="13" Background="White">
+    <DockPanel Margin="16">
+        <TextBlock x:Name="Resumo" DockPanel.Dock="Top" TextWrapping="Wrap" FontSize="15" FontWeight="SemiBold" Foreground="#263238" Margin="0,0,0,4"/>
+        <TextBlock x:Name="Detalhe" DockPanel.Dock="Top" TextWrapping="Wrap" Foreground="#607D8B" Margin="0,0,0,12"/>
+        <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
+            <Button DockPanel.Dock="Left" Content="Copiar relatório" Padding="12,4" Click="Copiar_Click"/>
+            <Button Content="Fechar" Width="100" Padding="12,4" HorizontalAlignment="Right" IsCancel="True" Click="Fechar_Click"/>
+        </DockPanel>
+        <ListView x:Name="Lista">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Nível" Width="150" DisplayMemberBinding="{Binding Nivel}"/>
+                    <GridViewColumn Header="Ambiente" Width="230" DisplayMemberBinding="{Binding Ambiente}"/>
+                    <GridViewColumn Header="Área (m²)" Width="80" DisplayMemberBinding="{Binding Area}"/>
+                    <GridViewColumn Header="Pé-direito (m)" Width="100" DisplayMemberBinding="{Binding PeDireito}"/>
+                    <GridViewColumn Header="Teto" Width="130" DisplayMemberBinding="{Binding Teto}"/>
+                    <GridViewColumn Header="Vínculo" Width="160" DisplayMemberBinding="{Binding Origem}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </DockPanel>
+</Window>

@@ -12,7 +12,11 @@ Na mesma janela ficam o **número da primeira folha** do SPK e o **código da pr
 
 Botão **Dados do projeto**. Aqui o engenheiro escolhe a classe de risco, a base de cálculo (densidade e área pela Figura 42, densidade e área informadas, ou ESFR), a demanda de hidrantes, a duração, o fator C e, se tiver, o ensaio do abastecimento. O SPK nunca escolhe a classe de risco sozinho: o cálculo usa exatamente o que estiver aqui, e isso vai para o memorial.
 
-## 3. A rede
+## 3. Arquitetura e estrutura (vínculos)
+
+Botão **Arquitetura**, no painel Projeto. O SPK lê a arquitetura e a estrutura do arquivo e dos vínculos Revit carregados (um IFC vinculado, como a estrutura feita no TQS ou no Eberick, também vale): cada ambiente com a área, a cota do piso e o que forma o teto (forro, laje ou telhado, o primeiro acima do ambiente), e as vigas com largura, fundo e topo. Nada muda no modelo: a janela mostra o que o SPK enxerga, para conferir antes de posicionar bicos. Vínculo não carregado aparece com o nome: recarregue em Gerenciar vínculos.
+
+## 4. A rede
 
 Há dois caminhos:
 
@@ -20,26 +24,26 @@ Há dois caminhos:
 - **Rede desenhada com ajuda do SPK** (painel Rede). Desenhe a subgeral e posicione os bicos. **Traçar ramais**: selecione os bicos (pode arrastar uma janela sobre vários) e a subgeral. O SPK separa as fileiras e traça um ramal por fileira, cruzando a subgeral, até o último bico. Na janela você escolhe a altura do ramal: na altura da subgeral (tê, ou cruzeta com bicos dos dois lados), acima ou abaixo dela com uma subida, ou a uma altura fixa acima do piso; e se liga os bicos agora ou só traça os ramais. Bico pendente fica abaixo do ramal; bico em pé, acima. **Ligar bicos**: com o ramal já desenhado, selecione os bicos e o ramal; o SPK parte o ramal, põe o tê e faz a descida até cada bico, ou o braço, o cotovelo e a descida quando o bico está de lado, e um cotovelo no último bico, na ponta do ramal. O que não for feito aparece com o motivo; Ctrl+Z desfaz tudo.
 - **Rede gerada pelo SPK.** **Dados do esboço** define a malha (ramais, espaçamentos, altura, bico, DN) e **Gerar** cria bicos, tubos e conexões já ligados, no ponto que você clicar. **Rede de exemplo** cria um dos cenários de teste prontos.
 
-## 4. Verificar o modelo
+## 5. Verificar o modelo
 
 Botão **Verificar modelo**, no painel Cálculo. Confere se o SPK consegue seguir a água pelas conexões: peças encostadas mas não ligadas, tubo que termina no meio de outro sem tê, bico solto, ponta aberta, tubo fora de sistema de incêndio, bico sem fator K confirmado e bico que não chega a nenhuma VGA. Cada item diz como resolver; **Mostrar** seleciona os elementos e leva a vista até eles, e **Corrigir** liga de uma vez as peças encostadas. Numa rede gerada pelo SPK, a lista sai vazia. O capítulo **Verificar o modelo** explica cada problema e como corrigir.
 
-## 5. Diâmetros (risco leve e ordinário)
+## 6. Diâmetros (risco leve e ordinário)
 
 Botão **Diâmetros**, no painel Cálculo. Com a rede ligada, o SPK conta quantos bicos cada trecho alimenta e põe em cada tubo o DN da tabela da norma (IT-23/2025, Tabelas 12 a 14, que reproduzem o método por tabela da NBR 10897): no ramal, DN 25 até 2 bicos, 32 até 3, 40 até 5, e assim por diante até a descida. Antes de mudar, mostra quantos tubos vão para cada DN e os avisos; no fim, oferece **Calcular agora** para conferir.
 
 A tabela é o ponto de partida. Em sistema novo ela só vale como método abaixo de 465 m², com K 80 e rede em árvore; fora disso o SPK avisa, e quem decide é o cálculo. Rede em grelha (malha fechada) e risco extra não têm tabela. Se o tubo do modelo não tem o DN da tabela (DN 90, por exemplo), fica o tamanho seguinte que ele tiver.
 
-## 6. Calcular
+## 7. Calcular
 
 Botão **Calcular**. Se o modelo tiver erro de modelagem, o Calcular mostra os problemas antes e pergunta se quer vê-los ou calcular mesmo assim (ligando as peças por proximidade, com aviso no resultado). O SPK mostra quantos bicos entram, lê a rede pelas conexões, pergunta o setor quando há mais de um (clicando na VGA, ou num bico do setor) e procura a área de operação mais desfavorável. O resultado diz se **ATENDE**, a pressão e a vazão necessárias na entrada do setor, o bico crítico e cada verificação que não passou.
 
 O resultado fica gravado no modelo: cada bico do setor ganha o número de cálculo, o setor, se está na área de cálculo, a pressão e a vazão; cada tubo ganha o setor, a vazão e a velocidade (parâmetros **SPK …**, que podem ser usados em tabelas e etiquetas).
 
-## 7. Memorial
+## 8. Memorial
 
 Botão **Memorial**: abre o memorial de cálculo em Word, com critérios, resumo, verificações, as áreas avaliadas e todos os trechos com vazão, diâmetro, perdas e pressões. Os números dos nós são os mesmos das folhas.
 
-## 8. Folhas
+## 9. Folhas
 
 Botão **Folhas**: monta a setorização, o isométrico geral e as folhas do último setor calculado, e exporta tudo num PDF na pasta **SPK** ao lado do arquivo do projeto. Rodar de novo refaz as folhas do SPK com os dados atuais.

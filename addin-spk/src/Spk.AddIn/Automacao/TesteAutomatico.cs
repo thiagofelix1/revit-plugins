@@ -252,6 +252,17 @@ static class TesteAutomatico
                     return feito.Texto();
                 });
 
+            if (cenario.Arquitetura)
+                Etapa(relatorio, "arquitetura", () =>
+                {
+                    var edificio = Arquitetura.LeituraDoEdificio.Ler(doc!);
+                    relatorio.Arquitetura = Arquitetura.ArquiteturaJanela.Relatorio(edificio).Split('\n').ToList();
+                    return $"{edificio.Ambientes.Count} ambientes e {edificio.Vigas.Count} vigas";
+                });
+
+            if (cenario.InspecionarVinculos)
+                relatorio.Vinculos = Diagnostico.Vinculos(doc!);
+
             if (cenario.InspecionarCarimbo)
                 relatorio.Carimbos = Diagnostico.Carimbos(doc!);
 
@@ -578,6 +589,9 @@ static class TesteAutomatico
             else if (rc.LigacoesDepois < rc.LigacoesAntes + rc.Ligadas)
                 falhas.Add($"reconexão perdeu ligações: antes {rc.LigacoesAntes}, {rc.Ligadas} feitas, depois {rc.LigacoesDepois}");
         }
+        foreach (var trecho in esperado.TextoDaArquitetura ?? [])
+            if (!(r.Arquitetura ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
+                falhas.Add($"arquitetura: \"{trecho}\" não apareceu");
         foreach (var trecho in esperado.TextoDasFolhas ?? [])
             if (!(r.Folhas?.Textos ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
                 falhas.Add($"folhas: texto \"{trecho}\" não apareceu");
@@ -662,6 +676,43 @@ static class Diagnostico
             linhas.Add($"{e.Category?.Name} {e.Id.Value} {(e as FamilyInstance)?.Symbol?.FamilyName}: {string.Join(" ", partes)}");
         }
         return linhas;
+    }
+
+    /// <summary>O próprio arquivo e cada vínculo: estado, transformação e quantos elementos de cada categoria de arquitetura e estrutura.</summary>
+    public static List<string> Vinculos(Document doc)
+    {
+        var linhas = new List<string> { "Este arquivo: " + Conteudo(doc) };
+        foreach (var vinculo in new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance)).Cast<RevitLinkInstance>())
+        {
+            var tipo = doc.GetElement(vinculo.GetTypeId()) as RevitLinkType;
+            var origem = vinculo.GetTotalTransform().Origin;
+            var vinculado = vinculo.GetLinkDocument();
+            linhas.Add($"Vínculo Revit {vinculo.Id.Value} \"{vinculo.Name}\" ({tipo?.GetLinkedFileStatus()}, " +
+                       $"origem {origem.X * 0.3048:0.00};{origem.Y * 0.3048:0.00};{origem.Z * 0.3048:0.00} m, " +
+                       $"rotação {Math.Atan2(vinculo.GetTotalTransform().BasisX.Y, vinculo.GetTotalTransform().BasisX.X) * 180 / Math.PI:0.#}°): " +
+                       (vinculado is null ? "não carregado" : vinculado.PathName + " — " + Conteudo(vinculado)));
+        }
+        foreach (var importado in new FilteredElementCollector(doc).OfClass(typeof(ImportInstance)).Cast<ImportInstance>())
+            linhas.Add($"{(importado.IsLinked ? "Vínculo" : "Importação")} CAD {importado.Id.Value} \"{importado.Category?.Name}\" " +
+                       $"na vista {(importado.ViewSpecific ? doc.GetElement(importado.OwnerViewId)?.Name : "(modelo)")}");
+        return linhas;
+    }
+
+    static string Conteudo(Document doc)
+    {
+        int Contar(BuiltInCategory categoria) =>
+            new FilteredElementCollector(doc).OfCategory(categoria).WhereElementIsNotElementType().GetElementCount();
+        var ambientes = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType()
+            .Cast<SpatialElement>().ToList();
+        var comArea = ambientes.Count(a => a.Area > 0);
+        var niveis = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().OrderBy(n => n.Elevation)
+            .Select(n => $"{n.Name} {n.Elevation * 0.3048:0.00}").ToList();
+        var exemplos = ambientes.Where(a => a.Area > 0).Take(4).Select(a => $"{a.Name} ({a.Area * 0.092903:0.0} m²)");
+        return $"{niveis.Count} níveis [{string.Join("; ", niveis.Take(8))}], {comArea} ambientes com área de {ambientes.Count} " +
+               $"[{string.Join("; ", exemplos)}], {Contar(BuiltInCategory.OST_Ceilings)} forros, {Contar(BuiltInCategory.OST_Floors)} lajes/pisos, " +
+               $"{Contar(BuiltInCategory.OST_StructuralFraming)} vigas, {Contar(BuiltInCategory.OST_StructuralColumns)} pilares, " +
+               $"{Contar(BuiltInCategory.OST_Walls)} paredes, {Contar(BuiltInCategory.OST_Roofs)} telhados, " +
+               $"{Contar(BuiltInCategory.OST_Sprinklers)} sprinklers, {Contar(BuiltInCategory.OST_PipeCurves)} tubos";
     }
 
     public static List<string> Vistas(Document doc) =>
@@ -812,6 +863,12 @@ sealed class Cenario
     public bool Reconectar { get; set; }
     public bool InspecionarCarimbo { get; set; }
 
+    /// <summary>Lista os vínculos (Revit, IFC, DWG) e o que há em cada um: ambientes, forros, lajes, vigas...</summary>
+    public bool InspecionarVinculos { get; set; }
+
+    /// <summary>Lê a arquitetura e a estrutura (ver LeituraDoEdificio) e põe uma linha por ambiente e por viga no relatório.</summary>
+    public bool Arquitetura { get; set; }
+
     /// <summary>Numeração e código das folhas a gravar no padrão antes de gerar.</summary>
     public AjustePadrao? Padrao { get; set; }
     public Esperado? Esperado { get; set; }
@@ -848,6 +905,9 @@ sealed class Esperado
 
     /// <summary>Trechos que precisam aparecer no texto de alguma das folhas geradas.</summary>
     public List<string>? TextoDasFolhas { get; set; }
+
+    /// <summary>Trechos que precisam aparecer em alguma linha da leitura da arquitetura.</summary>
+    public List<string>? TextoDaArquitetura { get; set; }
 }
 
 sealed class AjusteMapeamento
@@ -889,6 +949,8 @@ sealed class RelatorioCenario
     public List<string>? ConexoesAntes { get; set; }
     public List<string>? Conexoes { get; set; }
     public List<string>? Carimbos { get; set; }
+    public List<string>? Vinculos { get; set; }
+    public List<string>? Arquitetura { get; set; }
     public List<string>? CarimbosSpk { get; set; }
 
     /// <summary>Só com "esperado" no cenário: se tudo bateu, e o que não bateu.</summary>

@@ -60,6 +60,8 @@ Sem `fila.json` na pasta, nada disso é ligado: o Revit abre normalmente.
 | `tracarRamal` | Roda Traçar ramal com os bicos da cena e o primeiro tubo dela como subgeral (cena `subgeralComBicosSoltos`: subgeral de 9 m com descida e fileira de 5 bicos, 1 de lado). |
 | `ramais` | Traçar ramais com opções: `altura` (`NaSubgeral`, `RelativaASubgeral`, `RelativaAoPiso`), `alturaM`, `toleranciaFileiraM`, `ligarBicos`. Cena `subgeralComFileiras`: 3 fileiras de 4 bicos dos dois lados da subgeral, 1 de lado. No esperado, `ramaisTracados`. |
 | `ligarBicos` | Roda Ligar bicos com os bicos e ramais da cena e põe no relatório os ligados e os motivos dos recusados (`bicosLigados`, `bicosRecusados` no esperado). |
+| `arquitetura` | Lê a arquitetura e a estrutura (arquivo e vínculos) e põe uma linha por ambiente e por viga em `Arquitetura`. No esperado, `textoDaArquitetura`. Cena `arquiteturaVinculada`: gera dois modelos pelos templates brasileiros do Revit (2 salas, forro a 2,80 m numa, laje a 4 m; 1 viga) e os vincula deslocados 20 m e 10 m. |
+| `inspecionarVinculos` | Diagnóstico: lista os vínculos (estado, origem, rotação) e quantos ambientes, forros, lajes, vigas, pilares, paredes e telhados há em cada um. |
 | `diametros` | Diâmetros por tabela no setor (mesmos campos de `calcular`: `{}`, `vga`, `elemento`, `setor`); no relatório, tubos por DN, recusas, divergências e avisos. No esperado, `diametros` com os tubos por DN (`{"25": 8}`), que exige também zero recusa e divergência. |
 | `listarConexoes` | Diagnóstico: com `diametros`, lista cada conector de tubo, peça e bico (posição, DN e a quem liga) antes e depois, em `ConexoesAntes` e `Conexoes`. |
 | `reconectar` | Roda o Corrigir de Verificar modelo nas peças encostadas (depois de sabotar, antes de verificar) e põe no relatório quantas eram, quantas ligou, os motivos das recusadas e as ligações do modelo antes e depois. |
@@ -80,13 +82,14 @@ Duas telas aparecem antes do plugin carregar e o teste não consegue responder:
 
 ## Cenários de regressão
 
-A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado esperado de cada cenário. Para rodar: copiar para `Documentos\SPK\testes\fila.json`, abrir o Revit e, no fim, olhar `Passou` de cada cenário no relatório. São 21:
+A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado esperado de cada cenário. Para rodar: copiar para `Documentos\SPK\testes\fila.json`, abrir o Revit e, no fim, olhar `Passou` de cada cenário no relatório. São 23:
 
 | Grupo | Cenários | O que prova |
 |---|---|---|
 | Cálculo e folhas | os 5 da Rede de exemplo | valores de cálculo, 4 folhas, 2 quadros no isométrico, verificação sem problema na malha gerada |
 | Sabotagem | bico desligado, tê apagado, sistema de água fria, tubo desligado | Verificar modelo acha cada problema, no elemento certo |
 | Modelagem | cena com ramal e bicos soltos; cena com subgeral e fileira de bicos; a mesma com Diâmetros; 3 fileiras dos dois lados, com subida e com cruzeta | Ligar bicos liga 5 e recusa 1; Traçar ramal traça e liga 5; Diâmetros põe 8 tubos em DN 25, 1 em 32 e 4 em 40, com os cotovelos refeitos no DN novo e nenhuma redução entre tubos; Traçar ramais traça 3 ramais e liga os 12 bicos nos dois modos; verificação limpa |
+| Arquitetura | vínculos gerados pelo teste; Nova Era com vínculos descarregados | teto pelo forro (2,80) e pela laje (3,85), viga com fundo a 3,70, coordenadas com o deslocamento do vínculo; os vínculos descarregados aparecem com o nome |
 | Janelas | todos | nenhum cenário pode abrir janela do Revit que o engenheiro teria de fechar (antes, a Nova Era abria 55 no Corrigir) |
 | Correção | bico e tubo desligados e corrigidos; Nova Era corrigida | o Corrigir religa sem perder ligação e o cálculo volta ao valor original (1.757,6 kPa); na Nova Era, 910 de 971 ligadas |
 | Nova Era | verificação da cópia do modelo real | acha as peças encostadas sem ligação (971), as derivações sem tê, os 610 tubos em sistema hidrônico e os bicos não confirmados, em menos de 1 s |

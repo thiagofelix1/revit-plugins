@@ -73,7 +73,7 @@ Pronto quando um setor da Nova Era (ou de um projeto do engenheiro) é desenhado
 - [x] 3. Traçar o ramal: reta pelos bicos (eixo principal, passando pela mediana lateral), na altura da subgeral, do tê nela até o último bico, e os bicos ligados pelo Ligar bicos (último por cotovelo na ponta). Recusa fileira dos dois lados da subgeral (cruzeta) e fileira quase paralela a ela. Provado na cena de teste (5 bicos, 1 de lado; cálculo num ramal só).
 - [x] 3b. Traçar ramais de várias fileiras de uma vez (como o Auto Branch Line do AutoSPRINK): fileiras separadas pelo SPK, ramal na altura da subgeral (tê ou cruzeta), com subida (riser nipple) ou a uma altura fixa; bico em pé.
 - [x] 4. Aplicar diâmetros por tabela (número de bicos atendidos) e conferir pelo cálculo. Botão Diâmetros, no painel Cálculo; tabelas da IT-23/2025 (12 a 14).
-- [ ] 5. Ler a arquitetura e a estrutura vinculadas: níveis, forros, ambientes, vigas, telhados.
+- [x] 5. Ler a arquitetura e a estrutura vinculadas: ambientes (contorno, piso, teto pelo primeiro forro, laje ou telhado acima), vigas (largura, fundo, topo). Botão Arquitetura, painel Projeto. Testado com vínculos gerados pelo teste; falta conferir nos vínculos reais da Nova Era (NEPN-ARQ R03 e NEPN-PRE R08), pedidos ao engenheiro.
 - [ ] 6. Posicionar bicos num ambiente ou contorno pela regra da NBR, junto com a conferência de espaçamento, área por bico e distância à parede.
 - [ ] 7. Geração automática por contorno (contorno → bicos → ramais → subgeral → VGA), usando 2 a 6, com os arranjos de hoje (lateral, espinha de peixe, grelha). O gerador retangular atual passa a usar as mesmas peças.
 - [ ] Aviso de colisão com viga e duto, e de inclinação.
