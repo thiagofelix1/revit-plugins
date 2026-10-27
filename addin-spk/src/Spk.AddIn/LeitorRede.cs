@@ -88,7 +88,8 @@ static class LeitorRede
             }
         }
 
-        AplicarConexoes(doc, naRede, idsBico, trechos, trechosDoTubo, fatorC, avisos);
+        var entrePecas = LigarPecas(doc, naRede, idsBico, nos, trechos, ref seq, fatorC);
+        AplicarConexoes(doc, naRede, idsBico, trechos, trechosDoTubo, entrePecas, fatorC, avisos);
         var tuboDoTrecho = new Dictionary<string, ElementId>(StringComparer.Ordinal);
         foreach (var (tubo, indices) in trechosDoTubo)
             foreach (var i in indices)
@@ -259,7 +260,7 @@ static class LeitorRede
     /// conector fora do par alinhado de maior diâmetro. Válvula: pelo nome da família.
     /// </summary>
     static void AplicarConexoes(Document doc, HashSet<ElementId> naRede, HashSet<ElementId> idsBico, List<Trecho> trechos,
-        Dictionary<ElementId, List<int>> trechosDoTubo, double fatorC, List<string> avisos)
+        Dictionary<ElementId, List<int>> trechosDoTubo, Dictionary<string, int> entrePecas, double fatorC, List<string> avisos)
     {
         var c = Math.Clamp(fatorC, 100, 150);
         var aplicadas = 0;
@@ -269,7 +270,7 @@ static class LeitorRede
         void Somar(Connector? conector, string no, TipoConexao tipo, string nome)
         {
             if (conector is null) return;
-            var indice = TrechoDoConector(conector, no, trechos, trechosDoTubo);
+            var indice = TrechoDoConector(conector, no, trechos, trechosDoTubo, entrePecas);
             if (indice is null) return;
             var trecho = trechos[indice.Value];
             var dn = DnTabelado(trecho.DiametroNominal);
@@ -375,11 +376,45 @@ static class LeitorRede
         catch (Autodesk.Revit.Exceptions.InvalidOperationException) { return 0; }
     }
 
-    /// <summary>O trecho do tubo ligado a este conector que encosta no nó da conexão.</summary>
-    static int? TrechoDoConector(Connector conector, string no, List<Trecho> trechos, Dictionary<ElementId, List<int>> trechosDoTubo)
+    /// <summary>
+    /// Peça ligada direto a outra peça, sem tubo no meio (cotovelo com luva de redução, tê com válvula): um trecho curto
+    /// entre os nós das duas, com o diâmetro do conector; sem ele a rede se parte ali. Bico ligado em peça é com LigarBicos.
+    /// </summary>
+    /// <returns>O trecho de cada par de peças (pela chave <see cref="Par" />).</returns>
+    static Dictionary<string, int> LigarPecas(Document doc, HashSet<ElementId> naRede, HashSet<ElementId> idsBico,
+        Dictionary<string, No> nos, List<Trecho> trechos, ref int seq, double fatorC)
+    {
+        var entrePecas = new Dictionary<string, int>(StringComparer.Ordinal);
+        foreach (var id in naRede)
+        {
+            if (idsBico.Contains(id) || doc.GetElement(id) is not FamilyInstance peca || !nos.TryGetValue(IdPeca(id), out var a)) continue;
+            foreach (var conector in Conectores(peca))
+            foreach (Connector outro in conector.AllRefs)
+            {
+                if (outro.Owner is not FamilyInstance vizinha || vizinha.Id == id || !EhFisico(outro.ConnectorType)) continue;
+                if (idsBico.Contains(vizinha.Id) || !naRede.Contains(vizinha.Id) || !nos.TryGetValue(IdPeca(vizinha.Id), out var b)) continue;
+                var par = Par(a.Id, b.Id);
+                if (entrePecas.ContainsKey(par)) continue;
+                var mm = Raio(conector) * 2 * 304.8;
+                if (mm <= 0) mm = 25;
+                var distancia = Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y) + (a.Z - b.Z) * (a.Z - b.Z));
+                entrePecas[par] = trechos.Count;
+                trechos.Add(new Trecho($"T{seq++}", a.Id, b.Id, mm, Math.Max(distancia, 0.001), fatorC)
+                {
+                    DiametroNominal = (int)Math.Round(mm),
+                });
+            }
+        }
+        return entrePecas;
+    }
+
+    /// <summary>O trecho do tubo (ou entre peças) ligado a este conector que encosta no nó da conexão.</summary>
+    static int? TrechoDoConector(Connector conector, string no, List<Trecho> trechos, Dictionary<ElementId, List<int>> trechosDoTubo,
+        Dictionary<string, int> entrePecas)
     {
         foreach (Connector outro in conector.AllRefs)
         {
+            if (outro.Owner is FamilyInstance vizinha && entrePecas.TryGetValue(Par(no, IdPeca(vizinha.Id)), out var entre)) return entre;
             if (outro.Owner is not Pipe tubo || !trechosDoTubo.TryGetValue(tubo.Id, out var indices)) continue;
             foreach (var i in indices)
                 if (trechos[i].De == no || trechos[i].Para == no)

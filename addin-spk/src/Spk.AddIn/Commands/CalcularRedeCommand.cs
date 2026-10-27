@@ -2,7 +2,6 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
 using Nice3point.Revit.Toolkit.External;
 using Spk.AddIn.Servicos;
-using Spk.AddIn.Verificacao;
 
 namespace Spk.AddIn.Commands;
 
@@ -24,7 +23,7 @@ public class CalcularRedeCommand : ExternalCommand
             var dados = DadosProjetoUi.Obter(doc);
             if (dados is null) return;
 
-            if (!ModeloPronto(Application.ActiveUIDocument!)) return;
+            if (!SetorUi.ModeloPronto(Application.ActiveUIDocument!, "SPK — Calcular", "Calcular mesmo assim")) return;
 
             var leitura = BicosDoModelo.Ler(doc);
             ServicoCalculo.ValidarFatorK(leitura.Bicos);
@@ -38,35 +37,9 @@ public class CalcularRedeCommand : ExternalCommand
             };
             if (previa.Show() != TaskDialogResult.Ok) return;
 
-            var vgas = leitura.Gerados ? [] : MapeamentoGravado.Vgas(doc);
-            var fonte = vgas.Count switch
-            {
-                0 => null,
-                1 => vgas[0],
-                _ => EscolherVga(Application.ActiveUIDocument!, vgas),
-            };
-            ElementId? doSetor = null;
-            // Sem VGA, cada rede separada é um setor. Na malha gerada só pergunta se o cenário tem mais de uma.
-            if (vgas.Count == 0 && (!leitura.Gerados || LeitorRede.Montar(doc, leitura.Bicos, dados.FatorC).TotalDeSetores > 1))
-            {
-                var (seguir, escolhido) = EscolherSetor(Application.ActiveUIDocument!,
-                    leitura.Gerados ? "A malha gerada tem mais de um setor (redes separadas)." : null);
-                if (!seguir) return;
-                doSetor = escolhido;
-            }
-
-            ServicoCalculo.Resultado resultado;
-            try
-            {
-                resultado = ServicoCalculo.Executar(doc, dados, leitura, fonte, vgas.Select(v => v.Id).ToList(), doSetor);
-            }
-            catch (VgaDesligadaException e)
-            {
-                // A válvula não alcança a rede (vão no modelo): calcula pelo pedaço de rede do setor, se o engenheiro quiser.
-                var (seguir, escolhido) = EscolherSetor(Application.ActiveUIDocument!, e.Message);
-                if (!seguir) return;
-                resultado = ServicoCalculo.Executar(doc, dados, leitura, null, [], escolhido);
-            }
+            var resultado = SetorUi.NoSetor(Application.ActiveUIDocument!, "SPK — Calcular", dados, leitura,
+                (fonte, vgas, doSetor) => ServicoCalculo.Executar(doc, dados, leitura, fonte, vgas, doSetor));
+            if (resultado is null) return;
             TaskDialog.Show("SPK — Calcular", resultado.Texto());
         }
         catch (Autodesk.Revit.Exceptions.OperationCanceledException)
@@ -76,85 +49,5 @@ public class CalcularRedeCommand : ExternalCommand
         {
             TaskDialog.Show("SPK — Calcular", e.Message);
         }
-    }
-
-    /// <summary>
-    /// Leitura estrita: com erro de modelagem (peças encostadas sem ligar, bico solto, família não confirmada), o SPK
-    /// não calcula calado. Mostra os problemas; calcular mesmo assim liga a rede por proximidade, que pode errar.
-    /// </summary>
-    static bool ModeloPronto(UIDocument ui)
-    {
-        var verificacao = VerificacaoModelo.Verificar(ui.Document);
-        if (verificacao.Erros == 0) return true;
-
-        var erros = verificacao.Grupos.Where(g => g.Gravidade == Gravidade.Erro).Select(g => $"• {g.Titulo}: {g.Ocorrencias.Count}");
-        var dialogo = new TaskDialog("SPK — Calcular")
-        {
-            MainInstruction = $"O modelo tem {verificacao.Erros} problema(s) que afetam o cálculo",
-            MainContent = string.Join("\n", erros) + "\n\nCom eles, o SPK precisa ligar a rede por proximidade, o que pode juntar " +
-                          "o que não devia ou deixar trechos de fora. O certo é corrigir e calcular de novo.",
-            CommonButtons = TaskDialogCommonButtons.Cancel,
-        };
-        dialogo.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Ver os problemas");
-        dialogo.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Calcular mesmo assim", "Ligação por proximidade, com aviso no resultado");
-        switch (dialogo.Show())
-        {
-            case TaskDialogResult.CommandLink1:
-                VerificacaoUi.Mostrar(ui, verificacao);
-                return false;
-            case TaskDialogResult.CommandLink2:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    /// <summary>
-    /// Sem VGA no modelo, cada pedaço de rede é um setor. O engenheiro clica num bico ou tubo do que quer calcular, ou
-    /// fica com o de mais bicos (elemento nulo). Cancelar devolve <c>Seguir = false</c>.
-    /// </summary>
-    static (bool Seguir, ElementId? Elemento) EscolherSetor(UIDocument ui, string? motivo = null)
-    {
-        var dialogo = new TaskDialog("SPK — Calcular")
-        {
-            MainInstruction = "Qual setor calcular?",
-            MainContent = (motivo ?? "O modelo não tem VGA marcada em Famílias.") +
-                          " Cada rede sem ligação com as outras é tratada como um setor, com a entrada na ponta mais baixa da descida.",
-            CommonButtons = TaskDialogCommonButtons.Cancel,
-        };
-        dialogo.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Clicar num bico ou tubo do setor");
-        dialogo.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Calcular o setor com mais bicos");
-        switch (dialogo.Show())
-        {
-            case TaskDialogResult.CommandLink1:
-                var referencia = ui.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.Element, new BicoOuTubo(),
-                    "Clique num bico ou tubo do setor que quer calcular.");
-                return (true, referencia.ElementId);
-            case TaskDialogResult.CommandLink2:
-                return (true, null);
-            default:
-                return (false, null);
-        }
-    }
-
-    sealed class BicoOuTubo : Autodesk.Revit.UI.Selection.ISelectionFilter
-    {
-        public bool AllowElement(Element elemento) => elemento.Category?.Id.Value is long id
-            && (id == (long)BuiltInCategory.OST_Sprinklers || id == (long)BuiltInCategory.OST_PipeCurves);
-
-        public bool AllowReference(Reference referencia, XYZ ponto) => false;
-    }
-
-    static FamilyInstance EscolherVga(UIDocument ui, List<FamilyInstance> vgas)
-    {
-        var referencia = ui.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.Element,
-            new SoEstes(vgas.Select(v => v.Id).ToHashSet()), $"Há {vgas.Count} VGAs. Clique na VGA do setor que quer calcular.");
-        return (FamilyInstance)ui.Document.GetElement(referencia);
-    }
-
-    sealed class SoEstes(HashSet<ElementId> ids) : Autodesk.Revit.UI.Selection.ISelectionFilter
-    {
-        public bool AllowElement(Element elemento) => ids.Contains(elemento.Id);
-        public bool AllowReference(Reference referencia, XYZ ponto) => false;
     }
 }

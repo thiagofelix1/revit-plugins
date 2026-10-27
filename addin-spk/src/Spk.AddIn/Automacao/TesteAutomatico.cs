@@ -8,6 +8,7 @@ using Autodesk.Revit.UI.Events;
 using Spk.AddIn.Commands;
 using Spk.AddIn.Servicos;
 using Spk.AddIn.Modelagem;
+using Spk.Motor.Calculo;
 using Spk.AddIn.Verificacao;
 
 namespace Spk.AddIn.Automacao;
@@ -229,6 +230,28 @@ static class TesteAutomatico
                     return feito.Texto();
                 });
 
+            if (cenario.Diametros is { } setorDiametros)
+                Etapa(relatorio, "diametros", () =>
+                {
+                    if (cenario.ListarConexoes) relatorio.ConexoesAntes = Diagnostico.Conexoes(doc!);
+                    var (dados, leitura, fonte, vgas, doSetor) = Setor(doc!, setorDiametros);
+                    var lida = LeitorRede.Montar(doc!, leitura.Bicos, dados.FatorC, fonte, vgas, doSetor, setorDiametros.Setor);
+                    var dimensionamento = DimensionamentoPorTabela.Calcular(lida.Rede, dados.Classe);
+                    var feito = AplicarDiametros.Executar(doc!, lida, dimensionamento);
+                    relatorio.Diametros = new ResumoDiametros
+                    {
+                        Mudados = feito.Mudados,
+                        JaCertos = feito.JaCertos,
+                        TubosPorDn = feito.TubosPorDn.OrderBy(p => p.Key).ToDictionary(p => p.Key.ToString(), p => p.Value),
+                        Recusados = feito.Recusados.GroupBy(r => r).Select(g => $"{g.Count()}× {g.Key}").ToList(),
+                        Divergentes = feito.Divergentes.ToList(),
+                        Inseridas = feito.Inseridas.ToList(),
+                        Avisos = dimensionamento.Avisos.ToList(),
+                    };
+                    if (cenario.ListarConexoes) relatorio.Conexoes = Diagnostico.Conexoes(doc!);
+                    return feito.Texto();
+                });
+
             if (cenario.InspecionarCarimbo)
                 relatorio.Carimbos = Diagnostico.Carimbos(doc!);
 
@@ -334,6 +357,14 @@ static class TesteAutomatico
 
     static ServicoCalculo.Resultado Calcular(Document doc, PedidoCalculo pedido)
     {
+        var (dados, leitura, fonte, vgas, doSetor) = Setor(doc, pedido);
+        return ServicoCalculo.Executar(doc, dados, leitura, fonte, vgas, doSetor, pedido.Setor);
+    }
+
+    /// <summary>O setor do pedido, como Calcular e Diâmetros o escolhem na tela.</summary>
+    static (DadosProjeto Dados, BicosDoModelo.Leitura Leitura, FamilyInstance? Fonte, List<ElementId> Vgas, ElementId? DoSetor) Setor(
+        Document doc, PedidoCalculo pedido)
+    {
         var dados = DadosProjeto.Carregar(doc) ?? throw new InvalidOperationException("O projeto não tem Dados do projeto; mande \"dados\" no cenário.");
         var leitura = BicosDoModelo.Ler(doc);
         var vgas = leitura.Gerados ? [] : MapeamentoGravado.Vgas(doc);
@@ -349,7 +380,7 @@ static class TesteAutomatico
             throw new InvalidOperationException($"Há {vgas.Count} VGAs; diga qual em \"calcular.vga\" (ids no relatório, em \"vgas\").");
 
         var doSetor = pedido.Elemento is { } idElemento ? new ElementId(idElemento) : null;
-        return ServicoCalculo.Executar(doc, dados, leitura, fonte, vgas.Select(v => v.Id).ToList(), doSetor, pedido.Setor);
+        return (dados, leitura, fonte, vgas.Select(v => v.Id).ToList(), doSetor);
     }
 
     static ResumoCalculo Resumo(ServicoCalculo.Resultado r)
@@ -522,6 +553,14 @@ static class TesteAutomatico
             };
             if (!Atende(quantidade, condicao)) falhas.Add($"verificação {codigo}: esperado {condicao}, veio {quantidade}");
         }
+        if (esperado.Diametros is { } porDn)
+        {
+            var veio = r.Diametros?.TubosPorDn ?? [];
+            if (porDn.Count != veio.Count || porDn.Any(p => !veio.TryGetValue(p.Key, out var n) || n != p.Value))
+                falhas.Add($"diâmetros: esperado {Dns(porDn)}, veio {Dns(veio)}");
+            if (r.Diametros is { } d && d.Recusados.Count + d.Divergentes.Count + d.Inseridas.Count > 0)
+                falhas.Add($"diâmetros: {d.Recusados.Count} recusa(s), {d.Divergentes.Count} divergência(s), {d.Inseridas.Count} peça(s) inserida(s)");
+        }
         if (esperado.BicosLigados is { } ligados && r.Ligacao?.Ligados != ligados)
             falhas.Add($"ligar bicos: esperado {ligados} ligados, veio {r.Ligacao?.Ligados}");
         if (esperado.BicosRecusados is { } recusados && (r.Ligacao?.Recusados.Sum(Quantos) ?? 0) != recusados)
@@ -537,6 +576,8 @@ static class TesteAutomatico
                 falhas.Add($"folhas: texto \"{trecho}\" não apareceu");
         return falhas;
     }
+
+    static string Dns(Dictionary<string, int> porDn) => string.Join(", ", porDn.Select(p => $"DN {p.Key}: {p.Value}"));
 
     /// <summary>"3× motivo" → 3.</summary>
     static int Quantos(string linha) => int.TryParse(linha.Split('×')[0], out var n) ? n : 1;
@@ -584,6 +625,36 @@ static class Diagnostico
                 && c.AllRefs.Cast<Connector>().Any(r => r.Owner.Id != e.Id && r.Owner is MEPCurve or FamilyInstance));
         }
         return pontas / 2;
+    }
+
+    /// <summary>Cada conector de tubo, peça e bico: posição, DN e a quem está ligado.</summary>
+    public static List<string> Conexoes(Document doc)
+    {
+        var categorias = new ElementMulticategoryFilter(new[]
+        {
+            BuiltInCategory.OST_PipeCurves, BuiltInCategory.OST_PipeFitting, BuiltInCategory.OST_Sprinklers,
+        });
+        var linhas = new List<string>();
+        foreach (var e in new FilteredElementCollector(doc).WherePasses(categorias).WhereElementIsNotElementType().OrderBy(e => e.Id.Value))
+        {
+            var gerente = e switch
+            {
+                MEPCurve curva => curva.ConnectorManager,
+                FamilyInstance instancia => instancia.MEPModel?.ConnectorManager,
+                _ => null,
+            };
+            if (gerente is null) continue;
+            var partes = gerente.Connectors.Cast<Connector>().Where(c => c.Domain == Domain.DomainPiping).Select(c =>
+            {
+                var o = c.Origin;
+                var refs = c.AllRefs.Cast<Connector>().Where(r => r.Owner.Id != e.Id)
+                    .Select(r => $"{r.Owner.Id.Value}/{r.ConnectorType}");
+                var raio = c.Shape == ConnectorProfileType.Round ? c.Radius * 2 * 304.8 : 0;
+                return $"[{c.ConnectorType} ({o.X * 0.3048:0.000};{o.Y * 0.3048:0.000};{o.Z * 0.3048:0.000}) Ø{raio:0} → {string.Join(",", refs)}]";
+            });
+            linhas.Add($"{e.Category?.Name} {e.Id.Value} {(e as FamilyInstance)?.Symbol?.FamilyName}: {string.Join(" ", partes)}");
+        }
+        return linhas;
     }
 
     public static List<string> Vistas(Document doc) =>
@@ -721,6 +792,12 @@ sealed class Cenario
     /// <summary>Roda Ligar bicos com os bicos e ramais da cena (sem cena: todos os sprinklers e tubos).</summary>
     public bool LigarBicos { get; set; }
 
+    /// <summary>Diâmetros por tabela no setor pedido (como "calcular"), depois das ferramentas de modelagem.</summary>
+    public PedidoCalculo? Diametros { get; set; }
+
+    /// <summary>Lista os conectores de tubos e peças antes e depois de "diametros" (diagnóstico).</summary>
+    public bool ListarConexoes { get; set; }
+
     /// <summary>Liga as peças encostadas (o Corrigir de Verificar modelo), depois de sabotar e antes de verificar.</summary>
     public bool Reconectar { get; set; }
     public bool InspecionarCarimbo { get; set; }
@@ -751,6 +828,9 @@ sealed class Esperado
 
     public int? BicosLigados { get; set; }
     public int? BicosRecusados { get; set; }
+
+    /// <summary>Quantos tubos ficaram com cada DN ("25": 4); sem recusa nem divergência.</summary>
+    public Dictionary<string, int>? Diametros { get; set; }
 
     /// <summary>A reconexão não pode desfazer ligação que existia: ligações depois ≥ antes + feitas.</summary>
     public bool? ReconexaoSemPerda { get; set; }
@@ -794,6 +874,9 @@ sealed class RelatorioCenario
     public ResumoVerificacao? Verificacao { get; set; }
     public ResumoReconexao? Reconexao { get; set; }
     public ResumoLigacao? Ligacao { get; set; }
+    public ResumoDiametros? Diametros { get; set; }
+    public List<string>? ConexoesAntes { get; set; }
+    public List<string>? Conexoes { get; set; }
     public List<string>? Carimbos { get; set; }
     public List<string>? CarimbosSpk { get; set; }
 
@@ -811,6 +894,17 @@ sealed class ResumoVerificacao
     public int Erros { get; set; }
     public int Avisos { get; set; }
     public List<GrupoVerificado> Grupos { get; set; } = [];
+}
+
+sealed class ResumoDiametros
+{
+    public int Mudados { get; set; }
+    public int JaCertos { get; set; }
+    public Dictionary<string, int> TubosPorDn { get; set; } = [];
+    public List<string> Recusados { get; set; } = [];
+    public List<string> Divergentes { get; set; } = [];
+    public List<string> Inseridas { get; set; } = [];
+    public List<string> Avisos { get; set; } = [];
 }
 
 sealed class ResumoLigacao

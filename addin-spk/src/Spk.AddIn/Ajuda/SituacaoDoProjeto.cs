@@ -99,6 +99,7 @@ static class SituacaoDoProjeto
     {
         var acoes = new[]
         {
+            new AcaoDaEtapa("Diâmetros", "DiametrosCommand"),
             new AcaoDaEtapa("Calcular", "CalcularRedeCommand"),
             new AcaoDaEtapa("Memorial", "AbrirMemorialCommand"),
         };

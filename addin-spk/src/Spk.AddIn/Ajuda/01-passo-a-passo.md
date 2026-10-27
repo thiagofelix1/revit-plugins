@@ -24,16 +24,22 @@ Há dois caminhos:
 
 Botão **Verificar modelo**, no painel Cálculo. Confere se o SPK consegue seguir a água pelas conexões: peças encostadas mas não ligadas, tubo que termina no meio de outro sem tê, bico solto, ponta aberta, tubo fora de sistema de incêndio, bico sem fator K confirmado e bico que não chega a nenhuma VGA. Cada item diz como resolver; **Mostrar** seleciona os elementos e leva a vista até eles, e **Corrigir** liga de uma vez as peças encostadas. Numa rede gerada pelo SPK, a lista sai vazia. O capítulo **Verificar o modelo** explica cada problema e como corrigir.
 
-## 5. Calcular
+## 5. Diâmetros (risco leve e ordinário)
+
+Botão **Diâmetros**, no painel Cálculo. Com a rede ligada, o SPK conta quantos bicos cada trecho alimenta e põe em cada tubo o DN da tabela da norma (IT-23/2025, Tabelas 12 a 14, que reproduzem o método por tabela da NBR 10897): no ramal, DN 25 até 2 bicos, 32 até 3, 40 até 5, e assim por diante até a descida. Antes de mudar, mostra quantos tubos vão para cada DN e os avisos; no fim, oferece **Calcular agora** para conferir.
+
+A tabela é o ponto de partida. Em sistema novo ela só vale como método abaixo de 465 m², com K 80 e rede em árvore; fora disso o SPK avisa, e quem decide é o cálculo. Rede em grelha (malha fechada) e risco extra não têm tabela. Se o tubo do modelo não tem o DN da tabela (DN 90, por exemplo), fica o tamanho seguinte que ele tiver.
+
+## 6. Calcular
 
 Botão **Calcular**. Se o modelo tiver erro de modelagem, o Calcular mostra os problemas antes e pergunta se quer vê-los ou calcular mesmo assim (ligando as peças por proximidade, com aviso no resultado). O SPK mostra quantos bicos entram, lê a rede pelas conexões, pergunta o setor quando há mais de um (clicando na VGA, ou num bico do setor) e procura a área de operação mais desfavorável. O resultado diz se **ATENDE**, a pressão e a vazão necessárias na entrada do setor, o bico crítico e cada verificação que não passou.
 
 O resultado fica gravado no modelo: cada bico do setor ganha o número de cálculo, o setor, se está na área de cálculo, a pressão e a vazão; cada tubo ganha o setor, a vazão e a velocidade (parâmetros **SPK …**, que podem ser usados em tabelas e etiquetas).
 
-## 6. Memorial
+## 7. Memorial
 
 Botão **Memorial**: abre o memorial de cálculo em Word, com critérios, resumo, verificações, as áreas avaliadas e todos os trechos com vazão, diâmetro, perdas e pressões. Os números dos nós são os mesmos das folhas.
 
-## 7. Folhas
+## 8. Folhas
 
 Botão **Folhas**: monta a setorização, o isométrico geral e as folhas do último setor calculado, e exporta tudo num PDF na pasta **SPK** ao lado do arquivo do projeto. Rodar de novo refaz as folhas do SPK com os dados atuais.

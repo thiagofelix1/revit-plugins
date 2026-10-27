@@ -93,6 +93,16 @@ static class Icones
         }
     }
 
+    public static void Diametros(DrawingContext dc)
+    {
+        // Tubo que afina a cada derivação, como o ramal dimensionado.
+        dc.DrawLine(Caneta(Grafite, 8), new Point(2, 16), new Point(12, 16));
+        dc.DrawLine(Caneta(Vermelho, 5), new Point(12, 16), new Point(21, 16));
+        dc.DrawLine(Caneta(Vermelho, 2.5), new Point(21, 16), new Point(30, 16));
+        dc.DrawLine(Caneta(Grafite, 1.4), new Point(12, 8), new Point(12, 24));
+        dc.DrawLine(Caneta(Grafite, 1.4), new Point(21, 8), new Point(21, 24));
+    }
+
     public static void LigarBicos(DrawingContext dc)
     {
         dc.DrawLine(Caneta(Grafite, 3), new Point(3, 9), new Point(29, 9));

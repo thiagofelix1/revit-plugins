@@ -52,6 +52,10 @@ public class SpkApplication : IExternalApplication
             "Verificar\nmodelo", Icones.Verificar,
             "Confere se o SPK consegue ler a rede: peças encostadas mas não ligadas, tubo sem tê, bico solto, ponta aberta, " +
             "sistema que não é de incêndio, famílias não confirmadas e bicos sem VGA. Mostra cada item no modelo e corrige as peças encostadas.");
+        Botao<DiametrosCommand>(calculo,
+            "Diâmetros", Icones.Diametros,
+            "Põe nos tubos do setor o DN da tabela da norma (IT-23 / NBR 10897), pelo número de bicos que cada trecho alimenta. " +
+            "Mostra antes o que vai mudar e oferece calcular no fim para conferir. Risco leve e ordinário. Ctrl+Z desfaz tudo.");
         Botao<CalcularRedeCommand>(calculo,
             "Calcular", Icones.Executar,
             "Calcula o setor: lê a rede pelas conexões, acha a área mais desfavorável e grava o resultado no modelo.");
