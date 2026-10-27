@@ -7,6 +7,7 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
 using Spk.AddIn.Commands;
 using Spk.AddIn.Servicos;
+using Spk.AddIn.Modelagem;
 using Spk.AddIn.Verificacao;
 
 namespace Spk.AddIn.Automacao;
@@ -147,6 +148,31 @@ static class TesteAutomatico
                 Ponto = (v.Location as LocationPoint)?.Point is { } p ? [Math.Round(p.X * 0.3048, 2), Math.Round(p.Y * 0.3048, 2), Math.Round(p.Z * 0.3048, 2)] : null,
                 Conectores = Conectores(doc!, v),
             }).ToList();
+
+            Cena? cena = null;
+            if (cenario.Cena is { } nomeCena)
+                Etapa(relatorio, "cena", () =>
+                {
+                    cena = Cenas.Montar(doc!, nomeCena);
+                    return cena.Resumo;
+                });
+
+            if (cenario.LigarBicos)
+                Etapa(relatorio, "ligarBicos", () =>
+                {
+                    var bicos = cena?.Bicos ?? new FilteredElementCollector(doc!).OfCategory(BuiltInCategory.OST_Sprinklers)
+                        .WhereElementIsNotElementType().OfType<FamilyInstance>().ToList();
+                    var ramais = cena?.Ramais ?? new FilteredElementCollector(doc!).OfClass(typeof(Autodesk.Revit.DB.Plumbing.Pipe))
+                        .Cast<Autodesk.Revit.DB.Plumbing.Pipe>().ToList();
+                    var feito = LigarBicos.Executar(doc!, bicos, ramais);
+                    relatorio.Ligacao = new ResumoLigacao
+                    {
+                        Ligados = feito.Ligados,
+                        Criados = feito.Criados.Count,
+                        Recusados = feito.Recusados.GroupBy(r => r).Select(g => $"{g.Count()}× {g.Key}").ToList(),
+                    };
+                    return feito.Texto();
+                });
 
             if (cenario.RedeExemplo || cenario.Exemplo is not null)
                 Etapa(relatorio, "redeExemplo", () =>
@@ -470,6 +496,10 @@ static class TesteAutomatico
             };
             if (!Atende(quantidade, condicao)) falhas.Add($"verificação {codigo}: esperado {condicao}, veio {quantidade}");
         }
+        if (esperado.BicosLigados is { } ligados && r.Ligacao?.Ligados != ligados)
+            falhas.Add($"ligar bicos: esperado {ligados} ligados, veio {r.Ligacao?.Ligados}");
+        if (esperado.BicosRecusados is { } recusados && (r.Ligacao?.Recusados.Sum(Quantos) ?? 0) != recusados)
+            falhas.Add($"ligar bicos: esperado {recusados} recusados, veio {r.Ligacao?.Recusados.Sum(Quantos) ?? 0}");
         if (esperado.ReconexaoSemPerda == true)
         {
             if (r.Reconexao is not { } rc) falhas.Add("reconexão: o cenário não rodou \"reconectar\"");
@@ -481,6 +511,9 @@ static class TesteAutomatico
                 falhas.Add($"folhas: texto \"{trecho}\" não apareceu");
         return falhas;
     }
+
+    /// <summary>"3× motivo" → 3.</summary>
+    static int Quantos(string linha) => int.TryParse(linha.Split('×')[0], out var n) ? n : 1;
 
     /// <summary>"0", "3", "&gt;=1", "&lt;=2", "&gt;0".</summary>
     static bool Atende(int valor, string condicao)
@@ -653,6 +686,12 @@ sealed class Cenario
 
     public bool Verificar { get; set; }
 
+    /// <summary>Cena montada do zero para testar uma ferramenta de modelagem (ver Cenas): "ramalComBicosSoltos".</summary>
+    public string? Cena { get; set; }
+
+    /// <summary>Roda Ligar bicos com os bicos e ramais da cena (sem cena: todos os sprinklers e tubos).</summary>
+    public bool LigarBicos { get; set; }
+
     /// <summary>Liga as peças encostadas (o Corrigir de Verificar modelo), depois de sabotar e antes de verificar.</summary>
     public bool Reconectar { get; set; }
     public bool InspecionarCarimbo { get; set; }
@@ -680,6 +719,9 @@ sealed class Esperado
 
     /// <summary>Código do grupo (ou "erros", "avisos", "setores") e a condição: "0", "&gt;=1", "&lt;=2".</summary>
     public Dictionary<string, string>? Verificacao { get; set; }
+
+    public int? BicosLigados { get; set; }
+    public int? BicosRecusados { get; set; }
 
     /// <summary>A reconexão não pode desfazer ligação que existia: ligações depois ≥ antes + feitas.</summary>
     public bool? ReconexaoSemPerda { get; set; }
@@ -722,6 +764,7 @@ sealed class RelatorioCenario
     public string? Arquivo { get; set; }
     public ResumoVerificacao? Verificacao { get; set; }
     public ResumoReconexao? Reconexao { get; set; }
+    public ResumoLigacao? Ligacao { get; set; }
     public List<string>? Carimbos { get; set; }
     public List<string>? CarimbosSpk { get; set; }
 
@@ -739,6 +782,13 @@ sealed class ResumoVerificacao
     public int Erros { get; set; }
     public int Avisos { get; set; }
     public List<GrupoVerificado> Grupos { get; set; } = [];
+}
+
+sealed class ResumoLigacao
+{
+    public int Ligados { get; set; }
+    public int Criados { get; set; }
+    public List<string> Recusados { get; set; } = [];
 }
 
 sealed class ResumoReconexao

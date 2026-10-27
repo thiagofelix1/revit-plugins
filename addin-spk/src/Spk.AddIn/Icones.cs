@@ -82,6 +82,16 @@ static class Icones
             dc.DrawEllipse(Vermelho, null, new Point(x, 16), 2.2, 2.2);
     }
 
+    public static void LigarBicos(DrawingContext dc)
+    {
+        dc.DrawLine(Caneta(Grafite, 3), new Point(3, 9), new Point(29, 9));
+        var braco = Caneta(Vermelho, 2.2);
+        dc.DrawLine(braco, new Point(10, 9), new Point(10, 22));
+        dc.DrawGeometry(null, braco, Geometry.Parse("M 21,9 L 21,15 L 25,15 L 25,22"));
+        dc.DrawEllipse(Vermelho, null, new Point(10, 25), 3, 3);
+        dc.DrawEllipse(Vermelho, null, new Point(25, 25), 3, 3);
+    }
+
     public static void Verificar(DrawingContext dc)
     {
         dc.DrawEllipse(Brushes.White, Caneta(Grafite, 2.5), new Point(16, 16), 12, 12);

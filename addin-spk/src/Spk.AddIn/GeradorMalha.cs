@@ -171,7 +171,7 @@ static class GeradorMalha
         return ids;
     }
 
-    static void AjustarAltura(FamilyInstance bico, double zDesejado, double zNivel)
+    internal static void AjustarAltura(FamilyInstance bico, double zDesejado, double zNivel)
     {
         var deslocamento = zDesejado - zNivel;
         var parametro = bico.get_Parameter(BuiltInParameter.INSTANCE_ELEVATION_PARAM)
@@ -186,7 +186,7 @@ static class GeradorMalha
             ElementTransformUtils.MoveElement(bico.Document, bico.Id, new XYZ(0, 0, zDesejado - ponto.Point.Z));
     }
 
-    static XYZ? OrigemDoConector(FamilyInstance bico)
+    internal static XYZ? OrigemDoConector(FamilyInstance bico)
     {
         var gerente = bico.MEPModel?.ConnectorManager;
         if (gerente is null) return null;
@@ -196,10 +196,13 @@ static class GeradorMalha
         return null;
     }
 
-    static Pipe CriarTubo(Document doc, ElementId sistema, ElementId tipo, ElementId nivel, XYZ a, XYZ b, double? diametro)
+    /// <param name="marcar">Marca como malha gerada (a Rede de exemplo apaga o que tem a marca). Falso nas ferramentas de
+    /// modelagem, que desenham num projeto real.</param>
+    internal static Pipe CriarTubo(Document doc, ElementId sistema, ElementId tipo, ElementId nivel, XYZ a, XYZ b, double? diametro,
+        bool marcar = true)
     {
         var tubo = Pipe.Create(doc, sistema, tipo, nivel, a, b);
-        tubo.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.Set(DadosEsboco.Marca);
+        if (marcar) tubo.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.Set(DadosEsboco.Marca);
         if (diametro is > 0)
         {
             try { tubo.get_Parameter(BuiltInParameter.RBS_PIPE_DIAMETER_PARAM)?.Set(diametro.Value); }
@@ -208,7 +211,7 @@ static class GeradorMalha
         return tubo;
     }
 
-    static PipeType TipoComTe(Document doc)
+    internal static PipeType TipoComTe(Document doc)
     {
         var tipos = new FilteredElementCollector(doc).OfClass(typeof(PipeType)).Cast<PipeType>().ToList();
         if (tipos.Count == 0)
@@ -219,7 +222,7 @@ static class GeradorMalha
     }
 
     /// <summary>O DN pedido; se o tipo de tubo não tiver tê nele, o DN com tê mais próximo.</summary>
-    static double? DiametroComTe(Document doc, PipeType tipo, int dnPedido)
+    internal static double? DiametroComTe(Document doc, PipeType tipo, int dnPedido)
     {
         var regras = tipo.RoutingPreferenceManager;
         var n = regras.GetNumberOfRules(RoutingPreferenceRuleGroupType.Junctions);
@@ -265,7 +268,7 @@ static class GeradorMalha
         return parte == null || parte.AsInteger() == (int)PartType.Tee;
     }
 
-    static int Ligar(Document doc, List<Pipe> tubos, List<FamilyInstance> bicos, Level nivel)
+    internal static int Ligar(Document doc, List<Pipe> tubos, List<FamilyInstance> bicos, Level nivel)
     {
         var grupos = new List<List<Connector>>();
         foreach (var conector in Conectores(tubos, bicos))
@@ -321,7 +324,7 @@ static class GeradorMalha
         return feitas;
     }
 
-    static bool TentarInserirTe(Document doc, IReadOnlyList<Connector> conectores)
+    internal static bool TentarInserirTe(Document doc, IReadOnlyList<Connector> conectores)
     {
         var c = conectores.ToArray();
         (int A, int B, int Ramo)[] ordens = [(0, 1, 2), (1, 0, 2), (0, 2, 1), (2, 0, 1), (1, 2, 0), (2, 1, 0)];
@@ -339,7 +342,7 @@ static class GeradorMalha
         return false;
     }
 
-    static void InserirTePorFamilia(Document doc, XYZ centro, Level nivel, FamilySymbol? simbolo, IReadOnlyList<Connector> tubos)
+    internal static void InserirTePorFamilia(Document doc, XYZ centro, Level nivel, FamilySymbol? simbolo, IReadOnlyList<Connector> tubos)
     {
         if (simbolo is null)
             throw new InvalidOperationException(
@@ -396,7 +399,7 @@ static class GeradorMalha
         return melhor;
     }
 
-    static FamilySymbol? SimboloDeTe(Document doc)
+    internal static FamilySymbol? SimboloDeTe(Document doc)
     {
         var filtro = new ElementMulticategoryFilter([BuiltInCategory.OST_PipeFitting]);
         return new FilteredElementCollector(doc).WherePasses(filtro).OfClass(typeof(FamilySymbol)).Cast<FamilySymbol>()
@@ -416,7 +419,7 @@ static class GeradorMalha
                 yield return conector;
     }
 
-    static void Recuar(Connector conector, double recuoPes)
+    internal static void Recuar(Connector conector, double recuoPes)
     {
         if (conector.Owner is not Pipe tubo) return;
         if (tubo.Location is not LocationCurve local || local.Curve is not Line linha) return;
@@ -452,20 +455,20 @@ static class GeradorMalha
     /// O nível da planta aberta; fora de uma planta, o mais perto da cota zero (o térreo). O mais baixo seria o de
     /// fundação nos modelos do Revit, que têm "Sapata" e "Laje" abaixo do Nível 1.
     /// </summary>
-    static Level? Nivel(Document doc)
+    internal static Level? Nivel(Document doc)
     {
         if (doc.ActiveView is ViewPlan planta && planta.GenLevel is { } doView) return doView;
         return new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>()
             .OrderBy(n => Math.Abs(n.ProjectElevation)).ThenByDescending(n => n.ProjectElevation).FirstOrDefault();
     }
 
-    static PipingSystemType? Sistema(Document doc)
+    internal static PipingSystemType? Sistema(Document doc)
     {
         var tipos = new FilteredElementCollector(doc).OfClass(typeof(PipingSystemType)).Cast<PipingSystemType>().ToList();
         return tipos.FirstOrDefault(t => t.SystemClassification == MEPSystemClassification.FireProtectWet) ?? tipos.FirstOrDefault();
     }
 
-    static FamilySymbol? SimboloDeBico(Document doc)
+    internal static FamilySymbol? SimboloDeBico(Document doc)
     {
         var simbolos = new FilteredElementCollector(doc).OfClass(typeof(FamilySymbol)).Cast<FamilySymbol>()
             .Where(s => s.Category?.Id.Value == (long)BuiltInCategory.OST_Sprinklers)
@@ -475,5 +478,5 @@ static class GeradorMalha
                ?? simbolos.FirstOrDefault();
     }
 
-    static double Pes(double metros) => UnitUtils.ConvertToInternalUnits(metros, UnitTypeId.Meters);
+    internal static double Pes(double metros) => UnitUtils.ConvertToInternalUnits(metros, UnitTypeId.Meters);
 }

@@ -32,6 +32,10 @@ public class SpkApplication : IExternalApplication
         Botao<GerarMalhaCommand>(rede,
             "Gerar", Icones.Malha,
             "Cria uma malha de bicos e tubos já conectados, no ponto que você clicar, com a geometria de Dados do esboço.");
+        Botao<LigarBicosCommand>(rede,
+            "Ligar\nbicos", Icones.LigarBicos,
+            "Liga bicos soltos ao ramal que passa sobre eles: parte o ramal, põe o tê e faz a descida (ou o braço, o cotovelo e a " +
+            "descida, se o bico está de lado). Selecione os bicos e o ramal antes, ou clique e selecione depois. Ctrl+Z desfaz tudo.");
         Pequenos(rede,
             (typeof(DadosEsbocoCommand), "Dados do esboço", Icones.Formulario,
                 "Geometria da malha gerada: arranjo, ramais, espaçamentos, altura, bico (K em L/min/bar½ e área) e diâmetros."),
