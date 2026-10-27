@@ -26,6 +26,10 @@ public sealed record OpcoesBicos
 /// <summary>O que aconteceu num ambiente: bicos criados (ou existentes, na conferência), falhas e o motivo de recusa.</summary>
 public sealed record ResultadoAmbiente(Ambiente Ambiente, int Bicos, double? Defletor, string Altura, IReadOnlyList<FalhaDeEspacamento> Falhas, string? Recusa)
 {
+    /// <summary>Os bicos criados (ao posicionar) e a grade usada.</summary>
+    public IReadOnlyList<ElementId> Criados { get; init; } = [];
+    public PosicaoDeBicos? Posicao { get; init; }
+
     public string Texto()
     {
         var nome = $"{Ambiente.Numero} {Ambiente.Nome}".Trim();
@@ -79,7 +83,11 @@ static class BicosPorAmbiente
             }
             criados.AddRange(deste);
             resultados.Add(new ResultadoAmbiente(ambiente, posicao.Bicos.Count, defletor, altura,
-                BicosNoAmbiente.Conferir(ambiente.Contornos, posicao.Bicos, limites, posicao.DirecaoDosRamais), null));
+                BicosNoAmbiente.Conferir(ambiente.Contornos, posicao.Bicos, limites, posicao.DirecaoDosRamais), null)
+            {
+                Criados = deste,
+                Posicao = posicao,
+            });
         }
         grupo.Assimilate();
         return resultados;
@@ -192,7 +200,7 @@ static class BicosPorAmbiente
         bico.Location is LocationPoint p ? new Ponto2(Metros(p.Point.X), Metros(p.Point.Y)) : null;
 
     /// <summary>O nível do projeto de incêndio logo abaixo do piso do ambiente (ou o mais baixo).</summary>
-    static Level Nivel(Document doc, double piso)
+    internal static Level Nivel(Document doc, double piso)
     {
         var niveis = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().OrderBy(n => n.Elevation).ToList();
         return niveis.LastOrDefault(n => n.Elevation <= piso + Pes(0.05)) ?? niveis.First();

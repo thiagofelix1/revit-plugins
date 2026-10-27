@@ -7,13 +7,35 @@
         <TextBlock x:Name="Resumo" DockPanel.Dock="Top" TextWrapping="Wrap" Foreground="#37474F" Margin="0,0,0,10"/>
 
         <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
-            <Button DockPanel.Dock="Left" Content="Conferir os bicos existentes" Padding="12,4" Click="Conferir_Click"
+            <Button x:Name="BotaoConferir" DockPanel.Dock="Left" Content="Conferir os bicos existentes" Padding="12,4" Click="Conferir_Click"
                     ToolTip="Confere os bicos que já estão nos ambientes marcados: espaçamento, área por bico, paredes e altura do defletor. Não muda nada."/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Cancelar" Width="100" Padding="12,4" Margin="0,0,8,0" IsCancel="True" Click="Cancelar_Click"/>
-                <Button Content="Posicionar bicos" Padding="12,4" FontWeight="Bold" IsDefault="True" Click="Posicionar_Click"/>
+                <Button x:Name="BotaoPrincipal" Content="Posicionar bicos" Padding="12,4" FontWeight="Bold" IsDefault="True" Click="Posicionar_Click"/>
             </StackPanel>
         </DockPanel>
+
+        <Grid x:Name="Geracao" DockPanel.Dock="Bottom" Margin="0,8,0,0" Visibility="Collapsed">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="120"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Arranjo" VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <ComboBox x:Name="Arranjo" Grid.Column="1" Margin="0,4,16,4">
+                <ComboBoxItem Content="Espinha de peixe: subgeral no meio, ramais para os dois lados"/>
+                <ComboBoxItem Content="Lateral: subgeral junto à parede, ramais para um lado"/>
+            </ComboBox>
+            <TextBlock Grid.Column="2" Text="Do defletor ao ramal (m)" VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <TextBox x:Name="Drop" Grid.Column="3" Margin="0,4" Padding="4"/>
+            <CheckBox x:Name="Diametros" Grid.Row="1" Grid.ColumnSpan="4" Margin="0,4"
+                      Content="Aplicar os diâmetros da tabela no fim (risco leve e ordinário; depois confira com Calcular)"/>
+        </Grid>
 
         <Grid DockPanel.Dock="Bottom" Margin="0,12,0,0">
             <Grid.ColumnDefinitions>

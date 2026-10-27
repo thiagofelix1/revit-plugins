@@ -33,9 +33,10 @@ public class SpkApplication : IExternalApplication
         Margem(projeto);
 
         var rede = application.CreateRibbonPanel(Aba, "Rede");
-        Botao<GerarMalhaCommand>(rede,
-            "Gerar", Icones.Malha,
-            "Cria uma malha de bicos e tubos já conectados, no ponto que você clicar, com a geometria de Dados do esboço.");
+        Botao<GerarRedeCommand>(rede,
+            "Gerar\nrede", Icones.Malha,
+            "Gera a rede nos ambientes da arquitetura: bicos pela norma, subgeral com a descida, ramais, ligação dos bicos e " +
+            "diâmetros da tabela, em espinha de peixe ou lateral. Usa as mesmas ferramentas dos botões ao lado. Ctrl+Z desfaz cada ambiente.");
         Botao<BicosPorAmbienteCommand>(rede,
             "Bicos por\nambiente", Icones.BicosAmbiente,
             "Posiciona bicos nos ambientes da arquitetura (vínculos ou o próprio arquivo) pela regra da norma: área por bico, " +
@@ -51,6 +52,9 @@ public class SpkApplication : IExternalApplication
             "Liga bicos soltos ao ramal que passa sobre eles: parte o ramal, põe o tê e faz a descida (ou o braço, o cotovelo e a " +
             "descida, se o bico está de lado). Selecione os bicos e o ramal antes, ou clique e selecione depois. Ctrl+Z desfaz tudo.");
         Pequenos(rede,
+            (typeof(GerarMalhaCommand), "Malha retangular", Icones.Malha,
+                "Cria uma malha retangular de bicos e tubos já conectados, no ponto que você clicar, com a geometria de Dados do " +
+                "esboço. Para testar sem arquitetura."),
             (typeof(DadosEsbocoCommand), "Dados do esboço", Icones.Formulario,
                 "Geometria da malha gerada: arranjo, ramais, espaçamentos, altura, bico (K em L/min/bar½ e área) e diâmetros."),
             (typeof(RedeExemploCommand), "Rede de exemplo", Icones.Malha,

@@ -121,6 +121,9 @@ static class VistasSpk
             try { vista.SetCategoryOverrides(new ElementId(c), vermelho); }
             catch (Autodesk.Revit.Exceptions.ArgumentException) { }
         }
+        // Só a tubulação, como no isométrico de referência: a arquitetura e a estrutura vinculadas cobririam a rede.
+        try { vista.SetCategoryHidden(new ElementId(BuiltInCategory.OST_RvtLinks), true); }
+        catch (Exception e) when (e is Autodesk.Revit.Exceptions.ArgumentException or Autodesk.Revit.Exceptions.InvalidOperationException) { }
     }
 
     /// <summary>Troca o template ligado por uma cópia das configurações dele na própria vista.</summary>

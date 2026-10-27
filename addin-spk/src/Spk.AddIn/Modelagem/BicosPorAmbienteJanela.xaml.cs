@@ -36,11 +36,29 @@ public partial class BicosPorAmbienteJanela : Window
     /// <summary>Verdadeiro: posicionar; falso: só conferir os existentes.</summary>
     public bool Posicionar { get; private set; }
     public OpcoesBicos? Opcoes { get; private set; }
+
+    /// <summary>No modo de geração: o arranjo, o drop e os diâmetros, com as opções dos bicos.</summary>
+    public OpcoesRede? Rede { get; private set; }
+
+    readonly bool gerar;
     public IReadOnlyList<Ambiente> Escolhidos => linhas.Where(l => l.Marcado).Select(l => l.Ambiente).ToList();
 
-    public BicosPorAmbienteJanela(Edificio edificio, IReadOnlyList<string> tipos, string? tipoPadrao, string resumo, OpcoesBicos opcoes)
+    /// <param name="rede">Com ela, a janela é a do Gerar rede: mostra arranjo, drop e diâmetros, e o botão principal gera.</param>
+    public BicosPorAmbienteJanela(Edificio edificio, IReadOnlyList<string> tipos, string? tipoPadrao, string resumo, OpcoesBicos opcoes,
+        OpcoesRede? rede = null)
     {
         InitializeComponent();
+        if (rede is not null)
+        {
+            gerar = true;
+            Title = "SPK — Gerar rede nos ambientes";
+            Geracao.Visibility = System.Windows.Visibility.Visible;
+            BotaoConferir.Visibility = System.Windows.Visibility.Collapsed;
+            BotaoPrincipal.Content = "Gerar rede";
+            Arranjo.SelectedIndex = rede.Arranjo == AddIn.Arranjo.Lateral ? 1 : 0;
+            Drop.Text = Entrada.F(rede.DropM);
+            Diametros.IsChecked = rede.AplicarDiametros;
+        }
         Resumo.Text = resumo;
         linhas = edificio.Ambientes.OrderBy(a => a.Piso).ThenBy(a => a.Numero, StringComparer.CurrentCulture)
             .Select(a => new Linha { Ambiente = a, Marcado = a.Teto is not null }).ToList();
@@ -74,6 +92,14 @@ public partial class BicosPorAmbienteJanela : Window
                 Teto = (TipoDeTeto)Math.Max(0, Teto.SelectedIndex),
                 Direcao = (DirecaoDosRamais)Math.Max(0, Direcao.SelectedIndex),
             };
+            if (gerar)
+                Rede = new OpcoesRede
+                {
+                    Arranjo = Arranjo.SelectedIndex == 1 ? AddIn.Arranjo.Lateral : AddIn.Arranjo.EspinhaDePeixe,
+                    DropM = Entrada.Numero(Drop.Text, "Do defletor ao ramal", 0.15, 2),
+                    AplicarDiametros = Diametros.IsChecked == true,
+                    Bicos = Opcoes,
+                };
             Posicionar = posicionar;
             DialogResult = true;
         }

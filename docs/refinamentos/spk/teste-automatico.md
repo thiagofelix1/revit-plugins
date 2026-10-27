@@ -61,6 +61,7 @@ Sem `fila.json` na pasta, nada disso é ligado: o Revit abre normalmente.
 | `ramais` | Traçar ramais com opções: `altura` (`NaSubgeral`, `RelativaASubgeral`, `RelativaAoPiso`), `alturaM`, `toleranciaFileiraM`, `ligarBicos`. Cena `subgeralComFileiras`: 3 fileiras de 4 bicos dos dois lados da subgeral, 1 de lado. No esperado, `ramaisTracados`. |
 | `ligarBicos` | Roda Ligar bicos com os bicos e ramais da cena e põe no relatório os ligados e os motivos dos recusados (`bicosLigados`, `bicosRecusados` no esperado). |
 | `arquitetura` | Lê a arquitetura e a estrutura (arquivo e vínculos) e põe uma linha por ambiente e por viga em `Arquitetura`. No esperado, `textoDaArquitetura`. Cena `arquiteturaVinculada`: gera dois modelos pelos templates brasileiros do Revit (2 salas, forro a 2,80 m numa, laje a 4 m; 1 viga) e os vincula deslocados 20 m e 10 m. |
+| `gerarRede` | Gerar rede em todos os ambientes (opções: `arranjo` `EspinhaDePeixe` ou `Lateral`, `dropM`, `aplicarDiametros`, `bicos`). Uma linha por ambiente em `Rede`. No esperado, `textoDaRede`. A cena `arquiteturaVinculada` apaga antes a rede que a cópia do projeto tiver. |
 | `bicosPorAmbiente` | Bicos por ambiente em todos os ambientes, com opções (`defletorM`, `abaixoDaVigaM`, `teto`, `direcao`, `tipo`; `{}` usa o padrão), e depois a conferência dos bicos que ficaram. Uma linha por ambiente em `Bicos` ("posicionar | ..." e "conferir | ..."). No esperado, `textoDosBicos`. |
 | `inspecionarVinculos` | Diagnóstico: lista os vínculos (estado, origem, rotação) e quantos ambientes, forros, lajes, vigas, pilares, paredes e telhados há em cada um. |
 | `diametros` | Diâmetros por tabela no setor (mesmos campos de `calcular`: `{}`, `vga`, `elemento`, `setor`); no relatório, tubos por DN, recusas, divergências e avisos. No esperado, `diametros` com os tubos por DN (`{"25": 8}`), que exige também zero recusa e divergência. |
@@ -83,13 +84,14 @@ Duas telas aparecem antes do plugin carregar e o teste não consegue responder:
 
 ## Cenários de regressão
 
-A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado esperado de cada cenário. Para rodar: copiar para `Documentos\SPK\testes\fila.json`, abrir o Revit e, no fim, olhar `Passou` de cada cenário no relatório. São 24:
+A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado esperado de cada cenário. Para rodar: copiar para `Documentos\SPK\testes\fila.json`, abrir o Revit e, no fim, olhar `Passou` de cada cenário no relatório. São 26:
 
 | Grupo | Cenários | O que prova |
 |---|---|---|
 | Cálculo e folhas | os 5 da Rede de exemplo | valores de cálculo, 4 folhas, 2 quadros no isométrico, verificação sem problema na malha gerada |
 | Sabotagem | bico desligado, tê apagado, sistema de água fria, tubo desligado | Verificar modelo acha cada problema, no elemento certo |
 | Modelagem | cena com ramal e bicos soltos; cena com subgeral e fileira de bicos; a mesma com Diâmetros; 3 fileiras dos dois lados, com subida e com cruzeta | Ligar bicos liga 5 e recusa 1; Traçar ramal traça e liga 5; Diâmetros põe 8 tubos em DN 25, 1 em 32 e 4 em 40, com os cotovelos refeitos no DN novo e nenhuma redução entre tubos; Traçar ramais traça 3 ramais e liga os 12 bicos nos dois modos; verificação limpa |
+| Gerar rede | arquitetura vinculada, risco leve, espinha de peixe e lateral | na sala com forro: 4 bicos, rede a 3,00 m, 2 ramais, diâmetros da tabela, verificação sem erro, ATENDE e 4 folhas; o depósito com viga e laje baixa é recusado com o motivo (sem espaço entre o defletor e o teto) |
 | Bicos por ambiente | arquitetura vinculada, risco leve | 4 bicos em cada sala, defletor 100 mm abaixo do forro (2,70) e 50 mm abaixo da viga (3,65, a 203 mm do teto); a conferência dos bicos criados no Revit confirma as alturas e o espaçamento |
 | Arquitetura | vínculos gerados pelo teste; Nova Era com vínculos descarregados | teto pelo forro (2,80) e pela laje (3,85), viga com fundo a 3,70, coordenadas com o deslocamento do vínculo; os vínculos descarregados aparecem com o nome |
 | Janelas | todos | nenhum cenário pode abrir janela do Revit que o engenheiro teria de fechar (antes, a Nova Era abria 55 no Corrigir) |

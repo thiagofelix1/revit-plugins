@@ -83,7 +83,8 @@ static class Cenas
     }
 
     /// <summary>
-    /// Gera dois modelos e os vincula ao projeto, deslocados 20 m em X e 10 m em Y (para testar a transformação):
+    /// Apaga a rede que a cópia do projeto tiver, gera dois modelos e os vincula ao projeto, deslocados 20 m em X e 10 m
+    /// em Y (para testar a transformação):
     /// arquitetura com duas salas de 6 × 8 m (paredes de 4 m), forro a 2,80 m só na sala A e laje no nível 4 m sobre as
     /// duas; e estrutura com uma viga sobre a sala B, no nível 4 m. Os arquivos ficam na pasta de saída do teste.
     /// </summary>
@@ -142,6 +143,12 @@ static class Cenas
         using (var t = new Transaction(doc, "SPK — vínculos de teste"))
         {
             t.Start();
+            // A cópia do projeto começa sem rede: só a que o teste gerar nos ambientes entra no cálculo e nas folhas.
+            var rede = new FilteredElementCollector(doc).WhereElementIsNotElementType()
+                .Where(e => e.Category?.Id.Value is (long)BuiltInCategory.OST_Sprinklers or (long)BuiltInCategory.OST_PipeCurves
+                    or (long)BuiltInCategory.OST_PipeFitting or (long)BuiltInCategory.OST_PipeAccessory)
+                .Select(e => e.Id).ToList();
+            if (rede.Count > 0) doc.Delete(rede);
             foreach (var arquivo in new[] { arquivoArq, arquivoEst })
             {
                 var tipo = RevitLinkType.Create(doc, ModelPathUtils.ConvertUserVisiblePathToModelPath(arquivo), new RevitLinkOptions(false));

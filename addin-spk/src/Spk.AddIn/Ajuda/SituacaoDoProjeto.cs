@@ -58,7 +58,8 @@ static class SituacaoDoProjeto
             new AcaoDaEtapa("Traçar ramais", "TracarRamalCommand"),
             new AcaoDaEtapa("Ligar bicos", "LigarBicosCommand"),
             new AcaoDaEtapa("Verificar modelo", "VerificarModeloCommand"),
-            new AcaoDaEtapa("Gerar", "GerarMalhaCommand"),
+            new AcaoDaEtapa("Gerar rede", "GerarRedeCommand"),
+            new AcaoDaEtapa("Malha retangular", "GerarMalhaCommand"),
             new AcaoDaEtapa("Rede de exemplo", "RedeExemploCommand"),
         };
         var gerados = BicosDoModelo.Gerados(doc).Count;

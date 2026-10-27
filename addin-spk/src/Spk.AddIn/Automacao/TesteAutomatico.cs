@@ -274,6 +274,17 @@ static class TesteAutomatico
                     return $"{criados.Count} bicos em {feitos.Count(r => r.Recusa is null)} ambientes";
                 });
 
+            if (cenario.GerarRede is { } pedidoRede)
+                Etapa(relatorio, "gerarRede", () =>
+                {
+                    var dados = DadosProjeto.Carregar(doc!) ?? throw new InvalidOperationException("Mande \"dados\" no cenário.");
+                    var edificio = Arquitetura.LeituraDoEdificio.Ler(doc!);
+                    var criados = new List<ElementId>();
+                    var feitos = Modelagem.GerarRede.Executar(doc!, dados, edificio, edificio.Ambientes, pedidoRede, criados);
+                    relatorio.Rede = feitos.Select(r => r.Texto().Replace("\n", " ")).ToList();
+                    return $"{criados.Count} elementos em {feitos.Count(r => r.Recusa is null)} de {feitos.Count} ambientes";
+                });
+
             if (cenario.InspecionarVinculos)
                 relatorio.Vinculos = Diagnostico.Vinculos(doc!);
 
@@ -603,6 +614,9 @@ static class TesteAutomatico
             else if (rc.LigacoesDepois < rc.LigacoesAntes + rc.Ligadas)
                 falhas.Add($"reconexão perdeu ligações: antes {rc.LigacoesAntes}, {rc.Ligadas} feitas, depois {rc.LigacoesDepois}");
         }
+        foreach (var trecho in esperado.TextoDaRede ?? [])
+            if (!(r.Rede ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
+                falhas.Add($"gerar rede: \"{trecho}\" não apareceu");
         foreach (var trecho in esperado.TextoDosBicos ?? [])
             if (!(r.Bicos ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
                 falhas.Add($"bicos por ambiente: \"{trecho}\" não apareceu");
@@ -889,6 +903,9 @@ sealed class Cenario
     /// <summary>Bicos por ambiente em todos os ambientes, com estas opções; depois confere os bicos que ficaram.</summary>
     public OpcoesBicos? BicosPorAmbiente { get; set; }
 
+    /// <summary>Gerar rede em todos os ambientes da arquitetura, com estas opções.</summary>
+    public OpcoesRede? GerarRede { get; set; }
+
     /// <summary>Numeração e código das folhas a gravar no padrão antes de gerar.</summary>
     public AjustePadrao? Padrao { get; set; }
     public Esperado? Esperado { get; set; }
@@ -931,6 +948,9 @@ sealed class Esperado
 
     /// <summary>Trechos que precisam aparecer em alguma linha de Bicos por ambiente (posicionar | ... e conferir | ...).</summary>
     public List<string>? TextoDosBicos { get; set; }
+
+    /// <summary>Trechos que precisam aparecer em alguma linha de Gerar rede (uma por ambiente).</summary>
+    public List<string>? TextoDaRede { get; set; }
 }
 
 sealed class AjusteMapeamento
@@ -975,6 +995,7 @@ sealed class RelatorioCenario
     public List<string>? Vinculos { get; set; }
     public List<string>? Arquitetura { get; set; }
     public List<string>? Bicos { get; set; }
+    public List<string>? Rede { get; set; }
     public List<string>? CarimbosSpk { get; set; }
 
     /// <summary>Só com "esperado" no cenário: se tudo bateu, e o que não bateu.</summary>
