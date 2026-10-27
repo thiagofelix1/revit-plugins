@@ -76,6 +76,6 @@ Gerar a rede inteira é chamar, em sequência, as mesmas ferramentas da modelage
 
 Por isso as ferramentas vêm primeiro, uma por vez, cada uma útil sozinha em projeto real; a geração automática é montada em cima delas, e o gerador retangular de hoje passa a usar as mesmas peças.
 
-## Pergunta em aberto
+## Respondido: arquitetura e estrutura vêm vinculadas
 
-Como o escritório recebe a arquitetura e a estrutura: como vínculo ou no mesmo arquivo? Na Nova Era, conferir como vieram. Isso define como o plugin lê forros, ambientes e vigas.
+O engenheiro confirmou (27/10/2026): a arquitetura e a estrutura chegam como **vínculo**, e a estrutura muitas vezes vem de outros programas (IFC). Na Nova Era, o arquivo de incêndio vincula NEPN-ARQ (arquitetura), NEPN-PRE (pré-moldados), NEPN-INC-HID (hidrantes) e o arquivo do cliente; o próprio arquivo não tem paredes, forros, lajes nem vigas. O plugin lê os vínculos carregados (botão Arquitetura) e também o que estiver no próprio arquivo.
