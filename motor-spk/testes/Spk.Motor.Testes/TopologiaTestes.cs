@@ -59,6 +59,28 @@ public class TopologiaTestes
     }
 
     [Fact]
+    public void Braco_perpendicular_ate_o_bico_nao_separa_o_ramal()
+    {
+        // Ramal em y = 0 (eixo X). O bico B2 fica 0,6 m de lado: tê T2, braço até o cotovelo C2, descida até B2.
+        // A subgeral (SG0–SG1) liga o ramal ao de y = 3 e continua separando os dois.
+        var nos = Indice([
+            new No("SG0", 0, 0, 3), new No("SG1", 0, 3, 3),
+            new No("B1", 3, 0, 3), new No("T2", 6, 0, 3), new No("C2", 6, 0.6, 3), new No("B2", 6, 0.6, 2.7), new No("B3", 9, 0, 3),
+            new No("R1a", 3, 3, 3),
+        ]);
+        Trecho[] trechos =
+        [
+            T("SG0", "SG1"), T("SG0", "B1"), T("B1", "T2"), T("T2", "C2"), T("C2", "B2"), T("T2", "B3"), T("SG1", "R1a"),
+        ];
+
+        var ramal = Topologia.RamalDeCadaBico(["B1", "B2", "B3", "R1a"], trechos, nos, 1, 0);
+
+        Assert.Equal(ramal["B1"], ramal["B2"]);
+        Assert.Equal(ramal["B1"], ramal["B3"]);
+        Assert.NotEqual(ramal["B1"], ramal["R1a"]);
+    }
+
+    [Fact]
     public void Os_dois_lados_da_subgeral_na_mesma_linha_sao_um_ramal()
     {
         var nos = Indice([

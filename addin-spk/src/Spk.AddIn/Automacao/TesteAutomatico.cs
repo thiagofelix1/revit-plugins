@@ -356,7 +356,18 @@ static class TesteAutomatico
             CriticoLmin = Math.Round(critico.Vazao, 1),
             Falhas = r.Falhas.ToList(),
             Avisos = r.Avisos.ToList(),
+            Rede = r.Lida.Rede.Trechos.Count <= 80 ? Rede(r.Lida.Rede) : null,
         };
+    }
+
+    /// <summary>Nós e trechos da rede lida, em rede pequena: mostra como o leitor montou a geometria (ramais, braços).</summary>
+    static List<string> Rede(Spk.Motor.Modelo.Rede rede)
+    {
+        var nos = rede.Nos.ToDictionary(n => n.Id);
+        string P(string id) => nos.TryGetValue(id, out var n) ? $"{id}({n.X:0.00};{n.Y:0.00};{n.Z:0.00})" : id;
+        var linhas = rede.Chuveiros.Select(c => $"bico {c.Id} no {c.No} ramal {c.Ramal}").ToList();
+        linhas.AddRange(rede.Trechos.Select(t => $"{P(t.De)} -> {P(t.Para)} L={t.Comprimento:0.00}"));
+        return linhas;
     }
 
     /// <summary>
@@ -856,6 +867,7 @@ sealed class ResumoCalculo
     public double CriticoLmin { get; set; }
     public List<string> Falhas { get; set; } = [];
     public List<string> Avisos { get; set; } = [];
+    public List<string>? Rede { get; set; }
 }
 
 sealed class ResumoFolhas

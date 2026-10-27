@@ -54,19 +54,23 @@ public static class Topologia
             return n;
         }
 
-        foreach (var trecho in trechos)
+        var lista = trechos.ToList();
+        var bicos = new HashSet<string>(nosDeBico, StringComparer.Ordinal);
+        var adj = Adjacencia(lista);
+        foreach (var trecho in lista)
         {
             var a = nos[trecho.De];
             var b = nos[trecho.Para];
             double hx = b.X - a.X, hy = b.Y - a.Y;
             var horizontal = Math.Sqrt(hx * hx + hy * hy);
-            if (horizontal >= 0.30 && Math.Abs((hx * dx + hy * dy) / horizontal) <= 0.95) continue;
+            if (horizontal >= 0.30 && Math.Abs((hx * dx + hy * dy) / horizontal) <= 0.95
+                && !Braco(adj, nos, bicos, trecho.De, trecho.Para, dx, dy) && !Braco(adj, nos, bicos, trecho.Para, trecho.De, dx, dy)) continue;
             var ra = Raiz(trecho.De);
             var rb = Raiz(trecho.Para);
             if (ra != rb) pai[ra] = rb;
         }
 
-        var grupos = nosDeBico
+        var grupos = bicos
             .GroupBy(Raiz, StringComparer.Ordinal)
             .OrderBy(g => g.Average(id => Transversal(nos[id], dx, dy)))
             .ToList();
@@ -76,6 +80,36 @@ public static class Topologia
             foreach (var id in grupos[i])
                 ramal[id] = i;
         return ramal;
+    }
+
+    /// <summary>
+    /// O trecho que sai de <paramref name="de" /> para <paramref name="para" /> é o braço de um bico (armover): a partir de
+    /// <paramref name="para" />, sem nenhuma derivação no caminho (nós de grau 2: cotovelo, descida) e sem trecho paralelo
+    /// ao ramal, chega-se a um bico na ponta da rede. Braço perpendicular ao ramal não separa ramais; a subgeral separa,
+    /// porque liga tês ou leva a trechos paralelos (outro ramal, mesmo que de um bico só).
+    /// </summary>
+    static bool Braco(Dictionary<string, List<string>> adj, IReadOnlyDictionary<string, No> nos, ISet<string> bicos,
+        string de, string para, double dx, double dy)
+    {
+        var anterior = de;
+        var atual = para;
+        for (var passos = 0; passos < 20; passos++)
+        {
+            if (passos > 0 && ParaleloAoRamal(nos[anterior], nos[atual], dx, dy)) return false;
+            var vizinhos = Vizinhos(adj, atual).ToList();
+            if (bicos.Contains(atual)) return vizinhos.Count == 1;
+            if (vizinhos.Count != 2) return false;
+            var proximo = vizinhos[0] == anterior ? vizinhos[1] : vizinhos[0];
+            (anterior, atual) = (atual, proximo);
+        }
+        return false;
+    }
+
+    static bool ParaleloAoRamal(No a, No b, double dx, double dy)
+    {
+        double hx = b.X - a.X, hy = b.Y - a.Y;
+        var horizontal = Math.Sqrt(hx * hx + hy * hy);
+        return horizontal >= 0.30 && Math.Abs((hx * dx + hy * dy) / horizontal) > 0.95;
     }
 
     /// <summary>

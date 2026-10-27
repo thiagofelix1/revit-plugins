@@ -17,6 +17,7 @@ Botão **Dados do projeto**. Aqui o engenheiro escolhe a classe de risco, a base
 Há dois caminhos:
 
 - **Rede já desenhada no modelo.** Botão **Famílias**: o SPK lista as famílias do modelo e você confirma quais são bicos (com fator K e área de cobertura) e qual válvula é a VGA de cada setor (papel **Fonte**). Símbolos 2D e bicos que não entram no cálculo ficam como **Ignorar**.
+- **Rede desenhada com ajuda do SPK.** Com o ramal desenhado, selecione os bicos e o ramal e clique em **Ligar bicos** (painel Rede): o SPK parte o ramal, põe o tê e faz a descida até cada bico, ou o braço, o cotovelo e a descida quando o bico está de lado. O que ele não ligar aparece com o motivo; Ctrl+Z desfaz tudo.
 - **Rede gerada pelo SPK.** **Dados do esboço** define a malha (ramais, espaçamentos, altura, bico, DN) e **Gerar** cria bicos, tubos e conexões já ligados, no ponto que você clicar. **Rede de exemplo** cria um dos cenários de teste prontos.
 
 ## 4. Verificar o modelo

@@ -178,8 +178,10 @@ static class FolhasDoSetor
         var t = new XYZ(-d.Y, d.X, 0);
         double U(XYZ p) => VistasSpk.Metros(p.DotProduct(d));
         double V(XYZ p) => VistasSpk.Metros(p.DotProduct(t));
-        var meioU = Spk.Motor.Modelo.Contorno.Passo(todos.Select(U)) / 2;
-        var meioV = Spk.Motor.Modelo.Contorno.Passo(todos.Select(V)) / 2;
+        // Os mesmos limites da hachura da setorização: num ramal só, com bicos de lado em braços, o passo entre "linhas"
+        // seria o deslocamento do braço (0,6 m) e as coberturas virariam faixas finas que não se encostam.
+        var meioU = Math.Clamp(Spk.Motor.Modelo.Contorno.Passo(todos.Select(U)) / 2, 0.9, 2.5);
+        var meioV = Math.Clamp(Spk.Motor.Modelo.Contorno.Passo(todos.Select(V)) / 2, 0.9, 2.5);
         var coberturas = daArea.Select(p => (U(p) - meioU, V(p) - meioV, U(p) + meioU, V(p) + meioV)).ToList();
         return Spk.Motor.Modelo.Contorno.DeRetangulos(coberturas, vaoMaximo: 0.3)
             .Select(laco => laco.Select(p => d * VistasSpk.Pes(p.U) + t * VistasSpk.Pes(p.V)).ToList())
