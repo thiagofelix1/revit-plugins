@@ -82,6 +82,17 @@ static class Icones
             dc.DrawEllipse(Vermelho, null, new Point(x, 16), 2.2, 2.2);
     }
 
+    public static void TracarRamal(DrawingContext dc)
+    {
+        dc.DrawLine(Caneta(Grafite, 3), new Point(6, 3), new Point(6, 29));
+        dc.DrawLine(Caneta(Vermelho, 2.6), new Point(6, 14), new Point(29, 14));
+        foreach (var x in new[] { 13.0, 20.0, 27.0 })
+        {
+            dc.DrawLine(Caneta(Vermelho, 1.8), new Point(x, 14), new Point(x, 20));
+            dc.DrawEllipse(Vermelho, null, new Point(x, 22.5), 2.4, 2.4);
+        }
+    }
+
     public static void LigarBicos(DrawingContext dc)
     {
         dc.DrawLine(Caneta(Grafite, 3), new Point(3, 9), new Point(29, 9));

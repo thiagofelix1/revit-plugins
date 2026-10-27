@@ -66,8 +66,9 @@ public static class LigarBicos
     {
         if (Livre(bico) is not { } conectorBico) return "bico já ligado, ou sem conector de tubulação";
         var h = conectorBico.Origin;
-        if (Ramal(ramais, h) is not { } achado) return "nenhum ramal selecionado passa sobre o bico (até 3 m, longe das pontas do tubo)";
-        var (ramal, p) = achado;
+        if (Ramal(ramais, h) is not { } achado)
+            return "nenhum ramal selecionado passa sobre o bico (até 3 m; perto da ponta, só se a ponta estiver livre)";
+        var (ramal, p, naPonta) = achado;
         if (h.Z > p.Z - GeradorMalha.Pes(0.05)) return "bico na altura do ramal ou acima (bico em pé): ainda não suportado";
 
         var sistema = ramal.get_Parameter(BuiltInParameter.RBS_PIPING_SYSTEM_TYPE_PARAM)?.AsElementId() ?? ElementId.InvalidElementId;
@@ -76,8 +77,9 @@ public static class LigarBicos
         var tipo = ramal.PipeType.Id;
         var diametro = ramal.Diameter;
 
-        // Parte o ramal no ponto mais perto do bico: os dois pedaços ficam com a ponta ali, sem ligação.
-        if (doc.GetElement(PlumbingUtils.BreakCurve(doc, ramal.Id, p)) is Pipe outroPedaco) novos.Add(outroPedaco);
+        // No meio do ramal, parte o tubo no ponto mais perto do bico (os dois pedaços ficam com a ponta ali, sem ligação) e
+        // põe um tê. Na ponta livre do ramal, o último bico: sem partir, com cotovelo.
+        if (!naPonta && doc.GetElement(PlumbingUtils.BreakCurve(doc, ramal.Id, p)) is Pipe outroPedaco) novos.Add(outroPedaco);
 
         var canto = new XYZ(h.X, h.Y, p.Z);
         var temBraco = canto.DistanceTo(p) > GeradorMalha.Pes(0.01);
@@ -87,14 +89,27 @@ public static class LigarBicos
         if (descida is not null) criados.Add(descida.Id);
         doc.Regenerate();
 
-        // Tê no ramal: os três tubos recuam 1 cm do encontro e o Revit põe a peça das preferências de roteamento.
-        var noTe = Abertos(doc, p, ramal, novos.LastOrDefault(), primeiro);
-        if (noTe.Count != 3) return "o ramal não se partiu como esperado (tubo curto demais ou já com peça ali)";
-        foreach (var c in noTe) GeradorMalha.Recuar(c, Recuo);
-        doc.Regenerate();
-        noTe = Abertos(doc, p, ramal, novos.LastOrDefault(), primeiro);
-        if (!GeradorMalha.TentarInserirTe(doc, noTe))
-            GeradorMalha.InserirTePorFamilia(doc, p, nivel, GeradorMalha.SimboloDeTe(doc), noTe);
+        if (naPonta)
+        {
+            // Cotovelo na ponta do ramal: os dois tubos recuam 1 cm e o Revit põe a peça das preferências de roteamento.
+            var naCurva = Abertos(doc, p, ramal, primeiro);
+            if (naCurva.Count != 2) return "a ponta do ramal e a descida não se encontraram para o cotovelo";
+            foreach (var c in naCurva) GeradorMalha.Recuar(c, Recuo);
+            doc.Regenerate();
+            naCurva = Abertos(doc, p, ramal, primeiro);
+            doc.Create.NewElbowFitting(naCurva[0], naCurva[1]);
+        }
+        else
+        {
+            // Tê no ramal: os três tubos recuam 1 cm do encontro e o Revit põe a peça das preferências de roteamento.
+            var noTe = Abertos(doc, p, ramal, novos.LastOrDefault(), primeiro);
+            if (noTe.Count != 3) return "o ramal não se partiu como esperado (tubo curto demais ou já com peça ali)";
+            foreach (var c in noTe) GeradorMalha.Recuar(c, Recuo);
+            doc.Regenerate();
+            noTe = Abertos(doc, p, ramal, novos.LastOrDefault(), primeiro);
+            if (!GeradorMalha.TentarInserirTe(doc, noTe))
+                GeradorMalha.InserirTePorFamilia(doc, p, nivel, GeradorMalha.SimboloDeTe(doc), noTe);
+        }
 
         if (descida is not null)
         {
@@ -113,10 +128,13 @@ public static class LigarBicos
         return null;
     }
 
-    /// <summary>O ramal horizontal mais perto do bico em planta, com o ponto do ramal mais perto dele, longe das pontas.</summary>
-    static (Pipe, XYZ)? Ramal(List<Pipe> ramais, XYZ h)
+    /// <summary>
+    /// O ramal horizontal mais perto do bico em planta e o ponto dele onde o bico se liga: o mais perto do bico, longe das
+    /// pontas; ou a própria ponta, se o bico está nela e ela está livre (o último bico do ramal).
+    /// </summary>
+    static (Pipe Ramal, XYZ Ponto, bool NaPonta)? Ramal(List<Pipe> ramais, XYZ h)
     {
-        (Pipe, XYZ)? melhor = null;
+        (Pipe, XYZ, bool)? melhor = null;
         var menor = BracoMaximo;
         foreach (var ramal in ramais)
         {
@@ -124,15 +142,35 @@ public static class LigarBicos
             if (Math.Abs(linha.Direction.Z) > 0.05) continue;
             var a = linha.GetEndPoint(0);
             var t = (h - a).DotProduct(linha.Direction);
-            if (t < MargemPonta || t > linha.Length - MargemPonta) continue;
-            var p = a + linha.Direction * t;
+            XYZ p;
+            var naPonta = false;
+            if (t >= MargemPonta && t <= linha.Length - MargemPonta)
+            {
+                p = a + linha.Direction * t;
+            }
+            else if (t > -MargemPonta && t < MargemPonta && PontaLivre(ramal, a))
+            {
+                (p, naPonta) = (a, true);
+            }
+            else if (t > linha.Length - MargemPonta && t < linha.Length + MargemPonta && PontaLivre(ramal, linha.GetEndPoint(1)))
+            {
+                (p, naPonta) = (linha.GetEndPoint(1), true);
+            }
+            else
+            {
+                continue;
+            }
             var emPlanta = new XYZ(h.X - p.X, h.Y - p.Y, 0).GetLength();
             if (emPlanta >= menor) continue;
             menor = emPlanta;
-            melhor = (ramal, p);
+            melhor = (ramal, p, naPonta);
         }
         return melhor;
     }
+
+    static bool PontaLivre(Pipe tubo, XYZ ponta) =>
+        tubo.ConnectorManager.Connectors.Cast<Connector>()
+            .Any(c => c.ConnectorType == ConnectorType.End && !c.IsConnected && c.Origin.DistanceTo(ponta) < Encontro);
 
     static Connector? Livre(FamilyInstance bico) =>
         bico.MEPModel?.ConnectorManager?.Connectors.Cast<Connector>()

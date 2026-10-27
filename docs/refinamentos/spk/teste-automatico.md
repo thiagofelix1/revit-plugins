@@ -57,6 +57,7 @@ Sem `fila.json` na pasta, nada disso é ligado: o Revit abre normalmente.
 | `padrao` | Grava no Padrão do escritório `numeroInicial`, `codigoFolha` e `parametroCodigo` antes de gerar as folhas. |
 | `sabotar` | Estraga a malha gerada de propósito, sempre no mesmo elemento: `desligarBico`, `apagarTe` (tê entre três tubos), `sistemaAgua` (tubo em sistema de água fria), `desligarTubo` (uma ponta do tubo de maior diâmetro). |
 | `cena` | Monta uma cena do zero para testar uma ferramenta de modelagem (apaga antes a malha gerada da cópia). `ramalComBicosSoltos`: ramal de 15 m com descida, 5 bicos soltos embaixo (2 de lado) e 1 depois do fim do ramal. |
+| `tracarRamal` | Roda Traçar ramal com os bicos da cena e o primeiro tubo dela como subgeral (cena `subgeralComBicosSoltos`: subgeral de 9 m com descida e fileira de 5 bicos, 1 de lado). |
 | `ligarBicos` | Roda Ligar bicos com os bicos e ramais da cena e põe no relatório os ligados e os motivos dos recusados (`bicosLigados`, `bicosRecusados` no esperado). |
 | `reconectar` | Roda o Corrigir de Verificar modelo nas peças encostadas (depois de sabotar, antes de verificar) e põe no relatório quantas eram, quantas ligou, os motivos das recusadas e as ligações do modelo antes e depois. |
 | `verificar` | Roda Verificar modelo e põe no relatório cada grupo de problema com a quantidade e exemplos. |
@@ -76,13 +77,13 @@ Duas telas aparecem antes do plugin carregar e o teste não consegue responder:
 
 ## Cenários de regressão
 
-A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado esperado de cada cenário. Para rodar: copiar para `Documentos\SPK\testes\fila.json`, abrir o Revit e, no fim, olhar `Passou` de cada cenário no relatório. São 17:
+A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado esperado de cada cenário. Para rodar: copiar para `Documentos\SPK\testes\fila.json`, abrir o Revit e, no fim, olhar `Passou` de cada cenário no relatório. São 18:
 
 | Grupo | Cenários | O que prova |
 |---|---|---|
 | Cálculo e folhas | os 5 da Rede de exemplo | valores de cálculo, 4 folhas, 2 quadros no isométrico, verificação sem problema na malha gerada |
 | Sabotagem | bico desligado, tê apagado, sistema de água fria, tubo desligado | Verificar modelo acha cada problema, no elemento certo |
-| Modelagem | cena com ramal e bicos soltos | Ligar bicos liga 5 e recusa 1; verificação limpa; cálculo com os 5 num ramal só, 96,0 kPa |
+| Modelagem | cena com ramal e bicos soltos; cena com subgeral e fileira de bicos | Ligar bicos liga 5 e recusa 1; Traçar ramal traça e liga 5; verificação limpa; cálculo num ramal só |
 | Correção | bico e tubo desligados e corrigidos; Nova Era corrigida | o Corrigir religa sem perder ligação e o cálculo volta ao valor original (1.757,6 kPa); na Nova Era, 910 de 971 ligadas |
 | Nova Era | verificação da cópia do modelo real | acha as peças encostadas sem ligação (971), as derivações sem tê, os 610 tubos em sistema hidrônico e os bicos não confirmados, em menos de 1 s |
 | Carimbo | Nova Era numerada a partir de 17; Nova Era a partir de 13; Projeto2 a partir de 01 | número, código e campos do projeto preenchidos; número já usado por folha do escritório é recusado sem apagar nada; parâmetro de código ausente é avisado |

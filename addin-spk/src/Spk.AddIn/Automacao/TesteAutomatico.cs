@@ -157,6 +157,21 @@ static class TesteAutomatico
                     return cena.Resumo;
                 });
 
+            if (cenario.TracarRamal)
+                Etapa(relatorio, "tracarRamal", () =>
+                {
+                    if (cena is null) throw new InvalidOperationException("\"tracarRamal\" precisa de uma cena (bicos e a subgeral).");
+                    var feito = TracarRamal.Executar(doc!, cena.Bicos, cena.Ramais[0]);
+                    relatorio.Ligacao = new ResumoLigacao
+                    {
+                        Ligados = feito.Ligacao?.Ligados ?? 0,
+                        Criados = feito.Ligacao?.Criados.Count ?? 0,
+                        Recusados = feito.Recusa is not null ? [$"1× ramal: {feito.Recusa}"]
+                            : feito.Ligacao!.Recusados.GroupBy(r => r).Select(g => $"{g.Count()}× {g.Key}").ToList(),
+                    };
+                    return feito.Texto();
+                });
+
             if (cenario.LigarBicos)
                 Etapa(relatorio, "ligarBicos", () =>
                 {
@@ -699,6 +714,9 @@ sealed class Cenario
 
     /// <summary>Cena montada do zero para testar uma ferramenta de modelagem (ver Cenas): "ramalComBicosSoltos".</summary>
     public string? Cena { get; set; }
+
+    /// <summary>Roda Traçar ramal com os bicos da cena e o primeiro tubo dela como subgeral.</summary>
+    public bool TracarRamal { get; set; }
 
     /// <summary>Roda Ligar bicos com os bicos e ramais da cena (sem cena: todos os sprinklers e tubos).</summary>
     public bool LigarBicos { get; set; }
