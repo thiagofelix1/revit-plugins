@@ -10,6 +10,7 @@ public partial class VerificacaoJanela : Window
     public sealed class No
     {
         public string Texto { get; init; } = "";
+        public string? Codigo { get; init; }
         public string? Detalhe { get; init; }
         public string? Etiqueta { get; init; }
         public string Cor { get; init; } = "#78909C";
@@ -25,6 +26,12 @@ public partial class VerificacaoJanela : Window
 
     /// <summary>Os elementos a selecionar e mostrar no modelo, se o engenheiro pediu.</summary>
     public IReadOnlyList<ElementId>? Escolhidos { get; private set; }
+
+    /// <summary>Grupo que o engenheiro pediu para corrigir (hoje, só as peças encostadas).</summary>
+    public Grupo? ParaCorrigir { get; private set; }
+
+    /// <summary>Grupos que o SPK sabe corrigir sozinho.</summary>
+    static readonly HashSet<string> Corrigiveis = ["encostado-sem-ligar"];
 
     public VerificacaoJanela(ResultadoVerificacao resultado)
     {
@@ -45,6 +52,7 @@ public partial class VerificacaoJanela : Window
         };
         var no = new No
         {
+            Codigo = g.Codigo,
             Texto = $"{g.Titulo} ({g.Ocorrencias.Count})",
             Detalhe = g.ComoResolver,
             Etiqueta = etiqueta,
@@ -63,6 +71,9 @@ public partial class VerificacaoJanela : Window
     {
         BotaoMostrar.IsEnabled = Selecionado is { Elementos.Count: > 0 };
         BotaoTodos.IsEnabled = (Selecionado?.Pai ?? Selecionado) is { Elementos.Count: > 0 };
+        var grupo = (Selecionado?.Pai ?? Selecionado)?.Codigo;
+        BotaoCorrigir.IsEnabled = grupo is not null && Corrigiveis.Contains(grupo);
+        BotaoCorrigir.Content = BotaoCorrigir.IsEnabled ? $"Corrigir ({(Selecionado?.Pai ?? Selecionado)!.Filhos.Count})" : "Corrigir";
     }
 
     void Arvore_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e) => Atualizar();
@@ -83,6 +94,14 @@ public partial class VerificacaoJanela : Window
     {
         if ((Selecionado?.Pai ?? Selecionado) is not { Elementos.Count: > 0 } grupo) return;
         Escolhidos = grupo.Elementos;
+        DialogResult = true;
+    }
+
+    void Corrigir_Click(object sender, RoutedEventArgs e)
+    {
+        var codigo = (Selecionado?.Pai ?? Selecionado)?.Codigo;
+        ParaCorrigir = resultado.Grupos.FirstOrDefault(g => g.Codigo == codigo);
+        if (ParaCorrigir is null) return;
         DialogResult = true;
     }
 

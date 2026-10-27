@@ -1,6 +1,6 @@
 # Verificar o modelo
 
-O botão **Verificar modelo** (painel Rede) confere se o SPK consegue seguir a água pelas conexões do Revit, do bico até a VGA. Ele só lê o modelo: não altera nada. Rode antes de calcular, e de novo depois de cada correção.
+O botão **Verificar modelo** (painel Cálculo) confere se o SPK consegue seguir a água pelas conexões do Revit, do bico até a VGA. Ele só lê o modelo; só o botão Corrigir altera alguma coisa, e com um Ctrl+Z volta tudo. Rode antes de calcular, e de novo depois de cada correção.
 
 ## Como usar
 
@@ -8,6 +8,18 @@ O botão **Verificar modelo** (painel Rede) confere se o SPK consegue seguir a �
 2. Os problemas vêm em grupos, cada um com a explicação de como resolver. Abra o grupo para ver cada ocorrência, com o lugar no modelo (coordenadas e nível).
 3. Escolha uma ocorrência e clique em **Mostrar** (ou dê dois cliques): a janela fecha, os elementos ficam selecionados e a vista vai até eles. **Selecionar todos do grupo** seleciona todas as ocorrências de uma vez, útil para trocar o sistema de vários tubos juntos.
 4. Corrija e rode de novo. **Copiar relatório** copia a lista em texto, para mandar a alguém.
+
+## Corrigir sozinho as peças encostadas
+
+No grupo **Peças encostadas, mas não ligadas**, o botão **Corrigir** liga as peças de uma vez e abre a verificação de novo. Para não estragar o desenho:
+
+- só liga o que já se toca (folga de até 1 cm); folga maior fica para você, com o tamanho no aviso;
+- não move tubo nenhum; só traz até o conector um bico ou conexão solta, sem nenhuma outra ligação;
+- confere cada ligação: se ela desligaria uma peça vizinha ou faria o Revit mover uma peça presa a outras, ela é desfeita e aparece no relatório com o motivo;
+- tubo e conexão precisam ter o mesmo diâmetro; bico pode ligar em tubo maior;
+- dois tubos ponta a ponta ganham luva (alinhados) ou cotovelo (em ângulo), pelas preferências de roteamento do tipo de tubo.
+
+Tudo vira um passo só no desfazer: **Ctrl+Z** volta o modelo como estava. Na Nova Era, o Corrigir ligou 910 dos 971 pontos em menos de um minuto, sem desfazer nenhuma ligação existente.
 
 A tela **Seu projeto agora**, aqui no Guia, também mostra quantos erros e avisos o modelo tem.
 
@@ -23,7 +35,7 @@ A tela **Seu projeto agora**, aqui no Guia, também mostra quantos erros e aviso
 
 | Problema | O que é | Como corrigir |
 |---|---|---|
-| **Peças encostadas, mas não ligadas** (erro) | No desenho as peças se tocam (a menos de 5 cm), mas o Revit não as conectou. É o caso mais comum em modelos copiados ou desenhados à mão, e foi o que impediu a leitura da Nova Era. | Selecione e arraste a ponta do tubo até o conector da outra peça (o Revit liga quando o cursor mostra o conector), ou apague o trecho e redesenhe com a ferramenta de tubo. |
+| **Peças encostadas, mas não ligadas** (erro) | No desenho as peças se tocam (a menos de 5 cm), mas o Revit não as conectou. É o caso mais comum em modelos copiados ou desenhados à mão, e foi o que impediu a leitura da Nova Era. | Botão **Corrigir** (acima). O que ele não ligar: arraste a ponta do tubo até o conector da outra peça (o Revit liga quando o cursor mostra o conector), ou apague o trecho e redesenhe com a ferramenta de tubo. |
 | **Tubo que termina no meio de outro, sem tê** (erro) | A ponta de um tubo (ou de um tê) encosta no corpo de outro tubo, sem conexão. A água não passa. | Apague o tubo que chega e redesenhe partindo do outro tubo: o Revit cria o tê sozinho. |
 | **Bico sem tubo** (erro) | O bico não está ligado a nada, e nada encosta nele. | Selecione o bico e use a ferramenta **Conectar a** (Connect Into) para ligá-lo ao ramal, ou apague se sobrou. |
 | **Família de bico sem conector** (erro) | A família do bico não tem conector de tubulação, então nunca vai ligar. Comum em símbolos 2D usados como bico. | Troque por uma família de sprinkler com conector. Se for só símbolo de desenho, marque o tipo como **Ignorar** em Famílias. |

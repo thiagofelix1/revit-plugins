@@ -171,6 +171,23 @@ static class TesteAutomatico
             if (cenario.Sabotar is { Count: > 0 } sabotagens)
                 Etapa(relatorio, "sabotar", () => Sabotagem.Aplicar(doc!, sabotagens));
 
+            if (cenario.Reconectar)
+                Etapa(relatorio, "reconectar", () =>
+                {
+                    var encostadas = VerificacaoModelo.Verificar(doc!).Grupos.FirstOrDefault(g => g.Codigo == "encostado-sem-ligar");
+                    var antes = Diagnostico.Ligacoes(doc!);
+                    var feito = Reconexao.Executar(doc!, encostadas?.Ocorrencias ?? []);
+                    relatorio.Reconexao = new ResumoReconexao
+                    {
+                        Encostadas = encostadas?.Ocorrencias.Count ?? 0,
+                        Ligadas = feito.Ligadas,
+                        LigacoesAntes = antes,
+                        LigacoesDepois = Diagnostico.Ligacoes(doc!),
+                        Recusadas = feito.Recusadas.GroupBy(r => r).OrderByDescending(g => g.Count()).Select(g => $"{g.Count()}× {g.Key}").ToList(),
+                    };
+                    return feito.Texto();
+                });
+
             if (cenario.InspecionarCarimbo)
                 relatorio.Carimbos = Diagnostico.Carimbos(doc!);
 
@@ -453,6 +470,12 @@ static class TesteAutomatico
             };
             if (!Atende(quantidade, condicao)) falhas.Add($"verificação {codigo}: esperado {condicao}, veio {quantidade}");
         }
+        if (esperado.ReconexaoSemPerda == true)
+        {
+            if (r.Reconexao is not { } rc) falhas.Add("reconexão: o cenário não rodou \"reconectar\"");
+            else if (rc.LigacoesDepois < rc.LigacoesAntes + rc.Ligadas)
+                falhas.Add($"reconexão perdeu ligações: antes {rc.LigacoesAntes}, {rc.Ligadas} feitas, depois {rc.LigacoesDepois}");
+        }
         foreach (var trecho in esperado.TextoDasFolhas ?? [])
             if (!(r.Folhas?.Textos ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
                 falhas.Add($"folhas: texto \"{trecho}\" não apareceu");
@@ -477,6 +500,33 @@ static class TesteAutomatico
 /// <summary>Estado das vistas do SPK depois das folhas: o que a vista mostra das etiquetas e por quê.</summary>
 static class Diagnostico
 {
+    /// <summary>
+    /// Quantas ligações de tubulação o modelo tem (pares de conectores ligados). Corrigir só pode aumentar: cada ligação
+    /// feita soma pelo menos uma, e nenhuma que existia pode sumir.
+    /// </summary>
+    public static int Ligacoes(Document doc)
+    {
+        var categorias = new ElementMulticategoryFilter(new[]
+        {
+            BuiltInCategory.OST_PipeCurves, BuiltInCategory.OST_FlexPipeCurves, BuiltInCategory.OST_PipeFitting,
+            BuiltInCategory.OST_PipeAccessory, BuiltInCategory.OST_Sprinklers,
+        });
+        var pontas = 0;
+        foreach (var e in new FilteredElementCollector(doc).WherePasses(categorias).WhereElementIsNotElementType())
+        {
+            var gerente = e switch
+            {
+                MEPCurve curva => curva.ConnectorManager,
+                FamilyInstance instancia => instancia.MEPModel?.ConnectorManager,
+                _ => null,
+            };
+            if (gerente is null) continue;
+            pontas += gerente.Connectors.Cast<Connector>().Count(c => c.ConnectorType == ConnectorType.End && c.IsConnected
+                && c.AllRefs.Cast<Connector>().Any(r => r.Owner.Id != e.Id && r.Owner is MEPCurve or FamilyInstance));
+        }
+        return pontas / 2;
+    }
+
     public static List<string> Vistas(Document doc) =>
         new FilteredElementCollector(doc).OfClass(typeof(View)).Cast<View>()
             .Where(v => !v.IsTemplate && v.Name.StartsWith(Folhas.PranchaSpk.PrefixoVista, StringComparison.Ordinal)
@@ -602,6 +652,9 @@ sealed class Cenario
     public List<string>? Sabotar { get; set; }
 
     public bool Verificar { get; set; }
+
+    /// <summary>Liga as peças encostadas (o Corrigir de Verificar modelo), depois de sabotar e antes de verificar.</summary>
+    public bool Reconectar { get; set; }
     public bool InspecionarCarimbo { get; set; }
 
     /// <summary>Numeração e código das folhas a gravar no padrão antes de gerar.</summary>
@@ -627,6 +680,9 @@ sealed class Esperado
 
     /// <summary>Código do grupo (ou "erros", "avisos", "setores") e a condição: "0", "&gt;=1", "&lt;=2".</summary>
     public Dictionary<string, string>? Verificacao { get; set; }
+
+    /// <summary>A reconexão não pode desfazer ligação que existia: ligações depois ≥ antes + feitas.</summary>
+    public bool? ReconexaoSemPerda { get; set; }
 
     /// <summary>Trechos que precisam aparecer no texto de alguma das folhas geradas.</summary>
     public List<string>? TextoDasFolhas { get; set; }
@@ -665,6 +721,7 @@ sealed class RelatorioCenario
     public List<string>? Dialogos { get; set; }
     public string? Arquivo { get; set; }
     public ResumoVerificacao? Verificacao { get; set; }
+    public ResumoReconexao? Reconexao { get; set; }
     public List<string>? Carimbos { get; set; }
     public List<string>? CarimbosSpk { get; set; }
 
@@ -682,6 +739,15 @@ sealed class ResumoVerificacao
     public int Erros { get; set; }
     public int Avisos { get; set; }
     public List<GrupoVerificado> Grupos { get; set; } = [];
+}
+
+sealed class ResumoReconexao
+{
+    public int Encostadas { get; set; }
+    public int Ligadas { get; set; }
+    public int LigacoesAntes { get; set; }
+    public int LigacoesDepois { get; set; }
+    public List<string> Recusadas { get; set; } = [];
 }
 
 sealed class GrupoVerificado

@@ -7,7 +7,7 @@ namespace Spk.AddIn.Commands;
 
 /// <summary>Confere o modelo antes de calcular e mostra, item a item, o que impede a leitura da rede.</summary>
 [UsedImplicitly]
-[Transaction(TransactionMode.ReadOnly)]
+[Transaction(TransactionMode.Manual)]
 public class VerificarModeloCommand : ExternalCommand
 {
     public override void Execute()
@@ -24,11 +24,22 @@ public class VerificarModeloCommand : ExternalCommand
 
 static class VerificacaoUi
 {
-    /// <summary>Abre a janela; se o engenheiro escolher um item, seleciona os elementos e leva a vista até eles.</summary>
+    /// <summary>
+    /// Abre a janela; se o engenheiro escolher um item, seleciona os elementos e leva a vista até eles. Se pedir para
+    /// corrigir um grupo, corrige, mostra o que foi feito e abre a verificação de novo.
+    /// </summary>
     public static void Mostrar(UIDocument ui, ResultadoVerificacao resultado)
     {
         var janela = new VerificacaoJanela(resultado);
-        if (janela.ShowDialog() != true || janela.Escolhidos is not { Count: > 0 } escolhidos) return;
+        if (janela.ShowDialog() != true) return;
+        if (janela.ParaCorrigir is { } grupo)
+        {
+            var feito = Reconexao.Executar(ui.Document, grupo.Ocorrencias);
+            TaskDialog.Show("SPK — Corrigir", feito.Texto() + "\n\nCtrl+Z desfaz a correção inteira.");
+            Mostrar(ui, VerificacaoModelo.Verificar(ui.Document));
+            return;
+        }
+        if (janela.Escolhidos is not { Count: > 0 } escolhidos) return;
         var existentes = escolhidos.Where(id => ui.Document.GetElement(id) is not null).ToList();
         ui.Selection.SetElementIds(existentes);
         try

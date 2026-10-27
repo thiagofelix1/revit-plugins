@@ -60,14 +60,20 @@ static class Sabotagem
         return $"Tubo {tubo.Id.Value} (e o que o Revit mudou junto) no sistema \"{agua.Name}\".";
     }
 
-    /// <summary>Solta uma ponta do tubo de maior diâmetro (subgeral): tubo e conexão ficam encostados, sem ligação.</summary>
+    /// <summary>
+    /// Solta um tubo da subgeral entre dois tês, do lado do tê de menor id: tubo e tê ficam encostados, sem ligação, e a
+    /// rede se parte em duas, cada metade com bicos. A ordem das ligações que o Revit devolve muda de uma rodada para
+    /// outra; por isso a escolha não depende dela.
+    /// </summary>
     static string DesligarTubo(Document doc)
     {
+        static bool Te(Element e) => e is FamilyInstance { MEPModel: MechanicalFitting { PartType: PartType.Tee } };
         var tubo = Gerados(doc, BuiltInCategory.OST_PipeCurves).OfType<Pipe>()
-            .Where(t => Ligacoes(t).Count() >= 2)
-            .OrderByDescending(t => t.Diameter).ThenBy(t => t.Id.Value)
-            .First();
-        var (conector, outro) = Ligacoes(tubo).First();
+                       .Where(t => Ligacoes(t).Count() == 2 && Ligacoes(t).All(l => Te(l.Outro.Owner)))
+                       .OrderByDescending(t => t.Diameter).ThenBy(t => t.Id.Value)
+                       .FirstOrDefault()
+                   ?? throw new InvalidOperationException("Nenhum tubo entre dois tês na malha gerada.");
+        var (conector, outro) = Ligacoes(tubo).OrderBy(l => l.Outro.Owner.Id.Value).First();
         conector.DisconnectFrom(outro);
         return $"Tubo {tubo.Id.Value} desligado de {outro.Owner.Category?.Name} {outro.Owner.Id.Value}.";
     }

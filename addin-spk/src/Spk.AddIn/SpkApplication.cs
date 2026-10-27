@@ -14,38 +14,40 @@ public class SpkApplication : IExternalApplication
     {
         application.CreateRibbonTab(Aba);
 
+        // Na ordem do fluxo: preparar o projeto, desenhar a rede, conferir e calcular, tirar os resultados.
         var projeto = application.CreateRibbonPanel(Aba, "Projeto");
+        Botao<ImportarPadraoCommand>(projeto,
+            "Padrão do\nescritório", Icones.Folha,
+            "Copia de outro projeto aberto o carimbo, a etiqueta de tubo, os templates de vista e as legendas, e define o " +
+            "número e o código das folhas. As folhas passam a usar esse padrão.");
         Botao<DadosProjetoCommand>(projeto,
             "Dados do\nprojeto", Icones.Formulario,
             "Classe de risco, base de cálculo, hidrantes, reserva, fator C e abastecimento. Escolhidos pelo engenheiro.");
-        Botao<DadosEsbocoCommand>(projeto,
-            "Dados do\nesboço", Icones.Formulario,
-            "Geometria da malha: ramais, espaçamentos, altura, fator K em L/min/bar½ e área por bico.");
         Botao<DescobrirFamiliasCommand>(projeto,
             "Famílias", Icones.Lupa,
-            "Para um modelo que já veio desenhado: confirma quais famílias são bicos e o fator K.");
-        Botao<ImportarPadraoCommand>(projeto,
-            "Padrão do\nescritório", Icones.Folha,
-            "Copia de outro projeto aberto (a Nova Era, por exemplo) o carimbo, a etiqueta de tubo, os templates de vista e as " +
-            "legendas. As folhas passam a usar esse padrão.");
+            "Para um modelo que já veio desenhado: confirma quais famílias são bicos (fator K e área) e qual válvula é a VGA de cada setor.");
         Margem(projeto);
 
         var rede = application.CreateRibbonPanel(Aba, "Rede");
-        Botao<RedeExemploCommand>(rede,
-            "Rede de\nexemplo", Icones.Malha,
-            "Escolhe um cenário de teste (malha simples, espinha de peixe, grelha, 2 pavimentos, risco leve), apaga a malha " +
-            "gerada anterior, cria a rede ligada e abre a planta e o 3D enquadrados.");
         Botao<GerarMalhaCommand>(rede,
             "Gerar", Icones.Malha,
-            "Cria uma malha retangular de bicos e tubos já conectados, no ponto que você clicar.");
-        Botao<VerificarModeloCommand>(rede,
+            "Cria uma malha de bicos e tubos já conectados, no ponto que você clicar, com a geometria de Dados do esboço.");
+        Pequenos(rede,
+            (typeof(DadosEsbocoCommand), "Dados do esboço", Icones.Formulario,
+                "Geometria da malha gerada: arranjo, ramais, espaçamentos, altura, bico (K em L/min/bar½ e área) e diâmetros."),
+            (typeof(RedeExemploCommand), "Rede de exemplo", Icones.Malha,
+                "Cria um cenário de teste pronto (simples, espinha de peixe, grelha, 2 pavimentos, risco leve), com planta e 3D enquadrados."));
+        Margem(rede);
+
+        var calculo = application.CreateRibbonPanel(Aba, "Cálculo");
+        Botao<VerificarModeloCommand>(calculo,
             "Verificar\nmodelo", Icones.Verificar,
             "Confere se o SPK consegue ler a rede: peças encostadas mas não ligadas, tubo sem tê, bico solto, ponta aberta, " +
-            "sistema que não é de incêndio, famílias não confirmadas e bicos sem VGA. Clique num item para ir até ele.");
-        Botao<CalcularRedeCommand>(rede,
+            "sistema que não é de incêndio, famílias não confirmadas e bicos sem VGA. Mostra cada item no modelo e corrige as peças encostadas.");
+        Botao<CalcularRedeCommand>(calculo,
             "Calcular", Icones.Executar,
-            "Calcula a malha gerada. Se não houver, usa as famílias confirmadas.");
-        Margem(rede);
+            "Calcula o setor: lê a rede pelas conexões, acha a área mais desfavorável e grava o resultado no modelo.");
+        Margem(calculo);
 
         var resultados = application.CreateRibbonPanel(Aba, "Resultados");
         Botao<AbrirMemorialCommand>(resultados,
@@ -53,16 +55,16 @@ public class SpkApplication : IExternalApplication
             "Abre o último memorial de cálculo (.docx) gerado.");
         Botao<FolhasCommand>(resultados,
             "Folhas", Icones.Folha,
-            "Monta a setorização das VGAs, o isométrico geral e as folhas do último setor calculado (planta com a área de " +
-            "cálculo, 3D e corte), e exporta o PDF.");
-        Avancado(resultados);
+            "Monta a setorização das VGAs, o isométrico geral com os quadros e as folhas do último setor calculado (planta " +
+            "com a área de cálculo, 3D e corte), preenche o carimbo e exporta o PDF.");
         Margem(resultados);
 
         var ajuda = application.CreateRibbonPanel(Aba, "Ajuda");
         Botao<GuiaCommand>(ajuda,
             "Guia", Icones.Livro,
-            "O que já foi feito no projeto aberto e o que falta, com atalho para cada etapa; passo a passo, como preparar o " +
-            "modelo, em que o cálculo se baseia e o que as folhas trazem.");
+            "O que já foi feito no projeto aberto e o que falta, com atalho para cada etapa; passo a passo, como preparar e " +
+            "verificar o modelo, em que o cálculo se baseia e o que as folhas trazem.");
+        Avancado(ajuda);
         Margem(ajuda);
 
         Automacao.TesteAutomatico.Registrar(application);
@@ -81,6 +83,19 @@ public class SpkApplication : IExternalApplication
             Image = Icones.Gerar(icone, 16),
         });
         Largura(botao);
+    }
+
+    /// <summary>Botões pequenos empilhados, para o que é secundário no painel.</summary>
+    static void Pequenos(RibbonPanel painel, params (Type Tipo, string Texto, Action<DrawingContext> Icone, string Dica)[] botoes)
+    {
+        var dados = botoes.Select(b => (RibbonItemData)new PushButtonData(b.Tipo.Name, b.Texto, b.Tipo.Assembly.Location, b.Tipo.FullName)
+        {
+            ToolTip = b.Dica,
+            Image = Icones.Gerar(b.Icone, 16),
+            LargeImage = Icones.Gerar(b.Icone, 32),
+        }).ToList();
+        if (dados.Count == 2) painel.AddStackedItems(dados[0], dados[1]);
+        else painel.AddStackedItems(dados[0], dados[1], dados[2]);
     }
 
     static void Avancado(RibbonPanel painel)

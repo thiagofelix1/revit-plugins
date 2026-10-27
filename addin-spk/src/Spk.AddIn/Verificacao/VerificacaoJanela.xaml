@@ -10,6 +10,8 @@
         <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
             <Button DockPanel.Dock="Left" Content="Copiar relatório" Padding="12,4" Click="Copiar_Click"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="BotaoCorrigir" Content="Corrigir" Padding="12,4" Margin="0,0,8,0" Click="Corrigir_Click"
+                        ToolTip="Liga as peças encostadas deste grupo. Só move a ponta de tubos; o que não der para ligar fica como está, com o motivo. Ctrl+Z desfaz tudo."/>
                 <Button x:Name="BotaoTodos" Content="Selecionar todos do grupo" Padding="12,4" Margin="0,0,8,0" Click="Todos_Click"/>
                 <Button x:Name="BotaoMostrar" Content="Mostrar" Width="100" Padding="12,4" Margin="0,0,8,0" FontWeight="Bold" Click="Mostrar_Click"/>
                 <Button Content="Fechar" Width="100" Padding="12,4" IsCancel="True" Click="Fechar_Click"/>

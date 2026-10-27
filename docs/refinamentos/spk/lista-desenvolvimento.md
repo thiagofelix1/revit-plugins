@@ -23,7 +23,7 @@ Pronto quando um projeto real bem conectado passa sem erro e um projeto mal cone
 - [ ] Lista de problemas comuns nos modelos que o escritório recebe (**depende do engenheiro**) e checagens que faltarem.
 - [ ] Um projeto real **bem conectado** calculando sem proximidade (**depende do engenheiro**: ceder um projeto).
 - [ ] Tubos duplicados ou sobrepostos; tubo em nível ou fase errada.
-- [ ] Correção assistida para os casos simples (reconectar peças encostadas a menos de 1 cm).
+- [x] Correção assistida das peças encostadas (ver etapa 6, item 1).
 
 ## 2. Folhas completas
 
@@ -66,7 +66,8 @@ Os dois fluxos de uso (projeto regular e projeto complexo como a Nova Era) estã
 
 Pronto quando um setor da Nova Era (ou de um projeto do engenheiro) é desenhado com as ferramentas, passa no Verificar modelo sem erro e calcula sem proximidade.
 
-- [ ] 1. Reconectar peças encostadas (o que Verificar modelo aponta), em lote, com confirmação e desfazer.
+- [x] 1. Reconectar peças encostadas: botão Corrigir em Verificar modelo, um Ctrl+Z desfaz tudo. Não move tubo; cada ligação é conferida (nenhuma ligação vizinha desfeita, nenhuma peça presa movida). Nova Era: 910 de 971 ligadas em 55 s, ligações do modelo 4.600 → 5.512.
+- [ ] 1b. Derivação sem tê: criar o tê partindo o tubo (983 na Nova Era depois da reconexão).
 - [ ] 2. Ligar bicos selecionados ao ramal (braços e descidas).
 - [ ] 3. Traçar o ramal entre bicos selecionados até a subgeral.
 - [ ] 4. Aplicar diâmetros por tabela (número de bicos atendidos) e conferir pelo cálculo.

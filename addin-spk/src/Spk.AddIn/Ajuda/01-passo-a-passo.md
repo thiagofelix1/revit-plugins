@@ -21,7 +21,7 @@ Há dois caminhos:
 
 ## 4. Verificar o modelo
 
-Botão **Verificar modelo**, no painel Rede. Confere se o SPK consegue seguir a água pelas conexões: peças encostadas mas não ligadas, tubo que termina no meio de outro sem tê, bico solto, ponta aberta, tubo fora de sistema de incêndio, bico sem fator K confirmado e bico que não chega a nenhuma VGA. Cada item diz como resolver; **Mostrar** seleciona os elementos e leva a vista até eles. Numa rede gerada pelo SPK, a lista sai vazia. O capítulo **Verificar o modelo** explica cada problema e como corrigir.
+Botão **Verificar modelo**, no painel Cálculo. Confere se o SPK consegue seguir a água pelas conexões: peças encostadas mas não ligadas, tubo que termina no meio de outro sem tê, bico solto, ponta aberta, tubo fora de sistema de incêndio, bico sem fator K confirmado e bico que não chega a nenhuma VGA. Cada item diz como resolver; **Mostrar** seleciona os elementos e leva a vista até eles, e **Corrigir** liga de uma vez as peças encostadas. Numa rede gerada pelo SPK, a lista sai vazia. O capítulo **Verificar o modelo** explica cada problema e como corrigir.
 
 ## 5. Calcular
 

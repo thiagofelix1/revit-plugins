@@ -1,7 +1,7 @@
 namespace Spk.AddIn.Ajuda;
 
 /// <summary>Um botão de uma etapa: o texto e a classe do comando que ele abre.</summary>
-public sealed record AcaoDaEtapa(string Texto, string Painel, string Comando);
+public sealed record AcaoDaEtapa(string Texto, string Comando);
 
 /// <summary>Uma linha de "Seu projeto agora".</summary>
 public sealed record Etapa(string Titulo, string Estado, string Detalhe, IReadOnlyList<AcaoDaEtapa> Acoes)
@@ -32,7 +32,7 @@ static class SituacaoDoProjeto
     static Etapa Padrao(Document doc)
     {
         var padrao = PadraoEscritorio.Carregar(doc);
-        var acoes = new[] { new AcaoDaEtapa("Padrão do escritório", "Projeto", "ImportarPadraoCommand") };
+        var acoes = new[] { new AcaoDaEtapa("Padrão do escritório", "ImportarPadraoCommand") };
         return padrao.Origem is null && padrao.Carimbo is null
             ? new Etapa("1. Padrão do escritório", Etapa.Opcional,
                 "Não importado. As folhas saem com o primeiro carimbo do projeto e o estilo do SPK.", acoes)
@@ -41,7 +41,7 @@ static class SituacaoDoProjeto
 
     static Etapa Dados(Document doc)
     {
-        var acoes = new[] { new AcaoDaEtapa("Dados do projeto", "Projeto", "DadosProjetoCommand") };
+        var acoes = new[] { new AcaoDaEtapa("Dados do projeto", "DadosProjetoCommand") };
         return DadosProjeto.Carregar(doc) is { } dados
             ? new Etapa("2. Dados do projeto", Etapa.Feito, dados.Resumo(), acoes)
             : new Etapa("2. Dados do projeto", Etapa.Falta,
@@ -52,10 +52,10 @@ static class SituacaoDoProjeto
     {
         var acoes = new[]
         {
-            new AcaoDaEtapa("Famílias", "Projeto", "DescobrirFamiliasCommand"),
-            new AcaoDaEtapa("Verificar modelo", "Rede", "VerificarModeloCommand"),
-            new AcaoDaEtapa("Gerar", "Rede", "GerarMalhaCommand"),
-            new AcaoDaEtapa("Rede de exemplo", "Rede", "RedeExemploCommand"),
+            new AcaoDaEtapa("Famílias", "DescobrirFamiliasCommand"),
+            new AcaoDaEtapa("Verificar modelo", "VerificarModeloCommand"),
+            new AcaoDaEtapa("Gerar", "GerarMalhaCommand"),
+            new AcaoDaEtapa("Rede de exemplo", "RedeExemploCommand"),
         };
         var gerados = BicosDoModelo.Gerados(doc).Count;
         if (gerados > 0)
@@ -99,8 +99,8 @@ static class SituacaoDoProjeto
     {
         var acoes = new[]
         {
-            new AcaoDaEtapa("Calcular", "Rede", "CalcularRedeCommand"),
-            new AcaoDaEtapa("Memorial", "Resultados", "AbrirMemorialCommand"),
+            new AcaoDaEtapa("Calcular", "CalcularRedeCommand"),
+            new AcaoDaEtapa("Memorial", "AbrirMemorialCommand"),
         };
         if (ResultadoGravado.Ler(doc) is not { } resultado)
             return new Etapa("4. Cálculo", Etapa.Falta, "Ainda não calculado neste projeto.", acoes);
@@ -114,7 +114,7 @@ static class SituacaoDoProjeto
 
     static Etapa Folhas(Document doc)
     {
-        var acoes = new[] { new AcaoDaEtapa("Folhas", "Resultados", "FolhasCommand") };
+        var acoes = new[] { new AcaoDaEtapa("Folhas", "FolhasCommand") };
         var folhas = AddIn.Folhas.CarimboSpk.FolhasDoSpk(doc).Count;
         return folhas == 0
             ? new Etapa("5. Folhas", Etapa.Falta, "Nenhuma folha do SPK neste projeto.", acoes)
