@@ -54,7 +54,7 @@ public class BicosPorAmbienteCommand : ExternalCommand
             var resumo = $"{DadosProjeto.NomeClasse(dados.Classe)}: até {limites.AreaMaxima:0.0} m² por bico, {limites.DistanciaMaxima:0.0} m entre " +
                          $"bicos e {limites.ParedeMaxima:0.00} m até a parede (Tabela 2, teto incombustível; {EspacamentoDeBicos.Fonte}). " +
                          $"{edificio.Ambientes.Count} ambientes lidos ({string.Join("; ", edificio.Fontes)}).";
-            var janela = new BicosPorAmbienteJanela(edificio, tipos, null, resumo, ultimas);
+            var janela = new BicosPorAmbienteJanela(edificio, tipos, BicosPorAmbiente.TipoPadrao(doc), resumo, ultimas);
             if (janela.ShowDialog() != true || janela.Opcoes is not { } opcoes) return;
             ultimas = opcoes;
             limites = BicosPorAmbiente.Limites(dados, opcoes);

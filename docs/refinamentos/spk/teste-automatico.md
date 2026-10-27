@@ -50,6 +50,7 @@ Sem `fila.json` na pasta, nada disso é ligado: o Revit abre normalmente.
 | `abrir` | Projeto de origem; o teste trabalha numa cópia. |
 | `novo` | `true`: projeto novo pelo modelo padrão do Revit (que não tem tubo com tê; a Rede de exemplo precisa de um projeto que tenha). |
 | `dados` | Grava Dados do projeto (mesmos campos de `DadosProjeto`). |
+| `vincular` | Vincula modelos que já existem, origem interna com origem interna, logo depois de abrir: `arquivos` (caminhos), `apagarRede` (padrão sim: apaga bicos, tubos, conexões e acessórios da cópia) e `copiarNiveis` (padrão sim: cria os níveis dos vínculos que o projeto não tem, cada um com uma planta). Serve para testar com modelos de terceiros, como os exemplos que vêm com o Revit (Snowdon Towers em `C:\Program Files\Autodesk\Revit 2027\Samples`, copiados para `Documents\SPK\modelos-teste`). |
 | `mapeamento` | Ajusta o mapeamento de Famílias: acha linhas pela família (e tipo) por trecho do nome; cria a linha se a família existe no modelo e ainda não tem. |
 | `redeExemplo` | Cria a malha de exemplo. |
 | `calcular` | `{}`: o padrão. `vga`: id da VGA (os ids saem no relatório, em `Vgas`). `setor`: sem VGA, o pedaço de rede pela ordem (0 = maior). `elemento`: id de um bico ou tubo do setor. |

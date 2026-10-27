@@ -141,6 +141,9 @@ static class TesteAutomatico
             if (cenario.Mapeamento is { Count: > 0 } ajustes)
                 Etapa(relatorio, "mapeamento", () => AjustarMapeamento(doc!, ajustes));
 
+            if (cenario.Vincular is { } vinculos)
+                Etapa(relatorio, "vincular", () => Cenas.Vincular(doc!, vinculos));
+
             relatorio.Vgas = MapeamentoGravado.Vgas(doc!).Select(v => new VgaLida
             {
                 Id = v.Id.Value,
@@ -859,6 +862,9 @@ sealed class Cenario
     public bool Novo { get; set; }
 
     public DadosProjeto? Dados { get; set; }
+
+    /// <summary>Vincula modelos que já existem (origem interna com origem interna), logo depois de abrir.</summary>
+    public PedidoVinculos? Vincular { get; set; }
     public List<AjusteMapeamento>? Mapeamento { get; set; }
     public bool RedeExemplo { get; set; }
 
@@ -909,6 +915,17 @@ sealed class Cenario
     /// <summary>Numeração e código das folhas a gravar no padrão antes de gerar.</summary>
     public AjustePadrao? Padrao { get; set; }
     public Esperado? Esperado { get; set; }
+}
+
+sealed class PedidoVinculos
+{
+    public List<string> Arquivos { get; set; } = [];
+
+    /// <summary>Apaga antes a rede da cópia (bicos, tubos, conexões, acessórios).</summary>
+    public bool ApagarRede { get; set; } = true;
+
+    /// <summary>Cria no projeto os níveis dos vínculos que ele não tem, cada um com uma planta.</summary>
+    public bool CopiarNiveis { get; set; } = true;
 }
 
 sealed class AjustePadrao

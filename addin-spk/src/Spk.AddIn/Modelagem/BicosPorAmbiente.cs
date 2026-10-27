@@ -212,13 +212,21 @@ static class BicosPorAmbiente
 
     public static string Nome(FamilySymbol s) => $"{s.FamilyName} : {s.Name}";
 
-    /// <summary>O tipo pedido; sem ele, o bico confirmado em Famílias; sem isso, o mesmo do Gerar.</summary>
+    /// <summary>
+    /// O tipo pedido; sem ele, o bico confirmado em Famílias; sem isso, o primeiro que não é ESFR (o ESFR é de
+    /// armazenamento, que Bicos por ambiente não faz).
+    /// </summary>
     static FamilySymbol? Simbolo(Document doc, string? tipo)
     {
         var simbolos = Simbolos(doc).ToList();
         if (tipo is not null && simbolos.FirstOrDefault(s => Nome(s) == tipo) is { } pedido) return pedido;
-        return simbolos.FirstOrDefault(s => EhConfirmado(doc, s)) ?? GeradorMalha.SimboloDeBico(doc);
+        return simbolos.FirstOrDefault(s => EhConfirmado(doc, s))
+               ?? simbolos.FirstOrDefault(s => !Nome(s).Contains("ESFR", StringComparison.OrdinalIgnoreCase))
+               ?? simbolos.FirstOrDefault();
     }
+
+    /// <summary>O tipo que a janela mostra de início: o mesmo que vale sem escolha.</summary>
+    public static string? TipoPadrao(Document doc) => Simbolo(doc, null) is { } s ? Nome(s) : null;
 
     /// <summary>
     /// A família está confirmada em Famílias (com K e área): o Calcular lê os bicos dela. Senão os bicos novos levam a

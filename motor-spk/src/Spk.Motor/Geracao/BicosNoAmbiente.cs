@@ -77,7 +77,47 @@ public static class BicosNoAmbiente
             if (lugar is null) break;
             bicos.Add(lugar.Value);
         }
-        return new PosicaoDeBicos(bicos, u, su, sv);
+        return new PosicaoDeBicos(Alinhar(contornos, bicos, u, v, limites), u, su, sv);
+    }
+
+    /// <summary>
+    /// Abaixo disso, dois bicos fora da mesma linha de ramal não têm como ligar: não cabe o braço com cotovelo, e a
+    /// descida reta sai torta. É o braço mínimo de Ligar bicos.
+    /// </summary>
+    public const double DesalinhamentoMaximo = 0.15;
+
+    /// <summary>
+    /// Fileiras quase alinhadas (os pedaços de um ambiente que não é retângulo ganham grades próprias): os bicos a menos
+    /// de <see cref="DesalinhamentoMaximo" /> um do outro na direção entre ramais vão para a mesma linha, a de mais bicos.
+    /// Cada fileira só muda se os bicos continuam dentro e longe da parede e a conferência não piora.
+    /// </summary>
+    static List<Ponto2> Alinhar(IReadOnlyList<IReadOnlyList<Ponto2>> contornos, List<Ponto2> bicos, Ponto2 u, Ponto2 v, LimitesDeBico limites)
+    {
+        var atuais = bicos.ToList();
+        var falhas = Conferir(contornos, atuais, limites, u).Count;
+        var ordem = Enumerable.Range(0, atuais.Count).OrderBy(i => Dot(atuais[i], v)).ToList();
+        for (var k = 0; k < ordem.Count;)
+        {
+            var inicio = Dot(atuais[ordem[k]], v);
+            var fileira = ordem.Skip(k).TakeWhile(i => Dot(atuais[i], v) - inicio < DesalinhamentoMaximo).ToList();
+            k += fileira.Count;
+            var linhas = fileira.GroupBy(i => Math.Round(Dot(atuais[i], v), 3)).ToList();
+            if (linhas.Count < 2) continue;
+            var alvo = linhas.OrderByDescending(g => g.Count()).ThenBy(g => g.Key).First().Key;
+            var tentativa = atuais.ToList();
+            foreach (var i in fileira)
+            {
+                var b = atuais[i];
+                tentativa[i] = Ponto(u, v, Dot(b, u), alvo);
+            }
+            if (fileira.Any(i => !Dentro(contornos, tentativa[i]) || DistanciaAoContorno(contornos, tentativa[i]) < limites.ParedeMinima - Folga))
+                continue;
+            var novas = Conferir(contornos, tentativa, limites, u).Count;
+            if (novas > falhas) continue;
+            atuais = tentativa;
+            falhas = novas;
+        }
+        return atuais;
     }
 
     /// <summary>

@@ -47,6 +47,39 @@ public class BicosNoAmbienteTestes
         Assert.Empty(BicosNoAmbiente.Conferir(galpao, p.Bicos, Ordinario));
     }
 
+    public static TheoryData<string> Formatos => new()
+    {
+        "0,0 26.5,0 26.5,1.6 14.5,1.6 14.5,4.9 12.5,4.9 12.5,1.6 0,1.6",
+        "0,0 9.3,0 9.3,4.1 5.2,4.1 5.2,10.7 0,10.7",
+        "0,0 17,0 17,3 11.4,3 11.4,7.7 4.3,7.7 4.3,3 0,3",
+        "0,0 13.7,0 13.7,8.2 9.1,8.2 9.1,6.4 4.6,6.4 4.6,8.2 0,8.2",
+    };
+
+    [Theory]
+    [MemberData(nameof(Formatos))]
+    public void Fileiras_quase_alinhadas_viram_uma_linha_so(string formato)
+    {
+        // Cada pedaço do ambiente ganha a sua grade: sem alinhar, fileiras vizinhas ficam a poucos cm uma da outra, e o
+        // ramal não liga o bico (perto demais para braço, fora da linha para descida reta).
+        IReadOnlyList<IReadOnlyList<Ponto2>> sala = [formato.Split(' ').Select(t => t.Split(','))
+            .Select(c => new Ponto2(double.Parse(c[0], System.Globalization.CultureInfo.InvariantCulture),
+                double.Parse(c[1], System.Globalization.CultureInfo.InvariantCulture))).ToList()];
+        foreach (var limites in new[] { Leve, Ordinario })
+        {
+            var p = BicosNoAmbiente.Posicionar(sala, limites);
+            var v = new Ponto2(-p.DirecaoDosRamais.Y, p.DirecaoDosRamais.X);
+            var linhas = p.Bicos.Select(b => b.X * v.X + b.Y * v.Y).ToList();
+            foreach (var a in linhas)
+            foreach (var b in linhas)
+            {
+                var d = Math.Abs(a - b);
+                Assert.True(d < 1e-6 || d >= BicosNoAmbiente.DesalinhamentoMaximo,
+                    $"fileiras a {d * 100:0.0} cm: {string.Join("; ", p.Bicos)}");
+            }
+            Assert.Empty(BicosNoAmbiente.Conferir(sala, p.Bicos, limites).Where(f => f.Tipo == TipoDeFalha.ForaDoAmbiente));
+        }
+    }
+
     [Fact]
     public void Ambiente_em_L_fica_coberto_sem_bico_fora()
     {

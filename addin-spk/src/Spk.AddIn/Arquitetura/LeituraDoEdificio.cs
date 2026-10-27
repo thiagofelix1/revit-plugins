@@ -84,14 +84,32 @@ static class LeituraDoEdificio
             var ponto = fonte.Transformacao.OfPoint(local.Point);
             var piso = ponto.Z + (ambiente.get_Parameter(BuiltInParameter.ROOM_LOWER_OFFSET)?.AsDouble() ?? 0);
 
-            // O primeiro teto acima do ponto do ambiente, 10 cm acima do piso para não pegar a laje em que ele está.
-            var acima = raio.Find(new XYZ(ponto.X, ponto.Y, piso + Pes(0.1)), XYZ.BasisZ)
-                .Where(r => r.Proximity > 1e-6).OrderBy(r => r.Proximity).FirstOrDefault();
+            // O primeiro teto acima do ponto do ambiente, a partir de 10 cm acima do nível. O que estiver a menos de
+            // PeDireitoMinimo do nível não é teto: é a laje em que o ambiente está quando ela fica acima do nível
+            // (contrapiso grosso, piso elevado, terraço sobre a garagem), uma floreira ou o tampo de um elemento baixo. Se
+            // o raio saiu de dentro do elemento e a face achada está até PisoAcimaDoNivel, ela é o topo do piso de verdade.
+            var nivel = piso;
+            var inicio = new XYZ(ponto.X, ponto.Y, nivel + Pes(0.1));
+            ReferenceWithContext? acima = null;
+            foreach (var r in raio.Find(inicio, XYZ.BasisZ).Where(r => r.Proximity > 1e-6).OrderBy(r => r.Proximity))
+            {
+                var z = inicio.Z + r.Proximity;
+                if (z - nivel >= Pes(PeDireitoMinimo))
+                {
+                    acima = r;
+                    break;
+                }
+                if (z - nivel <= Pes(PisoAcimaDoNivel)
+                    && Elemento(doc, r.GetReference()) is { } achado
+                    && achado.Elemento.get_BoundingBox(null) is { } caixa
+                    && Math.Min(achado.Transformacao.OfPoint(caixa.Min).Z, achado.Transformacao.OfPoint(caixa.Max).Z) < inicio.Z)
+                    piso = Math.Max(piso, z);
+            }
             double? teto = null;
             var origem = OrigemDoTeto.NaoAchado;
             if (acima is not null)
             {
-                teto = piso + Pes(0.1) + acima.Proximity;
+                teto = inicio.Z + acima.Proximity;
                 origem = Categoria(doc, acima.GetReference()) switch
                 {
                     (long)BuiltInCategory.OST_Ceilings => OrigemDoTeto.Forro,
@@ -101,7 +119,7 @@ static class LeituraDoEdificio
             }
             else if (ambiente.UnboundedHeight > 0)
             {
-                teto = piso + ambiente.UnboundedHeight;
+                teto = nivel + ambiente.UnboundedHeight;
                 origem = OrigemDoTeto.AlturaDoAmbiente;
             }
 
@@ -112,13 +130,24 @@ static class LeituraDoEdificio
     }
 
     /// <summary>A categoria do elemento achado, no arquivo ou dentro do vínculo.</summary>
-    static long? Categoria(Document doc, Reference referencia)
+    static long? Categoria(Document doc, Reference referencia) => Elemento(doc, referencia)?.Elemento.Category?.Id.Value;
+
+    /// <summary>O elemento achado, no arquivo ou dentro do vínculo, com a transformação para as coordenadas do projeto.</summary>
+    static (Element Elemento, Transform Transformacao)? Elemento(Document doc, Reference referencia)
     {
         var elemento = doc.GetElement(referencia.ElementId);
         if (elemento is RevitLinkInstance vinculo && referencia.LinkedElementId != ElementId.InvalidElementId)
-            elemento = vinculo.GetLinkDocument()?.GetElement(referencia.LinkedElementId);
-        return elemento?.Category?.Id.Value;
+            return vinculo.GetLinkDocument()?.GetElement(referencia.LinkedElementId) is { } vinculado
+                ? (vinculado, vinculo.GetTotalTransform())
+                : null;
+        return elemento is null ? null : (elemento, Transform.Identity);
     }
+
+    /// <summary>Abaixo disso, acima do nível do ambiente, o que o raio acha não é teto (m).</summary>
+    const double PeDireitoMinimo = 2.0;
+
+    /// <summary>Até quanto acima do nível o topo da laje em que o ambiente está passa a ser o piso dele (m).</summary>
+    const double PisoAcimaDoNivel = 0.6;
 
     static IEnumerable<Viga> Vigas(Fonte fonte)
     {

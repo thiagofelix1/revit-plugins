@@ -143,12 +143,7 @@ static class Cenas
         using (var t = new Transaction(doc, "SPK — vínculos de teste"))
         {
             t.Start();
-            // A cópia do projeto começa sem rede: só a que o teste gerar nos ambientes entra no cálculo e nas folhas.
-            var rede = new FilteredElementCollector(doc).WhereElementIsNotElementType()
-                .Where(e => e.Category?.Id.Value is (long)BuiltInCategory.OST_Sprinklers or (long)BuiltInCategory.OST_PipeCurves
-                    or (long)BuiltInCategory.OST_PipeFitting or (long)BuiltInCategory.OST_PipeAccessory)
-                .Select(e => e.Id).ToList();
-            if (rede.Count > 0) doc.Delete(rede);
+            ApagarRede(doc);
             foreach (var arquivo in new[] { arquivoArq, arquivoEst })
             {
                 var tipo = RevitLinkType.Create(doc, ModelPathUtils.ConvertUserVisiblePathToModelPath(arquivo), new RevitLinkOptions(false));
@@ -158,6 +153,64 @@ static class Cenas
             t.Commit();
         }
         return new Cena("Arquitetura (2 salas, forro na A, laje sobre as duas) e estrutura (1 viga) vinculadas, deslocadas 20 m e 10 m.", [], []);
+    }
+
+    /// <summary>
+    /// Vincula modelos que já existem (arquitetura, estrutura) origem interna com origem interna, como o engenheiro faz
+    /// com os arquivos que recebe. Pode apagar antes a rede da cópia e copiar os níveis dos vínculos (com uma planta
+    /// para cada nível novo), como o Copiar/Monitorar do Revit.
+    /// </summary>
+    public static string Vincular(Document doc, PedidoVinculos pedido)
+    {
+        var linhas = new List<string>();
+        using var t = new Transaction(doc, "SPK — vincular modelos");
+        t.Start();
+        if (pedido.ApagarRede) linhas.Add($"{ApagarRede(doc)} elementos da rede apagados");
+        var instancias = new List<RevitLinkInstance>();
+        foreach (var arquivo in pedido.Arquivos)
+        {
+            if (!System.IO.File.Exists(arquivo)) throw new InvalidOperationException($"Arquivo não encontrado: {arquivo}");
+            var tipo = RevitLinkType.Create(doc, ModelPathUtils.ConvertUserVisiblePathToModelPath(arquivo), new RevitLinkOptions(false));
+            instancias.Add(RevitLinkInstance.Create(doc, tipo.ElementId, ImportPlacement.Origin));
+            linhas.Add($"vinculado {System.IO.Path.GetFileName(arquivo)}");
+        }
+        if (pedido.CopiarNiveis)
+        {
+            var existentes = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().ToList();
+            var tipoPlanta = new FilteredElementCollector(doc).OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>()
+                .FirstOrDefault(v => v.ViewFamily == ViewFamily.FloorPlan);
+            var criados = 0;
+            foreach (var instancia in instancias)
+            {
+                if (instancia.GetLinkDocument() is not { } vinculado) continue;
+                var dz = instancia.GetTotalTransform().Origin.Z;
+                foreach (var nivel in new FilteredElementCollector(vinculado).OfClass(typeof(Level)).Cast<Level>().OrderBy(n => n.Elevation))
+                {
+                    var elevacao = nivel.Elevation + dz;
+                    if (existentes.Any(n => Math.Abs(n.Elevation - elevacao) < GeradorMalha.Pes(0.05))) continue;
+                    var novo = Level.Create(doc, elevacao);
+                    try { novo.Name = nivel.Name; }
+                    catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+                    if (tipoPlanta is not null) ViewPlan.Create(doc, tipoPlanta.Id, novo.Id);
+                    existentes.Add(novo);
+                    criados++;
+                }
+            }
+            linhas.Add($"{criados} níveis copiados dos vínculos");
+        }
+        t.Commit();
+        return string.Join("; ", linhas);
+    }
+
+    /// <summary>Apaga bicos, tubos, conexões e acessórios: a cópia começa sem rede, e só a que o teste gerar entra no cálculo.</summary>
+    static int ApagarRede(Document doc)
+    {
+        var rede = new FilteredElementCollector(doc).WhereElementIsNotElementType()
+            .Where(e => e.Category?.Id.Value is (long)BuiltInCategory.OST_Sprinklers or (long)BuiltInCategory.OST_PipeCurves
+                or (long)BuiltInCategory.OST_PipeFitting or (long)BuiltInCategory.OST_PipeAccessory)
+            .Select(e => e.Id).ToList();
+        if (rede.Count > 0) doc.Delete(rede);
+        return rede.Count;
     }
 
     static string Template(Autodesk.Revit.ApplicationServices.Application app, string nome)

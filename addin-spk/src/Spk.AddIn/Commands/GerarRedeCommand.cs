@@ -55,7 +55,7 @@ public class GerarRedeCommand : ExternalCommand
             var resumo = $"Para cada ambiente marcado: bicos pela norma ({DadosProjeto.NomeClasse(dados.Classe)}: até {limites.AreaMaxima:0.0} m² " +
                          $"por bico e {limites.DistanciaMaxima:0.0} m entre bicos), a subgeral com a descida até o piso na parede de entrada, " +
                          "os ramais, a ligação dos bicos e os diâmetros. Depois: Verificar modelo e Calcular.";
-            var janela = new BicosPorAmbienteJanela(edificio, tipos, null, resumo, ultimas.Bicos, ultimas);
+            var janela = new BicosPorAmbienteJanela(edificio, tipos, BicosPorAmbiente.TipoPadrao(doc), resumo, ultimas.Bicos, ultimas);
             if (janela.ShowDialog() != true || janela.Rede is not { } opcoes) return;
             ultimas = opcoes;
 
