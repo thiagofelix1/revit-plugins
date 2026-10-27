@@ -8,7 +8,7 @@ Normas citadas por item, sem reproduzir texto. O motor e o que ele já acertou e
 
 ## Situação em 26/10/2026
 
-O acompanhamento rumo à distribuição está em [lista-desenvolvimento.md](lista-desenvolvimento.md). Este plano continua valendo para a geração (do esboço às folhas).
+O acompanhamento rumo à distribuição está em [lista-desenvolvimento.md](lista-desenvolvimento.md) e os fluxos de uso em [fluxos.md](fluxos.md). Decisão de 26/10/2026: a geração automática passa a ser montada sobre ferramentas de modelagem assistida (ligar bicos ao ramal, traçar ramal, aplicar diâmetros, posicionar bicos por ambiente); as etapas 2 e 4 abaixo seguem essa ordem.
 
 - **Provado no Revit** (à mão e pelo [teste automático](teste-automatico.md)): Rede de exemplo → Calcular → Folhas → PDF, com 12 bicos, ATENDE, crítico a 2,83 bar e 606 L/min, setorização, isométrico, planta e 3D do setor, corte, etiquetas do escritório e padrão do escritório importado (carimbo, etiqueta, templates, legendas).
 - **Sem validação de engenharia**: o conteúdo das folhas e a leitura de um projeto real **bem conectado** (nunca testada; a Nova Era é o caso oposto).

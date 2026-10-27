@@ -2,7 +2,7 @@
 
 Uma linha por entrega, na ordem combinada. `[x]` só quando provado no Revit (à mão ou pela [suíte automática](teste-automatico.md)); o que só compila fica `[ ]`. A ordem de cada etapa só começa com o critério de pronto da anterior, salvo o que não depende do engenheiro parceiro.
 
-Atualizada em 26/10/2026.
+Atualizada em 26/10/2026. Como o engenheiro usa o plugin de ponta a ponta: [fluxos.md](fluxos.md).
 
 ## 0. Base (feito)
 
@@ -60,13 +60,30 @@ Pronto quando houver pelo menos três projetos reais conferidos pelo engenheiro 
 - [ ] Licença por assinatura (ativação, validade, uso offline).
 - [ ] Primeiro escritório pagando, com canal de suporte.
 
-## 6. Geração avançada e dimensionamento
+## 6. Modelagem assistida e geração automática
 
-- [ ] Ler contorno de cobertura e forro; bicos por ambiente; afastamento de parede.
+Os dois fluxos de uso (projeto regular e projeto complexo como a Nova Era) estão em [fluxos.md](fluxos.md). As ferramentas vêm primeiro, uma por vez, cada uma útil sozinha em projeto real; a geração automática é montada em cima delas. Esta etapa pode começar antes da 4 e da 5: os itens 1 a 4 não dependem do engenheiro para existir, só para serem validados.
+
+Pronto quando um setor da Nova Era (ou de um projeto do engenheiro) é desenhado com as ferramentas, passa no Verificar modelo sem erro e calcula sem proximidade.
+
+- [ ] 1. Reconectar peças encostadas (o que Verificar modelo aponta), em lote, com confirmação e desfazer.
+- [ ] 2. Ligar bicos selecionados ao ramal (braços e descidas).
+- [ ] 3. Traçar o ramal entre bicos selecionados até a subgeral.
+- [ ] 4. Aplicar diâmetros por tabela (número de bicos atendidos) e conferir pelo cálculo.
+- [ ] 5. Ler a arquitetura e a estrutura vinculadas: níveis, forros, ambientes, vigas, telhados.
+- [ ] 6. Posicionar bicos num ambiente ou contorno pela regra da NBR, junto com a conferência de espaçamento, área por bico e distância à parede.
+- [ ] 7. Geração automática por contorno (contorno → bicos → ramais → subgeral → VGA), usando 2 a 6, com os arranjos de hoje (lateral, espinha de peixe, grelha). O gerador retangular atual passa a usar as mesmas peças.
+- [ ] Aviso de colisão com viga e duto, e de inclinação.
 - [ ] Rede seguindo telhado inclinado.
-- [ ] Setorização automática pela Tabela 8.
+- [ ] Setorização: área de cada setor contra a Tabela 8; depois, sugestão de cortes.
 - [ ] Tubo geral até a casa de bombas.
-- [ ] Dimensionamento: subir diâmetros até atender; sugerir a bomba pela curva.
+- [ ] Complementos baratos, a qualquer momento: pintar a rede por pressão ou velocidade; lista de material (metros de tubo por diâmetro, conexões).
+
+## 7. Dimensionamento
+
+- [ ] Subir diâmetros até atender, com a ordem de DN que o projetista usar.
+- [ ] Visão de todos os setores juntos e do setor que dimensiona a bomba.
+- [ ] Sugerir a bomba pela curva de abastecimento.
 
 ## Conhecido e aceito por enquanto
 
