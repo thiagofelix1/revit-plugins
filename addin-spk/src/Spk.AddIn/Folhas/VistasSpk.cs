@@ -189,6 +189,7 @@ static class VistasSpk
             planta.DetailLevel = ViewDetailLevel.Medium;
         }
 
+        FaseDaRede(doc, planta);
         AjustarIntervalo(planta, nivel, caixa, avisos);
         Recortar(planta, caixa);
         return planta;
@@ -251,6 +252,7 @@ static class VistasSpk
             EstiloPadrao(doc, vista, soARede: true);
         }
         Tubulacao3d(doc, vista);
+        FaseDaRede(doc, vista);
 
         var centro = caixa.Centro;
         var distancia = Math.Max((caixa.Max - caixa.Min).GetLength(), Pes(8)) * 2;
@@ -345,7 +347,21 @@ static class VistasSpk
             EstiloPadrao(doc, corte, soARede: false);
             corte.DetailLevel = ViewDetailLevel.Medium;
         }
+        FaseDaRede(doc, corte);
         return corte;
+    }
+
+    /// <summary>
+    /// A vista na fase em que a rede foi construída (a de mais bicos). A vista nova nasce numa fase qualquer do projeto,
+    /// e numa fase anterior à da rede o Revit não mostra nada dela: os bicos "ainda não existem".
+    /// </summary>
+    static void FaseDaRede(Document doc, View vista)
+    {
+        var fase = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Sprinklers).WhereElementIsNotElementType()
+            .GroupBy(b => b.CreatedPhaseId).OrderByDescending(g => g.Count()).Select(g => g.Key).FirstOrDefault();
+        if (fase is null || fase == ElementId.InvalidElementId) return;
+        if (vista.get_Parameter(BuiltInParameter.VIEW_PHASE) is { IsReadOnly: false } parametro && parametro.AsElementId() != fase)
+            parametro.Set(fase);
     }
 
     /// <summary>Direção dos ramais: o eixo horizontal com mais comprimento de tubo (1 m ou mais), o mesmo critério do cálculo.</summary>

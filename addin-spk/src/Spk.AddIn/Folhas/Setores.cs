@@ -185,11 +185,16 @@ static class LeituraSetores
     static double AreaEmPlanta(IReadOnlyList<XYZ> laco) =>
         Contorno.Area(laco.Select(p => (p.X, p.Y)).ToList());
 
-    /// <summary>A caixa de todos os contornos e bicos do nível, para recortar a planta.</summary>
+    /// <summary>
+    /// A caixa de todos os contornos e bicos do nível, para recortar a planta. Só os bicos do nível contam na altura: com
+    /// os de outros andares, o corte da planta subia até o telhado.
+    /// </summary>
     public static Caixa? CaixaNoNivel(IEnumerable<SetorLido> setores, Level nivel)
     {
         var pontos = setores.SelectMany(s => s.Contornos.TryGetValue(nivel.Id, out var l) ? l.SelectMany(p => p) : []).ToList();
-        var bicos = setores.SelectMany(s => s.Bicos).Select(b => b.get_BoundingBox(null)).OfType<BoundingBoxXYZ>().ToList();
+        var niveis = Niveis(nivel.Document);
+        var bicos = setores.SelectMany(s => s.Bicos).Where(b => NivelDe(nivel.Document, b, niveis)?.Id == nivel.Id)
+            .Select(b => b.get_BoundingBox(null)).OfType<BoundingBoxXYZ>().ToList();
         if (pontos.Count == 0) return null;
         var z0 = bicos.Count > 0 ? bicos.Min(b => b.Min.Z) : nivel.ProjectElevation;
         var z1 = bicos.Count > 0 ? bicos.Max(b => b.Max.Z) : nivel.ProjectElevation + VistasSpk.Pes(3);

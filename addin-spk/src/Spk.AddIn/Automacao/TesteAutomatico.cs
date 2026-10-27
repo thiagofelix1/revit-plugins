@@ -294,6 +294,9 @@ static class TesteAutomatico
             if (cenario.InspecionarCarimbo)
                 relatorio.Carimbos = Diagnostico.Carimbos(doc!);
 
+            if (cenario.InspecionarVistas)
+                relatorio.Folhas = new ResumoFolhas { Vistas = Diagnostico.Vistas(doc!) };
+
             if (cenario.Verificar)
                 Etapa(relatorio, "verificar", () =>
                 {
@@ -749,12 +752,18 @@ static class Diagnostico
                $"{Contar(BuiltInCategory.OST_Sprinklers)} sprinklers, {Contar(BuiltInCategory.OST_PipeCurves)} tubos";
     }
 
-    public static List<string> Vistas(Document doc) =>
-        new FilteredElementCollector(doc).OfClass(typeof(View)).Cast<View>()
-            .Where(v => !v.IsTemplate && v.Name.StartsWith(Folhas.PranchaSpk.PrefixoVista, StringComparison.Ordinal)
-                        && v.ViewType is ViewType.ThreeD or ViewType.FloorPlan)
-            .Select(v => Linha(doc, v))
+    public static List<string> Vistas(Document doc)
+    {
+        // Fase de criação dos bicos: uma vista em fase anterior não mostra a rede.
+        var fases = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Sprinklers).WhereElementIsNotElementType()
+            .GroupBy(b => doc.GetElement(b.CreatedPhaseId)?.Name ?? "-").Select(g => $"{g.Key}×{g.Count()}");
+        return new[] { "bicos por fase de criação: " + string.Join(", ", fases) }.Concat(
+            new FilteredElementCollector(doc).OfClass(typeof(View)).Cast<View>()
+                .Where(v => !v.IsTemplate && v.Name.StartsWith(Folhas.PranchaSpk.PrefixoVista, StringComparison.Ordinal)
+                            && v.ViewType is ViewType.ThreeD or ViewType.FloorPlan)
+                .Select(v => Linha(doc, v)))
             .ToList();
+    }
 
     static string Linha(Document doc, View v)
     {
@@ -767,7 +776,12 @@ static class Diagnostico
         var template = doc.GetElement(v.ViewTemplateId)?.Name ?? "-";
         var sobreposicao = v.GetCategoryOverrides(etiquetas);
         var filtros = v.GetFilters().Select(f => $"{doc.GetElement(f)?.Name}(vis={v.GetFilterVisibility(f)})");
-        return $"{v.Name} | {v.ViewType} | template={template} | escala={v.Scale} | anotacoesEscondidas={v.AreAnnotationCategoriesHidden} " +
+        int Visiveis(BuiltInCategory c) => new FilteredElementCollector(doc, v.Id).OfCategory(c).WhereElementIsNotElementType().GetElementCount();
+        var fase = doc.GetElement(v.get_Parameter(BuiltInParameter.VIEW_PHASE)?.AsElementId() ?? ElementId.InvalidElementId)?.Name ?? "-";
+        var intervalo = v is ViewPlan p && !p.IsTemplate ? Intervalo(doc, p) : "-";
+        return $"{v.Name} | {v.ViewType} | template={template} | escala={v.Scale} | fase={fase} | tubos visíveis={Visiveis(BuiltInCategory.OST_PipeCurves)} " +
+               $"bicos visíveis={Visiveis(BuiltInCategory.OST_Sprinklers)} | intervalo={intervalo} | caixa3d={(v as View3D)?.IsSectionBoxActive} " +
+               $"| tubosEscondidos={v.GetCategoryHidden(new ElementId(BuiltInCategory.OST_PipeCurves))} | anotacoesEscondidas={v.AreAnnotationCategoriesHidden} " +
                $"| pipeTagsEscondida={v.GetCategoryHidden(etiquetas)} | travada={(v as View3D)?.IsLocked} | tags donas={donas.Count} visiveis={visiveis} " +
                $"[{string.Join(",", categorias)}] | texto1={exemplo?.TagText} cabeca1={Fmt(exemplo?.TagHeadPosition)} " +
                $"| cor={sobreposicao.ProjectionLineColor?.IsValid} halftone={sobreposicao.Halftone} transp={sobreposicao.Transparency} " +
@@ -776,6 +790,15 @@ static class Diagnostico
     }
 
     static string Fmt(XYZ? p) => p is null ? "-" : $"({p.X:0.0},{p.Y:0.0},{p.Z:0.0})";
+
+    /// <summary>Corte, topo e fundo do intervalo de vista da planta, em metros acima do nível de cada um.</summary>
+    static string Intervalo(Document doc, ViewPlan p)
+    {
+        var r = p.GetViewRange();
+        string Plano(PlanViewPlane plano) => $"{doc.GetElement(r.GetLevelId(plano))?.Name}{r.GetOffset(plano) * 0.3048:+0.00;-0.00}";
+        return $"nível {p.GenLevel?.Name} {p.GenLevel?.ProjectElevation * 0.3048:0.00}: corte {Plano(PlanViewPlane.CutPlane)}, topo {Plano(PlanViewPlane.TopClipPlane)}, " +
+               $"fundo {Plano(PlanViewPlane.BottomClipPlane)}";
+    }
 
     /// <summary>
     /// Os campos do carimbo das folhas: parâmetros da folha e da instância e do tipo do carimbo, com o valor. Mostra onde
@@ -902,6 +925,9 @@ sealed class Cenario
 
     /// <summary>Lista os vínculos (Revit, IFC, DWG) e o que há em cada um: ambientes, forros, lajes, vigas...</summary>
     public bool InspecionarVinculos { get; set; }
+
+    /// <summary>Lista as vistas do SPK como estão no arquivo (sem gerar folhas): template, fase, intervalo, o que aparece.</summary>
+    public bool InspecionarVistas { get; set; }
 
     /// <summary>Lê a arquitetura e a estrutura (ver LeituraDoEdificio) e põe uma linha por ambiente e por viga no relatório.</summary>
     public bool Arquitetura { get; set; }

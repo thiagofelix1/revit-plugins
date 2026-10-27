@@ -37,6 +37,8 @@ Pronto quando o engenheiro aceita entregar as folhas sem retocar à mão.
 - [ ] Cotas entre ramais, bicos e paredes.
 - [ ] Etiqueta "Ø + comprimento" e número do bico como etiqueta (família do kit do escritório), no lugar de texto.
 - [ ] Área livre do carimbo configurável por escritório (o mapa-chave pode cair sobre carimbos grandes).
+- [ ] Folhas com arquitetura e estrutura vinculadas (visto no Snowdon): os eixos dos dois vínculos aparecem duplicados; móveis, vegetação e textos da arquitetura poluem a setorização (vínculo em meio-tom, sem essas categorias); a legenda da setorização cai em cima da primeira planta; a planta do setor pode passar da borda da folha.
+- [ ] Gerar rede em área externa (terraço, jardim sem cobertura): hoje gera; deveria pular ou perguntar.
 - [ ] Quadro de bombas com a bomba escolhida (hoje: a demanda que ela precisa atender).
 - [ ] Conferência das folhas pelo engenheiro (**depende do engenheiro**).
 
