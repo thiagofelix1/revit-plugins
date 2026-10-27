@@ -76,6 +76,14 @@ static class TextoDoGuia
                     lista.ListItems.Add(new ListItem(Paragrafo(linhas[i][2..].Trim(), new Thickness(0, 0, 0, 4))));
                 documento.Blocks.Add(lista);
             }
+            else if (Numerada(linha))
+            {
+                var lista = new List { MarkerStyle = TextMarkerStyle.Decimal, Margin = new Thickness(0, 0, 0, 10), Padding = new Thickness(22, 0, 0, 0) };
+                for (; i < linhas.Length && Numerada(linhas[i]); i++)
+                    lista.ListItems.Add(new ListItem(Paragrafo(linhas[i][(linhas[i].IndexOf(". ", StringComparison.Ordinal) + 2)..].Trim(),
+                        new Thickness(0, 0, 0, 4))));
+                documento.Blocks.Add(lista);
+            }
             else if (linha.StartsWith('|'))
             {
                 var tabela = new List<string>();
@@ -93,7 +101,10 @@ static class TextoDoGuia
         return documento;
     }
 
-    static bool Especial(string linha) => linha.StartsWith('#') || linha.StartsWith("- ") || linha.TrimStart().StartsWith('|');
+    static bool Especial(string linha) => linha.StartsWith('#') || linha.StartsWith("- ") || Numerada(linha) || linha.TrimStart().StartsWith('|');
+
+    /// <summary>"1. texto": item de lista numerada (o Markdown que o guia usa; títulos "## 1." começam com #).</summary>
+    static bool Numerada(string linha) => Regex.IsMatch(linha, @"^\d+\. ");
 
     static Paragraph Cabeca(string texto, double tamanho, Thickness margem) =>
         new(new Run(texto)) { FontSize = tamanho, FontWeight = FontWeights.SemiBold, Foreground = Titulo, Margin = margem };

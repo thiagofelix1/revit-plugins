@@ -59,7 +59,7 @@ static class SituacaoDoProjeto
         };
         var gerados = BicosDoModelo.Gerados(doc).Count;
         if (gerados > 0)
-            return new Etapa("3. Rede", Etapa.Feito, $"Malha gerada pelo SPK: {gerados} bicos.", acoes);
+            return ComVerificacao(doc, new Etapa("3. Rede", Etapa.Feito, $"Malha gerada pelo SPK: {gerados} bicos.", acoes));
 
         var mapeamento = MapeamentoGravado.Tentar(doc);
         if (mapeamento is null)
@@ -71,8 +71,28 @@ static class SituacaoDoProjeto
         var vgas = MapeamentoGravado.Vgas(doc).Count;
         var detalhe = $"Famílias confirmadas: {bicos} tipo(s) de bico com fator K e área, {vgas} VGA(s) no modelo.";
         if (bicos == 0) return new Etapa("3. Rede", Etapa.Falta, detalhe + " Falta um bico com fator K e área maiores que zero.", acoes);
-        return new Etapa("3. Rede", Etapa.Feito,
-            vgas == 0 ? detalhe + " Sem VGA, o Calcular pergunta o setor clicando num bico." : detalhe, acoes);
+        return ComVerificacao(doc, new Etapa("3. Rede", Etapa.Feito,
+            vgas == 0 ? detalhe + " Sem VGA, o Calcular pergunta o setor clicando num bico." : detalhe, acoes));
+    }
+
+    /// <summary>
+    /// Acrescenta o resultado de Verificar modelo (rápido: menos de 1 s na Nova Era). Com erro de modelagem a etapa volta
+    /// para Falta: o cálculo dependeria de ligação por proximidade.
+    /// </summary>
+    static Etapa ComVerificacao(Document doc, Etapa etapa)
+    {
+        try
+        {
+            var verificacao = Verificacao.VerificacaoModelo.Verificar(doc);
+            if (verificacao.Erros == 0 && verificacao.Avisos == 0)
+                return etapa with { Detalhe = etapa.Detalhe + " Verificar modelo: nenhum problema." };
+            var texto = $" Verificar modelo: {verificacao.Erros} erro(s) e {verificacao.Avisos} aviso(s); abra Verificar modelo para ver onde.";
+            return etapa with { Estado = verificacao.Erros > 0 ? Etapa.Falta : etapa.Estado, Detalhe = etapa.Detalhe + texto };
+        }
+        catch (Exception e) when (e is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException)
+        {
+            return etapa;
+        }
     }
 
     static Etapa Calculo(Document doc)
