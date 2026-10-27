@@ -21,8 +21,8 @@ public sealed record ResultadoLigacao(int Ligados, IReadOnlyList<string> Recusad
 /// <summary>
 ///     Liga bicos soltos ao ramal que passa sobre eles, como o "Conectar a" do Revit, mas para vários bicos de uma vez.
 ///     Para cada bico: acha o ramal selecionado que passa sobre ele (em planta, até 3 m, longe das pontas do tubo), parte
-///     o ramal no ponto mais perto do bico e põe um tê; se o bico está embaixo do ramal, desce um tubo até ele; se está
-///     de lado, faz o braço horizontal, um cotovelo e a descida. Braço e descida com o diâmetro e o tipo do ramal (o
+///     o ramal no ponto mais perto do bico e põe um tê; se o bico está embaixo do ramal (pendente), desce um tubo até ele,
+///     e se está acima (em pé), sobe; se está de lado, faz o braço horizontal, um cotovelo e a descida (ou a subida). Braço e descida com o diâmetro e o tipo do ramal (o
 ///     ajuste de diâmetro é outra ferramenta). Cada bico numa transação própria; tudo num grupo, um Ctrl+Z desfaz.
 ///     Os tubos criados não levam a marca da malha gerada: é rede do projeto, e a Rede de exemplo não pode apagá-los.
 /// </summary>
@@ -30,6 +30,7 @@ public static class LigarBicos
 {
     static readonly double MargemPonta = GeradorMalha.Pes(0.15);
     static readonly double BracoMaximo = GeradorMalha.Pes(3.0);
+    static readonly double BracoMinimo = GeradorMalha.Pes(0.15);
     static readonly double Encontro = GeradorMalha.Pes(0.04);
     static readonly double Recuo = GeradorMalha.Pes(0.01);
 
@@ -69,7 +70,13 @@ public static class LigarBicos
         if (Ramal(ramais, h) is not { } achado)
             return "nenhum ramal selecionado passa sobre o bico (até 3 m; perto da ponta, só se a ponta estiver livre)";
         var (ramal, p, naPonta) = achado;
-        if (h.Z > p.Z - GeradorMalha.Pes(0.05)) return "bico na altura do ramal ou acima (bico em pé): ainda não suportado";
+        if (Math.Abs(h.Z - p.Z) < GeradorMalha.Pes(0.05)) return "bico na altura do ramal: não cabe a descida (ou a subida)";
+        // O conector aponta para onde o tubo chega: para cima no pendente, para baixo no bico em pé.
+        var saida = conectorBico.CoordinateSystem.BasisZ;
+        if (Math.Abs(saida.Z) < 0.7) return "bico de parede (conector de lado): ainda não suportado";
+        if (saida.Z * (p.Z - h.Z) < 0)
+            return h.Z > p.Z ? "bico pendente acima do ramal: o ramal tem de passar acima do bico"
+                : "bico em pé abaixo do ramal: o ramal tem de passar abaixo do bico";
 
         var sistema = ramal.get_Parameter(BuiltInParameter.RBS_PIPING_SYSTEM_TYPE_PARAM)?.AsElementId() ?? ElementId.InvalidElementId;
         if (sistema == ElementId.InvalidElementId) return "o ramal não tem tipo de sistema";
@@ -83,6 +90,9 @@ public static class LigarBicos
 
         var canto = new XYZ(h.X, h.Y, p.Z);
         var temBraco = canto.DistanceTo(p) > GeradorMalha.Pes(0.01);
+        if (temBraco && canto.DistanceTo(p) < BracoMinimo)
+            return $"bico a {UnitUtils.ConvertFromInternalUnits(canto.DistanceTo(p), UnitTypeId.Centimeters):0} cm de lado do ramal: perto demais para braço com cotovelo " +
+                   "e fora da linha para descida reta (alinhe o bico ao ramal ou afaste-o a 15 cm ou mais)";
         var primeiro = GeradorMalha.CriarTubo(doc, sistema, tipo, nivel.Id, p, temBraco ? canto : h, diametro, marcar: false);
         var descida = temBraco ? GeradorMalha.CriarTubo(doc, sistema, tipo, nivel.Id, canto, h, diametro, marcar: false) : null;
         criados.Add(primeiro.Id);

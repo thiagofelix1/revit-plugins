@@ -71,6 +71,7 @@ Pronto quando um setor da Nova Era (ou de um projeto do engenheiro) é desenhado
 - [x] 2. Ligar bicos selecionados ao ramal: parte o ramal, tê, descida, ou braço + cotovelo + descida; bico fora do ramal ou acima dele é recusado com motivo; um Ctrl+Z. Provado na cena de teste (5 ligados, 1 recusado, cálculo com os 5 num ramal só). Braço e descida saem com o DN do ramal (o ajuste é o item 4); bico em pé ainda não.
 - [x] Cálculo: bico em braço perpendicular conta no ramal de onde sai (antes virava um ramal à parte e a área de cálculo saía picotada).
 - [x] 3. Traçar o ramal: reta pelos bicos (eixo principal, passando pela mediana lateral), na altura da subgeral, do tê nela até o último bico, e os bicos ligados pelo Ligar bicos (último por cotovelo na ponta). Recusa fileira dos dois lados da subgeral (cruzeta) e fileira quase paralela a ela. Provado na cena de teste (5 bicos, 1 de lado; cálculo num ramal só).
+- [x] 3b. Traçar ramais de várias fileiras de uma vez (como o Auto Branch Line do AutoSPRINK): fileiras separadas pelo SPK, ramal na altura da subgeral (tê ou cruzeta), com subida (riser nipple) ou a uma altura fixa; bico em pé.
 - [x] 4. Aplicar diâmetros por tabela (número de bicos atendidos) e conferir pelo cálculo. Botão Diâmetros, no painel Cálculo; tabelas da IT-23/2025 (12 a 14).
 - [ ] 5. Ler a arquitetura e a estrutura vinculadas: níveis, forros, ambientes, vigas, telhados.
 - [ ] 6. Posicionar bicos num ambiente ou contorno pela regra da NBR, junto com a conferência de espaçamento, área por bico e distância à parede.

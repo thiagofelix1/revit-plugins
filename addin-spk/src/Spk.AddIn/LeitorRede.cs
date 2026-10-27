@@ -349,25 +349,44 @@ static class LeitorRede
     }
 
     /// <summary>Conectores de tê ou cruzeta que desviam o fluxo: todos menos o par alinhado de maior diâmetro.</summary>
+    /// <remarks>
+    /// Empate de diâmetro (cruzeta toda de um DN, com buchas de redução para o ramal) desempata pelo que está ligado
+    /// depois da peça: a ordem dos conectores muda a cada sessão do Revit, e sem isso a perda do desvio caía ora no
+    /// ramal, ora na subgeral.
+    /// </remarks>
     static IEnumerable<Connector> Ramos(List<Connector> conectores)
     {
         (Connector A, Connector B)? passagem = null;
-        var maior = -1.0;
+        (double Raio, double Alem) maior = (-1, -1);
         for (var i = 0; i < conectores.Count; i++)
         for (var j = i + 1; j < conectores.Count; j++)
         {
             var a = conectores[i];
             var b = conectores[j];
             if (a.CoordinateSystem.BasisZ.DotProduct(b.CoordinateSystem.BasisZ) > -0.95) continue;
-            var raio = Raio(a) + Raio(b);
-            if (raio <= maior) continue;
-            maior = raio;
+            var chave = (Raio: Raio(a) + Raio(b), Alem: Alem(a) + Alem(b));
+            var ganha = chave.Raio > maior.Raio + 1e-6 || (Math.Abs(chave.Raio - maior.Raio) <= 1e-6 && chave.Alem > maior.Alem + 1e-6);
+            if (!ganha) continue;
+            maior = chave;
             passagem = (a, b);
         }
 
         return passagem is { } p
             ? conectores.Where(c => !ReferenceEquals(c, p.A) && !ReferenceEquals(c, p.B))
-            : conectores.OrderBy(Raio).Take(1);
+            : conectores.OrderBy(Raio).ThenBy(Alem).Take(1);
+    }
+
+    /// <summary>O raio do que está ligado ao conector, do outro lado: o tubo, ou o menor conector da peça (bucha de redução).</summary>
+    static double Alem(Connector conector)
+    {
+        foreach (Connector outro in conector.AllRefs)
+        {
+            if (outro.Owner is null || outro.Owner.Id == conector.Owner.Id || !EhFisico(outro.ConnectorType)) continue;
+            if (outro.Owner is Pipe tubo) return tubo.Diameter / 2;
+            if (outro.Owner is FamilyInstance peca && Conectores(peca).Select(Raio).Where(r => r > 0).DefaultIfEmpty(0).Min() is var menor)
+                return menor;
+        }
+        return 0;
     }
 
     static double Raio(Connector conector)

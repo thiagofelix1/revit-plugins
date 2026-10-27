@@ -158,17 +158,17 @@ static class TesteAutomatico
                     return cena.Resumo;
                 });
 
-            if (cenario.TracarRamal)
+            if (cenario.TracarRamal || cenario.Ramais is not null)
                 Etapa(relatorio, "tracarRamal", () =>
                 {
                     if (cena is null) throw new InvalidOperationException("\"tracarRamal\" precisa de uma cena (bicos e a subgeral).");
-                    var feito = TracarRamal.Executar(doc!, cena.Bicos, cena.Ramais[0]);
+                    var feito = TracarRamal.Executar(doc!, cena.Bicos, cena.Ramais[0], cenario.Ramais ?? new OpcoesRamais());
                     relatorio.Ligacao = new ResumoLigacao
                     {
-                        Ligados = feito.Ligacao?.Ligados ?? 0,
-                        Criados = feito.Ligacao?.Criados.Count ?? 0,
-                        Recusados = feito.Recusa is not null ? [$"1× ramal: {feito.Recusa}"]
-                            : feito.Ligacao!.Recusados.GroupBy(r => r).Select(g => $"{g.Count()}× {g.Key}").ToList(),
+                        Ramais = feito.Tracados,
+                        Ligados = feito.Ligados,
+                        Criados = feito.Criados.Count,
+                        Recusados = feito.Recusados.GroupBy(r => r).Select(g => $"{g.Count()}× {g.Key}").ToList(),
                     };
                     return feito.Texto();
                 });
@@ -314,6 +314,7 @@ static class TesteAutomatico
             });
             relatorio.Arquivo = arquivo;
             relatorio.Ok = true;
+            relatorio.Dialogos = dialogos.ToList();
             if (cenario.Esperado is { } esperado)
             {
                 relatorio.Divergencias = Conferir(esperado, relatorio);
@@ -529,6 +530,10 @@ static class TesteAutomatico
     static List<string> Conferir(Esperado esperado, RelatorioCenario r)
     {
         var falhas = new List<string>();
+        // Janela de erro do Revit é o engenheiro clicando: numa rede grande, centenas de vezes. Nunca pode aparecer.
+        var janelas = r.Dialogos?.Count(d => !d.StartsWith("TaskDialog_Unresolved_References")) ?? 0;
+        if (janelas > 0)
+            falhas.Add($"o Revit abriu {janelas} janela(s) que o engenheiro teria que fechar: {r.Dialogos!.First(d => !d.StartsWith("TaskDialog_Unresolved_References"))}");
         var c = r.Calculo;
         if (esperado.Atende is { } atende && c?.Atende != atende) falhas.Add($"atende: esperado {atende}, veio {c?.Atende}");
         if (esperado.Bicos is { } bicos && c?.Bicos != bicos) falhas.Add($"bicos: esperado {bicos}, veio {c?.Bicos}");
@@ -561,6 +566,8 @@ static class TesteAutomatico
             if (r.Diametros is { } d && d.Recusados.Count + d.Divergentes.Count + d.Inseridas.Count > 0)
                 falhas.Add($"diâmetros: {d.Recusados.Count} recusa(s), {d.Divergentes.Count} divergência(s), {d.Inseridas.Count} peça(s) inserida(s)");
         }
+        if (esperado.RamaisTracados is { } tracados && r.Ligacao?.Ramais != tracados)
+            falhas.Add($"traçar ramais: esperado {tracados} ramais, veio {r.Ligacao?.Ramais}");
         if (esperado.BicosLigados is { } ligados && r.Ligacao?.Ligados != ligados)
             falhas.Add($"ligar bicos: esperado {ligados} ligados, veio {r.Ligacao?.Ligados}");
         if (esperado.BicosRecusados is { } recusados && (r.Ligacao?.Recusados.Sum(Quantos) ?? 0) != recusados)
@@ -786,8 +793,11 @@ sealed class Cenario
     /// <summary>Cena montada do zero para testar uma ferramenta de modelagem (ver Cenas): "ramalComBicosSoltos".</summary>
     public string? Cena { get; set; }
 
-    /// <summary>Roda Traçar ramal com os bicos da cena e o primeiro tubo dela como subgeral.</summary>
+    /// <summary>Roda Traçar ramais com os bicos da cena e o primeiro tubo dela como subgeral, com as opções padrão.</summary>
     public bool TracarRamal { get; set; }
+
+    /// <summary>Roda Traçar ramais com estas opções (altura, alturaM, toleranciaFileiraM, ligarBicos).</summary>
+    public OpcoesRamais? Ramais { get; set; }
 
     /// <summary>Roda Ligar bicos com os bicos e ramais da cena (sem cena: todos os sprinklers e tubos).</summary>
     public bool LigarBicos { get; set; }
@@ -826,6 +836,7 @@ sealed class Esperado
     /// <summary>Código do grupo (ou "erros", "avisos", "setores") e a condição: "0", "&gt;=1", "&lt;=2".</summary>
     public Dictionary<string, string>? Verificacao { get; set; }
 
+    public int? RamaisTracados { get; set; }
     public int? BicosLigados { get; set; }
     public int? BicosRecusados { get; set; }
 
@@ -909,6 +920,7 @@ sealed class ResumoDiametros
 
 sealed class ResumoLigacao
 {
+    public int? Ramais { get; set; }
     public int Ligados { get; set; }
     public int Criados { get; set; }
     public List<string> Recusados { get; set; } = [];

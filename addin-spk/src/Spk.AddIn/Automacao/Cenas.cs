@@ -16,6 +16,7 @@ static class Cenas
     {
         "ramalComBicosSoltos" => RamalComBicosSoltos(doc),
         "subgeralComBicosSoltos" => SubgeralComBicosSoltos(doc),
+        "subgeralComFileiras" => SubgeralComFileiras(doc),
         _ => throw new InvalidOperationException($"Cena desconhecida: \"{nome}\"."),
     };
 
@@ -46,6 +47,38 @@ static class Cenas
             [(1.5, 4.5, true), (4.5, 4.5, true), (7.5, 5.0, true), (10.5, 4.5, true), (13.5, 4.5, true)]);
         transacao.Commit();
         return new Cena("Subgeral de 9 m com descida e fileira de 5 bicos soltos (1 de lado).", bicos, [subgeral]);
+    }
+
+    /// <summary>
+    /// Subgeral de 12 m no eixo Y, a 3 m de altura, com descida até o piso, e três fileiras de 4 bicos soltos (y = 3, 6 e
+    /// 9 m), dois de cada lado da subgeral (x = ±1,5 e ±4,5 m), 30 cm abaixo dela; na fileira do meio, um bico 0,4 m de
+    /// lado (pede braço). Os ramais da cena: só a subgeral.
+    /// </summary>
+    static Cena SubgeralComFileiras(Document doc)
+    {
+        using var transacao = new Transaction(doc, "SPK — cena de teste");
+        transacao.Start();
+        ApagarMalhaGerada(doc);
+        var nivel = GeradorMalha.Nivel(doc) ?? throw new InvalidOperationException("O projeto não tem nível.");
+        var tipo = GeradorMalha.TipoComTe(doc);
+        var sistema = GeradorMalha.Sistema(doc) ?? throw new InvalidOperationException("O projeto não tem sistema de tubulação.");
+        var diametro = GeradorMalha.DiametroComTe(doc, tipo, 65);
+        double M(double metros) => GeradorMalha.Pes(metros);
+        var z = nivel.Elevation;
+        var zSubgeral = z + M(3.0);
+
+        var descida = GeradorMalha.CriarTubo(doc, sistema.Id, tipo.Id, nivel.Id, new XYZ(0, 0, z), new XYZ(0, 0, zSubgeral), diametro);
+        var subgeral = GeradorMalha.CriarTubo(doc, sistema.Id, tipo.Id, nivel.Id, new XYZ(0, 0, zSubgeral), new XYZ(0, M(12), zSubgeral), diametro);
+        doc.Regenerate();
+        GeradorMalha.Ligar(doc, [descida, subgeral], [], nivel);
+
+        var posicoes = new List<(double X, double Y, bool Marcado)>();
+        foreach (var y in new[] { 3.0, 6.0, 9.0 })
+            foreach (var x in new[] { -4.5, -1.5, 1.5, 4.5 })
+                posicoes.Add((x, y == 6.0 && x == 1.5 ? 6.4 : y, true));
+        var bicos = Bicos(doc, nivel, zSubgeral - M(0.3), posicoes.ToArray());
+        transacao.Commit();
+        return new Cena("Subgeral de 12 m com descida e 3 fileiras de 4 bicos soltos, dos dois lados (1 de lado).", bicos, [subgeral]);
     }
 
     static void ApagarMalhaGerada(Document doc)

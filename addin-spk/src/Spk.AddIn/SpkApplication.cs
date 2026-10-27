@@ -33,9 +33,10 @@ public class SpkApplication : IExternalApplication
             "Gerar", Icones.Malha,
             "Cria uma malha de bicos e tubos já conectados, no ponto que você clicar, com a geometria de Dados do esboço.");
         Botao<TracarRamalCommand>(rede,
-            "Traçar\nramal", Icones.TracarRamal,
-            "Traça o ramal de uma fileira de bicos até a subgeral: reta pelos bicos, na altura da subgeral, com tê nela; e liga os " +
-            "bicos ao ramal. Selecione os bicos e a subgeral antes, ou clique e selecione depois. Ctrl+Z desfaz tudo.");
+            "Traçar\nramais", Icones.TracarRamal,
+            "Traça os ramais de várias fileiras de bicos até a subgeral e liga os bicos: o SPK separa as fileiras, e o ramal fica na " +
+            "altura da subgeral (tê ou cruzeta), acima ou abaixo dela (com subida) ou a uma altura fixa. Bico pendente ou em pé. " +
+            "Selecione os bicos (pode arrastar uma janela) e a subgeral. Ctrl+Z desfaz tudo.");
         Botao<LigarBicosCommand>(rede,
             "Ligar\nbicos", Icones.LigarBicos,
             "Liga bicos soltos ao ramal que passa sobre eles: parte o ramal, põe o tê e faz a descida (ou o braço, o cotovelo e a " +

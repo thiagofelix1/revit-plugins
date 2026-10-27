@@ -67,6 +67,9 @@ public static class Reconexao
         using var transacao = new Transaction(doc, "SPK — Reconectar");
         var opcoes = transacao.GetFailureHandlingOptions();
         opcoes.SetFailuresPreprocessor(recusa);
+        // Sem isto o Revit mostra, depois de desfazer, uma janela com o erro: uma por peça recusada, centenas num
+        // projeto grande. O motivo já vai para o relatório do fim.
+        opcoes.SetClearAfterRollback(true);
         transacao.SetFailureHandlingOptions(opcoes);
         transacao.Start();
         var antes = Retrato(doc, a, b);
