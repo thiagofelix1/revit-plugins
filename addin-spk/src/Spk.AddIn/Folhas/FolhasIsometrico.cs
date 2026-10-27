@@ -30,9 +30,12 @@ static class FolhasIsometrico
         var folha = PranchaSpk.Recriar(doc, Numero, "Sprinklers — isométrico geral");
         doc.Regenerate();
         var util = PranchaSpk.Util(folha);
-        // Notas embaixo à esquerda, como o quadro da folha do setor: o alto da coluna direita pode ser área do carimbo.
+        // Notas embaixo à esquerda e os quadros ao lado delas, como na NEPN-INC-013; o alto da coluna direita pode ser
+        // área do carimbo.
         var regiaoIso = util.Parte(0, 0.17, 0.74, 1);
-        var regiaoNota = util.Parte(0, 0, 0.6, 0.15);
+        var regiaoNota = util.Parte(0, 0, 0.34, 0.15);
+        var regiaoChuveiros = util.Parte(0.35, 0, 0.55, 0.16);
+        var regiaoDemanda = util.Parte(0.56, 0, 0.74, 0.16);
 
         var iso = VistasSpk.Isometrico(doc, $"{PranchaSpk.PrefixoVista}Isométrico geral", caixa.Expandir(VistasSpk.Pes(0.5), VistasSpk.Pes(0.5)),
             VistasSpk.Template3d);
@@ -55,8 +58,21 @@ static class FolhasIsometrico
         PranchaSpk.ColocarLegendas(doc, folha, util.Parte(0.76, 0, 1, 0.6), avisos);
         PranchaSpk.Tentar(avisos, "Notas do isométrico", () => PranchaSpk.Nota(doc, folha, regiaoNota.CantoSuperiorEsquerdo,
             Notas(contexto, rede.Count), regiaoNota.Largura * 0.95));
+        var quadros = 0;
+        PranchaSpk.Tentar(avisos, "Quadro de chuveiros", () =>
+        {
+            if (QuadrosSpk.Chuveiros(doc, avisos) is not { } quadro || PranchaSpk.Colocar(doc, folha, quadro, regiaoChuveiros.Centro, avisos) is not { } viewport) return;
+            PranchaSpk.SemTitulo(doc, viewport);
+            quadros++;
+        });
+        PranchaSpk.Tentar(avisos, "Quadro de demanda", () =>
+        {
+            if (QuadrosSpk.Demanda(doc, avisos) is not { } quadro || PranchaSpk.Colocar(doc, folha, quadro, regiaoDemanda.Centro, avisos) is not { } viewport) return;
+            PranchaSpk.SemTitulo(doc, viewport);
+            quadros++;
+        });
 
-        var texto = $"{Numero}  {folha.Name}\n{rede.Count} elementos ligados aos bicos, 1:{escala}, {etiquetas} etiquetas de diâmetro.";
+        var texto = $"{Numero}  {folha.Name}\n{rede.Count} elementos ligados aos bicos, 1:{escala}, {etiquetas} etiquetas de diâmetro, {quadros} quadros.";
         if (avisos.Count > 0) texto += "\n\nAvisos:\n" + string.Join("\n", avisos.Distinct().Take(12).Select(a => "• " + a));
         return new FolhasGeradas(texto, [folha.Id]);
     }

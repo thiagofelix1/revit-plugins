@@ -2,9 +2,9 @@
 
 Esta versão é um protótipo em validação. O que ainda não está pronto:
 
-- **Verificar modelo**: um comando que aponte, no Revit, tubos soltos, vãos, peças desligadas e sistemas errados antes de calcular.
-- **Carimbo preenchido**: código da prancha, número (ex.: 14/16) e revisão.
-- **Tabelas** de bicos e de bomba, e **cotas** entre ramais, bicos e paredes.
+- **Revisões no carimbo**: o SPK não cria nem atribui revisões; o histórico de revisões continua com o escritório.
+- **Cotas** entre ramais, bicos e paredes.
+- **Correção automática** dos problemas que Verificar modelo encontra: hoje ele aponta, o projetista corrige.
 - **Etiqueta "Ø + comprimento"** e número do bico como etiqueta (hoje é texto).
 - **Rede seguindo o telhado inclinado**, **bicos distribuídos por ambiente** (forro) e o **tubo geral até a casa de bombas**.
 - **Dimensionamento automático**: subir os diâmetros até atender e sugerir a bomba.

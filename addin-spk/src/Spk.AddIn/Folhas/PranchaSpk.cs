@@ -9,16 +9,22 @@ static class PranchaSpk
     public const string PrefixoNumero = "SPK-";
     public const string PrefixoVista = "SPK — ";
 
-    /// <summary>Apaga a folha com este número, se existir, e cria outra com o carimbo do projeto.</summary>
-    public static ViewSheet Recriar(Document doc, string numero, string nome)
+    /// <summary>
+    /// Apaga a folha do SPK deste papel (SPK-ISO, SPK-SETOR1-01...), pelo número ou pelo registro de uma rodada anterior
+    /// já renumerada, e cria outra com o carimbo do projeto. Folha que não é do SPK não é tocada: o papel sempre começa
+    /// com SPK-, e o registro só tem folhas que o SPK criou.
+    /// </summary>
+    public static ViewSheet Recriar(Document doc, string papel, string nome)
     {
         var ids = new FilteredElementCollector(doc).OfClass(typeof(ViewSheet)).Cast<ViewSheet>()
-            .Where(s => s.SheetNumber == numero).Select(s => s.Id).ToList();
-        if (ids.Count > 0) doc.Delete(ids);
+            .Where(s => s.SheetNumber == papel).Select(s => s.Id).ToList();
+        if (CarimboSpk.Registrada(doc, papel) is { } anterior) ids.Add(anterior.Id);
+        if (ids.Count > 0) doc.Delete(ids.Distinct().ToList());
 
         var folha = ViewSheet.Create(doc, Carimbo(doc));
-        folha.SheetNumber = numero;
+        folha.SheetNumber = papel;
         folha.Name = nome;
+        CarimboSpk.Registrar(doc, papel, folha);
         return folha;
     }
 
@@ -108,6 +114,23 @@ static class PranchaSpk
             return null;
         }
         return Viewport.Create(doc, folha.Id, vista.Id, centro);
+    }
+
+    /// <summary>
+    /// Tira o título da vista (círculo, nome e escala) de um viewport, como nos quadros da Nova Era: usa um tipo de
+    /// viewport sem título, criando "SPK — Sem título" a partir do tipo atual se o projeto não tiver.
+    /// </summary>
+    public static void SemTitulo(Document doc, Viewport viewport)
+    {
+        bool MostraTitulo(Element tipo) => tipo.get_Parameter(BuiltInParameter.VIEWPORT_ATTR_SHOW_LABEL)?.AsInteger() != 0;
+        var tipos = viewport.GetValidTypes().Select(doc.GetElement).OfType<ElementType>().ToList();
+        var semTitulo = tipos.FirstOrDefault(t => !MostraTitulo(t));
+        if (semTitulo is null && doc.GetElement(viewport.GetTypeId()) is ElementType atual)
+        {
+            semTitulo = atual.Duplicate("SPK — Sem título");
+            semTitulo.get_Parameter(BuiltInParameter.VIEWPORT_ATTR_SHOW_LABEL)?.Set(0);
+        }
+        if (semTitulo is not null) viewport.ChangeTypeId(semTitulo.Id);
     }
 
     /// <summary>

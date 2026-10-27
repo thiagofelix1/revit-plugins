@@ -82,6 +82,12 @@ static class Icones
             dc.DrawEllipse(Vermelho, null, new Point(x, 16), 2.2, 2.2);
     }
 
+    public static void Verificar(DrawingContext dc)
+    {
+        dc.DrawEllipse(Brushes.White, Caneta(Grafite, 2.5), new Point(16, 16), 12, 12);
+        dc.DrawGeometry(null, Caneta(Vermelho, 3.5), Geometry.Parse("M 9.5,16.5 L 14,21 L 23,11"));
+    }
+
     public static void Livro(DrawingContext dc)
     {
         var caneta = Caneta(Grafite, 2.2);

@@ -54,6 +54,11 @@ Sem `fila.json` na pasta, nada disso é ligado: o Revit abre normalmente.
 | `redeExemplo` | Cria a malha de exemplo. |
 | `calcular` | `{}`: o padrão. `vga`: id da VGA (os ids saem no relatório, em `Vgas`). `setor`: sem VGA, o pedaço de rede pela ordem (0 = maior). `elemento`: id de um bico ou tubo do setor. |
 | `folhas` | Gera as folhas; o PDF vai para `testes\saida\<nome>\`. |
+| `padrao` | Grava no Padrão do escritório `numeroInicial`, `codigoFolha` e `parametroCodigo` antes de gerar as folhas. |
+| `sabotar` | Estraga a malha gerada de propósito, sempre no mesmo elemento: `desligarBico`, `apagarTe` (tê entre três tubos), `sistemaAgua` (tubo em sistema de água fria), `desligarTubo` (uma ponta do tubo de maior diâmetro). |
+| `verificar` | Roda Verificar modelo e põe no relatório cada grupo de problema com a quantidade e exemplos. |
+| `inspecionarCarimbo` | Lista os parâmetros da folha e do carimbo (até 8 folhas do projeto e, depois das folhas, as do SPK). Mostra onde o escritório guarda código, revisão e número. |
+| `esperado` | O que o cenário deve dar; o relatório traz `Passou` e `Divergencias`. Campos: `atende`, `bicos`, `pressaoKPa` (±0,5), `critico`, `folhas` (quantidade), `verificacao` (código do grupo, ou `erros`, `avisos`, `setores`, com `"0"`, `"3"`, `">=1"`, `"<=2"`) e `textoDasFolhas` (trechos que precisam aparecer no texto das folhas). |
 
 ## O relatório
 
@@ -68,7 +73,18 @@ Duas telas aparecem antes do plugin carregar e o teste não consegue responder:
 
 ## Cenários de regressão
 
-Os cinco cenários da Rede de exemplo (`"exemplo": "<começo do nome>"`), cada um numa cópia do Projeto2 (que tem tubo com tê), com cálculo e folhas. Resultado de 26/10/2026:
+A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado esperado de cada cenário. Para rodar: copiar para `Documentos\SPK\testes\fila.json`, abrir o Revit e, no fim, olhar `Passou` de cada cenário no relatório. São 13:
+
+| Grupo | Cenários | O que prova |
+|---|---|---|
+| Cálculo e folhas | os 5 da Rede de exemplo | valores de cálculo, 4 folhas, 2 quadros no isométrico, verificação sem problema na malha gerada |
+| Sabotagem | bico desligado, tê apagado, sistema de água fria, tubo desligado | Verificar modelo acha cada problema, no elemento certo |
+| Nova Era | verificação da cópia do modelo real | acha as peças encostadas sem ligação (971), as derivações sem tê, os 610 tubos em sistema hidrônico e os bicos não confirmados, em menos de 1 s |
+| Carimbo | Nova Era numerada a partir de 17; Nova Era a partir de 13; Projeto2 a partir de 01 | número, código e campos do projeto preenchidos; número já usado por folha do escritório é recusado sem apagar nada; parâmetro de código ausente é avisado |
+
+O Projeto2 tem um bico solto (333229), longe da rede, que a verificação aponta com razão: por isso os cenários da malha esperam `bico-sem-tubo` 1.
+
+Valores de cálculo dos cinco cenários da Rede de exemplo, em 26/10/2026:
 
 | Cenário | Esperado |
 |---|---|

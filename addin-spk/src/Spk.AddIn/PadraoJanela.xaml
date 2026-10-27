@@ -50,6 +50,30 @@
                 </Grid>
             </GroupBox>
 
+            <GroupBox Header="Número e código das folhas" Padding="8" Margin="0,0,0,8">
+                <StackPanel>
+                    <TextBlock TextWrapping="Wrap" Foreground="#607D8B" Margin="0,0,0,6"
+                               Text="Sugeridos pelas folhas que este projeto já tem. Em branco: as folhas ficam SPK-SETORES, SPK-ISO... No código, {numero:000} é o número com zeros e {tipo} é PLA ou ISO."/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="170"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Número da primeira folha" VerticalAlignment="Center" Margin="0,4"/>
+                        <TextBox x:Name="NumeroInicial" Grid.Column="1" Margin="0,4" Width="80" HorizontalAlignment="Left"/>
+                        <TextBlock Grid.Row="1" Text="Código da prancha" VerticalAlignment="Center" Margin="0,4"/>
+                        <TextBox x:Name="CodigoFolha" Grid.Row="1" Grid.Column="1" Margin="0,4"/>
+                        <TextBlock Grid.Row="2" Text="Parâmetro do código" VerticalAlignment="Center" Margin="0,4"/>
+                        <TextBox x:Name="ParametroCodigo" Grid.Row="2" Grid.Column="1" Margin="0,4"/>
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
+
             <GroupBox Header="Legendas e notas colocadas nas folhas" Padding="8">
                 <StackPanel>
                     <TextBlock TextWrapping="Wrap" Foreground="#607D8B" Margin="0,0,0,6"

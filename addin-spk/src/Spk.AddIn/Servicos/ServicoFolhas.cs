@@ -57,6 +57,16 @@ static class ServicoFolhas
                 transacao.RollBack();
                 return new Resultado(textos, folhas, null, "Nenhuma folha foi gerada.");
             }
+
+            // Carimbo por último: a numeração do escritório vale para o conjunto, na ordem do PDF.
+            using (var sub = new SubTransaction(doc))
+            {
+                sub.Start();
+                var avisos = CarimboSpk.Preencher(doc, folhas.Select(doc.GetElement).OfType<ViewSheet>().ToList());
+                sub.Commit();
+                var numeros = string.Join(", ", folhas.Select(doc.GetElement).OfType<ViewSheet>().Select(f => f.SheetNumber));
+                textos.Add($"Carimbo\nFolhas: {numeros}." + (avisos.Count > 0 ? "\n" + string.Join("\n", avisos.Select(a => "• " + a)) : ""));
+            }
             if (transacao.Commit() != TransactionStatus.Committed)
                 throw new InvalidOperationException(
                     "O Revit desfez as folhas ao confirmar (um erro do modelo, não um aviso). Nada foi alterado.\n\n" +

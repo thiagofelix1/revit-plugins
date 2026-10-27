@@ -53,6 +53,7 @@ static class SituacaoDoProjeto
         var acoes = new[]
         {
             new AcaoDaEtapa("Famílias", "Projeto", "DescobrirFamiliasCommand"),
+            new AcaoDaEtapa("Verificar modelo", "Rede", "VerificarModeloCommand"),
             new AcaoDaEtapa("Gerar", "Rede", "GerarMalhaCommand"),
             new AcaoDaEtapa("Rede de exemplo", "Rede", "RedeExemploCommand"),
         };
@@ -94,8 +95,7 @@ static class SituacaoDoProjeto
     static Etapa Folhas(Document doc)
     {
         var acoes = new[] { new AcaoDaEtapa("Folhas", "Resultados", "FolhasCommand") };
-        var folhas = new FilteredElementCollector(doc).OfClass(typeof(ViewSheet)).Cast<ViewSheet>()
-            .Count(f => f.SheetNumber.StartsWith(AddIn.Folhas.PranchaSpk.PrefixoNumero, StringComparison.Ordinal));
+        var folhas = AddIn.Folhas.CarimboSpk.FolhasDoSpk(doc).Count;
         return folhas == 0
             ? new Etapa("5. Folhas", Etapa.Falta, "Nenhuma folha do SPK neste projeto.", acoes)
             : new Etapa("5. Folhas", Etapa.Feito, $"{folhas} folha(s) do SPK. Rodar de novo refaz todas com os dados atuais.", acoes);

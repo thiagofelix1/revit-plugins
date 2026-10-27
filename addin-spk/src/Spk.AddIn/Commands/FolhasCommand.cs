@@ -47,7 +47,7 @@ public class FolhasCommand : ExternalCommand
 
     static bool DoPlugin(View? vista) => vista switch
     {
-        ViewSheet folha => folha.SheetNumber.StartsWith(PranchaSpk.PrefixoNumero, StringComparison.Ordinal),
+        ViewSheet folha => CarimboSpk.EhDoSpk(folha.Document, folha),
         null => false,
         _ => vista.Name.StartsWith(PranchaSpk.PrefixoVista, StringComparison.Ordinal),
     };

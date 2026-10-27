@@ -7,6 +7,7 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
 using Spk.AddIn.Commands;
 using Spk.AddIn.Servicos;
+using Spk.AddIn.Verificacao;
 
 namespace Spk.AddIn.Automacao;
 
@@ -156,6 +157,46 @@ static class TesteAutomatico
                     return RedeExemploCommand.Criar(doc!, escolhido, gravarCriterios: cenario.Dados is null).Resumo;
                 });
 
+            if (cenario.Padrao is { } ajuste)
+                Etapa(relatorio, "padrao", () =>
+                {
+                    var padrao = PadraoEscritorio.Carregar(doc!);
+                    padrao.NumeroInicial = ajuste.NumeroInicial;
+                    padrao.CodigoFolha = ajuste.CodigoFolha;
+                    padrao.ParametroCodigo = ajuste.ParametroCodigo;
+                    ArmazenamentoSpk.GravarComTransacao(doc!, PadraoEscritorio.Chave, padrao, "SPK — Padrão (teste)");
+                    return padrao.Resumo();
+                });
+
+            if (cenario.Sabotar is { Count: > 0 } sabotagens)
+                Etapa(relatorio, "sabotar", () => Sabotagem.Aplicar(doc!, sabotagens));
+
+            if (cenario.InspecionarCarimbo)
+                relatorio.Carimbos = Diagnostico.Carimbos(doc!);
+
+            if (cenario.Verificar)
+                Etapa(relatorio, "verificar", () =>
+                {
+                    var verificacao = VerificacaoModelo.Verificar(doc!);
+                    relatorio.Verificacao = new ResumoVerificacao
+                    {
+                        Bicos = verificacao.Bicos,
+                        Tubos = verificacao.Tubos,
+                        Pecas = verificacao.Pecas,
+                        Setores = verificacao.Setores,
+                        Erros = verificacao.Erros,
+                        Avisos = verificacao.Avisos,
+                        Grupos = verificacao.Grupos.Select(g => new GrupoVerificado
+                        {
+                            Codigo = g.Codigo,
+                            Gravidade = g.Gravidade.ToString(),
+                            Quantidade = g.Ocorrencias.Count,
+                            Exemplos = g.Ocorrencias.Take(5).Select(o => o.Descricao).ToList(),
+                        }).ToList(),
+                    };
+                    return verificacao.Resumo();
+                });
+
             if (cenario.Calcular is { } pedido)
                 Etapa(relatorio, "calcular", () =>
                 {
@@ -176,6 +217,8 @@ static class TesteAutomatico
                         Textos = folhas.Textos.ToList(),
                         Vistas = Diagnostico.Vistas(doc!),
                     };
+                    if (cenario.InspecionarCarimbo)
+                        relatorio.CarimbosSpk = Diagnostico.Carimbos(doc!, folhas.Folhas.Select(doc!.GetElement).OfType<ViewSheet>().ToList());
                     return folhas.Texto();
                 });
 
@@ -183,10 +226,18 @@ static class TesteAutomatico
             {
                 if (cenario.Novo) doc!.SaveAs(arquivo, new SaveAsOptions { OverwriteExistingFile = true });
                 else doc!.Save();
+                // O Revit guarda cópias numeradas (nome.0001.rvt) a cada gravação; no teste elas só ocupam espaço.
+                foreach (var copia in Directory.GetFiles(PastaSaida, Path.GetFileNameWithoutExtension(arquivo) + ".0*.rvt"))
+                    File.Delete(copia);
                 return arquivo;
             });
             relatorio.Arquivo = arquivo;
             relatorio.Ok = true;
+            if (cenario.Esperado is { } esperado)
+            {
+                relatorio.Divergencias = Conferir(esperado, relatorio);
+                relatorio.Passou = relatorio.Divergencias.Count == 0;
+            }
         }
         catch (Exception ex)
         {
@@ -374,6 +425,52 @@ static class TesteAutomatico
         return linhas;
     }
 
+    /// <summary>O que o cenário esperava e não aconteceu. Lista vazia: passou.</summary>
+    static List<string> Conferir(Esperado esperado, RelatorioCenario r)
+    {
+        var falhas = new List<string>();
+        var c = r.Calculo;
+        if (esperado.Atende is { } atende && c?.Atende != atende) falhas.Add($"atende: esperado {atende}, veio {c?.Atende}");
+        if (esperado.Bicos is { } bicos && c?.Bicos != bicos) falhas.Add($"bicos: esperado {bicos}, veio {c?.Bicos}");
+        if (esperado.PressaoKPa is { } pressao && (c is null || Math.Abs(c.PressaoKPa - pressao) > 0.5))
+            falhas.Add($"pressão: esperado {pressao} kPa, veio {c?.PressaoKPa}");
+        if (esperado.Critico is { } critico && c?.Critico != critico) falhas.Add($"crítico: esperado {critico}, veio {c?.Critico}");
+        if (esperado.Folhas is { } folhas && (r.Folhas?.Folhas.Count ?? 0) != folhas)
+            falhas.Add($"folhas: esperado {folhas}, veio {r.Folhas?.Folhas.Count ?? 0}");
+        foreach (var (codigo, condicao) in esperado.Verificacao ?? [])
+        {
+            if (r.Verificacao is null)
+            {
+                falhas.Add("verificação: o cenário não rodou \"verificar\"");
+                break;
+            }
+            var quantidade = codigo switch
+            {
+                "erros" => r.Verificacao.Erros,
+                "avisos" => r.Verificacao.Avisos,
+                "setores" => r.Verificacao.Setores,
+                _ => r.Verificacao.Grupos.FirstOrDefault(g => g.Codigo == codigo)?.Quantidade ?? 0,
+            };
+            if (!Atende(quantidade, condicao)) falhas.Add($"verificação {codigo}: esperado {condicao}, veio {quantidade}");
+        }
+        foreach (var trecho in esperado.TextoDasFolhas ?? [])
+            if (!(r.Folhas?.Textos ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
+                falhas.Add($"folhas: texto \"{trecho}\" não apareceu");
+        return falhas;
+    }
+
+    /// <summary>"0", "3", "&gt;=1", "&lt;=2", "&gt;0".</summary>
+    static bool Atende(int valor, string condicao)
+    {
+        condicao = condicao.Trim();
+        int N(string t) => int.Parse(t.Trim(), System.Globalization.CultureInfo.InvariantCulture);
+        if (condicao.StartsWith(">=")) return valor >= N(condicao[2..]);
+        if (condicao.StartsWith("<=")) return valor <= N(condicao[2..]);
+        if (condicao.StartsWith('>')) return valor > N(condicao[1..]);
+        if (condicao.StartsWith('<')) return valor < N(condicao[1..]);
+        return valor == N(condicao);
+    }
+
     static string Seguro(string nome) => string.Concat(nome.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '-' : c));
 }
 
@@ -407,6 +504,73 @@ static class Diagnostico
     }
 
     static string Fmt(XYZ? p) => p is null ? "-" : $"({p.X:0.0},{p.Y:0.0},{p.Z:0.0})";
+
+    /// <summary>
+    /// Os campos do carimbo das folhas: parâmetros da folha e da instância e do tipo do carimbo, com o valor. Mostra onde
+    /// o escritório guarda código, revisão, número e total de pranchas.
+    /// </summary>
+    public static List<string> Carimbos(Document doc, List<ViewSheet>? apenas = null)
+    {
+        var linhas = new List<string>();
+        var folhas = apenas ?? new FilteredElementCollector(doc).OfClass(typeof(ViewSheet)).Cast<ViewSheet>()
+            .Where(f => !f.IsPlaceholder).OrderBy(f => f.SheetNumber).Take(8).ToList();
+        foreach (var folha in folhas)
+        {
+            linhas.Add($"FOLHA {folha.SheetNumber} | {folha.Name}");
+            linhas.Add("  folha: " + Parametros(folha));
+            foreach (var carimbo in new FilteredElementCollector(doc, folha.Id).OfCategory(BuiltInCategory.OST_TitleBlocks)
+                         .WhereElementIsNotElementType().Cast<FamilyInstance>())
+            {
+                linhas.Add($"  carimbo {carimbo.Symbol?.Family?.Name} : {carimbo.Symbol?.Name}");
+                linhas.Add("    instância: " + Parametros(carimbo));
+                if (carimbo.Symbol is { } tipo) linhas.Add("    tipo: " + Parametros(tipo));
+            }
+        }
+        // RevisionNumber não vale quando a numeração é por folha (a Nova Era é assim): fica de fora.
+        var revisoes = new FilteredElementCollector(doc).OfClass(typeof(Revision)).Cast<Revision>()
+            .Select(r => $"{r.SequenceNumber}: \"{r.Description}\" {r.RevisionDate} por {r.IssuedBy}/{r.IssuedTo} emitida={r.Issued}");
+        linhas.Add("REVISÕES: " + string.Join(" | ", revisoes));
+        foreach (var folha in folhas)
+        {
+            try
+            {
+                var ids = folha.GetAllRevisionIds();
+                linhas.Add($"REVISÕES DA FOLHA {folha.SheetNumber}: {ids.Count} → atual {folha.GetCurrentRevision()?.Value}; " +
+                           string.Join(", ", ids.Select(id => folha.GetRevisionNumberOnSheet(id))));
+            }
+            catch (Autodesk.Revit.Exceptions.ApplicationException e)
+            {
+                linhas.Add($"REVISÕES DA FOLHA {folha.SheetNumber}: {e.Message}");
+            }
+        }
+        linhas.Add("INFORMAÇÕES DO PROJETO: " + Parametros(doc.ProjectInformation));
+        return linhas;
+    }
+
+    static string Parametros(Element e) =>
+        string.Join("; ", e.Parameters.Cast<Parameter>()
+            .Select(p => (p.Definition?.Name ?? "?", Valor(p), p.IsReadOnly, p.IsShared, (p.Definition as InternalDefinition)?.BuiltInParameter))
+            .Where(p => !string.IsNullOrEmpty(p.Item2))
+            .OrderBy(p => p.Item1)
+            .Select(p => $"{p.Item1}{(p.IsShared ? "*" : "")}{(p.IsReadOnly ? "(ro)" : "")}{(p.Item5 is { } b && b != BuiltInParameter.INVALID ? $"[{b}]" : "")}={p.Item2}"));
+
+    static string? Valor(Parameter p)
+    {
+        try
+        {
+            return p.StorageType switch
+            {
+                StorageType.String => p.AsString(),
+                StorageType.ElementId => p.AsElementId() == ElementId.InvalidElementId ? null : p.AsValueString() ?? p.AsElementId().Value.ToString(),
+                StorageType.None => null,
+                _ => p.AsValueString(),
+            };
+        }
+        catch (Autodesk.Revit.Exceptions.ApplicationException e)
+        {
+            return "(erro: " + e.Message + ")";
+        }
+    }
 }
 
 sealed class FilaDeTestes
@@ -433,6 +597,39 @@ sealed class Cenario
     public string? Exemplo { get; set; }
     public PedidoCalculo? Calcular { get; set; }
     public bool Folhas { get; set; }
+
+    /// <summary>Estraga a rede de propósito antes de verificar: "desligarBico", "apagarTe", "sistemaAgua", "desligarTubo".</summary>
+    public List<string>? Sabotar { get; set; }
+
+    public bool Verificar { get; set; }
+    public bool InspecionarCarimbo { get; set; }
+
+    /// <summary>Numeração e código das folhas a gravar no padrão antes de gerar.</summary>
+    public AjustePadrao? Padrao { get; set; }
+    public Esperado? Esperado { get; set; }
+}
+
+sealed class AjustePadrao
+{
+    public string? NumeroInicial { get; set; }
+    public string? CodigoFolha { get; set; }
+    public string? ParametroCodigo { get; set; }
+}
+
+/// <summary>O que o cenário deve dar. Campo nulo não é conferido.</summary>
+sealed class Esperado
+{
+    public bool? Atende { get; set; }
+    public int? Bicos { get; set; }
+    public double? PressaoKPa { get; set; }
+    public string? Critico { get; set; }
+    public int? Folhas { get; set; }
+
+    /// <summary>Código do grupo (ou "erros", "avisos", "setores") e a condição: "0", "&gt;=1", "&lt;=2".</summary>
+    public Dictionary<string, string>? Verificacao { get; set; }
+
+    /// <summary>Trechos que precisam aparecer no texto de alguma das folhas geradas.</summary>
+    public List<string>? TextoDasFolhas { get; set; }
 }
 
 sealed class AjusteMapeamento
@@ -467,6 +664,32 @@ sealed class RelatorioCenario
     public ResumoFolhas? Folhas { get; set; }
     public List<string>? Dialogos { get; set; }
     public string? Arquivo { get; set; }
+    public ResumoVerificacao? Verificacao { get; set; }
+    public List<string>? Carimbos { get; set; }
+    public List<string>? CarimbosSpk { get; set; }
+
+    /// <summary>Só com "esperado" no cenário: se tudo bateu, e o que não bateu.</summary>
+    public bool? Passou { get; set; }
+    public List<string>? Divergencias { get; set; }
+}
+
+sealed class ResumoVerificacao
+{
+    public int Bicos { get; set; }
+    public int Tubos { get; set; }
+    public int Pecas { get; set; }
+    public int Setores { get; set; }
+    public int Erros { get; set; }
+    public int Avisos { get; set; }
+    public List<GrupoVerificado> Grupos { get; set; } = [];
+}
+
+sealed class GrupoVerificado
+{
+    public string Codigo { get; set; } = "";
+    public string Gravidade { get; set; } = "";
+    public int Quantidade { get; set; }
+    public List<string> Exemplos { get; set; } = [];
 }
 
 sealed class EtapaExecutada

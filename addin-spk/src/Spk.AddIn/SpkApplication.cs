@@ -38,6 +38,10 @@ public class SpkApplication : IExternalApplication
         Botao<GerarMalhaCommand>(rede,
             "Gerar", Icones.Malha,
             "Cria uma malha retangular de bicos e tubos já conectados, no ponto que você clicar.");
+        Botao<VerificarModeloCommand>(rede,
+            "Verificar\nmodelo", Icones.Verificar,
+            "Confere se o SPK consegue ler a rede: peças encostadas mas não ligadas, tubo sem tê, bico solto, ponta aberta, " +
+            "sistema que não é de incêndio, famílias não confirmadas e bicos sem VGA. Clique num item para ir até ele.");
         Botao<CalcularRedeCommand>(rede,
             "Calcular", Icones.Executar,
             "Calcula a malha gerada. Se não houver, usa as famílias confirmadas.");

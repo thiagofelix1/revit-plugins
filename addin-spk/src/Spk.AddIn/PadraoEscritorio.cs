@@ -23,6 +23,15 @@ public sealed class PadraoEscritorio
     /// <summary>Vistas de legenda (símbolos, notas) colocadas nas folhas do setor e no isométrico.</summary>
     public List<string> Legendas { get; set; } = [];
 
+    /// <summary>Número da primeira folha do SPK, com os zeros que o escritório usa ("09"). Vazio: SPK-SETORES, SPK-ISO...</summary>
+    public string? NumeroInicial { get; set; }
+
+    /// <summary>Molde do código da prancha: {numero}, {numero:000} e {tipo} (PLA ou ISO). Ex.: NEPN-INC-{numero:000}-LG-SPK-{tipo}-R00.</summary>
+    public string? CodigoFolha { get; set; }
+
+    /// <summary>Parâmetro de texto da folha onde vai o código ("Código de Projeto" na Nova Era).</summary>
+    public string? ParametroCodigo { get; set; }
+
     /// <summary>De qual arquivo o padrão foi importado, para o resumo.</summary>
     public string? Origem { get; set; }
 
@@ -59,6 +68,9 @@ public sealed class PadraoEscritorio
         linhas.Add($"Templates: planta {TemplatePlanta ?? "—"}; 3D {Template3d ?? "—"}; corte {TemplateCorte ?? "—"}; " +
                    $"setorização {TemplateSetorizacao ?? "—"}");
         linhas.Add(Legendas.Count == 0 ? "Legendas: nenhuma" : "Legendas: " + string.Join(", ", Legendas));
+        linhas.Add(string.IsNullOrWhiteSpace(NumeroInicial) ? "Folhas numeradas SPK-…" : $"Folhas a partir do número {NumeroInicial}");
+        if (!string.IsNullOrWhiteSpace(CodigoFolha))
+            linhas.Add($"Código das folhas: {CodigoFolha} em \"{ParametroCodigo}\"");
         return string.Join("\n", linhas);
     }
 }

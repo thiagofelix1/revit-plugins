@@ -22,7 +22,7 @@ public class ImportarPadraoCommand : ExternalCommand
             var origem = EscolherOrigem(doc);
             if (origem is null) return;
 
-            var janela = new PadraoJanela(Opcoes(origem));
+            var janela = new PadraoJanela(Opcoes(origem, doc));
             if (janela.ShowDialog() != true || janela.Resultado is not { } escolha) return;
 
             var avisos = new List<string>();
@@ -77,7 +77,11 @@ public class ImportarPadraoCommand : ExternalCommand
         return indice >= 0 && indice < opcoes.Count ? opcoes[indice] : null;
     }
 
-    static OpcoesPadrao Opcoes(Document origem)
+    /// <summary>
+    /// O que a origem oferece, com a sugestão do plugin. Numeração e código vêm do projeto de destino: são deste projeto
+    /// (o código tem a sigla da obra), e o que já estiver gravado no padrão vale mais que a sugestão.
+    /// </summary>
+    static OpcoesPadrao Opcoes(Document origem, Document destino)
     {
         var carimbos = Simbolos(origem, BuiltInCategory.OST_TitleBlocks);
         var etiquetas = Simbolos(origem, BuiltInCategory.OST_PipeTags);
@@ -96,6 +100,11 @@ public class ImportarPadraoCommand : ExternalCommand
             TemplateSetorizacao = PorNome(templates, ["SETOR"]),
             Legendas = legendas.Where(n => DoSistema(n) && Contem(n, ["LEGENDA", "NOTA", "SIMBOLO", "SÍMBOLO"])).ToList(),
         };
+        var atual = PadraoEscritorio.Carregar(destino);
+        var (numero, molde, parametro) = Folhas.CarimboSpk.Sugerir(destino);
+        sugestao.NumeroInicial = atual.NumeroInicial ?? numero;
+        sugestao.CodigoFolha = atual.CodigoFolha ?? molde;
+        sugestao.ParametroCodigo = atual.ParametroCodigo ?? parametro;
         return new OpcoesPadrao(origem.Title, carimbos, etiquetas, templates, legendas, sugestao);
     }
 
@@ -123,7 +132,13 @@ public class ImportarPadraoCommand : ExternalCommand
     {
         var opcoes = new CopyPasteOptions();
         opcoes.SetDuplicateTypeNamesHandler(new UsarTiposDoDestino());
-        var resultado = new PadraoEscritorio { Origem = origem.Title };
+        var resultado = new PadraoEscritorio
+        {
+            Origem = origem.Title,
+            NumeroInicial = escolha.NumeroInicial,
+            CodigoFolha = escolha.CodigoFolha,
+            ParametroCodigo = escolha.ParametroCodigo,
+        };
 
         resultado.Carimbo = CopiarSimbolo(origem, destino, BuiltInCategory.OST_TitleBlocks, escolha.Carimbo, opcoes, avisos, "Carimbo");
         resultado.EtiquetaTubo = CopiarSimbolo(origem, destino, BuiltInCategory.OST_PipeTags, escolha.EtiquetaTubo, opcoes, avisos, "Etiqueta de tubo");

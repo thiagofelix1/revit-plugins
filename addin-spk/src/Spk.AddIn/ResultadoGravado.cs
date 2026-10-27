@@ -12,6 +12,12 @@ public sealed class ResultadoGravado
     public double VazaoChuveirosLmin { get; set; }
     public double VazaoTotalLmin { get; set; }
 
+    /// <summary>Hidrantes, duração e reserva do cálculo. Zero num resultado gravado por versão anterior.</summary>
+    public double VazaoHidrantesLmin { get; set; }
+
+    public double DuracaoMin { get; set; }
+    public double ReservaM3 { get; set; }
+
     /// <summary>Número de cálculo do bico crítico.</summary>
     public string? ChuveiroCritico { get; set; }
 

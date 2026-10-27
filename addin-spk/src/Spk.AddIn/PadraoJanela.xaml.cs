@@ -39,6 +39,10 @@ public partial class PadraoJanela : Window
         Preencher(TemplateCorte, opcoes.Templates, opcoes.Sugestao.TemplateCorte);
         Preencher(TemplateSetorizacao, opcoes.Templates, opcoes.Sugestao.TemplateSetorizacao);
 
+        NumeroInicial.Text = opcoes.Sugestao.NumeroInicial ?? "";
+        CodigoFolha.Text = opcoes.Sugestao.CodigoFolha ?? "";
+        ParametroCodigo.Text = opcoes.Sugestao.ParametroCodigo ?? "";
+
         var sugeridas = opcoes.Sugestao.Legendas.ToHashSet(StringComparer.Ordinal);
         legendas = opcoes.Legendas.Select(n => new ItemLegenda { Nome = n, Marcada = sugeridas.Contains(n) }).ToList();
         Legendas.ItemsSource = legendas;
@@ -51,6 +55,8 @@ public partial class PadraoJanela : Window
         combo.ItemsSource = itens;
         combo.SelectedItem = sugerido is not null && nomes.Contains(sugerido) ? sugerido : Nenhum;
     }
+
+    static string? Texto(TextBox caixa) => string.IsNullOrWhiteSpace(caixa.Text) ? null : caixa.Text.Trim();
 
     static string? Escolha(ComboBox combo) => combo.SelectedItem is string nome && nome != Nenhum ? nome : null;
 
@@ -65,6 +71,9 @@ public partial class PadraoJanela : Window
             TemplateCorte = Escolha(TemplateCorte),
             TemplateSetorizacao = Escolha(TemplateSetorizacao),
             Legendas = legendas.Where(l => l.Marcada).Select(l => l.Nome).ToList(),
+            NumeroInicial = Texto(NumeroInicial),
+            CodigoFolha = Texto(CodigoFolha),
+            ParametroCodigo = Texto(ParametroCodigo),
         };
         DialogResult = true;
     }

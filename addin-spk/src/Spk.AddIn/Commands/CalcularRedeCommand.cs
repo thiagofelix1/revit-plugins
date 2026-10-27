@@ -2,6 +2,7 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
 using Nice3point.Revit.Toolkit.External;
 using Spk.AddIn.Servicos;
+using Spk.AddIn.Verificacao;
 
 namespace Spk.AddIn.Commands;
 
@@ -22,6 +23,8 @@ public class CalcularRedeCommand : ExternalCommand
 
             var dados = DadosProjetoUi.Obter(doc);
             if (dados is null) return;
+
+            if (!ModeloPronto(Application.ActiveUIDocument!)) return;
 
             var leitura = BicosDoModelo.Ler(doc);
             ServicoCalculo.ValidarFatorK(leitura.Bicos);
@@ -72,6 +75,37 @@ public class CalcularRedeCommand : ExternalCommand
         catch (Exception e)
         {
             TaskDialog.Show("SPK — Calcular", e.Message);
+        }
+    }
+
+    /// <summary>
+    /// Leitura estrita: com erro de modelagem (peças encostadas sem ligar, bico solto, família não confirmada), o SPK
+    /// não calcula calado. Mostra os problemas; calcular mesmo assim liga a rede por proximidade, que pode errar.
+    /// </summary>
+    static bool ModeloPronto(UIDocument ui)
+    {
+        var verificacao = VerificacaoModelo.Verificar(ui.Document);
+        if (verificacao.Erros == 0) return true;
+
+        var erros = verificacao.Grupos.Where(g => g.Gravidade == Gravidade.Erro).Select(g => $"• {g.Titulo}: {g.Ocorrencias.Count}");
+        var dialogo = new TaskDialog("SPK — Calcular")
+        {
+            MainInstruction = $"O modelo tem {verificacao.Erros} problema(s) que afetam o cálculo",
+            MainContent = string.Join("\n", erros) + "\n\nCom eles, o SPK precisa ligar a rede por proximidade, o que pode juntar " +
+                          "o que não devia ou deixar trechos de fora. O certo é corrigir e calcular de novo.",
+            CommonButtons = TaskDialogCommonButtons.Cancel,
+        };
+        dialogo.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Ver os problemas");
+        dialogo.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Calcular mesmo assim", "Ligação por proximidade, com aviso no resultado");
+        switch (dialogo.Show())
+        {
+            case TaskDialogResult.CommandLink1:
+                VerificacaoUi.Mostrar(ui, verificacao);
+                return false;
+            case TaskDialogResult.CommandLink2:
+                return true;
+            default:
+                return false;
         }
     }
 

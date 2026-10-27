@@ -1,0 +1,74 @@
+# Lista de desenvolvimento — SPK até a distribuição
+
+Uma linha por entrega, na ordem combinada. `[x]` só quando provado no Revit (à mão ou pela [suíte automática](teste-automatico.md)); o que só compila fica `[ ]`. A ordem de cada etapa só começa com o critério de pronto da anterior, salvo o que não depende do engenheiro parceiro.
+
+Atualizada em 26/10/2026.
+
+## 0. Base (feito)
+
+- [x] Motor hidráulico: Hazen-Williams, pressão total, comprimento equivalente, árvore e anel (gradiente global), busca da área mais desfavorável, ESFR de 12 bicos. Conferido com o memorial Sprinkler-CALC da Nova Era (0,01 bar nó a nó).
+- [x] Add-in para Revit 2025, 2026 e 2027 (aba SPK): Dados do projeto, Famílias, Dados do esboço, Gerar, Rede de exemplo (5 cenários), Calcular, Memorial (.docx), Folhas (PDF), Guia.
+- [x] Padrão do escritório importado de outro projeto: carimbo, etiqueta de tubo, templates, legendas.
+- [x] Folhas: setorização, isométrico geral, planta + 3D do setor com área de cálculo, corte.
+- [x] Teste automático no Revit com suíte de regressão e conferência automática (`Passou`).
+- [x] Pacote de teste (`dist/`, zip com instalar.bat) para o engenheiro parceiro.
+
+## 1. Verificar modelo e leitura estrita
+
+Pronto quando um projeto real bem conectado passa sem erro e um projeto mal conectado mostra cada problema no lugar certo.
+
+- [x] Verificar modelo: peças encostadas sem ligação, tubo terminando no meio de outro sem tê, bico sem tubo, família de bico sem conector, ponta aberta, tubo fora de sistema de incêndio, bico sem K e área confirmados, bico que não chega a VGA, redes separadas. Clique leva ao elemento.
+- [x] Provado por sabotagem (bico desligado, tê apagado, sistema de água fria, tubo desligado) e na cópia da Nova Era (971 encostados, 169 derivações sem tê, 610 tubos em sistema hidrônico, 172 redes separadas, em menos de 1 s).
+- [x] Leitura estrita: Calcular mostra os erros antes e só liga por proximidade se o engenheiro pedir.
+- [ ] Lista de problemas comuns nos modelos que o escritório recebe (**depende do engenheiro**) e checagens que faltarem.
+- [ ] Um projeto real **bem conectado** calculando sem proximidade (**depende do engenheiro**: ceder um projeto).
+- [ ] Tubos duplicados ou sobrepostos; tubo em nível ou fase errada.
+- [ ] Correção assistida para os casos simples (reconectar peças encostadas a menos de 1 cm).
+
+## 2. Folhas completas
+
+Pronto quando o engenheiro aceita entregar as folhas sem retocar à mão.
+
+- [x] Carimbo: número na sequência do escritório, código da prancha por molde (sugerido pelas folhas do projeto), campos do projeto copiados das outras folhas do mesmo projeto. Número já usado por outra folha é recusado sem apagar nada. Provado na cópia da Nova Era (folhas 17 a 20, código NEPN-INC-018-LG-SPK-ISO-R00, CNPJ, lote e CREA preenchidos).
+- [x] Quadro de chuveiros (tipo, K, área, quantidade) e quadro de demanda na entrada do setor (vazões, pressão em kPa e mca, duração, reserva), no isométrico.
+- [x] Isométrico no padrão da NEPN-INC-013: nível Fino, vermelho, diâmetro só nos trechos principais.
+- [x] Hachura da área de cálculo no formato real da área; corte e 3D só com o setor.
+- [ ] Revisões no carimbo (criar ou atribuir revisão às folhas do SPK) — decidir com o engenheiro se o SPK deve mexer nisso.
+- [ ] Cotas entre ramais, bicos e paredes.
+- [ ] Etiqueta "Ø + comprimento" e número do bico como etiqueta (família do kit do escritório), no lugar de texto.
+- [ ] Área livre do carimbo configurável por escritório (o mapa-chave pode cair sobre carimbos grandes).
+- [ ] Quadro de bombas com a bomba escolhida (hoje: a demanda que ela precisa atender).
+- [ ] Conferência das folhas pelo engenheiro (**depende do engenheiro**).
+
+## 3. Validação com projetos reais
+
+Pronto quando houver pelo menos três projetos reais conferidos pelo engenheiro como cenários da suíte.
+
+- [ ] Cada projeto real cedido vira cenário em `testes/regressao.json`, com o resultado conferido pelo engenheiro como esperado.
+- [ ] Comparar memorial do SPK com o memorial que o escritório entregou para a mesma obra (pressão, vazão, área, reserva).
+- [ ] Tempo de cálculo em rede grande (hoje ~8 min em 700 bicos lidos por proximidade): medir num modelo bem conectado.
+
+## 4. Pronto para distribuir
+
+- [ ] Certificado de assinatura de código (some o "Sempre carregar" e os alertas do Windows). Compra e instalação ficam com o dono do produto.
+- [ ] Instalador (MSI ou equivalente) para 2025–2027, com desinstalação.
+- [ ] Núcleo comum para os próximos plugins (licença, padrão do escritório, folhas, teste automático).
+- [ ] Desligar no pacote o que é de desenvolvimento (menu Avançado, teste automático).
+
+## 5. Licença e piloto pago
+
+- [ ] Licença por assinatura (ativação, validade, uso offline).
+- [ ] Primeiro escritório pagando, com canal de suporte.
+
+## 6. Geração avançada e dimensionamento
+
+- [ ] Ler contorno de cobertura e forro; bicos por ambiente; afastamento de parede.
+- [ ] Rede seguindo telhado inclinado.
+- [ ] Setorização automática pela Tabela 8.
+- [ ] Tubo geral até a casa de bombas.
+- [ ] Dimensionamento: subir diâmetros até atender; sugerir a bomba pela curva.
+
+## Conhecido e aceito por enquanto
+
+- O campo ESCALA do carimbo do isométrico mostra 1:1: o Revit monta esse campo sem a vista 3D. A prancha 013 da Nova Era sai igual.
+- O Projeto2 tem um bico solto (333229), que a verificação aponta com razão.
