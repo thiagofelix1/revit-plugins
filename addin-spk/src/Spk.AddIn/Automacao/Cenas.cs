@@ -19,6 +19,8 @@ static class Cenas
         "subgeralComFileiras" => SubgeralComFileiras(doc),
         "arquiteturaVinculada" => ArquiteturaVinculada(doc),
         "andarComSalas" => AndarComSalas(doc),
+        "salaComVigas" => SalaComVigas(doc, grelha: false),
+        "salaComGrelha" => SalaComVigas(doc, grelha: true),
         _ => throw new InvalidOperationException($"Cena desconhecida: \"{nome}\"."),
     };
 
@@ -208,6 +210,92 @@ static class Cenas
             t.Commit();
         }
         return new Cena("Andar vinculado (deslocado 20 m e 10 m): corredor de 24 × 2,5 m e 4 salas de 6 × 8 m com forro a 2,80 m.", [], []);
+    }
+
+    /// <summary>
+    /// Apaga a rede da cópia e vincula, deslocados 20 m em X e 10 m em Y: arquitetura com uma sala de 12 × 9 m ("Sala com
+    /// vigas", paredes de 4 m, laje no nível 4 m, sem forro) e estrutura com três vigas ao longo de y em x = 3, 6 e 9 m,
+    /// com o fundo a 3,25 m (60 cm abaixo da face de baixo da laje de 15 cm): fundas demais para o bico ficar abaixo delas.
+    /// </summary>
+    /// <param name="grelha">Vigas nas duas direções: uma em x = 6 m e outra em y = 4,5 m (quatro quadros).</param>
+    static Cena SalaComVigas(Document doc, bool grelha)
+    {
+        var app = doc.Application;
+        var pasta = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "SPK", "testes", "saida");
+        System.IO.Directory.CreateDirectory(pasta);
+        var arquivoArq = System.IO.Path.Combine(pasta, $"vinculo-sala-com-{(grelha ? "grelha" : "vigas")}-arq.rvt");
+        var arquivoEst = System.IO.Path.Combine(pasta, $"vinculo-sala-com-{(grelha ? "grelha" : "vigas")}-est.rvt");
+        double M(double metros) => GeradorMalha.Pes(metros);
+
+        var arq = app.NewProjectDocument(Template(app, "DefaultBRAPTB.rte"));
+        using (var t = new Transaction(arq, "SPK — sala de teste"))
+        {
+            t.Start();
+            var (terreo, superior) = Niveis(arq);
+            var tipoParede = arq.GetDefaultElementTypeId(ElementTypeGroup.WallType);
+            XYZ P(double x, double y) => new(M(x), M(y), terreo.Elevation);
+            foreach (var (a, b) in new[] { (P(0, 0), P(12, 0)), (P(12, 0), P(12, 9)), (P(12, 9), P(0, 9)), (P(0, 9), P(0, 0)) })
+                Wall.Create(arq, Line.CreateBound(a, b), tipoParede, terreo.Id, M(4), 0, false, false);
+            arq.Regenerate();
+            var sala = arq.Create.NewRoom(terreo, new UV(M(6), M(4.5)));
+            sala.get_Parameter(BuiltInParameter.ROOM_NAME).Set("Sala com vigas");
+            sala.get_Parameter(BuiltInParameter.ROOM_NUMBER).Set("101");
+            Floor.Create(arq, [Retangulo(0, 0, M(12), M(9), superior.Elevation)], arq.GetDefaultElementTypeId(ElementTypeGroup.FloorType), superior.Id);
+            t.Commit();
+        }
+        arq.SaveAs(arquivoArq, new SaveAsOptions { OverwriteExistingFile = true });
+        arq.Close(false);
+
+        var est = app.NewProjectDocument(Template(app, "Structural Analysis-DefaultBRAPTB.rte"));
+        using (var t = new Transaction(est, "SPK — vigas de teste"))
+        {
+            t.Start();
+            var (_, superior) = Niveis(est);
+            var simbolo = new FilteredElementCollector(est).OfCategory(BuiltInCategory.OST_StructuralFraming).OfClass(typeof(FamilySymbol))
+                .Cast<FamilySymbol>().FirstOrDefault() ?? throw new InvalidOperationException("O template de estrutura não tem família de viga.");
+            // Tipo com 75 cm de altura, se a família tiver o parâmetro; senão a viga desce até o fundo ficar a 3,25 m.
+            var funda = (FamilySymbol)simbolo.Duplicate("SPK viga 20x75");
+            var altura = new[] { "h", "d", "Altura", "Height", "H" }.Select(n => funda.LookupParameter(n))
+                .FirstOrDefault(p => p is { IsReadOnly: false, StorageType: StorageType.Double });
+            altura?.Set(M(0.75));
+            new[] { "b", "bf", "Largura", "Width", "B" }.Select(n => funda.LookupParameter(n))
+                .FirstOrDefault(p => p is { IsReadOnly: false, StorageType: StorageType.Double })?.Set(M(0.2));
+            if (!funda.IsActive) funda.Activate();
+            est.Regenerate();
+            var vigas = new List<FamilyInstance>();
+            var eixos = grelha
+                ? new[] { (6.0, 0.0, 6.0, 9.0), (0.0, 4.5, 12.0, 4.5) }
+                : new[] { (3.0, 0.0, 3.0, 9.0), (6.0, 0.0, 6.0, 9.0), (9.0, 0.0, 9.0, 9.0) };
+            foreach (var (xa, ya, xb, yb) in eixos)
+                vigas.Add(est.Create.NewFamilyInstance(Line.CreateBound(new XYZ(M(xa), M(ya), superior.Elevation), new XYZ(M(xb), M(yb), superior.Elevation)),
+                    funda, superior, Autodesk.Revit.DB.Structure.StructuralType.Beam));
+            est.Regenerate();
+            foreach (var viga in vigas)
+            {
+                var fundo = viga.get_BoundingBox(null)?.Min.Z ?? superior.Elevation;
+                var desce = fundo - (superior.Elevation - M(0.75));
+                if (desce <= M(0.01)) continue;
+                viga.get_Parameter(BuiltInParameter.STRUCTURAL_BEAM_END0_ELEVATION)?.Set(-desce);
+                viga.get_Parameter(BuiltInParameter.STRUCTURAL_BEAM_END1_ELEVATION)?.Set(-desce);
+            }
+            t.Commit();
+        }
+        est.SaveAs(arquivoEst, new SaveAsOptions { OverwriteExistingFile = true });
+        est.Close(false);
+
+        using (var t = new Transaction(doc, "SPK — vínculos de teste"))
+        {
+            t.Start();
+            ApagarRede(doc);
+            foreach (var arquivo in new[] { arquivoArq, arquivoEst })
+            {
+                var tipo = RevitLinkType.Create(doc, ModelPathUtils.ConvertUserVisiblePathToModelPath(arquivo), new RevitLinkOptions(false));
+                var instancia = RevitLinkInstance.Create(doc, tipo.ElementId);
+                ElementTransformUtils.MoveElement(doc, instancia.Id, new XYZ(M(20), M(10), 0));
+            }
+            t.Commit();
+        }
+        return new Cena("Sala de 12 × 9 m vinculada, laje a 4 m, três vigas com o fundo a 3,25 m (deslocadas 20 m e 10 m).", [], []);
     }
 
     /// <summary>

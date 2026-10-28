@@ -83,6 +83,55 @@ public class BicosNoAmbienteTestes
     }
 
     [Fact]
+    public void Vigas_paralelas_fundas_ganham_um_bico_por_vao()
+    {
+        // Sala de 12 × 9 m com vigas de 20 cm ao longo de y em x = 3, 6 e 9: quatro vãos de ~3 m, uma fileira por vão.
+        var sala = Retangulo(0, 0, 12, 9);
+        var vigas = new[] { 3.0, 6.0, 9.0 }.Select(x => (new Ponto2(x, 0), new Ponto2(x, 9), 0.2)).ToList();
+        var p = BicosNoAmbiente.PosicionarPorVaos(sala, vigas, Leve)!;
+
+        Assert.Equal(8, p.Bicos.Count);
+        Assert.True(Math.Abs(p.DirecaoDosRamais.Y) > 0.999, "ramais na direção das vigas");
+        foreach (var b in p.Bicos)
+            Assert.All(vigas, g => Assert.True(Math.Abs(b.X - g.Item1.X) > 0.1 + 0.1 - 1e-9, $"bico em x {b.X} em cima da viga em {g.Item1.X}"));
+        Assert.Equal(4, p.Bicos.Select(b => Math.Round(b.X, 3)).Distinct().Count());
+        Assert.Empty(BicosNoAmbiente.Conferir(sala, p.Bicos, Leve, p.DirecaoDosRamais));
+    }
+
+    [Fact]
+    public void Grelha_de_vigas_ganha_bicos_em_cada_quadro()
+    {
+        // Vigas em x = 6 e em y = 4,5: quatro quadros de ~6 × 4,5 m, cada um com a sua grade, nenhum bico sobre viga.
+        var sala = Retangulo(0, 0, 12, 9);
+        var vigas = new List<(Ponto2, Ponto2, double)> { (new Ponto2(6, 0), new Ponto2(6, 9), 0.2), (new Ponto2(0, 4.5), new Ponto2(12, 4.5), 0.2) };
+        Assert.True(BicosNoAmbiente.EhGrelha(vigas));
+        var p = BicosNoAmbiente.PosicionarPorVaos(sala, vigas, Leve)!;
+
+        Assert.Equal(8, p.Bicos.Count);
+        Assert.All(p.Bicos, b => Assert.True(Math.Abs(b.X - 6) > 0.2 - 1e-9 && Math.Abs(b.Y - 4.5) > 0.2 - 1e-9, $"bico em {b} sobre viga"));
+        foreach (var (qx, qy) in new[] { (3.0, 2.25), (9.0, 2.25), (3.0, 6.75), (9.0, 6.75) })
+            Assert.Equal(2, p.Bicos.Count(b => Math.Abs(b.X - qx) < 3 && Math.Abs(b.Y - qy) < 2.25));
+        Assert.Empty(BicosNoAmbiente.Conferir(sala, p.Bicos, Leve, p.DirecaoDosRamais));
+    }
+
+    [Fact]
+    public void Viga_inclinada_fora_das_duas_direcoes_ainda_nao()
+    {
+        var sala = Retangulo(0, 0, 12, 9);
+        var vigas = new List<(Ponto2, Ponto2, double)> { (new Ponto2(6, 0), new Ponto2(6, 9), 0.2), (new Ponto2(0, 0), new Ponto2(12, 9), 0.2) };
+        Assert.Null(BicosNoAmbiente.PosicionarPorVaos(sala, vigas, Leve));
+    }
+
+    [Fact]
+    public void Viga_larga_encostada_em_outra_vira_uma_faixa_so()
+    {
+        var sala = Retangulo(0, 0, 10, 8);
+        var vigas = new List<(Ponto2, Ponto2, double)> { (new Ponto2(0, 4), new Ponto2(10, 4), 0.3), (new Ponto2(0, 4.2), new Ponto2(10, 4.2), 0.3) };
+        var p = BicosNoAmbiente.PosicionarPorVaos(sala, vigas, Leve)!;
+        Assert.All(p.Bicos, b => Assert.True(b.Y < 3.85 - 0.1 + 1e-9 || b.Y > 4.35 + 0.1 - 1e-9, $"bico em y {b.Y} sobre as vigas"));
+    }
+
+    [Fact]
     public void Ambiente_em_L_fica_coberto_sem_bico_fora()
     {
         // 12 × 12 sem o quadrado de 6 × 6 do canto superior direito.

@@ -81,6 +81,83 @@ public static class BicosNoAmbiente
     }
 
     /// <summary>
+    /// Bicos nos vãos entre vigas (8.13.1.2, quando a viga é funda demais para o bico ficar abaixo dela): as vigas,
+    /// faixas com a largura delas, cortam o ambiente em vãos; com vigas nas duas direções (a grelha, o quadro de vigas
+    /// de cada painel de laje), em quadros. Cada vão ou quadro ganha a sua grade (meio passo das vigas e das paredes,
+    /// como um ambiente pequeno), e nenhum bico fica em cima de viga nem a menos da distância mínima da parede. Os ramais
+    /// seguem a direção da primeira viga. Nulo se há viga fora das duas direções (até 10° de folga).
+    /// </summary>
+    /// <param name="vigas">Eixo de cada viga em planta (A, B) e a largura dela, em m.</param>
+    public static PosicaoDeBicos? PosicionarPorVaos(IReadOnlyList<IReadOnlyList<Ponto2>> contornos,
+        IReadOnlyList<(Ponto2 A, Ponto2 B, double Largura)> vigas, LimitesDeBico limites)
+    {
+        if (vigas.Count == 0) return Posicionar(contornos, limites);
+        var direcoes = vigas.Select(g => Normalizar(Sub(g.B, g.A))).ToList();
+        var folga = Math.Cos(80 * Math.PI / 180);
+        var paralelas = vigas.Where((_, i) => Math.Abs(Dot(direcoes[i], direcoes[0])) > Math.Cos(10 * Math.PI / 180)).ToList();
+        var cruzadas = vigas.Where((_, i) => Math.Abs(Dot(direcoes[i], direcoes[0])) < folga).ToList();
+        if (paralelas.Count + cruzadas.Count < vigas.Count) return null;
+        var (u, v) = Eixos(contornos[0], direcoes[0]);
+        var us = contornos[0].Select(p => Dot(p, u)).ToList();
+        var vs = contornos[0].Select(p => Dot(p, v)).ToList();
+        var (u0, u1, v0, v1) = (us.Min(), us.Max(), vs.Min(), vs.Max());
+
+        // Vãos na direção v (entre as vigas ao longo de u) e na direção u (entre as vigas que as cruzam): os quadros.
+        var vaosV = Vaos(paralelas, v, v0, v1, limites);
+        var vaosU = Vaos(cruzadas, u, u0, u1, limites);
+
+        bool Valido(Ponto2 p) => Dentro(contornos, p) && DistanciaAoContorno(contornos, p) >= limites.ParedeMinima - Folga;
+        var bicos = new List<Ponto2>();
+        var (su, sv) = (0.0, 0.0);
+        foreach (var (a, b) in vaosV)
+        foreach (var (c, d) in vaosU)
+        {
+            var (ni, nj) = Contagem(d - c, b - a, limites);
+            (su, sv) = (Math.Max(su, (d - c) / ni), Math.Max(sv, (b - a) / nj));
+            for (var j = 0; j < nj; j++)
+            for (var i = 0; i < ni; i++)
+            {
+                var p = Ponto(u, v, c + (d - c) / ni * (i + 0.5), a + (b - a) / nj * (j + 0.5));
+                if (Valido(p)) bicos.Add(p);
+            }
+        }
+        return new PosicaoDeBicos(bicos, u, su, sv);
+    }
+
+    /// <summary>
+    /// Os vãos ao longo do eixo entre as faixas destas vigas (todas atravessadas a ele) e as paredes; faixas que se
+    /// encostam viram uma. Sem viga, o vão é o ambiente inteiro.
+    /// </summary>
+    static List<(double A, double B)> Vaos(IReadOnlyList<(Ponto2 A, Ponto2 B, double Largura)> vigas, Ponto2 eixo, double inicio, double fim,
+        LimitesDeBico limites)
+    {
+        var faixas = vigas.Select(g => (Meio: (Dot(g.A, eixo) + Dot(g.B, eixo)) / 2, Meia: g.Largura / 2))
+            .Select(f => (A: f.Meio - f.Meia, B: f.Meio + f.Meia)).OrderBy(f => f.A).ToList();
+        var juntas = new List<(double A, double B)>();
+        foreach (var f in faixas)
+            if (juntas.Count > 0 && f.A <= juntas[juntas.Count - 1].B)
+                juntas[juntas.Count - 1] = (juntas[juntas.Count - 1].A, Math.Max(juntas[juntas.Count - 1].B, f.B));
+            else juntas.Add(f);
+        var vaos = new List<(double A, double B)>();
+        var de = inicio;
+        foreach (var f in juntas.Where(f => f.B > inicio && f.A < fim))
+        {
+            if (f.A - de > 2 * limites.ParedeMinima) vaos.Add((de, f.A));
+            de = f.B;
+        }
+        if (fim - de > 2 * limites.ParedeMinima) vaos.Add((de, fim));
+        return vaos;
+    }
+
+    /// <summary>Se há vigas nas duas direções (grelha): a rede não cabe no vão e passa por baixo delas.</summary>
+    public static bool EhGrelha(IReadOnlyList<(Ponto2 A, Ponto2 B, double Largura)> vigas)
+    {
+        if (vigas.Count < 2) return false;
+        var d0 = Normalizar(Sub(vigas[0].B, vigas[0].A));
+        return vigas.Skip(1).Any(g => Math.Abs(Dot(Normalizar(Sub(g.B, g.A)), d0)) < Math.Cos(80 * Math.PI / 180));
+    }
+
+    /// <summary>
     /// Abaixo disso, dois bicos fora da mesma linha de ramal não têm como ligar: não cabe o braço com cotovelo, e a
     /// descida reta sai torta. É o braço mínimo de Ligar bicos.
     /// </summary>

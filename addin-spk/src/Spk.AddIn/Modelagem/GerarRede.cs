@@ -43,6 +43,9 @@ public sealed record GeralGerada(Ambiente Corredor, string? Recusa, ResultadoGer
 public sealed record RedeNoAmbiente(Ambiente Ambiente, string? Recusa, int Bicos, double? AlturaDaRede, ResultadoRamais? Ramais,
     ResultadoDiametros? Diametros, IReadOnlyList<string> Avisos)
 {
+    /// <summary>Altura da subgeral (a entrada da sala), quando não é a dos ramais: por baixo das vigas fundas.</summary>
+    public double? AlturaDaSubgeral { get; init; }
+
     public string Texto()
     {
         var nome = $"{Ambiente.Numero} {Ambiente.Nome}".Trim();
@@ -113,7 +116,7 @@ static class GerarRede
 
         // Altura: a das redes das salas (a mais alta), sem encostar na laje do corredor.
         var avisos = new List<string> { "o corredor ficou sem bicos: ponha com Bicos por ambiente e ligue à geral com Ligar bicos ou Traçar ramais" };
-        var z = feitas.Max(r => r.AlturaDaRede!.Value);
+        var z = feitas.Max(r => r.AlturaDaSubgeral ?? r.AlturaDaRede!.Value);
         if (corredor.OrigemDoTeto is OrigemDoTeto.Laje or OrigemDoTeto.Telhado && corredor.Teto is { } teto && z > teto - FolgaDoTeto)
         {
             z = teto - FolgaDoTeto;
@@ -270,30 +273,69 @@ static class GerarRede
 
         // Com geral, os ramais correm paralelos a ela: a subgeral sai perpendicular e aponta direto para a geral.
         var opcoesBicos = geral is null ? opcoes.Bicos : opcoes.Bicos with { Rumo = geral.Direcao };
+        // Viga funda: bicos nos vãos. Vigas numa direção só: o ramal corre no vão, entre a laje e o defletor, que desce até
+        // 25 cm da laje (o máximo sob teto liso é 30 cm) para caber o ramal 10 cm abaixo da laje e 15 cm acima do bico.
+        // Grelha (vigas nas duas direções): o ramal no vão bateria nas vigas que o cruzam; a rede inteira passa por baixo
+        // das vigas e sobe até cada bico, que tem de ser em pé.
+        var vigasDosVaos = BicosPorAmbiente.VigasDosVaos(edificio, ambiente, limites, opcoesBicos);
+        var grelha = vigasDosVaos is not null && Spk.Motor.Geracao.BicosNoAmbiente.EhGrelha(vigasDosVaos.Select(v => (v.A, v.B, v.Largura)).ToList());
+        if (vigasDosVaos is not null && !grelha) opcoesBicos = opcoesBicos with { DefletorM = Math.Max(opcoesBicos.DefletorM, FolgaDoTeto + DropMinimo) };
         var bicos = BicosPorAmbiente.Posicionar(doc, edificio, [ambiente], limites, opcoesBicos, criados).Single();
         if (bicos.Recusa is not null) return Recusa(bicos.Recusa);
         if (bicos.Posicao is not { Bicos.Count: > 0 } posicao || bicos.Defletor is not { } defletor) return Recusa("nenhum bico coube no ambiente");
-
-        // Altura da rede: o drop acima do defletor, sem encostar na laje ou no telhado (o forro a rede atravessa por cima).
-        var avisos = new List<string>();
-        var zRede = defletor + opcoes.DropM;
-        if (ambiente.OrigemDoTeto is OrigemDoTeto.Laje or OrigemDoTeto.Telhado && ambiente.Teto is { } teto && zRede > teto - FolgaDoTeto)
-        {
-            zRede = teto - FolgaDoTeto;
-            if (zRede - defletor < DropMinimo)
-                return Recusa($"sem espaço para a rede entre o defletor ({defletor:0.00}) e o teto ({teto:0.00}): " +
-                              "a rede precisa de pelo menos 15 cm acima do defletor e 10 cm abaixo do teto");
-            avisos.Add($"rede baixada para {zRede:0.00} m, 10 cm abaixo do teto");
-        }
-        foreach (var viga in edificio.Vigas.Where(v => v.Fundo < zRede + 0.05 && v.Topo > zRede - 0.05).Take(3))
-            if (Cruza(ambiente, viga)) avisos.Add($"a rede, a {zRede:0.00} m, passa na altura da viga (fundo {viga.Fundo:0.00}): confira a travessia");
-
         var bicosDoAmbiente = criados.Select(doc.GetElement).OfType<FamilyInstance>().ToList();
+
+        var avisos = new List<string>();
+        double zRede, zSubgeral;
+        if (bicos.VaosEntreVigas is { Count: > 0 } vaos && grelha)
+        {
+            // O conector do bico em pé aponta para baixo (o tubo chega por baixo).
+            var emPe = bicosDoAmbiente.All(b => b.MEPModel?.ConnectorManager?.Connectors.Cast<Connector>()
+                .Any(c => c.Domain == Domain.DomainPiping && c.CoordinateSystem.BasisZ.Z < -0.7) == true);
+            if (!emPe)
+                return Recusa("vigas nas duas direções (quadros de vigas): a rede passa por baixo das vigas e sobe até cada bico, o que pede " +
+                              "bico em pé (upright). Escolha um tipo em pé em Bico, ou ponha os bicos com Bicos por ambiente e desenhe a rede à mão");
+            zRede = zSubgeral = vaos.Min(v => v.Fundo) - 0.15;
+            if (defletor - zRede < DropMinimo - 1e-6) return Recusa("as vigas são rasas demais para a rede passar por baixo delas e subir até os bicos");
+            avisos.Add($"bicos em pé nos quadros entre as vigas; ramais e subgeral por baixo das vigas a {zRede:0.00} m, com subida até cada bico. " +
+                       "Confira a regra de obstrução: distância do bico à viga e altura do defletor acima do fundo dela");
+        }
+        else
+        {
+            // Altura da rede: o drop acima do defletor, sem encostar na laje ou no telhado (o forro a rede atravessa por cima).
+            zRede = defletor + opcoes.DropM;
+            if (ambiente.OrigemDoTeto is OrigemDoTeto.Laje or OrigemDoTeto.Telhado && ambiente.Teto is { } teto && zRede > teto - FolgaDoTeto)
+            {
+                zRede = teto - FolgaDoTeto;
+                if (zRede - defletor < DropMinimo - 1e-6)
+                    return Recusa($"sem espaço para a rede entre o defletor ({defletor:0.00}) e o teto ({teto:0.00}): " +
+                                  "a rede precisa de pelo menos 15 cm acima do defletor e 10 cm abaixo do teto");
+                avisos.Add($"rede baixada para {zRede:0.00} m, 10 cm abaixo do teto");
+            }
+            // Com bicos nos vãos, a subgeral passa por baixo das vigas (15 cm abaixo do fundo da mais baixa) e cada ramal sobe
+            // dela até o vão; senão, a subgeral fica na altura dos ramais.
+            zSubgeral = zRede;
+            if (bicos.VaosEntreVigas is { Count: > 0 } paralelas)
+            {
+                zSubgeral = paralelas.Min(v => v.Fundo) - 0.15;
+                if (zRede - zSubgeral < DropMinimo) return Recusa("as vigas são rasas demais para a subgeral passar por baixo e subir até o vão");
+                avisos.Add($"bicos nos vãos entre as vigas; ramais nos vãos a {zRede:0.00} m e subgeral por baixo das vigas a {zSubgeral:0.00} m, " +
+                           "com subida até cada ramal. Confira a regra de obstrução: distância do bico à viga e altura do defletor acima do fundo dela");
+            }
+            else
+            {
+                foreach (var viga in edificio.Vigas.Where(v => v.Fundo < zRede + 0.05 && v.Topo > zRede - 0.05).Take(3))
+                    if (Cruza(ambiente, viga)) avisos.Add($"a rede, a {zRede:0.00} m, passa na altura da viga (fundo {viga.Fundo:0.00}): confira a travessia");
+            }
+        }
         var subgeral = new List<Pipe>();
-        var motivo = TransacaoSegura.Executar(doc, "SPK — Subgeral", () => Subgeral(doc, ambiente, posicao, zRede, opcoes.Arranjo, criados, avisos, subgeral, geral));
+        var motivo = TransacaoSegura.Executar(doc, "SPK — Subgeral", () => Subgeral(doc, ambiente, posicao, zSubgeral, opcoes.Arranjo, criados, avisos, subgeral, geral));
         if (motivo is not null) return Recusa(motivo);
 
-        var ramais = TracarRamal.Executar(doc, bicosDoAmbiente, subgeral[0], new OpcoesRamais());
+        var opcoesRamais = zSubgeral < zRede - 0.01
+            ? new OpcoesRamais { Altura = AlturaDoRamal.RelativaASubgeral, AlturaM = zRede - zSubgeral }
+            : new OpcoesRamais();
+        var ramais = TracarRamal.Executar(doc, bicosDoAmbiente, subgeral[0], opcoesRamais);
         criados.AddRange(ramais.Criados);
         if (ramais.Tracados == 0) return Recusa("nenhum ramal traçado: " + string.Join("; ", ramais.Fileiras.Select(f => f.Recusa).Distinct()));
 
@@ -315,8 +357,11 @@ static class GerarRede
                 avisos.Add("diâmetros não aplicados: " + e.Message);
             }
         }
-        if (Tampar(doc, criados, zRede) is { } semTampao) avisos.Add(semTampao);
-        return new RedeNoAmbiente(ambiente, null, bicosDoAmbiente.Count, zRede, ramais, diametros, avisos);
+        if (Tampar(doc, criados, Math.Min(zRede, zSubgeral)) is { } semTampao) avisos.Add(semTampao);
+        return new RedeNoAmbiente(ambiente, null, bicosDoAmbiente.Count, zRede, ramais, diametros, avisos)
+        {
+            AlturaDaSubgeral = zSubgeral < zRede - 0.01 ? zSubgeral : null,
+        };
     }
 
     /// <summary>

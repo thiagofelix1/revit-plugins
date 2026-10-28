@@ -88,13 +88,14 @@ Duas telas aparecem antes do plugin carregar e o teste não consegue responder:
 
 ## Cenários de regressão
 
-A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado esperado de cada cenário. Para rodar: copiar para `Documentos\SPK\testes\fila.json`, abrir o Revit e, no fim, olhar `Passou` de cada cenário no relatório. São 30:
+A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado esperado de cada cenário. Para rodar: copiar para `Documentos\SPK\testes\fila.json`, abrir o Revit e, no fim, olhar `Passou` de cada cenário no relatório. São 33:
 
 | Grupo | Cenários | O que prova |
 |---|---|---|
 | Cálculo e folhas | os 5 da Rede de exemplo | valores de cálculo, 4 folhas, 2 quadros no isométrico, verificação sem problema na malha gerada |
 | Sabotagem | bico desligado, tê apagado, sistema de água fria, tubo desligado | Verificar modelo acha cada problema, no elemento certo |
 | Modelagem | cena com ramal e bicos soltos; cena com subgeral e fileira de bicos; a mesma com Diâmetros; 3 fileiras dos dois lados, com subida e com cruzeta | Ligar bicos liga 5 e recusa 1; Traçar ramal traça e liga 5; Diâmetros põe 8 tubos em DN 25, 1 em 32 e 4 em 40, com os cotovelos refeitos no DN novo e nenhuma redução entre tubos; Traçar ramais traça 3 ramais e liga os 12 bicos nos dois modos; verificação limpa |
+| Vigas fundas | `salaComVigas` (três vigas paralelas com o fundo 60 cm abaixo da laje) e `salaComGrelha` (vigas nas duas direções) | vigas paralelas: 8 bicos nos vãos, defletor 25 cm abaixo da laje, ramais nos vãos a 3,75 m e subgeral por baixo das vigas a 3,10 m, verificação limpa, 4 folhas; grelha: 8 bicos nos quadros com espaçamento ok, e o Gerar rede recusa com bico pendente (pede bico em pé) |
 | Editar bicos | o setor automático, depois apagar um bico (cruzeta vira tê), inserir outro num ramal e mover um terceiro 70 cm de lado (religado com braço) | 16 bicos, 1 setor, sem erro nem aviso, ATENDE |
 | Setor automático | `andarComSalas`, Gerar rede nas salas com `geralPor` = Corredor | as 4 salas com a entrada voltada para o corredor, geral pelo eixo dele: 1 setor, 16 bicos, verificação sem erro nem aviso, ATENDE; 4 folhas |
 | Setor com várias salas | `andarComSalas`, rede nas 4 salas, geral pelo corredor a 3,00 m e a 3,40 m (com subida) | as 4 redes ligadas: 1 setor, 16 bicos, verificação sem erro e sem ponta aberta, ATENDE; 4 folhas |

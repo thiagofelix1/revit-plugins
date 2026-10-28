@@ -33,6 +33,9 @@ public sealed record ResultadoAmbiente(Ambiente Ambiente, int Bicos, double? Def
     public IReadOnlyList<ElementId> Criados { get; init; } = [];
     public PosicaoDeBicos? Posicao { get; init; }
 
+    /// <summary>As vigas fundas do ambiente, quando os bicos ficaram nos vãos entre elas (nulo: teto liso ou abaixo da viga).</summary>
+    public IReadOnlyList<Viga>? VaosEntreVigas { get; init; }
+
     public string Texto()
     {
         var nome = $"{Ambiente.Numero} {Ambiente.Nome}".Trim();
@@ -47,7 +50,8 @@ public sealed record ResultadoAmbiente(Ambiente Ambiente, int Bicos, double? Def
 ///     Posiciona bicos nos ambientes da arquitetura (<see cref="Arquitetura.LeituraDoEdificio" />) pela regra de espaçamento
 ///     (<see cref="BicosNoAmbiente" />), com o defletor na altura que o teto pede: sob teto liso, a <see cref="OpcoesBicos.DefletorM" />
 ///     do forro ou da laje; com viga no ambiente, abaixo do fundo da viga mais baixa, se ficar a até 560 mm do teto
-///     (8.13.1.2); senão o ambiente é recusado (um bico por vão ainda não é automático). Também confere os bicos que já
+///     (8.13.1.2); com viga mais funda, nos vãos entre as vigas, sob a laje (vigas paralelas; a grelha ainda não é
+///     automática). Também confere os bicos que já
 ///     existem em cada ambiente. Cada ambiente numa transação própria; tudo num grupo, um Ctrl+Z desfaz.
 /// </summary>
 static class BicosPorAmbiente
@@ -69,13 +73,30 @@ static class BicosPorAmbiente
         grupo.Start();
         foreach (var ambiente in ambientes)
         {
-            var (defletor, altura, recusa) = Defletor(edificio, ambiente, limites, opcoes);
+            var (defletor, altura, recusa, vaos) = Defletor(edificio, ambiente, limites, opcoes);
             if (recusa is not null)
             {
                 resultados.Add(new ResultadoAmbiente(ambiente, 0, null, "", [], recusa));
                 continue;
             }
-            var posicao = BicosNoAmbiente.Posicionar(ambiente.Contornos, limites, (opcoes.Rumo ?? Direcao(opcoes.Direcao)));
+            var posicao = vaos is null
+                ? BicosNoAmbiente.Posicionar(ambiente.Contornos, limites, (opcoes.Rumo ?? Direcao(opcoes.Direcao)))
+                : BicosNoAmbiente.PosicionarPorVaos(ambiente.Contornos, vaos.Select(v => (v.A, v.B, v.Largura)).ToList(), limites);
+            if (posicao is null)
+            {
+                resultados.Add(new ResultadoAmbiente(ambiente, 0, null, "", [],
+                    "vigas fundas fora de duas direções em ângulo reto (viga inclinada): os vãos entre elas ainda não são automáticos"));
+                continue;
+            }
+            // Vãos estreitos (vigotas, terças): um bico por vão deixaria bicos a menos da distância mínima uns dos outros.
+            if (vaos is not null && BicosNoAmbiente.Conferir(ambiente.Contornos, posicao.Bicos, limites, posicao.DirecaoDosRamais)
+                    .FirstOrDefault(f => f.Tipo == TipoDeFalha.PertoDeOutroBico) is { } perto)
+            {
+                resultados.Add(new ResultadoAmbiente(ambiente, 0, null, "", [],
+                    $"vigas fundas e próximas umas das outras (vigotas): um bico por vão deixaria bicos {perto.Descricao}. " +
+                    "A regra para elementos estruturais próximos é outra: posicione à mão"));
+                continue;
+            }
             var deste = new List<ElementId>();
             var motivo = TransacaoSegura.Executar(doc, "SPK — Bicos no ambiente", () =>
                 Criar(doc, simbolo, posicao.Bicos, ambiente.Piso, defletor!.Value, marcar, deste));
@@ -90,6 +111,7 @@ static class BicosPorAmbiente
             {
                 Criados = deste,
                 Posicao = posicao,
+                VaosEntreVigas = vaos,
             });
         }
         grupo.Assimilate();
@@ -110,7 +132,7 @@ static class BicosPorAmbiente
                                           && BicosNoAmbiente.Dentro(ambiente.Contornos, b.Ponto!.Value)).ToList();
             var falhas = BicosNoAmbiente.Conferir(ambiente.Contornos, dentro.Select(b => b.Ponto!.Value).ToList(), limites,
                 (opcoes.Rumo ?? Direcao(opcoes.Direcao))).ToList();
-            var (esperado, _, _) = Defletor(edificio, ambiente, limites, opcoes);
+            var (esperado, _, _, _) = Defletor(edificio, ambiente, limites, opcoes);
             var abaixoDaViga = Vigas(edificio, ambiente).Any();
             foreach (var b in dentro)
             {
@@ -128,30 +150,35 @@ static class BicosPorAmbiente
 
     /// <summary>
     /// Cota do defletor: sob teto liso, o teto menos o afastamento pedido; com viga no ambiente, abaixo do fundo da viga
-    /// mais baixa, desde que fique a até 560 mm do teto.
+    /// mais baixa, desde que fique a até 560 mm do teto; com viga mais funda, nos vãos entre elas, sob a laje (as vigas
+    /// voltam para posicionar os bicos por vão).
     /// </summary>
-    static (double? Defletor, string Texto, string? Recusa) Defletor(Edificio edificio, Ambiente ambiente, LimitesDeBico limites, OpcoesBicos opcoes)
+    static (double? Defletor, string Texto, string? Recusa, IReadOnlyList<Viga>? Vaos) Defletor(Edificio edificio, Ambiente ambiente,
+        LimitesDeBico limites, OpcoesBicos opcoes)
     {
         if (ambiente.Teto is not { } teto)
-            return (null, "", "sem forro, laje ou telhado acima: não dá para saber a altura do bico");
+            return (null, "", "sem forro, laje ou telhado acima: não dá para saber a altura do bico", null);
         // Sem nada acima (o teto saiu da altura do ambiente): área descoberta, como terraço ou jardim no telhado. Sem teto
         // não há onde o calor se acumular para abrir o bico; o engenheiro decide como proteger.
         if (ambiente.OrigemDoTeto == OrigemDoTeto.AlturaDoAmbiente)
-            return (null, "", "sem forro, laje ou telhado acima (área descoberta): o SPK não põe bicos; confira na arquitetura");
+            return (null, "", "sem forro, laje ou telhado acima (área descoberta): o SPK não põe bicos; confira na arquitetura", null);
         var vigas = Vigas(edificio, ambiente).ToList();
+        var afastamento = Math.Max(limites.DefletorMinimo, Math.Min(limites.DefletorMaximo, opcoes.DefletorM));
         if (vigas.Count == 0)
-        {
-            var afastamento = Math.Max(limites.DefletorMinimo, Math.Min(limites.DefletorMaximo, opcoes.DefletorM));
-            return (teto - afastamento, $"defletor a {teto - afastamento:0.00} ({afastamento * 1000:0} mm abaixo do {Origem(ambiente)})", null);
-        }
+            return (teto - afastamento, $"defletor a {teto - afastamento:0.00} ({afastamento * 1000:0} mm abaixo do {Origem(ambiente)})", null, null);
         var fundo = vigas.Min(v => v.Fundo);
         var abaixo = Math.Max(EspacamentoDeBicos.DefletorAbaixoDaVigaMinimo, Math.Min(EspacamentoDeBicos.DefletorAbaixoDaVigaMaximo, opcoes.AbaixoDaVigaM));
         var defletor = fundo - abaixo;
         if (teto - defletor > EspacamentoDeBicos.DefletorMaximoComViga + 1e-6)
-            return (null, "", $"viga de {(teto - fundo) * 100:0} cm: abaixo dela o defletor ficaria a {(teto - defletor) * 1000:0} mm do teto " +
-                              "(máximo 560 mm, 8.13.1.2). Precisa de um bico em cada vão entre vigas, que ainda não é automático.");
-        return (defletor, $"defletor a {defletor:0.00} ({abaixo * 1000:0} mm abaixo da viga, {(teto - defletor) * 1000:0} mm do {Origem(ambiente)})", null);
+            return (teto - afastamento, $"defletor a {teto - afastamento:0.00} ({afastamento * 1000:0} mm abaixo do {Origem(ambiente)}), nos vãos entre " +
+                                        $"as vigas de {(teto - fundo) * 100:0} cm (abaixo delas ficaria a {(teto - defletor) * 1000:0} mm, máximo 560 mm, 8.13.1.2)",
+                null, vigas);
+        return (defletor, $"defletor a {defletor:0.00} ({abaixo * 1000:0} mm abaixo da viga, {(teto - defletor) * 1000:0} mm do {Origem(ambiente)})", null, null);
     }
+
+    /// <summary>As vigas do ambiente quando são fundas e os bicos vão para os vãos entre elas; nulo, se não.</summary>
+    public static IReadOnlyList<Viga>? VigasDosVaos(Edificio edificio, Ambiente ambiente, LimitesDeBico limites, OpcoesBicos opcoes) =>
+        Defletor(edificio, ambiente, limites, opcoes).Vaos;
 
     static string Origem(Ambiente a) => a.OrigemDoTeto switch
     {
@@ -160,9 +187,12 @@ static class BicosPorAmbiente
         _ => "teto",
     };
 
-    /// <summary>Vigas que passam pelo ambiente com o fundo abaixo do teto.</summary>
+    /// <summary>
+    /// Vigas do teto que passam pelo ambiente: com o fundo abaixo do teto e o topo até 50 cm dele (penduradas na laje). A
+    /// viga no meio da altura de um ambiente alto (a do mezanino) é outra obstrução, não a do teto.
+    /// </summary>
     static IEnumerable<Viga> Vigas(Edificio edificio, Ambiente ambiente) =>
-        edificio.Vigas.Where(v => ambiente.Teto is { } teto && v.Fundo < teto - 0.01 && v.Topo > ambiente.Piso
+        edificio.Vigas.Where(v => ambiente.Teto is { } teto && v.Fundo < teto - 0.01 && v.Topo > teto - 0.50
                                   && Enumerable.Range(0, 21).Any(k => BicosNoAmbiente.Dentro(ambiente.Contornos,
                                       new Ponto2(v.A.X + (v.B.X - v.A.X) * k / 20, v.A.Y + (v.B.Y - v.A.Y) * k / 20))));
 
