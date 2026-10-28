@@ -117,6 +117,37 @@ static class PranchaSpk
     }
 
     /// <summary>
+    /// Coloca a vista no centro da região e, se o viewport passar dela, sobe a escala até caber. A escala escolhida pelo
+    /// recorte não conta o que o Revit desenha além dele (cabeças dos eixos, anotações), e a planta saía da folha.
+    /// </summary>
+    public static Viewport? ColocarNaRegiao(Document doc, ViewSheet folha, View vista, Regiao regiao, IList<string> avisos)
+    {
+        var viewport = Colocar(doc, folha, vista, regiao.Centro, avisos);
+        if (viewport is null) return null;
+        var inicial = vista.Scale;
+        for (var tentativa = 0; tentativa < 6; tentativa++)
+        {
+            doc.Regenerate();
+            var caixa = viewport.GetBoxOutline();
+            if (caixa.MaximumPoint.X - caixa.MinimumPoint.X <= regiao.Largura && caixa.MaximumPoint.Y - caixa.MinimumPoint.Y <= regiao.Altura)
+                break;
+            if (VistasSpk.EscalaSeguinte(vista.Scale) is not { } maior)
+                break;
+            try { vista.Scale = maior; }
+            catch (Autodesk.Revit.Exceptions.ApplicationException) { break; }
+        }
+        if (vista.Scale != inicial)
+            avisos.Add($"{vista.Name}: não cabia na região da folha em 1:{inicial}; ficou em 1:{vista.Scale}.");
+
+        // O Revit centra pelo recorte do modelo; as anotações fora dele deixam o quadro torto. Centra o quadro inteiro.
+        doc.Regenerate();
+        var quadro = viewport.GetBoxOutline();
+        var centro = (quadro.MinimumPoint + quadro.MaximumPoint) / 2;
+        viewport.SetBoxCenter(viewport.GetBoxCenter() + new XYZ(regiao.Centro.X - centro.X, regiao.Centro.Y - centro.Y, 0));
+        return viewport;
+    }
+
+    /// <summary>
     /// Tira o título da vista (círculo, nome e escala) de um viewport, como nos quadros da Nova Era: usa um tipo de
     /// viewport sem título, criando "SPK — Sem título" a partir do tipo atual se o projeto não tiver.
     /// </summary>
@@ -192,6 +223,25 @@ static class PranchaSpk
         tipo.BackgroundPatternId = ElementId.InvalidElementId;
         tipo.IsMasking = false;
         return tipo.Id;
+    }
+
+    /// <summary>Região de máscara (fundo branco que cobre o modelo) com este laço, no plano da vista como em <see cref="RegiaoPreenchida" />.</summary>
+    public static void Mascara(Document doc, View vista, IReadOnlyList<XYZ> laco, Level? nivel)
+    {
+        Autodesk.Revit.Exceptions.ApplicationException? erro = null;
+        foreach (var z in nivel is null ? [0.0] : new[] { nivel.ProjectElevation, 0.0 })
+        {
+            try
+            {
+                FilledRegion.CreateMaskingRegion(doc, vista.Id, [Laco(laco, z)]);
+                return;
+            }
+            catch (Autodesk.Revit.Exceptions.ApplicationException e)
+            {
+                erro = e;
+            }
+        }
+        throw erro!;
     }
 
     /// <summary>

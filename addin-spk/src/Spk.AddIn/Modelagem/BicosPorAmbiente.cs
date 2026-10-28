@@ -131,6 +131,10 @@ static class BicosPorAmbiente
     {
         if (ambiente.Teto is not { } teto)
             return (null, "", "sem forro, laje ou telhado acima: não dá para saber a altura do bico");
+        // Sem nada acima (o teto saiu da altura do ambiente): área descoberta, como terraço ou jardim no telhado. Sem teto
+        // não há onde o calor se acumular para abrir o bico; o engenheiro decide como proteger.
+        if (ambiente.OrigemDoTeto == OrigemDoTeto.AlturaDoAmbiente)
+            return (null, "", "sem forro, laje ou telhado acima (área descoberta): o SPK não põe bicos; confira na arquitetura");
         var vigas = Vigas(edificio, ambiente).ToList();
         if (vigas.Count == 0)
         {

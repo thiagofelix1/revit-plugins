@@ -113,7 +113,7 @@ static class FolhasDoSetor
 
         var chave = MapaChave(contexto, setor, bicos.Select(b => b.Elemento!.Id).ToHashSet(), nivel, regiaoChave, avisos);
 
-        PranchaSpk.Colocar(doc, folha, planta, regiaoPlanta.Centro, avisos);
+        PranchaSpk.ColocarNaRegiao(doc, folha, planta, regiaoPlanta, avisos);
         PranchaSpk.Colocar(doc, folha, iso, regiao3d.Centro, avisos);
         if (chave is not null) PranchaSpk.Colocar(doc, folha, chave, regiaoChave.Centro, avisos);
         PranchaSpk.ColocarLegendas(doc, folha, lateral.Parte(0, 0, 1, 0.28), avisos);
@@ -138,7 +138,7 @@ static class FolhasDoSetor
         }
 
         var texto = string.Join("\n", folhas.Select(id => doc.GetElement(id) is ViewSheet s ? $"{s.SheetNumber}  {s.Name}" : ""));
-        texto += $"\n\nPlanta 1:{escala}, {daArea.Count} bicos na área, {etiquetas} etiquetas de diâmetro, {descidas} descidas marcadas.";
+        texto += $"\n\nPlanta 1:{planta.Scale}, {daArea.Count} bicos na área, {etiquetas} etiquetas de diâmetro, {descidas} descidas marcadas.";
         if (!gravado.Atende) texto += "\nO último cálculo NÃO ATENDE; as folhas mostram esse resultado.";
         if (!PranchaSpk.TemCarimbo(doc)) texto += "\nO projeto não tem carimbo. As folhas foram criadas sem ele.";
         if (avisos.Count > 0) texto += "\n\nAvisos:\n" + string.Join("\n", avisos.Distinct().Take(12).Select(a => "• " + a));

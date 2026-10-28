@@ -16,6 +16,28 @@ static class VistasSpk
         BuiltInCategory.OST_PipeAccessory, BuiltInCategory.OST_Sprinklers,
     ];
 
+    /// <summary>Categorias da arquitetura que só poluem a planta e o corte de incêndio (sem template do escritório).</summary>
+    static readonly BuiltInCategory[] CategoriasDeFundo =
+    [
+        BuiltInCategory.OST_Furniture, BuiltInCategory.OST_FurnitureSystems, BuiltInCategory.OST_Casework,
+        BuiltInCategory.OST_SpecialityEquipment, BuiltInCategory.OST_Planting, BuiltInCategory.OST_Entourage,
+        BuiltInCategory.OST_Parking,
+    ];
+
+    /// <summary>
+    /// Vínculos (arquitetura, estrutura) em meio-tom, como fundo da rede. É ajuste do elemento na vista, que o template do
+    /// escritório não controla: vale com ou sem template.
+    /// </summary>
+    public static void VinculosEmMeioTom(Document doc, View vista)
+    {
+        var meioTom = new OverrideGraphicSettings().SetHalftone(true);
+        foreach (var vinculo in new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance)).ToElementIds())
+        {
+            try { vista.SetElementOverrides(vinculo, meioTom); }
+            catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+        }
+    }
+
     public static double Pes(double metros) => UnitUtils.ConvertToInternalUnits(metros, UnitTypeId.Meters);
     public static double Metros(double pes) => UnitUtils.ConvertFromInternalUnits(pes, UnitTypeId.Meters);
     public static double Milimetros(double pes) => UnitUtils.ConvertFromInternalUnits(pes, UnitTypeId.Millimeters);
@@ -87,6 +109,9 @@ static class VistasSpk
         else
         {
             foreach (var c in CategoriasDaRede) Esconder(vista, new ElementId(c), false);
+            // Fundo de arquitetura limpo: móveis, vegetação e equipamentos não entram na prancha de incêndio. Vale para o
+            // projeto e para os vínculos (que seguem a vista).
+            foreach (var c in CategoriasDeFundo) Esconder(vista, new ElementId(c), true);
         }
 
         var vermelho = new OverrideGraphicSettings().SetProjectionLineColor(new Color(204, 0, 0));
@@ -166,6 +191,9 @@ static class VistasSpk
         catch (Autodesk.Revit.Exceptions.ArgumentException) { }
     }
 
+    /// <summary>A próxima escala da lista depois desta (mais reduzida), ou nula se já é a última.</summary>
+    public static int? EscalaSeguinte(int escala) => Escalas.Where(e => e > escala).Cast<int?>().FirstOrDefault();
+
     /// <summary>A menor escala da lista em que a extensão (em pés) cabe no espaço de papel (em mm).</summary>
     public static int EscalaQueCabe(double larguraPes, double alturaPes, double larguraPapelMm, double alturaPapelMm)
     {
@@ -190,6 +218,7 @@ static class VistasSpk
         }
 
         FaseDaRede(doc, planta);
+        VinculosEmMeioTom(doc, planta);
         AjustarIntervalo(planta, nivel, caixa, avisos);
         Recortar(planta, caixa);
         return planta;
@@ -233,6 +262,10 @@ static class VistasSpk
         vista.CropBox = crop;
         vista.CropBoxActive = true;
         vista.CropBoxVisible = false;
+        // Recorte também das anotações e eixos: sem ele, os eixos dos vínculos passam do recorte e a vista fica maior que a
+        // região dela na folha (a planta do setor saía pela borda).
+        try { vista.get_Parameter(BuiltInParameter.VIEWER_ANNOTATION_CROP_ACTIVE)?.Set(1); }
+        catch (Autodesk.Revit.Exceptions.ApplicationException) { }
     }
 
     /// <summary>Isométrico com caixa de corte em volta da rede, só tubulação e bicos, em linha simples.</summary>
@@ -348,6 +381,7 @@ static class VistasSpk
             corte.DetailLevel = ViewDetailLevel.Medium;
         }
         FaseDaRede(doc, corte);
+        VinculosEmMeioTom(doc, corte);
         return corte;
     }
 

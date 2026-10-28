@@ -91,6 +91,9 @@ static class FolhasSetorizacao
 
         PranchaSpk.Tentar(avisos, "Legenda", () =>
         {
+            // Fundo branco: à direita dos setores pode haver prédio (arquitetura vinculada), e a legenda ficava ilegível.
+            var fundo = -setores.Count * Linha - 3;
+            PranchaSpk.Mascara(doc, planta, [P(-3, 13), P(LarguraLegendaMm - 6, 13), P(LarguraLegendaMm - 6, fundo), P(-3, fundo)], planta.GenLevel);
             PranchaSpk.Nota(doc, planta, P(0, 6), "SETORIZAÇÃO DAS VGAs");
             for (var k = 0; k < setores.Count; k++)
             {
