@@ -21,6 +21,9 @@ public sealed record OpcoesBicos
 
     public TipoDeTeto Teto { get; init; } = TipoDeTeto.IncombustivelOuNaoObstruido;
     public DirecaoDosRamais Direcao { get; init; } = DirecaoDosRamais.LadoMaior;
+
+    /// <summary>Direção dos ramais em planta, no lugar de <see cref="Direcao" /> (Gerar rede: paralela à geral).</summary>
+    public Ponto2? Rumo { get; init; }
 }
 
 /// <summary>O que aconteceu num ambiente: bicos criados (ou existentes, na conferência), falhas e o motivo de recusa.</summary>
@@ -72,7 +75,7 @@ static class BicosPorAmbiente
                 resultados.Add(new ResultadoAmbiente(ambiente, 0, null, "", [], recusa));
                 continue;
             }
-            var posicao = BicosNoAmbiente.Posicionar(ambiente.Contornos, limites, Direcao(opcoes.Direcao));
+            var posicao = BicosNoAmbiente.Posicionar(ambiente.Contornos, limites, (opcoes.Rumo ?? Direcao(opcoes.Direcao)));
             var deste = new List<ElementId>();
             var motivo = TransacaoSegura.Executar(doc, "SPK — Bicos no ambiente", () =>
                 Criar(doc, simbolo, posicao.Bicos, ambiente.Piso, defletor!.Value, marcar, deste));
@@ -106,7 +109,7 @@ static class BicosPorAmbiente
             var dentro = bicos.Where(b => b.Defletor > ambiente.Piso && b.Defletor < teto + 0.05
                                           && BicosNoAmbiente.Dentro(ambiente.Contornos, b.Ponto!.Value)).ToList();
             var falhas = BicosNoAmbiente.Conferir(ambiente.Contornos, dentro.Select(b => b.Ponto!.Value).ToList(), limites,
-                Direcao(opcoes.Direcao)).ToList();
+                (opcoes.Rumo ?? Direcao(opcoes.Direcao))).ToList();
             var (esperado, _, _) = Defletor(edificio, ambiente, limites, opcoes);
             var abaixoDaViga = Vigas(edificio, ambiente).Any();
             foreach (var b in dentro)

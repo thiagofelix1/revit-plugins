@@ -104,9 +104,9 @@ public static class LigarAGeral
     }
 
     /// <summary>A ponta por onde a rede recebe água: a descida até o piso (com o cotovelo em cima) ou uma ponta horizontal.</summary>
-    sealed record EntradaDaRede(XYZ Ponto, Pipe? Descida, FamilyInstance? Cotovelo, Pipe Subgeral, Connector Ponta);
+    internal sealed record EntradaDaRede(XYZ Ponto, Pipe? Descida, FamilyInstance? Cotovelo, Pipe Subgeral, Connector Ponta);
 
-    static EntradaDaRede? Entrada(Document doc, HashSet<ElementId> rede)
+    internal static EntradaDaRede? Entrada(Document doc, HashSet<ElementId> rede)
     {
         var aberta = rede.Select(doc.GetElement).OfType<Pipe>()
             .SelectMany(t => t.ConnectorManager.Connectors.Cast<Connector>().Where(c => c.ConnectorType == ConnectorType.End && !c.IsConnected)
@@ -131,9 +131,12 @@ public static class LigarAGeral
     static string? Ligar(Document doc, EntradaDaRede entrada, List<Pipe> pedacos, List<Pipe> novos)
     {
         var subgeral = entrada.Subgeral;
-        if (entrada.Cotovelo is not null) doc.Delete(entrada.Cotovelo.Id);
-        if (entrada.Descida is not null) doc.Delete(entrada.Descida.Id);
-        doc.Regenerate();
+        Passo("tirar a descida", () =>
+        {
+            if (entrada.Cotovelo is not null) doc.Delete(entrada.Cotovelo.Id);
+            if (entrada.Descida is not null) doc.Delete(entrada.Descida.Id);
+            doc.Regenerate();
+        });
         var ponta = subgeral.ConnectorManager.Connectors.Cast<Connector>()
             .Where(c => c.ConnectorType == ConnectorType.End && !c.IsConnected)
             .OrderBy(c => c.Origin.DistanceTo(entrada.Ponto)).FirstOrDefault();
@@ -144,20 +147,30 @@ public static class LigarAGeral
         if (Math.Abs(eixoSub.Direction.Z) > 0.05) return "a ponta de entrada da rede não é horizontal";
         var sentido = Horizontal(p - outraPonta).Normalize();
 
-        // O pé da perpendicular da entrada até a geral, em planta, longe das pontas e dos tês que já existem.
+        // Onde a ligação encontra a geral, em planta, longe das pontas e dos tês que já existem: se a subgeral aponta para a
+        // geral (até ~8°), no cruzamento da reta dela com a geral, e ela é esticada até lá (um cotovelo entre tubos quase
+        // alinhados o Revit recusa); senão, no pé da perpendicular da entrada até a geral.
         Pipe? geral = null;
         XYZ? g = null;
+        var esticar = false;
         foreach (var pedaco in pedacos.Where(t => t.IsValidObject).OrderBy(t => Distancia(t, p)))
         {
             var linha = (Line)((LocationCurve)pedaco.Location).Curve;
             var a = linha.GetEndPoint(0);
-            var t = Horizontal(p - a).DotProduct(Horizontal(linha.Direction).Normalize());
+            var dg = Horizontal(linha.Direction).Normalize();
+            var normal = new XYZ(-dg.Y, dg.X, 0);
+            var lado = Horizontal(a - p).DotProduct(normal);
+            var avanco = sentido.DotProduct(normal);
+            var cruza = Math.Abs(avanco) > Math.Cos(8 * Math.PI / 180) && lado / avanco > 0;
+            var alvo = cruza ? p + sentido * (lado / avanco) : p + normal * lado;
+            var t = Horizontal(alvo - a).DotProduct(dg);
             if (t < MargemPonta || t > linha.Length - MargemPonta) continue;
             geral = pedaco;
             g = a + linha.Direction * t;
+            esticar = cruza;
             break;
         }
-        if (geral is null || g is null) return "a geral não passa em frente a esta rede (o pé da perpendicular cai fora dela ou perto de um tê)";
+        if (geral is null || g is null) return "a geral não passa em frente a esta rede (o encontro cai fora dela ou perto de um tê)";
 
         var rumo = Horizontal(g - p);
         if (rumo.GetLength() < MargemPonta) return "a entrada da rede fica em cima da geral";
@@ -176,12 +189,19 @@ public static class LigarAGeral
         var canto = new XYZ(g.X, g.Y, p.Z);
 
         // Trecho horizontal até em frente à geral: a própria subgeral esticada, se aponta para lá; senão um tubo novo.
-        Pipe horizontal;
-        var esticar = rumo.DotProduct(sentido) > 0.999;
+        Pipe horizontal = subgeral;
         if (esticar)
         {
-            ((LocationCurve)subgeral.Location).Curve = Line.CreateBound(outraPonta, mesmaAltura ? g : canto);
-            horizontal = subgeral;
+            // A linha nova mantém a ordem das pontas do tubo (como em Recuar): invertida, o Revit não estica o tubo.
+            var ate = mesmaAltura ? g : canto;
+            var pontaEhInicio = eixoSub.GetEndPoint(0).DistanceTo(p) < eixoSub.GetEndPoint(1).DistanceTo(p);
+            Passo("esticar a subgeral", () =>
+            {
+                ((LocationCurve)subgeral.Location).Curve = pontaEhInicio ? Line.CreateBound(ate, outraPonta) : Line.CreateBound(outraPonta, ate);
+                doc.Regenerate();
+                if (!subgeral.ConnectorManager.Connectors.Cast<Connector>().Any(c => c.Origin.DistanceTo(ate) < GeradorMalha.Pes(0.02)))
+                    throw new InvalidOperationException("o Revit não esticou o tubo até a geral");
+            });
         }
         else
         {
@@ -191,17 +211,36 @@ public static class LigarAGeral
         var subida = mesmaAltura ? null : GeradorMalha.CriarTubo(doc, sistema, subgeral.PipeType.Id, nivel.Id, canto, g, subgeral.Diameter, marcar: false);
         if (subida is not null) novos.Add(subida);
 
-        var outroPedaco = doc.GetElement(PlumbingUtils.BreakCurve(doc, geral.Id, g)) as Pipe;
+        Pipe? outroPedaco = null;
+        Passo("partir a geral", () =>
+        {
+            outroPedaco = doc.GetElement(PlumbingUtils.BreakCurve(doc, geral.Id, g)) as Pipe;
+            doc.Regenerate();
+        });
         if (outroPedaco is not null)
         {
             pedacos.Add(outroPedaco);
             novos.Add(outroPedaco);
         }
-        doc.Regenerate();
 
-        if (!esticar && TracarRamal.Juntar(doc, p, nivel, [subgeral, horizontal]) is { } naEntrada) return naEntrada;
-        if (subida is not null && TracarRamal.Juntar(doc, canto, nivel, [horizontal, subida]) is { } noCanto) return noCanto;
-        return TracarRamal.Juntar(doc, g, nivel, [geral, outroPedaco, subida ?? horizontal]);
+        string? motivo = null;
+        if (!esticar) Passo("cotovelo na entrada", () => motivo = TracarRamal.Juntar(doc, p, nivel, [subgeral, horizontal]));
+        if (motivo is null && subida is not null) Passo("cotovelo da subida", () => motivo = TracarRamal.Juntar(doc, canto, nivel, [horizontal, subida]));
+        if (motivo is null) Passo("tê na geral", () => motivo = TracarRamal.Juntar(doc, g, nivel, [geral, outroPedaco, subida ?? horizontal]));
+        return motivo;
+    }
+
+    /// <summary>Roda um passo da ligação; se o Revit recusar, a mensagem diz qual passo foi.</summary>
+    static void Passo(string nome, Action acao)
+    {
+        try
+        {
+            acao();
+        }
+        catch (Exception e) when (e is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException)
+        {
+            throw new InvalidOperationException($"{nome}: {e.Message}", e);
+        }
     }
 
     /// <summary>Tudo o que está ligado ao elemento pelos conectores (sem o sistema).</summary>

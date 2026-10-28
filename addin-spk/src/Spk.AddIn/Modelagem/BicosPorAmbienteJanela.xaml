@@ -25,6 +25,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <TextBlock Text="Arranjo" VerticalAlignment="Center" Margin="0,4,8,4"/>
             <ComboBox x:Name="Arranjo" Grid.Column="1" Margin="0,4,16,4">
@@ -35,6 +36,10 @@
             <TextBox x:Name="Drop" Grid.Column="3" Margin="0,4" Padding="4"/>
             <CheckBox x:Name="Diametros" Grid.Row="1" Grid.ColumnSpan="4" Margin="0,4"
                       Content="Aplicar os diâmetros da tabela no fim (risco leve e ordinário; depois confira com Calcular)"/>
+            <CheckBox x:Name="JuntarNumSetor" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,4,8,4" VerticalAlignment="Center"
+                      Content="Juntar as salas num setor, com a geral passando pelo ambiente:"
+                      ToolTip="As salas marcadas ganham a rede com a entrada voltada para a geral; a geral corre pelo eixo do ambiente escolhido (o corredor), com a descida da VGA numa ponta, e as salas são ligadas a ela (Ligar à geral). O ambiente da geral fica sem bicos."/>
+            <ComboBox x:Name="GeralPor" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,4"/>
         </Grid>
 
         <Grid DockPanel.Dock="Bottom" Margin="0,12,0,0">

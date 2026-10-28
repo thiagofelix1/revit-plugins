@@ -60,13 +60,15 @@ public class GerarRedeCommand : ExternalCommand
             ultimas = opcoes;
 
             var criados = new List<ElementId>();
-            var redes = GerarRede.Executar(doc, dados, edificio, janela.Escolhidos, opcoes, criados);
+            var (redes, geral) = GerarRede.ExecutarComGeral(doc, dados, edificio, janela.Escolhidos, opcoes, criados);
+            criados = criados.Where(id => doc.GetElement(id) is not null).ToList();
             if (criados.Count > 0) ui.Selection.SetElementIds(criados);
             new TaskDialog(Titulo)
             {
-                MainInstruction = $"Rede gerada em {redes.Count(r => r.Recusa is null)} de {redes.Count} ambiente(s)",
-                MainContent = string.Join("\n", redes.Select(r => r.Texto())) +
-                              "\n\nO que foi criado fica selecionado. Ctrl+Z desfaz cada ambiente. Depois: Verificar modelo e Calcular.",
+                MainInstruction = $"Rede gerada em {redes.Count(r => r.Recusa is null)} de {redes.Count} ambiente(s)" +
+                                  (geral is { Ligacao: { } l } ? $", {l.Ligadas} ligada(s) à geral" : ""),
+                MainContent = string.Join("\n", redes.Select(r => r.Texto())) + (geral is null ? "" : "\n\n" + geral.Texto()) +
+                              "\n\nO que foi criado fica selecionado. Ctrl+Z desfaz cada etapa. Depois: Verificar modelo e Calcular.",
             }.Show();
         }
         catch (Autodesk.Revit.Exceptions.OperationCanceledException)

@@ -284,9 +284,11 @@ static class TesteAutomatico
                     var dados = DadosProjeto.Carregar(doc!) ?? throw new InvalidOperationException("Mande \"dados\" no cenário.");
                     var edificio = Arquitetura.LeituraDoEdificio.Ler(doc!);
                     var criados = new List<ElementId>();
-                    var feitos = Modelagem.GerarRede.Executar(doc!, dados, edificio, Filtrar(edificio.Ambientes, cenario.Ambientes), pedidoRede, criados);
+                    var (feitos, geral) = Modelagem.GerarRede.ExecutarComGeral(doc!, dados, edificio, Filtrar(edificio.Ambientes, cenario.Ambientes), pedidoRede, criados);
                     relatorio.Rede = feitos.Select(r => r.Texto().Replace("\n", " ")).ToList();
-                    return $"{criados.Count} elementos em {feitos.Count(r => r.Recusa is null)} de {feitos.Count} ambientes";
+                    if (geral is not null) relatorio.Geral = geral.Texto().Split('\n').ToList();
+                    return $"{criados.Count} elementos em {feitos.Count(r => r.Recusa is null)} de {feitos.Count} ambientes" +
+                           (geral is null ? "" : "; " + geral.Texto().Split('\n')[0]);
                 });
 
             if (cenario.LigarAGeral is { } pedidoGeral)

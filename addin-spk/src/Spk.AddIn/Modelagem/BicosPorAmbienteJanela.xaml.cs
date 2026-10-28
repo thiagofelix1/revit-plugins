@@ -59,6 +59,12 @@ public partial class BicosPorAmbienteJanela : Window
             Arranjo.SelectedIndex = rede.Arranjo == AddIn.Arranjo.Lateral ? 1 : 0;
             Drop.Text = Entrada.F(rede.DropM);
             Diametros.IsChecked = rede.AplicarDiametros;
+            var nomes = edificio.Ambientes.OrderBy(a => a.Piso).ThenBy(a => a.Numero, StringComparer.CurrentCulture)
+                .Select(a => new ItemDeAmbiente(a)).ToList();
+            GeralPor.ItemsSource = nomes;
+            GeralPor.SelectedItem = nomes.FirstOrDefault(n => n.Ambiente.Id == rede.GeralPor)
+                                    ?? nomes.FirstOrDefault(n => PareceCorredor(n.Ambiente.Nome)) ?? nomes.FirstOrDefault();
+            JuntarNumSetor.IsChecked = rede.GeralPor is not null;
         }
         Resumo.Text = resumo;
         // Começa com os ambientes da última vez (nenhum na primeira): o engenheiro escolhe onde mexer, e marcar o prédio
@@ -102,6 +108,7 @@ public partial class BicosPorAmbienteJanela : Window
                     DropM = Entrada.Numero(Drop.Text, "Do defletor ao ramal", 0.15, 2),
                     AplicarDiametros = Diametros.IsChecked == true,
                     Bicos = Opcoes,
+                    GeralPor = JuntarNumSetor.IsChecked == true ? (GeralPor.SelectedItem as ItemDeAmbiente)?.Ambiente.Id : null,
                 };
             Posicionar = posicionar;
             ultimosMarcados.Clear();
@@ -113,6 +120,15 @@ public partial class BicosPorAmbienteJanela : Window
             MessageBox.Show(this, ex.Message, Title, MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
+
+    /// <summary>Um ambiente na lista da geral: "nível — número nome".</summary>
+    sealed record ItemDeAmbiente(Ambiente Ambiente)
+    {
+        public override string ToString() => $"{Ambiente.Nivel} — {Ambiente.Numero} {Ambiente.Nome}".Trim();
+    }
+
+    static bool PareceCorredor(string nome) =>
+        new[] { "corredor", "circula", "hall", "passagem", "corridor" }.Any(p => nome.Contains(p, StringComparison.CurrentCultureIgnoreCase));
 
     void Todos_Click(object sender, RoutedEventArgs e) => linhas.ForEach(l => l.Marcado = true);
 
