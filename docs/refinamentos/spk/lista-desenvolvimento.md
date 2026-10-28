@@ -82,6 +82,7 @@ Pronto quando um setor da Nova Era (ou de um projeto do engenheiro) é desenhado
 - [ ] **Um bico por vão entre vigas** (o que mais falta): no Snowdon (exemplo da Autodesk, arquitetura e estrutura vinculadas), 42 dos 67 ambientes foram recusados por viga (23 deles pela viga de 52 cm, que põe o defletor a 573 mm da laje; máximo 560 mm). Em prédio de concreto brasileiro, viga é a regra.
 - [ ] Ambiente com mais de um teto (parte sob mezanino, parte em pé-direito duplo): hoje vale o teto no ponto do ambiente, e uma viga de outro nível aparece como "viga de 4 m".
 - [ ] Ambiente que não é retângulo: o posicionamento pode sair fora da Tabela 2 (o Snowdon mostrou S de 6 m no 200 e no R100; a conferência avisa); a subgeral pode sair do ambiente; fileira colada à parede da entrada recusa o ambiente.
+- [x] Editar bico com a rede ligada: Inserir bico (no ramal clicado, igual ao bico mais perto da rede), Apagar bico (com o caminho só dele até o primeiro encontro, que é refeito: tubo, cotovelo, tê ou cruzeta) e Mover bico (apaga e insere no ponto novo, religado ao ramal mais perto da mesma rede). Falta: mover vários de uma vez; mover mantendo o ramal quando o bico continua na linha dele.
 - [ ] Aviso de colisão com viga e duto, e de inclinação.
 - [ ] Rede seguindo telhado inclinado.
 - [ ] Setorização: área de cada setor contra a Tabela 8; depois, sugestão de cortes.

@@ -56,6 +56,16 @@ public class SpkApplication : IExternalApplication
             "Junta as redes das salas num setor: desenhe a geral com a ferramenta Tubo (da VGA pelo corredor), selecione-a e clique " +
             "aqui. Cada rede solta perde a descida até o piso e ganha um tubo até a geral, com tê. Ctrl+Z desfaz tudo.");
         Pequenos(rede,
+            (typeof(InserirBicoCommand), "Inserir bico", Icones.LigarBicos,
+                "Clique no ramal onde vai o bico novo: ele sai igual ao bico mais perto da mesma rede (tipo e altura), já com tê e " +
+                "descida. Vários cliques seguidos; Esc termina. Avisa se ficou a menos de 1,8 m de outro bico."),
+            (typeof(ApagarBicoCommand), "Apagar bico", Icones.LigarBicos,
+                "Apaga os bicos selecionados com a descida e o braço deles e emenda a rede: o tê vira tubo, a cruzeta vira tê, e a " +
+                "ponta do ramal que só servia ao bico sai."),
+            (typeof(MoverBicoCommand), "Mover bico", Icones.LigarBicos,
+                "Leva o bico para o ponto que você clicar na planta, religado ao ramal mais perto da mesma rede (com braço, se ficar " +
+                "de lado), e emenda a rede no lugar antigo."));
+        Pequenos(rede,
             (typeof(GerarMalhaCommand), "Malha retangular", Icones.Malha,
                 "Cria uma malha retangular de bicos e tubos já conectados, no ponto que você clicar, com a geometria de Dados do " +
                 "esboço. Para testar sem arquitetura."),

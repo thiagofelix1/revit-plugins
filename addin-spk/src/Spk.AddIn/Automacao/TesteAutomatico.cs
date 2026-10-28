@@ -301,6 +301,14 @@ static class TesteAutomatico
                     return feito.Texto();
                 });
 
+            if (cenario.EditarBicos is { Count: > 0 } edicoes)
+                Etapa(relatorio, "editarBicos", () =>
+                {
+                    var linhas = edicoes.Select(e => e.Op + ": " + Editar(doc!, e)).ToList();
+                    relatorio.Edicoes = linhas;
+                    return string.Join("\n", linhas);
+                });
+
             if (cenario.InspecionarVinculos)
                 relatorio.Vinculos = Diagnostico.Vinculos(doc!);
 
@@ -387,6 +395,37 @@ static class TesteAutomatico
             catch (Exception ex) { relatorio.Erro ??= "Ao fechar: " + ex.Message; }
         }
         return relatorio;
+    }
+
+    /// <summary>Roda uma edição de bico do cenário e devolve o texto dela.</summary>
+    static string Editar(Document doc, OperacaoDeBico e)
+    {
+        XYZ P(double[] m) => new(m[0] / 0.3048, m[1] / 0.3048, 0);
+        double EmPlanta(XYZ a, XYZ b) => new XYZ(a.X - b.X, a.Y - b.Y, 0).GetLength();
+        FamilyInstance BicoPerto(double[] m) => new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Sprinklers)
+            .WhereElementIsNotElementType().OfType<FamilyInstance>().Where(b => b.Location is LocationPoint)
+            .OrderBy(b => EmPlanta(((LocationPoint)b.Location).Point, P(m))).First();
+        switch (e.Op)
+        {
+            case "apagar":
+                return Modelagem.EditarBicos.Apagar(doc, BicoPerto(e.Perto!)).Texto("apagado");
+            case "mover":
+                return Modelagem.EditarBicos.Mover(doc, BicoPerto(e.Perto!), P(e.Para!)).Texto("movido");
+            case "inserir":
+                var alvo = P(e.Em!);
+                var ramal = new FilteredElementCollector(doc).OfClass(typeof(Autodesk.Revit.DB.Plumbing.Pipe)).Cast<Autodesk.Revit.DB.Plumbing.Pipe>()
+                    .Where(t => t.Location is LocationCurve { Curve: Line l } && Math.Abs(l.Direction.Z) < 0.05)
+                    .OrderBy(t =>
+                    {
+                        var l = (Line)((LocationCurve)t.Location).Curve;
+                        var q = l.Project(new XYZ(alvo.X, alvo.Y, l.GetEndPoint(0).Z)).XYZPoint;
+                        return EmPlanta(q, alvo);
+                    }).First();
+                var linha = (Line)((LocationCurve)ramal.Location).Curve;
+                return Modelagem.EditarBicos.Inserir(doc, ramal, linha.Project(new XYZ(alvo.X, alvo.Y, linha.GetEndPoint(0).Z)).XYZPoint).Texto("inserido");
+            default:
+                return "operação desconhecida";
+        }
     }
 
     static IReadOnlyList<Spk.Motor.Modelo.Ambiente> Filtrar(IReadOnlyList<Spk.Motor.Modelo.Ambiente> ambientes, List<string>? nomes) =>
@@ -983,9 +1022,25 @@ sealed class Cenario
     /// <summary>Desenha esta geral e liga a ela as redes soltas (Ligar à geral), depois de gerar a rede.</summary>
     public PedidoGeral? LigarAGeral { get; set; }
 
+    /// <summary>Edições de bico, em ordem, depois de gerar e ligar a rede (Apagar, Inserir e Mover bico).</summary>
+    public List<OperacaoDeBico>? EditarBicos { get; set; }
+
     /// <summary>Numeração e código das folhas a gravar no padrão antes de gerar.</summary>
     public AjustePadrao? Padrao { get; set; }
     public Esperado? Esperado { get; set; }
+}
+
+/// <summary>
+/// Uma edição de bico: "apagar" o bico mais perto de <see cref="Perto" />, "inserir" no ramal mais perto de
+/// <see cref="Em" /> (no ponto dele mais perto), "mover" o bico mais perto de <see cref="Perto" /> para <see cref="Para" />.
+/// Pontos em planta, em m nas coordenadas do projeto.
+/// </summary>
+sealed class OperacaoDeBico
+{
+    public string Op { get; set; } = "";
+    public double[]? Perto { get; set; }
+    public double[]? Em { get; set; }
+    public double[]? Para { get; set; }
 }
 
 /// <summary>Geral desenhada pelo teste, como o engenheiro faria com a ferramenta Tubo (ver Cenas.DesenharGeral).</summary>
@@ -1100,6 +1155,7 @@ sealed class RelatorioCenario
     public List<string>? Bicos { get; set; }
     public List<string>? Rede { get; set; }
     public List<string>? Geral { get; set; }
+    public List<string>? Edicoes { get; set; }
     public List<string>? CarimbosSpk { get; set; }
 
     /// <summary>Só com "esperado" no cenário: se tudo bateu, e o que não bateu.</summary>
