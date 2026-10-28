@@ -270,8 +270,9 @@ static class TesteAutomatico
                     var edificio = Arquitetura.LeituraDoEdificio.Ler(doc!);
                     var limites = BicosPorAmbiente.Limites(dados, pedidoBicos);
                     var criados = new List<ElementId>();
-                    var feitos = BicosPorAmbiente.Posicionar(doc!, edificio, edificio.Ambientes, limites, pedidoBicos, criados);
-                    var conferidos = BicosPorAmbiente.Conferir(doc!, edificio, edificio.Ambientes, limites, pedidoBicos);
+                    var alvo = Filtrar(edificio.Ambientes, cenario.Ambientes);
+                    var feitos = BicosPorAmbiente.Posicionar(doc!, edificio, alvo, limites, pedidoBicos, criados);
+                    var conferidos = BicosPorAmbiente.Conferir(doc!, edificio, alvo, limites, pedidoBicos);
                     relatorio.Bicos = feitos.Select(r => "posicionar | " + r.Texto().Replace("\n", " ")).Concat(
                         conferidos.Select(r => "conferir | " + r.Texto().Replace("\n", " "))).ToList();
                     return $"{criados.Count} bicos em {feitos.Count(r => r.Recusa is null)} ambientes";
@@ -283,9 +284,19 @@ static class TesteAutomatico
                     var dados = DadosProjeto.Carregar(doc!) ?? throw new InvalidOperationException("Mande \"dados\" no cenário.");
                     var edificio = Arquitetura.LeituraDoEdificio.Ler(doc!);
                     var criados = new List<ElementId>();
-                    var feitos = Modelagem.GerarRede.Executar(doc!, dados, edificio, edificio.Ambientes, pedidoRede, criados);
+                    var feitos = Modelagem.GerarRede.Executar(doc!, dados, edificio, Filtrar(edificio.Ambientes, cenario.Ambientes), pedidoRede, criados);
                     relatorio.Rede = feitos.Select(r => r.Texto().Replace("\n", " ")).ToList();
                     return $"{criados.Count} elementos em {feitos.Count(r => r.Recusa is null)} de {feitos.Count} ambientes";
+                });
+
+            if (cenario.LigarAGeral is { } pedidoGeral)
+                Etapa(relatorio, "ligarAGeral", () =>
+                {
+                    var geral = Cenas.DesenharGeral(doc!, pedidoGeral);
+                    var redes = Modelagem.LigarAGeral.RedesSoltas(doc!, geral);
+                    var feito = Modelagem.LigarAGeral.Executar(doc!, geral, redes);
+                    relatorio.Geral = feito.Texto().Split('\n').ToList();
+                    return feito.Texto();
                 });
 
             if (cenario.InspecionarVinculos)
@@ -375,6 +386,9 @@ static class TesteAutomatico
         }
         return relatorio;
     }
+
+    static IReadOnlyList<Spk.Motor.Modelo.Ambiente> Filtrar(IReadOnlyList<Spk.Motor.Modelo.Ambiente> ambientes, List<string>? nomes) =>
+        nomes is { Count: > 0 } ? ambientes.Where(a => nomes.Any(n => a.Nome.Contains(n, StringComparison.CurrentCultureIgnoreCase))).ToList() : ambientes;
 
     /// <summary>Roda a etapa, mede o tempo e anota o texto ou o erro. Erro interrompe o cenário.</summary>
     static void Etapa(RelatorioCenario relatorio, string nome, Func<string> acao)
@@ -961,9 +975,30 @@ sealed class Cenario
     /// <summary>Gerar rede em todos os ambientes da arquitetura, com estas opções.</summary>
     public OpcoesRede? GerarRede { get; set; }
 
+    /// <summary>Só os ambientes cujo nome contém um destes textos, em Bicos por ambiente e Gerar rede (vazio: todos).</summary>
+    public List<string>? Ambientes { get; set; }
+
+    /// <summary>Desenha esta geral e liga a ela as redes soltas (Ligar à geral), depois de gerar a rede.</summary>
+    public PedidoGeral? LigarAGeral { get; set; }
+
     /// <summary>Numeração e código das folhas a gravar no padrão antes de gerar.</summary>
     public AjustePadrao? Padrao { get; set; }
     public Esperado? Esperado { get; set; }
+}
+
+/// <summary>Geral desenhada pelo teste, como o engenheiro faria com a ferramenta Tubo (ver Cenas.DesenharGeral).</summary>
+sealed class PedidoGeral
+{
+    /// <summary>Pontos em planta, em metros nas coordenadas do projeto: [x, y].</summary>
+    public List<double[]> Pontos { get; set; } = [];
+
+    /// <summary>Altura da geral acima do nível mais baixo (m).</summary>
+    public double AlturaM { get; set; } = 3.0;
+
+    public int Dn { get; set; } = 65;
+
+    /// <summary>Descida até o piso no primeiro ponto: a entrada do setor (a subida da VGA).</summary>
+    public bool DescidaNoInicio { get; set; } = true;
 }
 
 sealed class PedidoVinculos
@@ -1062,6 +1097,7 @@ sealed class RelatorioCenario
     public List<string>? Arquitetura { get; set; }
     public List<string>? Bicos { get; set; }
     public List<string>? Rede { get; set; }
+    public List<string>? Geral { get; set; }
     public List<string>? CarimbosSpk { get; set; }
 
     /// <summary>Só com "esperado" no cenário: se tudo bateu, e o que não bateu.</summary>

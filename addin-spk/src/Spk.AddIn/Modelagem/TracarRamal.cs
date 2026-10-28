@@ -199,7 +199,7 @@ public static class TracarRamal
     /// Liga as pontas soltas destes tubos que se encontram no ponto, com a peça que o número de pontas pede: cotovelo
     /// (2), tê (3) ou cruzeta (4). Os tubos recuam 1 cm e o Revit põe a peça das preferências de roteamento.
     /// </summary>
-    static string? Juntar(Document doc, XYZ ponto, Level nivel, IReadOnlyList<Pipe?> tubos)
+    internal static string? Juntar(Document doc, XYZ ponto, Level nivel, IReadOnlyList<Pipe?> tubos)
     {
         var abertos = Abertos(ponto, tubos);
         foreach (var c in abertos) GeradorMalha.Recuar(c, Recuo);

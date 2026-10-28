@@ -51,6 +51,10 @@ public class SpkApplication : IExternalApplication
             "Ligar\nbicos", Icones.LigarBicos,
             "Liga bicos soltos ao ramal que passa sobre eles: parte o ramal, põe o tê e faz a descida (ou o braço, o cotovelo e a " +
             "descida, se o bico está de lado). Selecione os bicos e o ramal antes, ou clique e selecione depois. Ctrl+Z desfaz tudo.");
+        Botao<LigarAGeralCommand>(rede,
+            "Ligar à\ngeral", Icones.TracarRamal,
+            "Junta as redes das salas num setor: desenhe a geral com a ferramenta Tubo (da VGA pelo corredor), selecione-a e clique " +
+            "aqui. Cada rede solta perde a descida até o piso e ganha um tubo até a geral, com tê. Ctrl+Z desfaz tudo.");
         Pequenos(rede,
             (typeof(GerarMalhaCommand), "Malha retangular", Icones.Malha,
                 "Cria uma malha retangular de bicos e tubos já conectados, no ponto que você clicar, com a geometria de Dados do " +

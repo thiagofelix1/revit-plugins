@@ -18,6 +18,7 @@ static class Cenas
         "subgeralComBicosSoltos" => SubgeralComBicosSoltos(doc),
         "subgeralComFileiras" => SubgeralComFileiras(doc),
         "arquiteturaVinculada" => ArquiteturaVinculada(doc),
+        "andarComSalas" => AndarComSalas(doc),
         _ => throw new InvalidOperationException($"Cena desconhecida: \"{nome}\"."),
     };
 
@@ -153,6 +154,86 @@ static class Cenas
             t.Commit();
         }
         return new Cena("Arquitetura (2 salas, forro na A, laje sobre as duas) e estrutura (1 viga) vinculadas, deslocadas 20 m e 10 m.", [], []);
+    }
+
+    /// <summary>
+    /// Apaga a rede da cópia e vincula uma arquitetura de um andar, deslocada 20 m em X e 10 m em Y: corredor de 24 × 2,5 m
+    /// (y de 0 a 2,5) e, ao norte dele, quatro salas de 6 × 8 m ("Sala 1" a "Sala 4", x de 0 a 24), paredes de 4 m, forro
+    /// a 2,80 m nas salas e laje no nível 4 m sobre tudo. Sem estrutura: o teste é juntar as salas num setor.
+    /// </summary>
+    static Cena AndarComSalas(Document doc)
+    {
+        var app = doc.Application;
+        var pasta = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "SPK", "testes", "saida");
+        System.IO.Directory.CreateDirectory(pasta);
+        var arquivo = System.IO.Path.Combine(pasta, "vinculo-andar-com-salas.rvt");
+        double M(double metros) => GeradorMalha.Pes(metros);
+
+        var arq = app.NewProjectDocument(Template(app, "DefaultBRAPTB.rte"));
+        using (var t = new Transaction(arq, "SPK — andar de teste"))
+        {
+            t.Start();
+            var (terreo, superior) = Niveis(arq);
+            var tipoParede = arq.GetDefaultElementTypeId(ElementTypeGroup.WallType);
+            XYZ P(double x, double y) => new(M(x), M(y), terreo.Elevation);
+            var paredes = new List<(XYZ, XYZ)> { (P(0, 0), P(24, 0)), (P(24, 0), P(24, 10.5)), (P(24, 10.5), P(0, 10.5)), (P(0, 10.5), P(0, 0)), (P(0, 2.5), P(24, 2.5)) };
+            foreach (var x in new[] { 6.0, 12.0, 18.0 }) paredes.Add((P(x, 2.5), P(x, 10.5)));
+            foreach (var (a, b) in paredes) Wall.Create(arq, Line.CreateBound(a, b), tipoParede, terreo.Id, M(4), 0, false, false);
+            arq.Regenerate();
+            var corredor = arq.Create.NewRoom(terreo, new UV(M(12), M(1.25)));
+            corredor.get_Parameter(BuiltInParameter.ROOM_NAME).Set("Corredor");
+            corredor.get_Parameter(BuiltInParameter.ROOM_NUMBER).Set("200");
+            var tipoForro = new FilteredElementCollector(arq).OfClass(typeof(CeilingType)).FirstElementId();
+            for (var k = 0; k < 4; k++)
+            {
+                var sala = arq.Create.NewRoom(terreo, new UV(M(6 * k + 3), M(6.5)));
+                sala.get_Parameter(BuiltInParameter.ROOM_NAME).Set($"Sala {k + 1}");
+                sala.get_Parameter(BuiltInParameter.ROOM_NUMBER).Set($"20{k + 1}");
+                var forro = Ceiling.Create(arq, [Retangulo(M(6 * k + 0.1), M(2.6), M(6 * k + 5.9), M(10.4), terreo.Elevation)], tipoForro, terreo.Id);
+                forro.get_Parameter(BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM).Set(M(2.8));
+            }
+            Floor.Create(arq, [Retangulo(0, 0, M(24), M(10.5), superior.Elevation)], arq.GetDefaultElementTypeId(ElementTypeGroup.FloorType), superior.Id);
+            t.Commit();
+        }
+        arq.SaveAs(arquivo, new SaveAsOptions { OverwriteExistingFile = true });
+        arq.Close(false);
+
+        using (var t = new Transaction(doc, "SPK — vínculo de teste"))
+        {
+            t.Start();
+            ApagarRede(doc);
+            var tipo = RevitLinkType.Create(doc, ModelPathUtils.ConvertUserVisiblePathToModelPath(arquivo), new RevitLinkOptions(false));
+            var instancia = RevitLinkInstance.Create(doc, tipo.ElementId);
+            ElementTransformUtils.MoveElement(doc, instancia.Id, new XYZ(M(20), M(10), 0));
+            t.Commit();
+        }
+        return new Cena("Andar vinculado (deslocado 20 m e 10 m): corredor de 24 × 2,5 m e 4 salas de 6 × 8 m com forro a 2,80 m.", [], []);
+    }
+
+    /// <summary>
+    /// A geral que o engenheiro desenharia: tubos horizontais pelos pontos (m, coordenadas do projeto) na altura pedida
+    /// acima do nível mais baixo, com cotovelos, e uma descida até o piso no primeiro ponto (a subida da VGA).
+    /// </summary>
+    public static List<Pipe> DesenharGeral(Document doc, PedidoGeral pedido)
+    {
+        using var t = new Transaction(doc, "SPK — geral de teste");
+        t.Start();
+        var nivel = GeradorMalha.Nivel(doc) ?? throw new InvalidOperationException("O projeto não tem nível.");
+        var tipo = GeradorMalha.TipoComTe(doc);
+        var sistema = GeradorMalha.Sistema(doc) ?? throw new InvalidOperationException("O projeto não tem sistema de tubulação.");
+        var diametro = GeradorMalha.DiametroComTe(doc, tipo, pedido.Dn);
+        double M(double metros) => GeradorMalha.Pes(metros);
+        var z = nivel.Elevation + M(pedido.AlturaM);
+        var pontos = pedido.Pontos.Select(p => new XYZ(M(p[0]), M(p[1]), z)).ToList();
+        var tubos = new List<Pipe>();
+        if (pedido.DescidaNoInicio)
+            tubos.Add(GeradorMalha.CriarTubo(doc, sistema.Id, tipo.Id, nivel.Id, new XYZ(pontos[0].X, pontos[0].Y, nivel.Elevation), pontos[0], diametro, marcar: false));
+        for (var i = 0; i + 1 < pontos.Count; i++)
+            tubos.Add(GeradorMalha.CriarTubo(doc, sistema.Id, tipo.Id, nivel.Id, pontos[i], pontos[i + 1], diametro, marcar: false));
+        doc.Regenerate();
+        GeradorMalha.Ligar(doc, tubos, [], nivel);
+        t.Commit();
+        return tubos.Where(p => p.IsValidObject && p.Location is LocationCurve { Curve: Line l } && Math.Abs(l.Direction.Z) < 0.05).ToList();
     }
 
     /// <summary>

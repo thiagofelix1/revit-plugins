@@ -57,6 +57,7 @@ static class SituacaoDoProjeto
             new AcaoDaEtapa("Bicos por ambiente", "BicosPorAmbienteCommand"),
             new AcaoDaEtapa("Traçar ramais", "TracarRamalCommand"),
             new AcaoDaEtapa("Ligar bicos", "LigarBicosCommand"),
+            new AcaoDaEtapa("Ligar à geral", "LigarAGeralCommand"),
             new AcaoDaEtapa("Verificar modelo", "VerificarModeloCommand"),
             new AcaoDaEtapa("Gerar rede", "GerarRedeCommand"),
             new AcaoDaEtapa("Malha retangular", "GerarMalhaCommand"),
