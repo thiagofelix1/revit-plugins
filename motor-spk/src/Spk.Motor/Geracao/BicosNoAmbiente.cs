@@ -87,9 +87,16 @@ public static class BicosNoAmbiente
     public const double DesalinhamentoMaximo = 0.15;
 
     /// <summary>
+    /// Bicos a menos disso um do outro na direção entre ramais são da mesma fileira: fileiras de verdade ficam a pelo menos
+    /// a distância mínima entre bicos (1,8 m), e Traçar ramais junta numa linha só o que estiver a menos de 1 m.
+    /// </summary>
+    public const double MesmaFileira = 0.9;
+
+    /// <summary>
     /// Fileiras quase alinhadas (os pedaços de um ambiente que não é retângulo ganham grades próprias): os bicos a menos
-    /// de <see cref="DesalinhamentoMaximo" /> um do outro na direção entre ramais vão para a mesma linha, a de mais bicos.
-    /// Cada fileira só muda se os bicos continuam dentro e longe da parede e a conferência não piora.
+    /// de <see cref="MesmaFileira" /> um do outro na direção entre ramais vão para a mesma linha: a de mais bicos, ou outra
+    /// das linhas, ou a média, a primeira em que os bicos continuam dentro e longe da parede e a conferência não piora.
+    /// Sem isso, o ramal passava entre as linhas e deixava bicos a poucos cm dele, sem como ligar.
     /// </summary>
     static List<Ponto2> Alinhar(IReadOnlyList<IReadOnlyList<Ponto2>> contornos, List<Ponto2> bicos, Ponto2 u, Ponto2 v, LimitesDeBico limites)
     {
@@ -99,23 +106,24 @@ public static class BicosNoAmbiente
         for (var k = 0; k < ordem.Count;)
         {
             var inicio = Dot(atuais[ordem[k]], v);
-            var fileira = ordem.Skip(k).TakeWhile(i => Dot(atuais[i], v) - inicio < DesalinhamentoMaximo).ToList();
+            var fileira = ordem.Skip(k).TakeWhile(i => Dot(atuais[i], v) - inicio < MesmaFileira).ToList();
             k += fileira.Count;
             var linhas = fileira.GroupBy(i => Math.Round(Dot(atuais[i], v), 3)).ToList();
             if (linhas.Count < 2) continue;
-            var alvo = linhas.OrderByDescending(g => g.Count()).ThenBy(g => g.Key).First().Key;
-            var tentativa = atuais.ToList();
-            foreach (var i in fileira)
+            var alvos = linhas.OrderByDescending(g => g.Count()).ThenBy(g => g.Key).Select(g => g.Key)
+                .Append(fileira.Average(i => Dot(atuais[i], v)));
+            foreach (var alvo in alvos)
             {
-                var b = atuais[i];
-                tentativa[i] = Ponto(u, v, Dot(b, u), alvo);
+                var tentativa = atuais.ToList();
+                foreach (var i in fileira) tentativa[i] = Ponto(u, v, Dot(atuais[i], u), alvo);
+                if (fileira.Any(i => !Dentro(contornos, tentativa[i]) || DistanciaAoContorno(contornos, tentativa[i]) < limites.ParedeMinima - Folga))
+                    continue;
+                var novas = Conferir(contornos, tentativa, limites, u).Count;
+                if (novas > falhas) continue;
+                atuais = tentativa;
+                falhas = novas;
+                break;
             }
-            if (fileira.Any(i => !Dentro(contornos, tentativa[i]) || DistanciaAoContorno(contornos, tentativa[i]) < limites.ParedeMinima - Folga))
-                continue;
-            var novas = Conferir(contornos, tentativa, limites, u).Count;
-            if (novas > falhas) continue;
-            atuais = tentativa;
-            falhas = novas;
         }
         return atuais;
     }

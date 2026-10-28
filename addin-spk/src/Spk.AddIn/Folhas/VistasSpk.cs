@@ -191,6 +191,9 @@ static class VistasSpk
         catch (Autodesk.Revit.Exceptions.ArgumentException) { }
     }
 
+    /// <summary>Folga do recorte de anotações em volta do recorte da planta, em mm no papel (a padrão do Revit, 1").</summary>
+    public const double FolgaAnotacaoMm = 25.4;
+
     /// <summary>A próxima escala da lista depois desta (mais reduzida), ou nula se já é a última.</summary>
     public static int? EscalaSeguinte(int escala) => Escalas.Where(e => e > escala).Cast<int?>().FirstOrDefault();
 
@@ -263,8 +266,18 @@ static class VistasSpk
         vista.CropBoxActive = true;
         vista.CropBoxVisible = false;
         // Recorte também das anotações e eixos: sem ele, os eixos dos vínculos passam do recorte e a vista fica maior que a
-        // região dela na folha (a planta do setor saía pela borda).
-        try { vista.get_Parameter(BuiltInParameter.VIEWER_ANNOTATION_CROP_ACTIVE)?.Set(1); }
+        // região dela na folha (a planta do setor saía pela borda). A folga das anotações fica a padrão do Revit, que a
+        // escala das plantas desconta (Regiao.EscalaDePlanta).
+        try
+        {
+            vista.get_Parameter(BuiltInParameter.VIEWER_ANNOTATION_CROP_ACTIVE)?.Set(1);
+            var forma = vista.GetCropRegionShapeManager();
+            var folga = FolgaAnotacaoMm / 304.8;
+            forma.LeftAnnotationCropOffset = folga;
+            forma.RightAnnotationCropOffset = folga;
+            forma.TopAnnotationCropOffset = folga;
+            forma.BottomAnnotationCropOffset = folga;
+        }
         catch (Autodesk.Revit.Exceptions.ApplicationException) { }
     }
 
@@ -339,11 +352,15 @@ static class VistasSpk
     /// Corte que olha no sentido dos ramais (direção <paramref name="d" />, horizontal), para descidas e subgeral
     /// aparecerem de perfil. A caixa cobre o setor inteiro em profundidade. Eixos da caixa em regra da mão direita.
     /// </summary>
-    public static ViewSection Corte(Document doc, string nome, Caixa caixa, XYZ d, string template)
+    /// <param name="inicio">Onde fica o plano do corte, medido na direção dos ramais (pés); sem ele, logo antes da rede.</param>
+    public static ViewSection Corte(Document doc, string nome, Caixa caixa, XYZ d, string template, double? inicio = null)
     {
         ApagarSeExistir(doc, nome);
         var direcao = new XYZ(d.X, d.Y, 0).Normalize();
-        var basisZ = direcao.Negate();
+        // O Revit põe o plano do corte na ponta de z mínimo da caixa e olha para a de z máximo (medido: com o eixo z
+        // contra a direção, o plano ia parar no fim da rede, olhando para trás). Então z segue a direção, e a origem fica
+        // no fundo da caixa.
+        var basisZ = direcao;
         var basisY = XYZ.BasisZ;
         var basisX = basisY.CrossProduct(basisZ);
 
@@ -352,9 +369,13 @@ static class VistasSpk
         var transversal = cantos.Select(p => Proj(p, basisX)).ToList();
         var longitudinal = cantos.Select(p => Proj(p, direcao)).ToList();
         var margem = Pes(1.5);
+        // O plano do corte fica logo antes da rede: 1,5 m antes caía atrás da parede do fim de um corredor, e o corte
+        // mostrava a parede, escondendo a rede inteira (num galpão aberto não se notava).
+        var plano = inicio ?? longitudinal.Min() - Pes(0.10);
+        var profundidade = longitudinal.Max() - plano + margem;
 
         var origem = basisX * ((transversal.Min() + transversal.Max()) / 2)
-                     + direcao * (longitudinal.Min() - margem)
+                     + direcao * (plano + profundidade)
                      + XYZ.BasisZ * ((caixa.Min.Z + caixa.Max.Z) / 2);
         var transformacao = Transform.Identity;
         transformacao.Origin = origem;
@@ -364,7 +385,6 @@ static class VistasSpk
 
         var meiaLargura = (transversal.Max() - transversal.Min()) / 2 + margem;
         var meiaAltura = (caixa.Max.Z - caixa.Min.Z) / 2 + margem;
-        var profundidade = longitudinal.Max() - longitudinal.Min() + 2 * margem;
         var caixaCorte = new BoundingBoxXYZ
         {
             Enabled = true,

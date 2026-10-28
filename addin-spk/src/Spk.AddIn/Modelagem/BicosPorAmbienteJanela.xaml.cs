@@ -41,6 +41,7 @@ public partial class BicosPorAmbienteJanela : Window
     public OpcoesRede? Rede { get; private set; }
 
     readonly bool gerar;
+    static readonly HashSet<string> ultimosMarcados = [];
     public IReadOnlyList<Ambiente> Escolhidos => linhas.Where(l => l.Marcado).Select(l => l.Ambiente).ToList();
 
     /// <param name="rede">Com ela, a janela é a do Gerar rede: mostra arranjo, drop e diâmetros, e o botão principal gera.</param>
@@ -60,8 +61,10 @@ public partial class BicosPorAmbienteJanela : Window
             Diametros.IsChecked = rede.AplicarDiametros;
         }
         Resumo.Text = resumo;
+        // Começa com os ambientes da última vez (nenhum na primeira): o engenheiro escolhe onde mexer, e marcar o prédio
+        // inteiro sem querer gerava rede até em escada e elevador.
         linhas = edificio.Ambientes.OrderBy(a => a.Piso).ThenBy(a => a.Numero, StringComparer.CurrentCulture)
-            .Select(a => new Linha { Ambiente = a, Marcado = a.Teto is not null }).ToList();
+            .Select(a => new Linha { Ambiente = a, Marcado = ultimosMarcados.Contains(a.Id) }).ToList();
         Lista.ItemsSource = linhas;
         Tipo.ItemsSource = tipos;
         Tipo.SelectedItem = opcoes.Tipo is { } t && tipos.Contains(t) ? t : tipoPadrao ?? tipos.FirstOrDefault();
@@ -101,6 +104,8 @@ public partial class BicosPorAmbienteJanela : Window
                     Bicos = Opcoes,
                 };
             Posicionar = posicionar;
+            ultimosMarcados.Clear();
+            ultimosMarcados.UnionWith(linhas.Where(l => l.Marcado).Select(l => l.Ambiente.Id));
             DialogResult = true;
         }
         catch (Exception ex) when (ex is FormatException or ArgumentOutOfRangeException)

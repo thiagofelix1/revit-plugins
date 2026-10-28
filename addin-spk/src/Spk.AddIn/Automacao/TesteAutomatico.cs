@@ -760,7 +760,7 @@ static class Diagnostico
         return new[] { "bicos por fase de criação: " + string.Join(", ", fases) }.Concat(
             new FilteredElementCollector(doc).OfClass(typeof(View)).Cast<View>()
                 .Where(v => !v.IsTemplate && v.Name.StartsWith(Folhas.PranchaSpk.PrefixoVista, StringComparison.Ordinal)
-                            && v.ViewType is ViewType.ThreeD or ViewType.FloorPlan)
+                            && v.ViewType is ViewType.ThreeD or ViewType.FloorPlan or ViewType.Section)
                 .Select(v => Linha(doc, v)))
             .ToList();
     }
@@ -778,7 +778,8 @@ static class Diagnostico
         var filtros = v.GetFilters().Select(f => $"{doc.GetElement(f)?.Name}(vis={v.GetFilterVisibility(f)})");
         int Visiveis(BuiltInCategory c) => new FilteredElementCollector(doc, v.Id).OfCategory(c).WhereElementIsNotElementType().GetElementCount();
         var fase = doc.GetElement(v.get_Parameter(BuiltInParameter.VIEW_PHASE)?.AsElementId() ?? ElementId.InvalidElementId)?.Name ?? "-";
-        var intervalo = v is ViewPlan p && !p.IsTemplate ? Intervalo(doc, p) : "-";
+        var intervalo = v is ViewPlan p && !p.IsTemplate ? Intervalo(doc, p)
+            : v is ViewSection s ? CaixaDoCorte(doc, s) : "-";
         return $"{v.Name} | {v.ViewType} | template={template} | escala={v.Scale} | fase={fase} | tubos visíveis={Visiveis(BuiltInCategory.OST_PipeCurves)} " +
                $"bicos visíveis={Visiveis(BuiltInCategory.OST_Sprinklers)} | intervalo={intervalo} | caixa3d={(v as View3D)?.IsSectionBoxActive} " +
                $"| tubosEscondidos={v.GetCategoryHidden(new ElementId(BuiltInCategory.OST_PipeCurves))} | anotacoesEscondidas={v.AreAnnotationCategoriesHidden} " +
@@ -790,6 +791,28 @@ static class Diagnostico
     }
 
     static string Fmt(XYZ? p) => p is null ? "-" : $"({p.X:0.0},{p.Y:0.0},{p.Z:0.0})";
+
+    /// <summary>
+    /// A caixa do corte em coordenadas do projeto (m): origem, para onde olha, largura, altura e profundidade; e onde
+    /// estão os tubos que a vista enxerga, na direção em que ela olha (0 = plano do corte).
+    /// </summary>
+    static string CaixaDoCorte(Document doc, ViewSection s)
+    {
+        var c = s.CropBox;
+        var t = c.Transform;
+        var olha = t.BasisZ.Negate();
+        string P(XYZ p) => $"({p.X * 0.3048:0.00};{p.Y * 0.3048:0.00};{p.Z * 0.3048:0.00})";
+        var tubos = new FilteredElementCollector(doc, s.Id).OfCategory(BuiltInCategory.OST_PipeCurves).WhereElementIsNotElementType()
+            .Select(e => (e.Location as LocationCurve)?.Curve).OfType<Curve>()
+            .SelectMany(cv => new[] { cv.GetEndPoint(0), cv.GetEndPoint(1) })
+            .Select(p => (p - t.Origin).DotProduct(olha) * 0.3048).ToList();
+        var faixa = tubos.Count > 0 ? $"{tubos.Min():0.00}..{tubos.Max():0.00}" : "-";
+        var longe = s.get_Parameter(BuiltInParameter.VIEWER_BOUND_FAR_CLIPPING)?.AsValueString();
+        var distancia = s.get_Parameter(BuiltInParameter.VIEWER_BOUND_OFFSET_FAR)?.AsValueString();
+        return $"origem {P(t.Origin)} olha {P(olha)} x {c.Min.X * 0.3048:0.00}..{c.Max.X * 0.3048:0.00} y {c.Min.Y * 0.3048:0.00}..{c.Max.Y * 0.3048:0.00} " +
+               $"z {c.Min.Z * 0.3048:0.00}..{c.Max.Z * 0.3048:0.00}; tubos a {faixa} m do plano; recorte distante {longe} {distancia}; " +
+               $"estilo {s.DisplayStyle} detalhe {s.DetailLevel} disciplina {s.Discipline}";
+    }
 
     /// <summary>Corte, topo e fundo do intervalo de vista da planta, em metros acima do nível de cada um.</summary>
     static string Intervalo(Document doc, ViewPlan p)

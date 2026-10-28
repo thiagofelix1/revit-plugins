@@ -55,7 +55,7 @@ static class FolhasSetorizacao
         var escala = plantas.Select((p, i) =>
         {
             var celula = i == 0 ? p.Celula with { X1 = p.Celula.X1 - VistasSpk.Pes(LarguraLegendaMm / 1000) } : p.Celula;
-            return celula.Escala(p.Recorte.Max.X - p.Recorte.Min.X, p.Recorte.Max.Y - p.Recorte.Min.Y);
+            return celula.EscalaDePlanta(p.Recorte.Max.X - p.Recorte.Min.X, p.Recorte.Max.Y - p.Recorte.Min.Y);
         }).Max();
 
         foreach (var (vista, _, _) in plantas)
@@ -70,7 +70,8 @@ static class FolhasSetorizacao
         Legenda(doc, plantas[0].Vista, plantas[0].Recorte, setores, avisos);
 
         foreach (var (vista, celula, _) in plantas)
-            PranchaSpk.Colocar(doc, folha, vista, celula.Centro, avisos);
+            if (PranchaSpk.Colocar(doc, folha, vista, celula.Centro, avisos) is { } viewport)
+                PranchaSpk.Centrar(doc, viewport, celula);
 
         var texto = $"{Numero}  {folha.Name}\n{plantas.Count} planta(s) 1:{escala}, {setores.Count} setor(es): " +
                     string.Join(", ", setores.Select(s => $"{s.Nome} ({s.Bicos.Count} bicos)")) + ".";

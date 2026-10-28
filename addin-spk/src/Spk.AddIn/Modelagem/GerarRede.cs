@@ -113,7 +113,10 @@ static class GerarRede
             try
             {
                 var leitura = BicosDoModelo.Ler(doc);
-                var lida = LeitorRede.Montar(doc, leitura.Bicos, dados.FatorC, null, [], bicosDoAmbiente[0].Id);
+                // O setor é o de um bico ligado: um bico que ficou solto não está em setor nenhum.
+                var ligado = bicosDoAmbiente.FirstOrDefault(b => b.MEPModel?.ConnectorManager?.Connectors.Cast<Connector>().Any(c => c.IsConnected) == true)
+                             ?? bicosDoAmbiente[0];
+                var lida = LeitorRede.Montar(doc, leitura.Bicos, dados.FatorC, null, [], ligado.Id);
                 diametros = AplicarDiametros.Executar(doc, lida, DimensionamentoPorTabela.Calcular(lida.Rede, dados.Classe));
                 avisos.AddRange(diametros.Recusados.Distinct());
             }
@@ -122,6 +125,7 @@ static class GerarRede
                 avisos.Add("diâmetros não aplicados: " + e.Message);
             }
         }
+        if (Tampar(doc, criados, zRede) is { } semTampao) avisos.Add(semTampao);
         return new RedeNoAmbiente(ambiente, null, bicosDoAmbiente.Count, zRede, ramais, diametros, avisos);
     }
 
@@ -182,6 +186,27 @@ static class GerarRede
         doc.Regenerate();
         GeradorMalha.Ligar(doc, [descida, tubo], [], nivel);
         return null;
+    }
+
+    /// <summary>
+    /// Tampão nas pontas abertas da rede do ambiente na altura da rede (a ponta da subgeral depois da última fileira),
+    /// como na obra. O pé da descida fica aberto: é a entrada do setor. O tampão vem das preferências de roteamento do
+    /// tipo de tubo; sem ele, a ponta fica aberta e o aviso diz por quê.
+    /// </summary>
+    static string? Tampar(Document doc, List<ElementId> criados, double zRede)
+    {
+        var abertos = criados.Select(doc.GetElement).OfType<Pipe>()
+            .Where(t => t.ConnectorManager.Connectors.Cast<Connector>()
+                .Any(c => c.ConnectorType == ConnectorType.End && !c.IsConnected && c.Origin.Z > Pes(zRede - 0.05)))
+            .ToList();
+        if (abertos.Count == 0) return null;
+        return TransacaoSegura.Executar(doc, "SPK — Tampão", () =>
+        {
+            foreach (var tubo in abertos) PlumbingUtils.PlaceCapOnOpenEnds(doc, tubo.Id, ElementId.InvalidElementId);
+            return null;
+        }) is { } erro
+            ? "ponta da subgeral sem tampão (o tipo de tubo não tem tampão nas preferências de roteamento): " + erro
+            : null;
     }
 
     /// <summary>Posições distintas (a menos de 30 cm viram uma), em ordem.</summary>

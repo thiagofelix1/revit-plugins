@@ -53,6 +53,8 @@ public class BicosNoAmbienteTestes
         "0,0 9.3,0 9.3,4.1 5.2,4.1 5.2,10.7 0,10.7",
         "0,0 17,0 17,3 11.4,3 11.4,7.7 4.3,7.7 4.3,3 0,3",
         "0,0 13.7,0 13.7,8.2 9.1,8.2 9.1,6.4 4.6,6.4 4.6,8.2 0,8.2",
+        "0,0 8.7,0 8.7,5.0 3.2,5.0 3.2,4.7 0,4.7",
+        "0,0 6.3,0 6.3,2.5 8.7,2.5 8.7,5.04 0,5.04",
     };
 
     [Theory]
@@ -73,7 +75,7 @@ public class BicosNoAmbienteTestes
             foreach (var b in linhas)
             {
                 var d = Math.Abs(a - b);
-                Assert.True(d < 1e-6 || d >= BicosNoAmbiente.DesalinhamentoMaximo,
+                Assert.True(d < 1e-6 || d >= BicosNoAmbiente.MesmaFileira,
                     $"fileiras a {d * 100:0.0} cm: {string.Join("; ", p.Bicos)}");
             }
             Assert.Empty(BicosNoAmbiente.Conferir(sala, p.Bicos, limites).Where(f => f.Tipo == TipoDeFalha.ForaDoAmbiente));

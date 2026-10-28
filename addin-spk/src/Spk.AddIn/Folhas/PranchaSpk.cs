@@ -138,13 +138,20 @@ static class PranchaSpk
         }
         if (vista.Scale != inicial)
             avisos.Add($"{vista.Name}: não cabia na região da folha em 1:{inicial}; ficou em 1:{vista.Scale}.");
+        Centrar(doc, viewport, regiao);
+        return viewport;
+    }
 
-        // O Revit centra pelo recorte do modelo; as anotações fora dele deixam o quadro torto. Centra o quadro inteiro.
+    /// <summary>
+    /// Centra o quadro inteiro do viewport na região. O Revit centra pelo recorte do modelo, e as anotações fora dele
+    /// (cabeças dos eixos, a legenda) deixavam o quadro torto, às vezes para fora da folha.
+    /// </summary>
+    public static void Centrar(Document doc, Viewport viewport, Regiao regiao)
+    {
         doc.Regenerate();
         var quadro = viewport.GetBoxOutline();
         var centro = (quadro.MinimumPoint + quadro.MaximumPoint) / 2;
         viewport.SetBoxCenter(viewport.GetBoxCenter() + new XYZ(regiao.Centro.X - centro.X, regiao.Centro.Y - centro.Y, 0));
-        return viewport;
     }
 
     /// <summary>
@@ -357,4 +364,12 @@ readonly record struct Regiao(double X0, double Y0, double X1, double Y1)
     /// <summary>A menor escala em que a extensão (pés de modelo) cabe aqui, com 5% de folga.</summary>
     public int Escala(double larguraModelo, double alturaModelo) =>
         VistasSpk.EscalaQueCabe(larguraModelo, alturaModelo, LarguraMm * 0.95, AlturaMm * 0.95);
+
+    /// <summary>
+    /// A escala de uma planta recortada aqui: o quadro dela é o recorte mais a folga das anotações de cada lado
+    /// (<see cref="VistasSpk.FolgaAnotacaoMm" />), onde ficam as cabeças dos eixos.
+    /// </summary>
+    public int EscalaDePlanta(double larguraModelo, double alturaModelo) =>
+        VistasSpk.EscalaQueCabe(larguraModelo, alturaModelo, LarguraMm * 0.95 - 2 * VistasSpk.FolgaAnotacaoMm,
+            AlturaMm * 0.95 - 2 * VistasSpk.FolgaAnotacaoMm);
 }

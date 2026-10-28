@@ -10,7 +10,7 @@ static class QuadrosSpk
     const double MargemMm = 1.5;
 
     /// <summary>Tipos de chuveiro da rede: K, área de cobertura e quantidade.</summary>
-    public static ViewDrafting? Chuveiros(Document doc, IList<string> avisos)
+    public static ViewDrafting? Chuveiros(Document doc, IList<string> avisos, int escala = 1)
     {
         IReadOnlyList<LeitorRede.BicoLido> bicos;
         try
@@ -34,11 +34,11 @@ static class QuadrosSpk
             ])
             .ToList();
         return Criar(doc, $"{PranchaSpk.PrefixoVista}Quadro de chuveiros", "QUADRO DE CHUVEIROS",
-            ["TIPO", "K (L/min/bar½)", "ÁREA (m²)", "QUANT."], linhas, [62, 30, 22, 18]);
+            ["TIPO", "K (L/min/bar½)", "ÁREA (m²)", "QUANT."], linhas, [62, 30, 22, 18], escala);
     }
 
     /// <summary>Demanda do último cálculo na entrada do setor: o que a bomba e a reserva precisam atender.</summary>
-    public static ViewDrafting? Demanda(Document doc, IList<string> avisos)
+    public static ViewDrafting? Demanda(Document doc, IList<string> avisos, int escala = 1)
     {
         if (ResultadoGravado.Ler(doc) is not { } r)
         {
@@ -65,22 +65,24 @@ static class QuadrosSpk
             avisos.Add("Quadro de demanda sem hidrantes e reserva: o cálculo gravado é de uma versão anterior. Rode Calcular de novo.");
         }
         return Criar(doc, $"{PranchaSpk.PrefixoVista}Quadro de demanda", $"DEMANDA NA ENTRADA DO SETOR — {(r.Atende ? "ATENDE" : "NÃO ATENDE")}",
-            ["ITEM", "VALOR"], linhas, [50, 52]);
+            ["ITEM", "VALOR"], linhas, [50, 52], escala);
     }
 
     /// <summary>
     /// Quadro com título, cabeçalho e linhas, larguras das colunas em mm no papel. Recria a vista se já existir.
-    /// A origem é o canto de cima à esquerda do quadro; as linhas descem.
+    /// A origem é o canto de cima à esquerda do quadro; as linhas descem. A vista fica na escala da folha (o desenho
+    /// cresce na mesma proporção, o tamanho no papel não muda): o Revit conta as vistas de desenho na escala do carimbo,
+    /// e um quadro em 1:1 punha "1:1" na folha do isométrico.
     /// </summary>
     public static ViewDrafting Criar(Document doc, string nome, string titulo, IReadOnlyList<string> cabecalho,
-        IReadOnlyList<IReadOnlyList<string>> linhas, IReadOnlyList<double> largurasMm)
+        IReadOnlyList<IReadOnlyList<string>> linhas, IReadOnlyList<double> largurasMm, int escala = 1)
     {
         VistasSpk.ApagarSeExistir(doc, nome);
         var vista = ViewDrafting.Create(doc, VistasSpk.Tipo(doc, ViewFamily.Drafting).Id);
         vista.Name = nome;
-        vista.Scale = 1;
+        vista.Scale = escala;
 
-        XYZ P(double xMm, double yMm) => new(VistasSpk.Pes(xMm / 1000), VistasSpk.Pes(yMm / 1000), 0);
+        XYZ P(double xMm, double yMm) => new(VistasSpk.Pes(xMm * escala / 1000), VistasSpk.Pes(yMm * escala / 1000), 0);
         var largura = largurasMm.Sum();
         var todas = new List<IReadOnlyList<string>> { cabecalho };
         todas.AddRange(linhas);

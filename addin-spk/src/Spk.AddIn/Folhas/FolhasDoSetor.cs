@@ -48,7 +48,7 @@ static class FolhasDoSetor
         var nivel = LeituraSetores.NivelDaMaioria(doc, bicos.Select(b => b.Elemento!));
         var recorte = rede.Expandir(VistasSpk.Pes(2.0));
         var planta = VistasSpk.Planta(doc, $"{PranchaSpk.PrefixoVista}{setor} — Planta", nivel, recorte, VistasSpk.TemplatePlanta, avisos);
-        PranchaSpk.Tentar(avisos, "Escala da planta", () => planta.Scale = regiaoPlanta.Escala(recorte.Max.X - recorte.Min.X, recorte.Max.Y - recorte.Min.Y));
+        PranchaSpk.Tentar(avisos, "Escala da planta", () => planta.Scale = regiaoPlanta.EscalaDePlanta(recorte.Max.X - recorte.Min.X, recorte.Max.Y - recorte.Min.Y));
         var escala = planta.Scale;
         double NoModelo(double mmNoPapel) => VistasSpk.Pes(mmNoPapel * escala / 1000);
 
@@ -92,9 +92,24 @@ static class FolhasDoSetor
             PranchaSpk.Tentar(avisos, "Bico da área no 3D", () => iso.SetElementOverrides(elemento!.Id,
                 dado.Id == gravado.ChuveiroCritico ? PranchaSpk.Pintura(doc, Vermelho, 8, true) : laranja));
 
+        // O corte começa 30 cm antes do tubo principal, que ele mostra de perfil: o mais longo entre os de pé (a descida da
+        // entrada) e os atravessados aos ramais (a subgeral). Cortando de uma ponta da rede, num corredor o plano caía
+        // atrás da parede do fim, e ela escondia a rede inteira. As descidas curtas até cada bico ficam de fora.
+        var principal = tubos.Select(t => (t.Location as LocationCurve)?.Curve).OfType<Curve>()
+            .Where(c =>
+            {
+                var e = c.GetEndPoint(1) - c.GetEndPoint(0);
+                var h = new XYZ(e.X, e.Y, 0);
+                return h.GetLength() < VistasSpk.Pes(0.01) || Math.Abs(h.Normalize().DotProduct(direcao.Normalize())) < 0.2;
+            })
+            .OrderByDescending(c => c.Length).FirstOrDefault();
+        var d = direcao.Normalize();
+        double? inicioDoCorte = principal is null ? null
+            : Math.Min(principal.GetEndPoint(0).DotProduct(d), principal.GetEndPoint(1).DotProduct(d)) - VistasSpk.Pes(0.3);
+
         ViewSection? corte = null;
         PranchaSpk.Tentar(avisos, "Corte do setor", () => corte = VistasSpk.Corte(doc, $"{PranchaSpk.PrefixoVista}{setor} — Corte", rede, direcao,
-            VistasSpk.TemplateCorte));
+            VistasSpk.TemplateCorte, inicioDoCorte));
 
         doc.Regenerate();
         var doSetor = elementos.Select(e => e.Id).ToHashSet();
@@ -115,7 +130,7 @@ static class FolhasDoSetor
 
         PranchaSpk.ColocarNaRegiao(doc, folha, planta, regiaoPlanta, avisos);
         PranchaSpk.Colocar(doc, folha, iso, regiao3d.Centro, avisos);
-        if (chave is not null) PranchaSpk.Colocar(doc, folha, chave, regiaoChave.Centro, avisos);
+        if (chave is not null && PranchaSpk.Colocar(doc, folha, chave, regiaoChave.Centro, avisos) is { } vpChave) PranchaSpk.Centrar(doc, vpChave, regiaoChave);
         PranchaSpk.ColocarLegendas(doc, folha, lateral.Parte(0, 0, 1, 0.28), avisos);
         PranchaSpk.Tentar(avisos, "Quadro de resultado", () => PranchaSpk.Nota(doc, folha, regiaoNota.CantoSuperiorEsquerdo,
             Quadro(gravado, setor, daArea.Count, critico.Dado), regiaoNota.Largura * 0.95));
@@ -247,7 +262,7 @@ static class FolhasDoSetor
         var recorte = caixa.Expandir(VistasSpk.Pes(3.0));
         var vista = VistasSpk.Planta(doc, $"{PranchaSpk.PrefixoVista}{setor} — Mapa-chave", nivel, recorte, VistasSpk.TemplateSetorizacao, avisos);
         VistasSpk.EsconderRede(vista);
-        PranchaSpk.Tentar(avisos, "Escala do mapa-chave", () => vista.Scale = Math.Max(500, regiao.Escala(recorte.Max.X - recorte.Min.X, recorte.Max.Y - recorte.Min.Y)));
+        PranchaSpk.Tentar(avisos, "Escala do mapa-chave", () => vista.Scale = Math.Max(500, regiao.EscalaDePlanta(recorte.Max.X - recorte.Min.X, recorte.Max.Y - recorte.Min.Y)));
         foreach (var s in noNivel)
         {
             var esteSetor = s.Bicos.Any(b => bicosDoSetor.Contains(b.Id));

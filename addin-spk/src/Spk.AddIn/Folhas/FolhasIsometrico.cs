@@ -61,13 +61,13 @@ static class FolhasIsometrico
         var quadros = 0;
         PranchaSpk.Tentar(avisos, "Quadro de chuveiros", () =>
         {
-            if (QuadrosSpk.Chuveiros(doc, avisos) is not { } quadro || PranchaSpk.Colocar(doc, folha, quadro, regiaoChuveiros.Centro, avisos) is not { } viewport) return;
+            if (QuadrosSpk.Chuveiros(doc, avisos, escala) is not { } quadro || PranchaSpk.Colocar(doc, folha, quadro, regiaoChuveiros.Centro, avisos) is not { } viewport) return;
             PranchaSpk.SemTitulo(doc, viewport);
             quadros++;
         });
         PranchaSpk.Tentar(avisos, "Quadro de demanda", () =>
         {
-            if (QuadrosSpk.Demanda(doc, avisos) is not { } quadro || PranchaSpk.Colocar(doc, folha, quadro, regiaoDemanda.Centro, avisos) is not { } viewport) return;
+            if (QuadrosSpk.Demanda(doc, avisos, escala) is not { } quadro || PranchaSpk.Colocar(doc, folha, quadro, regiaoDemanda.Centro, avisos) is not { } viewport) return;
             PranchaSpk.SemTitulo(doc, viewport);
             quadros++;
         });
