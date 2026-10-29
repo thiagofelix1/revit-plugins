@@ -42,6 +42,9 @@ public static class CalculoSpk
     public static RelatorioSpk Executar(ProjetoSpk projeto)
     {
         var avisos = new List<string>();
+        // O modelo não diz se o bico é de resposta rápida (a família não traz o RTI): fica com o engenheiro.
+        if (projeto.Classe == ClasseRisco.Leve)
+            avisos.Add("Risco leve: em sistema novo, os chuveiros devem ser de resposta rápida (IT-23/2025 8.10.1). Confira o tipo dos bicos.");
         var (vazaoHidrantes, duracao) = DemandaHidrantes(projeto, avisos);
         var motor = new MotorHidraulico(projeto.Rede);
 
@@ -94,6 +97,9 @@ public static class CalculoSpk
     {
         var v = new List<Verificacao>();
         var abertos = r.Chuveiros;
+        // Setor menor que a área de operação: todos os chuveiros dele operam, com a densidade da área mínima da curva
+        // (IT-23/2025 10.4.3 a: em risco leve e ordinário, área menor que 140 m² usa a densidade de 140 m²).
+        var setorInteiro = abertos.Count >= p.Rede.Chuveiros.Count;
 
         v.Add(new Verificacao("Convergência do cálculo da rede", "9.4.3.1",
             r.Estado.Convergiu && r.Estado.ErroBalancoMaximo < 0.01,
@@ -103,11 +109,13 @@ public static class CalculoSpk
         {
             var completa = abertos.Count >= busca.ChuveirosNaArea;
             v.Add(new Verificacao("Área de operação com o número de chuveiros exigido",
-                p.Base is BaseNumeroFixo numeroFixo ? numeroFixo.Referencia : "9.4.4.2", completa,
+                p.Base is BaseNumeroFixo numeroFixo ? numeroFixo.Referencia : "9.4.4.2", completa || setorInteiro,
                 completa
                     ? $"{abertos.Count} chuveiros, até {busca.ChuveirosPorRamal} por ramal"
-                    : $"a rede não forma a área: o critério pede {busca.ChuveirosNaArea} chuveiros com até {busca.ChuveirosPorRamal} por ramal, " +
-                      $"e os ramais existentes só comportam {abertos.Count}"));
+                    : setorInteiro
+                        ? $"o setor inteiro tem {abertos.Count} chuveiros, menos que os {busca.ChuveirosNaArea} da área: todos operam (IT-23/2025 10.4.3 a)"
+                        : $"a rede não forma a área: o critério pede {busca.ChuveirosNaArea} chuveiros com até {busca.ChuveirosPorRamal} por ramal, " +
+                          $"e os ramais existentes só comportam {abertos.Count}"));
         }
 
         var piorPressao = abertos.OrderBy(c => c.Pressao - c.PressaoMinima).First();
@@ -122,9 +130,13 @@ public static class CalculoSpk
                 $"densidade {densidade.Densidade:0.##} L/min/m²"));
 
             var areaAberta = abertos.Sum(c => c.AreaCobertura);
-            v.Add(new Verificacao("Chuveiros da área cobrem a área de operação", "9.4.4.2",
-                areaAberta >= densidade.AreaOperacao - 1e-6,
-                $"{abertos.Count} chuveiros cobrindo {areaAberta:0.0} m² para {densidade.AreaOperacao:0.0} m²"));
+            var cobre = areaAberta >= densidade.AreaOperacao - 1e-6;
+            v.Add(new Verificacao("Chuveiros da área cobrem a área de operação", setorInteiro && !cobre ? "9.4.4.2; IT-23/2025 10.4.3 a" : "9.4.4.2",
+                cobre || setorInteiro,
+                cobre || !setorInteiro
+                    ? $"{abertos.Count} chuveiros cobrindo {areaAberta:0.0} m² para {densidade.AreaOperacao:0.0} m²"
+                    : $"o setor inteiro ({areaAberta:0.0} m², {abertos.Count} chuveiros) é menor que a área de operação ({densidade.AreaOperacao:0.0} m²): " +
+                      $"todos os chuveiros dele operam, com a densidade de {densidade.Densidade:0.##} L/min/m²"));
 
             if (densidade.Ajuste?.Ajustes.Any(a => a.Item.StartsWith("8.5.5.3")) == true)
                 v.Add(new Verificacao("Resposta rápida: pelo menos 5 chuveiros na área", "8.5.5.3.2",

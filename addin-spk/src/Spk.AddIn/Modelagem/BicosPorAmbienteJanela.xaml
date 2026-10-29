@@ -41,9 +41,13 @@
                       Content="Juntar as salas num setor, com a geral passando pelo ambiente:"
                       ToolTip="As salas marcadas ganham a rede com a entrada voltada para a geral; a geral corre pelo eixo do ambiente escolhido (o corredor, reto ou em L), com a descida da VGA numa ponta, e as salas são ligadas a ela (Ligar à geral)."/>
             <ComboBox x:Name="GeralPor" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,4"/>
-            <CheckBox x:Name="BicosNoCorredor" Grid.Row="3" Grid.ColumnSpan="4" Margin="20,4,0,4"
+            <CheckBox x:Name="BicosNoCorredor" Grid.Row="3" Grid.ColumnSpan="2" Margin="20,4,8,4"
                       IsEnabled="{Binding IsChecked, ElementName=JuntarNumSetor}"
-                      Content="Pôr bicos também no corredor, ligados direto na geral (tê e descida)"/>
+                      Content="Pôr bicos também no corredor, ligados direto na geral"/>
+            <CheckBox x:Name="VgaNoCliqueCaixa" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,4"
+                      IsEnabled="{Binding IsChecked, ElementName=JuntarNumSetor}"
+                      Content="VGA no ponto que eu clicar"
+                      ToolTip="Desmarcado: a descida da VGA fica na ponta do corredor (num L, na ponta longe do canto). Marcado: depois de Gerar rede, clique no corredor onde fica a VGA; a geral sai dela para os dois lados, com tê."/>
         </Grid>
 
         <Grid DockPanel.Dock="Bottom" Margin="0,12,0,0">

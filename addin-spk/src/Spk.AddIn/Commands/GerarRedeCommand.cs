@@ -58,6 +58,28 @@ public class GerarRedeCommand : ExternalCommand
             var janela = new BicosPorAmbienteJanela(edificio, tipos, BicosPorAmbiente.TipoPadrao(doc), resumo, ultimas.Bicos, ultimas);
             if (janela.ShowDialog() != true || janela.Rede is not { } opcoes) return;
             ultimas = opcoes;
+            if (opcoes.GeralPor is not null && janela.VgaNoClique)
+            {
+                // O ponto da VGA vale só para esta geração: na próxima, a pergunta volta.
+                try
+                {
+                    var p = ui.Selection.PickPoint("Clique no corredor onde fica a descida da VGA (a geral sai dela para os dois lados)");
+                    opcoes = opcoes with
+                    {
+                        EntradaDaGeral = new Spk.Motor.Modelo.Ponto2(UnitUtils.ConvertFromInternalUnits(p.X, UnitTypeId.Meters),
+                            UnitUtils.ConvertFromInternalUnits(p.Y, UnitTypeId.Meters)),
+                    };
+                }
+                catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+                {
+                    return;
+                }
+                catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+                {
+                    TaskDialog.Show(Titulo, "Abra uma planta para clicar onde fica a VGA.");
+                    return;
+                }
+            }
 
             var criados = new List<ElementId>();
             var (redes, geral) = GerarRede.ExecutarComGeral(doc, dados, edificio, janela.Escolhidos, opcoes, criados);

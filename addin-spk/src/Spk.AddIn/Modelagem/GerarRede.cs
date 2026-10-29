@@ -25,6 +25,12 @@ public sealed record OpcoesRede
 
     /// <summary>Com geral: põe os bicos do corredor pela norma e liga cada um direto na geral (tê e descida).</summary>
     public bool BicosNoCorredor { get; init; } = true;
+
+    /// <summary>
+    /// Com geral: onde fica a descida da VGA, em planta (m). Nulo: na ponta do corredor (num L, a longe do canto). Com um
+    /// ponto, a descida vai para o ponto do eixo do corredor mais perto dele e a geral sai dela para os dois lados.
+    /// </summary>
+    public Ponto2? EntradaDaGeral { get; init; }
 }
 
 /// <summary>A geral gerada pelo corredor e a ligação das salas a ela, ou por que não foi feita.</summary>
@@ -111,9 +117,12 @@ static class GerarRede
         GeralGerada Recusa(string motivo) => new(corredor, motivo, null, null, []);
 
         var avisos = new List<string>();
-        var trechos = CaminhoDoCorredor(corredor, avisos);
-        if (trechos.Count == 0)
+        var caminho = CaminhoDoCorredor(corredor, avisos);
+        if (caminho.Count == 0)
             return (Executar(doc, dados, edificio, salas, opcoes, criados, null), Recusa("o ambiente é estreito demais para a geral (menos de 60 cm entre as paredes)"));
+        // A geral em ramos que saem da descida da VGA: um só com a descida na ponta; dois com ela no meio do corredor.
+        var ramos = RamosDaEntrada(caminho, opcoes.EntradaDaGeral);
+        var trechos = ramos.SelectMany(r => r).ToList();
 
         // Cada sala fica de frente para um trecho da geral: os ramais dela correm paralelos a ele, a entrada do lado dele.
         var redes = Executar(doc, dados, edificio, salas, opcoes, criados, sala => TrechoDaSala(sala, trechos));
@@ -175,33 +184,40 @@ static class GerarRede
                 .FirstOrDefault(b => b.Category?.Id.Value == (long)BuiltInCategory.OST_Sprinklers && Dentro(r.Ambiente, b)))
             .OfType<FamilyInstance>().Select(b => LigarAGeral.Rede(doc, b)).ToList();
 
-        // A geral vai da descida (ponta A do primeiro trecho) até 50 cm depois da entrada da última sala, e não até o fim do
-        // corredor: depois do último tê não passa água. O último trecho sem sala nenhuma sai; o que sobra é encurtado.
-        // Os bicos do corredor também seguram a geral: ela vai até 50 cm depois do último deles.
+        // Cada ramo da geral vai da descida até 50 cm depois da entrada da última sala dele, e não até o fim do corredor:
+        // depois do último tê não passa água. Trecho da ponta sem sala nenhuma sai; o que sobra é encurtado; ramo sem sala
+        // nenhuma sai inteiro. Os bicos do corredor também seguram a geral: ela vai até 50 cm depois do último deles.
         var entradas = dasSalas.Select(r => LigarAGeral.Entrada(doc, r)).OfType<LigarAGeral.EntradaDaRede>()
             .Select(e => new Ponto2(Metros(e.Ponto.X), Metros(e.Ponto.Y))).Concat(pontosDosBicos).ToList();
-        while (trechos.Count > 0)
-        {
-            var ultimo = trechos[^1];
-            var d = ultimo.Direcao;
-            double Ao(Ponto2 p) => (p.X - ultimo.A.X) * d.X + (p.Y - ultimo.A.Y) * d.Y;
-            var comprimento = Ao(ultimo.B);
-            var nele = entradas.Where(p => ReferenceEquals(TrechoDaEntrada(p, trechos), ultimo)).Select(Ao).ToList();
-            if (nele.Count == 0 && trechos.Count > 1)
+        var descidaEm = ramos[0][0].A;
+        foreach (var ramo in ramos)
+            while (ramo.Count > 0)
             {
-                trechos.RemoveAt(trechos.Count - 1);
-                continue;
+                var ultimo = ramo[^1];
+                var d = ultimo.Direcao;
+                double Ao(Ponto2 p) => (p.X - ultimo.A.X) * d.X + (p.Y - ultimo.A.Y) * d.Y;
+                var comprimento = Ao(ultimo.B);
+                var todos = ramos.SelectMany(r => r).ToList();
+                var nele = entradas.Where(p => ReferenceEquals(TrechoDaEntrada(p, todos), ultimo)).Select(Ao).ToList();
+                if (nele.Count == 0)
+                {
+                    ramo.RemoveAt(ramo.Count - 1);
+                    continue;
+                }
+                if (nele.Max() + 0.5 < comprimento)
+                {
+                    comprimento = Math.Max(nele.Max() + 0.5, 0.5);
+                    ramo[^1] = ultimo with { B = new Ponto2(ultimo.A.X + d.X * comprimento, ultimo.A.Y + d.Y * comprimento) };
+                }
+                break;
             }
-            if (nele.Count > 0 && nele.Max() + 0.5 < comprimento)
-            {
-                comprimento = Math.Max(nele.Max() + 0.5, 0.5);
-                trechos[^1] = ultimo with { B = new Ponto2(ultimo.A.X + d.X * comprimento, ultimo.A.Y + d.Y * comprimento) };
-            }
-            break;
-        }
-        if (trechos.Count > 1)
-            avisos.Add("geral em L: " + string.Join(" + ", trechos.Select(t => $"{Comprimento(t):0.0} m")) + ", com cotovelo no canto");
-        var eixo = trechos[0];
+        ramos.RemoveAll(r => r.Count == 0);
+        if (ramos.Count == 0) return (redes, Recusa("nenhuma sala nem bico do corredor ficou em frente à geral"));
+        trechos = ramos.SelectMany(r => r).ToList();
+        if (ramos.Count > 1 || trechos.Count > 1)
+            avisos.Add((ramos.Count > 1 ? "descida da VGA no meio do corredor, geral para os dois lados: " : "geral em L: ") +
+                       string.Join(" | ", ramos.Select(r => string.Join(" + ", r.Select(t => $"{Comprimento(t):0.0} m")))) +
+                       (trechos.Count > ramos.Count ? ", com cotovelo no canto" : ""));
 
         using var grupo = new TransactionGroup(doc, "SPK — Geral pelo corredor");
         grupo.Start();
@@ -214,7 +230,7 @@ static class GerarRede
             var esboco = DadosEsboco.Carregar(doc);
             var diametro = GeradorMalha.DiametroComTe(doc, tipo, esboco.DnSubgeral > 0 ? esboco.DnSubgeral : esboco.DnTubo);
             XYZ Xyz(Ponto2 p, double zM) => new(Pes(p.X), Pes(p.Y), Pes(zM));
-            var descida = GeradorMalha.CriarTubo(doc, sistema.Id, tipo.Id, nivel.Id, Xyz(eixo.A, corredor.Piso), Xyz(eixo.A, z), diametro, marcar: false);
+            var descida = GeradorMalha.CriarTubo(doc, sistema.Id, tipo.Id, nivel.Id, Xyz(descidaEm, corredor.Piso), Xyz(descidaEm, z), diametro, marcar: false);
             criados.Add(descida.Id);
             foreach (var trecho in trechos)
             {
@@ -346,6 +362,56 @@ static class GerarRede
         var inicio = Math.Abs(uc - ua) > Math.Abs(uc - ub) ? principal.A : principal.B;
         if (!LivreAte(corredor, inicio, canto)) return [principal];
         return [new Eixo(inicio, canto), new Eixo(canto, ponta)];
+    }
+
+    /// <summary>
+    /// Os ramos da geral a partir da descida da VGA. Sem ponto: um ramo, o caminho inteiro, com a descida na ponta dele. Com
+    /// ponto: a descida no ponto do caminho mais perto dele (se cair a menos de 50 cm de um canto, ela anda 50 cm para fora
+    /// do canto, onde cabe o tê), e dois ramos, um para cada lado; o lado com menos de 30 cm sai.
+    /// </summary>
+    static List<List<Eixo>> RamosDaEntrada(List<Eixo> caminho, Ponto2? entrada)
+    {
+        if (entrada is not { } alvo) return [caminho.ToList()];
+        var pontos = new List<Ponto2> { caminho[0].A };
+        pontos.AddRange(caminho.Select(t => t.B));
+
+        // O ponto do caminho mais perto do pedido.
+        var (k, e) = (0, pontos[0]);
+        var menor = double.MaxValue;
+        for (var i = 0; i + 1 < pontos.Count; i++)
+        {
+            var (a, b) = (pontos[i], pontos[i + 1]);
+            var c = Distancia(a, b);
+            var t = c < 1e-9 ? 0 : Math.Clamp(((alvo.X - a.X) * (b.X - a.X) + (alvo.Y - a.Y) * (b.Y - a.Y)) / (c * c), 0, 1);
+            var p = new Ponto2(a.X + (b.X - a.X) * t, a.Y + (b.Y - a.Y) * t);
+            if (Distancia(p, alvo) < menor) (menor, k, e) = (Distancia(p, alvo), i, p);
+        }
+        // Num canto (vértice do meio do caminho) a descida faria um tê com os dois ramos em ângulo: anda 50 cm para fora.
+        for (var i = 1; i + 1 < pontos.Count; i++)
+        {
+            if (Distancia(e, pontos[i]) >= 0.5) continue;
+            var (de, para) = Distancia(pontos[i], pontos[i - 1]) >= Distancia(pontos[i], pontos[i + 1]) ? (i, i - 1) : (i, i + 1);
+            var c = Distancia(pontos[de], pontos[para]);
+            e = new Ponto2(pontos[de].X + (pontos[para].X - pontos[de].X) * 0.5 / c, pontos[de].Y + (pontos[para].Y - pontos[de].Y) * 0.5 / c);
+            k = Math.Min(de, para);
+        }
+
+        var volta = new List<Eixo>();
+        var atual = e;
+        for (var i = k; i >= 0; i--)
+        {
+            if (Distancia(atual, pontos[i]) > 0.01) volta.Add(new Eixo(atual, pontos[i]));
+            atual = pontos[i];
+        }
+        var vai = new List<Eixo>();
+        atual = e;
+        for (var i = k + 1; i < pontos.Count; i++)
+        {
+            if (Distancia(atual, pontos[i]) > 0.01) vai.Add(new Eixo(atual, pontos[i]));
+            atual = pontos[i];
+        }
+        var ramos = new[] { vai, volta }.Where(r => r.Sum(Comprimento) >= 0.30).ToList();
+        return ramos.Count > 0 ? ramos : [caminho.ToList()];
     }
 
     /// <summary>O trecho da geral que a sala tem à frente: o mais perto do centro dela entre os que ela ladeia (1 m ou mais).</summary>

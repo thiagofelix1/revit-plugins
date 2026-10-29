@@ -40,6 +40,9 @@ public partial class BicosPorAmbienteJanela : Window
     /// <summary>No modo de geração: o arranjo, o drop e os diâmetros, com as opções dos bicos.</summary>
     public OpcoesRede? Rede { get; private set; }
 
+    /// <summary>Gerar rede com geral: o engenheiro quer clicar onde fica a VGA, depois de fechar a janela.</summary>
+    public bool VgaNoClique { get; private set; }
+
     readonly bool gerar;
     static readonly HashSet<string> ultimosMarcados = [];
     public IReadOnlyList<Ambiente> Escolhidos => linhas.Where(l => l.Marcado).Select(l => l.Ambiente).ToList();
@@ -112,6 +115,7 @@ public partial class BicosPorAmbienteJanela : Window
                     GeralPor = JuntarNumSetor.IsChecked == true ? (GeralPor.SelectedItem as ItemDeAmbiente)?.Ambiente.Id : null,
                     BicosNoCorredor = BicosNoCorredor.IsChecked == true,
                 };
+            VgaNoClique = gerar && VgaNoCliqueCaixa.IsChecked == true;
             Posicionar = posicionar;
             ultimosMarcados.Clear();
             ultimosMarcados.UnionWith(linhas.Where(l => l.Marcado).Select(l => l.Ambiente.Id));

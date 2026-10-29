@@ -108,4 +108,21 @@ public class BuscaEProjetoTestes
         Assert.Contains(rel.Verificacoes, v => v.Item == "7.3, Tabela 8" && !v.Atende);
         Assert.Contains(rel.Verificacoes, v => v.Item == "9.4.4.2" && !v.Atende);
     }
+
+    [Fact]
+    public void Setor_menor_que_a_area_de_operacao_opera_inteiro()
+    {
+        // Um ramal com 2 chuveiros de cada lado: o setor inteiro é bem menor que 140 m². Todos operam, com a densidade de
+        // 140 m² (IT-23/2025 10.4.3 a), e as verificações de área não reprovam.
+        var projeto = new ProjetoSpk("Sala pequena", new GalpaoEspinhaDePeixe { Ramais = 1, ChuveirosPorLado = 2 }.Criar(), ClasseRisco.Leve,
+            BaseDeProjeto.PelaFigura42(ClasseRisco.Leve, 140));
+
+        var rel = CalculoSpk.Executar(projeto);
+
+        Assert.Equal(projeto.Rede.Chuveiros.Count, rel.Resultado.Chuveiros.Count);
+        var cobre = Assert.Single(rel.Verificacoes, v => v.Descricao == "Chuveiros da área cobrem a área de operação");
+        Assert.True(cobre.Atende, cobre.Detalhe);
+        Assert.Contains("10.4.3", cobre.Item);
+        Assert.All(rel.Verificacoes.Where(v => v.Descricao.StartsWith("Área de operação")), v => Assert.True(v.Atende, v.Detalhe));
+    }
 }
