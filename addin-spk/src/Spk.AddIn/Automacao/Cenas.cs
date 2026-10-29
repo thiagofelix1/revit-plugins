@@ -324,6 +324,21 @@ static class Cenas
         return tubos.Where(p => p.IsValidObject && p.Location is LocationCurve { Curve: Line l } && Math.Abs(l.Direction.Z) < 0.05).ToList();
     }
 
+    /// <summary>Tubos soltos, sem ligar, como o projetista desenha com a ferramenta Tubo antes de ligar peça a peça.</summary>
+    public static List<Pipe> DesenharTubos(Document doc, IReadOnlyList<TuboDesenhado> pedidos)
+    {
+        using var t = new Transaction(doc, "SPK — tubos de teste");
+        t.Start();
+        var nivel = GeradorMalha.Nivel(doc) ?? throw new InvalidOperationException("O projeto não tem nível.");
+        var tipo = GeradorMalha.TipoComTe(doc);
+        var sistema = GeradorMalha.Sistema(doc) ?? throw new InvalidOperationException("O projeto não tem sistema de tubulação.");
+        XYZ P(double[] m) => new(GeradorMalha.Pes(m[0]), GeradorMalha.Pes(m[1]), nivel.Elevation + GeradorMalha.Pes(m[2]));
+        var tubos = pedidos.Select(p => GeradorMalha.CriarTubo(doc, sistema.Id, tipo.Id, nivel.Id, P(p.De), P(p.Ate),
+            GeradorMalha.DiametroComTe(doc, tipo, p.Dn), marcar: false)).ToList();
+        t.Commit();
+        return tubos;
+    }
+
     /// <summary>
     /// Vincula modelos que já existem (arquitetura, estrutura) origem interna com origem interna, como o engenheiro faz
     /// com os arquivos que recebe. Pode apagar antes a rede da cópia e copiar os níveis dos vínculos (com uma planta

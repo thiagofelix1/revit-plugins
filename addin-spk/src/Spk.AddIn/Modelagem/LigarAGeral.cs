@@ -31,9 +31,9 @@ public sealed record ResultadoGeral(IReadOnlyList<RedeLigada> Redes, IReadOnlyLi
 /// </summary>
 public static class LigarAGeral
 {
-    static readonly double MargemPonta = GeradorMalha.Pes(0.15);
+    internal static readonly double MargemPonta = GeradorMalha.Pes(0.15);
     static readonly double SubidaMinima = GeradorMalha.Pes(0.15);
-    static readonly double MesmaAltura = GeradorMalha.Pes(0.02);
+    internal static readonly double MesmaAltura = GeradorMalha.Pes(0.02);
 
     /// <summary>As redes com bico que não tocam a geral e cuja entrada fica até 3 m acima ou abaixo dela.</summary>
     public static List<HashSet<ElementId>> RedesSoltas(Document doc, IReadOnlyList<Pipe> geral)
@@ -128,7 +128,7 @@ public static class LigarAGeral
         return new EntradaDaRede(paraSubgeral.Origin, tubo, cotovelo, subgeral, paraSubgeral);
     }
 
-    static string? Ligar(Document doc, EntradaDaRede entrada, List<Pipe> pedacos, List<Pipe> novos)
+    internal static string? Ligar(Document doc, EntradaDaRede entrada, List<Pipe> pedacos, List<Pipe> novos)
     {
         var subgeral = entrada.Subgeral;
         Passo("tirar a descida", () =>
@@ -231,7 +231,7 @@ public static class LigarAGeral
     }
 
     /// <summary>Roda um passo da ligação; se o Revit recusar, a mensagem diz qual passo foi.</summary>
-    static void Passo(string nome, Action acao)
+    internal static void Passo(string nome, Action acao)
     {
         try
         {

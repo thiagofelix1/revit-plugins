@@ -142,6 +142,7 @@ static class LeitorRede
         HashSet<string> setor;
         var totalDeSetores = 1;
         var indiceEscolhido = 0;
+        string? nomeMarcado = null;
         if (fonte is not null)
         {
             noFonte = IdPeca(fonte.Id);
@@ -158,8 +159,10 @@ static class LeitorRede
         {
             var componentes = Topologia.Componentes(nos, trechos, nosDeBico);
             if (componentes.Count == 0) throw new InvalidOperationException("Os bicos não formam uma rede contínua com os tubos encontrados.");
+            var nomes = AplicarEntradas(doc, componentes, nos, avisos);
             indiceEscolhido = IndiceDoSetor(componentes, elementoDoSetor, indiceSetor, trechos, tuboDoTrecho);
             (noFonte, setor, _) = componentes[indiceEscolhido];
+            nomeMarcado = nomes[indiceEscolhido];
             totalDeSetores = componentes.Count;
         }
 
@@ -171,8 +174,8 @@ static class LeitorRede
                 ? $"{ligados.Count - doSetor.Count} bicos são de outra VGA ou de rede solta e ficaram fora deste setor."
                 : totalDeSetores > 1
                     ? $"A rede tem {totalDeSetores} setores sem ligação entre si (VGA não desenhada no modelo). Este é o setor " +
-                      $"{indiceEscolhido + 1}; os outros {ligados.Count - doSetor.Count} bicos são dos demais. Para calcular outro, rode " +
-                      "Calcular e clique num bico dele."
+                      $"{nomeMarcado ?? (indiceEscolhido + 1).ToString()}; os outros {ligados.Count - doSetor.Count} bicos são dos demais. " +
+                      "Para calcular outro, rode Calcular e clique num bico dele."
                     : $"{ligados.Count - doSetor.Count} bicos ficaram de fora: o tubo deles não encontra o restante da rede.");
 
         var (dx, dy) = Topologia.DirecaoDosRamais(trechosSetor, nos);
@@ -184,10 +187,12 @@ static class LeitorRede
         }).ToList();
 
         var cotaFonte = nos[noFonte].Z;
-        avisos.Add(fonte is null
-            ? $"Fonte adotada: ponta de tubo mais baixa (nó {noFonte}, cota {cotaFonte:0.00} m). " +
-              "Para calcular a partir da VGA, marque a família dela como Fonte em Famílias."
-            : $"Fonte: VGA \"{fonte.Symbol?.Family?.Name}\" (id {fonte.Id.Value}), cota {cotaFonte:0.00} m.");
+        avisos.Add(fonte is not null
+            ? $"Fonte: VGA \"{fonte.Symbol?.Family?.Name}\" (id {fonte.Id.Value}), cota {cotaFonte:0.00} m."
+            : nomeMarcado is not null
+                ? $"Fonte: entrada marcada do setor \"{nomeMarcado}\", cota {cotaFonte:0.00} m."
+                : $"Fonte adotada: ponta de tubo mais baixa (nó {noFonte}, cota {cotaFonte:0.00} m). " +
+                  "Para escolher a entrada e o nome do setor, use Marcar setor; com a VGA desenhada, marque a família dela como Fonte em Famílias.");
         avisos.Add($"{chuveiros.Count} bicos em {ramalDe.Values.Distinct().Count()} ramais.");
 
         // Números a partir da VGA, os mesmos no memorial, nos parâmetros e nas folhas.
@@ -207,7 +212,7 @@ static class LeitorRede
         var bicosPorNo = doSetor.ToDictionary(b => IdBico(b.Instancia), b => b.Instancia.Id, StringComparer.Ordinal);
         var chuveirosNumerados = chuveiros.Select(c => c with { Id = N(c.No), No = N(c.No) }).ToList();
         var bicosNumerados = chuveiros.ToDictionary(c => N(c.No), c => bicosPorNo[c.No], StringComparer.Ordinal);
-        var setorNome = fonte is not null ? NomeDaVga(fonte) : totalDeSetores > 1 ? $"Setor {indiceEscolhido + 1}" : "Malha";
+        var setorNome = fonte is not null ? NomeDaVga(fonte) : nomeMarcado ?? (totalDeSetores > 1 ? $"Setor {indiceEscolhido + 1}" : "Malha");
 
         var rede = new Rede(N(noFonte), nosSetor.Select(n => n with { Id = N(n.Id) }), trechosNumerados, chuveirosNumerados);
         return new RedeLida(rede, avisos, setorNome, bicosNumerados, tubos, totalDeSetores);
@@ -230,6 +235,37 @@ static class LeitorRede
                 nosDoElemento.Add(trecho.De);
         var k = componentes.FindIndex(c => c.Nos.Overlaps(nosDoElemento));
         return k >= 0 ? k : throw new InvalidOperationException("O elemento clicado não está em nenhum setor que o plugin conseguiu ler.");
+    }
+
+    /// <summary>
+    /// As entradas marcadas pelo projetista (<see cref="Modelagem.EntradasDeSetor" />): cada uma vira a fonte do pedaço de
+    /// rede onde cai, no lugar da ponta mais baixa. Devolve o nome de cada pedaço (nulo onde não há marca).
+    /// </summary>
+    static string?[] AplicarEntradas(Document doc, List<(string Fonte, HashSet<string> Nos, int Bicos)> componentes,
+        Dictionary<string, No> nos, List<string> avisos)
+    {
+        var nomes = new string?[componentes.Count];
+        foreach (var entrada in Modelagem.EntradasDeSetor.Ler(doc))
+        {
+            var perto = nos.Values.Where(n => !n.Id.StartsWith('S'))
+                .Select(n => (n.Id, D: Math.Sqrt((n.X - entrada.X) * (n.X - entrada.X) + (n.Y - entrada.Y) * (n.Y - entrada.Y) +
+                                                 (n.Z - entrada.Z) * (n.Z - entrada.Z))))
+                .Where(x => x.D <= Modelagem.EntradasDeSetor.Tolerancia).OrderBy(x => x.D).Select(x => x.Id).FirstOrDefault();
+            var k = perto is null ? -1 : componentes.FindIndex(c => c.Nos.Contains(perto));
+            if (k < 0)
+            {
+                avisos.Add($"A entrada marcada do setor \"{entrada.Nome}\" não encontra mais a rede (o tubo mudou ou foi apagado): marque de novo.");
+                continue;
+            }
+            if (nomes[k] is { } outro)
+            {
+                avisos.Add($"\"{entrada.Nome}\" e \"{outro}\" estão marcadas na mesma rede: valeu \"{outro}\".");
+                continue;
+            }
+            nomes[k] = entrada.Nome;
+            componentes[k] = (perto!, componentes[k].Nos, componentes[k].Bicos);
+        }
+        return nomes;
     }
 
     /// <summary>Distância em metros da VGA até o nó mais próximo da rede lida, ou nula se não der para medir.</summary>

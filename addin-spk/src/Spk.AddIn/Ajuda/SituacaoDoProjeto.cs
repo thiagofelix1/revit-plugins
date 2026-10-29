@@ -78,7 +78,7 @@ static class SituacaoDoProjeto
         var detalhe = $"Famílias confirmadas: {bicos} tipo(s) de bico com fator K e área, {vgas} VGA(s) no modelo.";
         if (bicos == 0) return new Etapa("3. Rede", Etapa.Falta, detalhe + " Falta um bico com fator K e área maiores que zero.", acoes);
         return ComVerificacao(doc, new Etapa("3. Rede", Etapa.Feito,
-            vgas == 0 ? detalhe + " Sem VGA, o Calcular pergunta o setor clicando num bico." : detalhe, acoes));
+            vgas == 0 ? detalhe + " Sem VGA, o Calcular pergunta o setor clicando num bico; Marcar setor dá nome e entrada a cada um." : detalhe, acoes));
     }
 
     /// <summary>
@@ -105,6 +105,7 @@ static class SituacaoDoProjeto
     {
         var acoes = new[]
         {
+            new AcaoDaEtapa("Marcar setor", "MarcarSetorCommand"),
             new AcaoDaEtapa("Diâmetros", "DiametrosCommand"),
             new AcaoDaEtapa("Calcular", "CalcularRedeCommand"),
             new AcaoDaEtapa("Memorial", "AbrirMemorialCommand"),

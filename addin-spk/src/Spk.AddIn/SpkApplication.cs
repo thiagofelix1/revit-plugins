@@ -66,6 +66,16 @@ public class SpkApplication : IExternalApplication
                 "Leva o bico para o ponto que você clicar na planta, religado ao ramal mais perto da mesma rede (com braço, se ficar " +
                 "de lado), e emenda a rede no lugar antigo."));
         Pequenos(rede,
+            (typeof(LigarTubosCommand), "Ligar tubos", Icones.TracarRamal,
+                "Clique no tubo que chega (o da ponta solta) e no tubo onde ele liga: no meio do segundo, o SPK parte e põe o tê " +
+                "(com subida se as alturas são diferentes); na ponta dele, estica os dois até o canto e põe o cotovelo. Vários pares " +
+                "seguidos; Esc termina."),
+            (typeof(ConferirNaPlantaCommand), "Conferir na planta", Icones.Verificar,
+                "Desenha a conferência da norma na planta aberta: bico fora da regra em vermelho com a nota do que falta, o alcance de " +
+                "cada bico em cinza e os trechos sem cobertura com um círculo vermelho. Só anotação da vista."),
+            (typeof(LimparConferenciaCommand), "Limpar conferência", Icones.Verificar,
+                "Apaga as marcas da conferência desta vista e tira o vermelho dos bicos."));
+        Pequenos(rede,
             (typeof(GerarMalhaCommand), "Malha retangular", Icones.Malha,
                 "Cria uma malha retangular de bicos e tubos já conectados, no ponto que você clicar, com a geometria de Dados do " +
                 "esboço. Para testar sem arquitetura."),
@@ -76,6 +86,11 @@ public class SpkApplication : IExternalApplication
         Margem(rede);
 
         var calculo = application.CreateRibbonPanel(Aba, "Cálculo");
+        Botao<MarcarSetorCommand>(calculo,
+            "Marcar\nsetor", Icones.Setor,
+            "Para rede sem a VGA desenhada: clique no tubo por onde a água chega (a descida da VGA) e dê o nome do setor. " +
+            "Calcular, Diâmetros, o memorial e as folhas usam essa entrada e esse nome, em vez da ponta mais baixa e de \"Setor 1\". " +
+            "Clique de novo na mesma rede para trocar o nome ou tirar a marca.");
         Botao<VerificarModeloCommand>(calculo,
             "Verificar\nmodelo", Icones.Verificar,
             "Confere se o SPK consegue ler a rede: peças encostadas mas não ligadas, tubo sem tê, bico solto, ponta aberta, " +

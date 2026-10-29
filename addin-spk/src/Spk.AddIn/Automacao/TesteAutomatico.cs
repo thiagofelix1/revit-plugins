@@ -301,12 +301,98 @@ static class TesteAutomatico
                     return feito.Texto();
                 });
 
+            if (cenario.DesenharTubos is { Count: > 0 } desenho)
+                Etapa(relatorio, "desenharTubos", () => $"{Cenas.DesenharTubos(doc!, desenho).Count} tubo(s) soltos");
+
+            if (cenario.LigarTubos is { Count: > 0 } pares)
+                Etapa(relatorio, "ligarTubos", () =>
+                {
+                    Autodesk.Revit.DB.Plumbing.Pipe Perto(double[] m)
+                    {
+                        var q = new XYZ(m[0] / 0.3048, m[1] / 0.3048, 0);
+                        return new FilteredElementCollector(doc!).OfClass(typeof(Autodesk.Revit.DB.Plumbing.Pipe)).Cast<Autodesk.Revit.DB.Plumbing.Pipe>()
+                            .Where(t => t.Location is LocationCurve { Curve: Line })
+                            .OrderBy(t =>
+                            {
+                                var l = (Line)((LocationCurve)t.Location).Curve;
+                                var (a, b) = (new XYZ(l.GetEndPoint(0).X, l.GetEndPoint(0).Y, 0), new XYZ(l.GetEndPoint(1).X, l.GetEndPoint(1).Y, 0));
+                                return a.IsAlmostEqualTo(b) ? a.DistanceTo(q) : Line.CreateBound(a, b).Distance(q);
+                            }).First();
+                    }
+                    var linhas = new List<string>();
+                    foreach (var par in pares)
+                    {
+                        var chega = Perto(par.Chega);
+                        var feito = Modelagem.LigarTubos.Executar(doc!, chega, Perto(par.Alvo));
+                        linhas.Add(feito.Texto() + (feito.Recusa is null ? $"; rede com {Modelagem.LigarAGeral.Rede(doc!, chega).Count} peças" : ""));
+                    }
+                    relatorio.Ligacoes = linhas;
+                    return string.Join("\n", linhas);
+                });
+
+            if (cenario.MarcarSetor is { Count: > 0 } marcas)
+                Etapa(relatorio, "marcarSetor", () =>
+                {
+                    var linhas = new List<string>();
+                    foreach (var m in marcas)
+                    {
+                        var perto = new XYZ(m.Perto[0] / 0.3048, m.Perto[1] / 0.3048, 0);
+                        // O tubo da ponta solta mais perto em planta, como o clique do projetista na descida.
+                        var tubo = new FilteredElementCollector(doc!).OfClass(typeof(Autodesk.Revit.DB.Plumbing.Pipe)).Cast<Autodesk.Revit.DB.Plumbing.Pipe>()
+                            .SelectMany(t => t.ConnectorManager.Connectors.Cast<Connector>()
+                                .Where(c => c.ConnectorType == ConnectorType.End && !c.IsConnected)
+                                .Select(c => (Tubo: t, D: new XYZ(c.Origin.X - perto.X, c.Origin.Y - perto.Y, 0).GetLength())))
+                            .OrderBy(x => x.D).Select(x => x.Tubo).FirstOrDefault()
+                            ?? throw new InvalidOperationException("Nenhum tubo com ponta solta para marcar.");
+                        using var t = new Transaction(doc!, "SPK — Marcar setor");
+                        t.Start();
+                        var feito = Modelagem.EntradasDeSetor.Marcar(doc!, tubo, perto, m.Nome);
+                        t.Commit();
+                        linhas.Add($"{feito.Entrada.Nome}: {feito.Bicos} bico(s), entrada a {feito.Entrada.Z:0.00} m" +
+                                   (feito.Aviso is null ? "" : " • " + feito.Aviso));
+                    }
+                    return string.Join("\n", linhas);
+                });
+
             if (cenario.EditarBicos is { Count: > 0 } edicoes)
                 Etapa(relatorio, "editarBicos", () =>
                 {
                     var linhas = edicoes.Select(e => e.Op + ": " + Editar(doc!, e)).ToList();
                     relatorio.Edicoes = linhas;
                     return string.Join("\n", linhas);
+                });
+
+            if (cenario.ConferirNaPlanta)
+                Etapa(relatorio, "conferirNaPlanta", () =>
+                {
+                    var dados = DadosProjeto.Carregar(doc!) ?? throw new InvalidOperationException("Mande \"dados\" no cenário.");
+                    var bicos = new FilteredElementCollector(doc!).OfCategory(BuiltInCategory.OST_Sprinklers).WhereElementIsNotElementType()
+                        .OfType<FamilyInstance>().ToList();
+                    var nivel = Folhas.LeituraSetores.NivelDaMaioria(doc!, bicos);
+                    var planta = new FilteredElementCollector(doc!).OfClass(typeof(ViewPlan)).Cast<ViewPlan>()
+                        .FirstOrDefault(v => !v.IsTemplate && v.ViewType == ViewType.FloorPlan && v.GenLevel?.Id == nivel.Id);
+                    if (planta is null)
+                    {
+                        using var t = new Transaction(doc!, "SPK — planta de teste");
+                        t.Start();
+                        var tipo = new FilteredElementCollector(doc!).OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>().First(v => v.ViewFamily == ViewFamily.FloorPlan);
+                        planta = ViewPlan.Create(doc!, tipo.Id, nivel.Id);
+                        t.Commit();
+                    }
+                    var feito = Modelagem.ConferenciaVisual.Executar(doc!, planta, dados, new Modelagem.OpcoesBicos());
+                    var circulos = new FilteredElementCollector(doc!, planta.Id).OfClass(typeof(CurveElement)).Cast<CurveElement>()
+                        .Count(c => c.LineStyle?.Name == "SPK Cobertura");
+                    // A planta em imagem, para ver o desenho da conferência.
+                    var imagem = Path.Combine(PastaSaida, Seguro(cenario.Nome) + "-conferencia");
+                    var opcoesImagem = new ImageExportOptions
+                    {
+                        FilePath = imagem, ExportRange = ExportRange.SetOfViews, HLRandWFViewsFileType = ImageFileType.PNG,
+                        ImageResolution = ImageResolution.DPI_150, ZoomType = ZoomFitType.FitToPage, PixelSize = 2400,
+                    };
+                    opcoesImagem.SetViewsAndSheets([planta.Id]);
+                    doc!.ExportImage(opcoesImagem);
+                    relatorio.Conferencia = [feito.Texto(), $"{circulos} círculo(s) de alcance na planta {planta.Name}"];
+                    return string.Join("\n", relatorio.Conferencia);
                 });
 
             if (cenario.InspecionarVinculos)
@@ -637,6 +723,7 @@ static class TesteAutomatico
         if (esperado.PressaoKPa is { } pressao && (c is null || Math.Abs(c.PressaoKPa - pressao) > 0.5))
             falhas.Add($"pressão: esperado {pressao} kPa, veio {c?.PressaoKPa}");
         if (esperado.Critico is { } critico && c?.Critico != critico) falhas.Add($"crítico: esperado {critico}, veio {c?.Critico}");
+        if (esperado.Setor is { } setor && c?.Setor != setor) falhas.Add($"setor: esperado \"{setor}\", veio \"{c?.Setor}\"");
         if (esperado.Folhas is { } folhas && (r.Folhas?.Folhas.Count ?? 0) != folhas)
             falhas.Add($"folhas: esperado {folhas}, veio {r.Folhas?.Folhas.Count ?? 0}");
         foreach (var (codigo, condicao) in esperado.Verificacao ?? [])
@@ -678,6 +765,12 @@ static class TesteAutomatico
         foreach (var trecho in esperado.TextoDaRede ?? [])
             if (!(r.Rede ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
                 falhas.Add($"gerar rede: \"{trecho}\" não apareceu");
+        foreach (var trecho in esperado.TextoDasLigacoes ?? [])
+            if (!(r.Ligacoes ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
+                falhas.Add($"ligar tubos: \"{trecho}\" não apareceu");
+        foreach (var trecho in esperado.TextoDaConferencia ?? [])
+            if (!(r.Conferencia ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
+                falhas.Add($"conferir na planta: \"{trecho}\" não apareceu");
         foreach (var trecho in esperado.TextoDosBicos ?? [])
             if (!(r.Bicos ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
                 falhas.Add($"bicos por ambiente: \"{trecho}\" não apareceu");
@@ -1022,8 +1115,20 @@ sealed class Cenario
     /// <summary>Desenha esta geral e liga a ela as redes soltas (Ligar à geral), depois de gerar a rede.</summary>
     public PedidoGeral? LigarAGeral { get; set; }
 
+    /// <summary>Tubos soltos desenhados pelo teste, depois de gerar e ligar a rede.</summary>
+    public List<TuboDesenhado>? DesenharTubos { get; set; }
+
+    /// <summary>Ligar tubos aos pares, em ordem, depois de desenhar os tubos.</summary>
+    public List<ParDeTubos>? LigarTubos { get; set; }
+
+    /// <summary>Marcar setor depois de gerar e ligar a rede: o nome e o ponto em planta perto da ponta de entrada.</summary>
+    public List<MarcaDeSetor>? MarcarSetor { get; set; }
+
     /// <summary>Edições de bico, em ordem, depois de gerar e ligar a rede (Apagar, Inserir e Mover bico).</summary>
     public List<OperacaoDeBico>? EditarBicos { get; set; }
+
+    /// <summary>Conferir na planta do nível da maioria dos bicos, depois das edições.</summary>
+    public bool ConferirNaPlanta { get; set; }
 
     /// <summary>Numeração e código das folhas a gravar no padrão antes de gerar.</summary>
     public AjustePadrao? Padrao { get; set; }
@@ -1041,6 +1146,31 @@ sealed class OperacaoDeBico
     public double[]? Perto { get; set; }
     public double[]? Em { get; set; }
     public double[]? Para { get; set; }
+}
+
+/// <summary>Um tubo solto: pontas [x, y, altura acima do nível] em m, e o DN.</summary>
+sealed class TuboDesenhado
+{
+    public double[] De { get; set; } = [0, 0, 3];
+    public double[] Ate { get; set; } = [1, 0, 3];
+    public int Dn { get; set; } = 25;
+}
+
+/// <summary>Ligar tubos: o tubo mais perto de <see cref="Chega" /> vai até o mais perto de <see cref="Alvo" /> (em planta, m).</summary>
+sealed class ParDeTubos
+{
+    public double[] Chega { get; set; } = [0, 0];
+    public double[] Alvo { get; set; } = [0, 0];
+}
+
+/// <summary>
+/// Marcar setor como o projetista: o tubo com ponta solta mais perto de <see cref="Perto" /> (em planta, m nas
+/// coordenadas do projeto) e o nome.
+/// </summary>
+sealed class MarcaDeSetor
+{
+    public string Nome { get; set; } = "";
+    public double[] Perto { get; set; } = [0, 0];
 }
 
 /// <summary>Geral desenhada pelo teste, como o engenheiro faria com a ferramenta Tubo (ver Cenas.DesenharGeral).</summary>
@@ -1083,6 +1213,9 @@ sealed class Esperado
     public int? Bicos { get; set; }
     public double? PressaoKPa { get; set; }
     public string? Critico { get; set; }
+
+    /// <summary>O nome do setor calculado (da VGA, da marca de Marcar setor, ou "Setor 1").</summary>
+    public string? Setor { get; set; }
     public int? Folhas { get; set; }
 
     /// <summary>Código do grupo (ou "erros", "avisos", "setores") e a condição: "0", "&gt;=1", "&lt;=2".</summary>
@@ -1109,6 +1242,12 @@ sealed class Esperado
 
     /// <summary>Trechos que precisam aparecer em alguma linha de Gerar rede (uma por ambiente).</summary>
     public List<string>? TextoDaRede { get; set; }
+
+    /// <summary>Trechos que precisam aparecer no resultado de Conferir na planta.</summary>
+    public List<string>? TextoDaConferencia { get; set; }
+
+    /// <summary>Trechos que precisam aparecer em alguma linha de Ligar tubos (uma por par).</summary>
+    public List<string>? TextoDasLigacoes { get; set; }
 }
 
 sealed class AjusteMapeamento
@@ -1146,6 +1285,9 @@ sealed class RelatorioCenario
     public ResumoVerificacao? Verificacao { get; set; }
     public ResumoReconexao? Reconexao { get; set; }
     public ResumoLigacao? Ligacao { get; set; }
+
+    /// <summary>Uma linha por par de Ligar tubos.</summary>
+    public List<string>? Ligacoes { get; set; }
     public ResumoDiametros? Diametros { get; set; }
     public List<string>? ConexoesAntes { get; set; }
     public List<string>? Conexoes { get; set; }
@@ -1156,6 +1298,7 @@ sealed class RelatorioCenario
     public List<string>? Rede { get; set; }
     public List<string>? Geral { get; set; }
     public List<string>? Edicoes { get; set; }
+    public List<string>? Conferencia { get; set; }
     public List<string>? CarimbosSpk { get; set; }
 
     /// <summary>Só com "esperado" no cenário: se tudo bateu, e o que não bateu.</summary>

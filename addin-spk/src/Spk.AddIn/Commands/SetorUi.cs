@@ -85,25 +85,34 @@ static class SetorUi
     /// </summary>
     static (bool Seguir, ElementId? Elemento) EscolherSetor(UIDocument ui, string titulo, string? motivo)
     {
+        // Os setores marcados (Marcar setor) aparecem pelo nome, até três; o tubo marcado leva ao pedaço de rede dele.
+        var marcados = Modelagem.EntradasDeSetor.Ler(ui.Document).Where(e => ui.Document.GetElement(new ElementId(e.Tubo)) is not null)
+            .OrderBy(e => e.Nome, Folhas.ComparadorNatural.Instancia).ToList();
         var dialogo = new TaskDialog(titulo)
         {
             MainInstruction = "Qual setor?",
             MainContent = (motivo ?? "O modelo não tem VGA marcada em Famílias.") +
-                          " Cada rede sem ligação com as outras é tratada como um setor, com a entrada na ponta mais baixa da descida.",
+                          (marcados.Count > 0
+                              ? " Cada rede sem ligação com as outras é um setor; os marcados com Marcar setor têm nome e entrada escolhidos."
+                              : " Cada rede sem ligação com as outras é tratada como um setor, com a entrada na ponta mais baixa da descida. " +
+                                "Para dar nome e escolher a entrada de cada um, use Marcar setor."),
             CommonButtons = TaskDialogCommonButtons.Cancel,
         };
         dialogo.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Clicar num bico ou tubo do setor");
-        dialogo.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "O setor com mais bicos");
-        switch (dialogo.Show())
+        var links = new[] { TaskDialogCommandLinkId.CommandLink2, TaskDialogCommandLinkId.CommandLink3, TaskDialogCommandLinkId.CommandLink4 };
+        if (marcados.Count is > 0 and <= 3)
+            for (var i = 0; i < marcados.Count; i++) dialogo.AddCommandLink(links[i], marcados[i].Nome);
+        else
+            dialogo.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "O setor com mais bicos");
+        var resposta = dialogo.Show();
+        if (resposta == TaskDialogResult.CommandLink1)
         {
-            case TaskDialogResult.CommandLink1:
-                var referencia = ui.Selection.PickObject(ObjectType.Element, new BicoOuTubo(), "Clique num bico ou tubo do setor.");
-                return (true, referencia.ElementId);
-            case TaskDialogResult.CommandLink2:
-                return (true, null);
-            default:
-                return (false, null);
+            var referencia = ui.Selection.PickObject(ObjectType.Element, new BicoOuTubo(), "Clique num bico ou tubo do setor.");
+            return (true, referencia.ElementId);
         }
+        var k = Array.FindIndex(links, l => (int)l == (int)resposta);
+        if (k < 0) return (false, null);
+        return marcados.Count is > 0 and <= 3 ? (true, new ElementId(marcados[k].Tubo)) : (true, null);
     }
 
     sealed class BicoOuTubo : ISelectionFilter

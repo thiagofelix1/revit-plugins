@@ -88,7 +88,7 @@ Duas telas aparecem antes do plugin carregar e o teste não consegue responder:
 
 ## Cenários de regressão
 
-A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado esperado de cada cenário. Para rodar: copiar para `Documentos\SPK\testes\fila.json`, abrir o Revit e, no fim, olhar `Passou` de cada cenário no relatório. São 33:
+A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado esperado de cada cenário. Para rodar: copiar para `Documentos\SPK\testes\fila.json`, abrir o Revit e, no fim, olhar `Passou` de cada cenário no relatório. São 37:
 
 | Grupo | Cenários | O que prova |
 |---|---|---|
@@ -97,6 +97,9 @@ A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado
 | Modelagem | cena com ramal e bicos soltos; cena com subgeral e fileira de bicos; a mesma com Diâmetros; 3 fileiras dos dois lados, com subida e com cruzeta | Ligar bicos liga 5 e recusa 1; Traçar ramal traça e liga 5; Diâmetros põe 8 tubos em DN 25, 1 em 32 e 4 em 40, com os cotovelos refeitos no DN novo e nenhuma redução entre tubos; Traçar ramais traça 3 ramais e liga os 12 bicos nos dois modos; verificação limpa |
 | Vigas fundas | `salaComVigas` (três vigas paralelas com o fundo 60 cm abaixo da laje) e `salaComGrelha` (vigas nas duas direções) | vigas paralelas: 8 bicos nos vãos, defletor 25 cm abaixo da laje, ramais nos vãos a 3,75 m e subgeral por baixo das vigas a 3,10 m, verificação limpa, 4 folhas; grelha: 8 bicos nos quadros com espaçamento ok, e o Gerar rede recusa com bico pendente (pede bico em pé) |
 | Editar bicos | o setor automático, depois apagar um bico (cruzeta vira tê), inserir outro num ramal e mover um terceiro 70 cm de lado (religado com braço) | 16 bicos, 1 setor, sem erro nem aviso, ATENDE |
+| Conferir na planta | o setor automático, depois inserir um bico a 45 cm de outro e apagar um bico da sala 1 | na planta do nível: 16 bicos conferidos, 16 círculos de alcance, 3 bicos fora da regra (os dois juntos e o vizinho do apagado) e 3 trechos sem cobertura (duas paredes da sala 1 e o corredor), com a imagem da planta em `saida` |
+| Marcar setor | o setor automático com a descida da VGA marcada "VGA 01"; as 4 salas em redes separadas, com "VGA 03" e "VGA 01" marcadas | setor único: o cálculo, o memorial e as folhas saem como VGA 01 (SPK-VGA01-01), entrada na descida, ATENDE; salas separadas: setorização com VGA 01, VGA 03, Setor 2 e Setor 4, e o cálculo da VGA 01 (NÃO ATENDE: a sala de 48 m² não cobre os 140 m² da área de operação) |
+| Ligar tubos | tubos soltos desenhados pelo teste, longe da arquitetura | tê no meio do destino (rede de 4 peças), tê com subida de 40 cm (9 peças), cotovelo no canto com a ponta do destino (3 peças) e recusa de tubos em linha |
 | Setor automático | `andarComSalas`, Gerar rede nas salas com `geralPor` = Corredor | as 4 salas com a entrada voltada para o corredor, geral pelo eixo dele: 1 setor, 16 bicos, verificação sem erro nem aviso, ATENDE; 4 folhas |
 | Setor com várias salas | `andarComSalas`, rede nas 4 salas, geral pelo corredor a 3,00 m e a 3,40 m (com subida) | as 4 redes ligadas: 1 setor, 16 bicos, verificação sem erro e sem ponta aberta, ATENDE; 4 folhas |
 | Gerar rede | arquitetura vinculada, risco leve, espinha de peixe e lateral | na sala com forro: 4 bicos, rede a 3,00 m, 2 ramais, diâmetros da tabela, verificação sem erro, ATENDE e 4 folhas; o depósito com viga e laje baixa é recusado com o motivo (sem espaço entre o defletor e o teto) |

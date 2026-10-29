@@ -135,6 +135,16 @@ static class Icones
         dc.DrawEllipse(Vermelho, null, new Point(25, 25), 3, 3);
     }
 
+    public static void Setor(DrawingContext dc)
+    {
+        // A descida da VGA com a bandeira do nome do setor.
+        dc.DrawLine(Caneta(Grafite, 3), new Point(9, 29), new Point(9, 12));
+        dc.DrawLine(Caneta(Grafite, 3), new Point(9, 12), new Point(28, 12));
+        dc.DrawGeometry(Vermelho, null, Geometry.Parse("M 13,3 L 27,6.5 L 13,10 Z"));
+        dc.DrawLine(Caneta(Grafite, 1.6), new Point(13, 2), new Point(13, 12));
+        dc.DrawEllipse(Vermelho, null, new Point(9, 27), 3.2, 3.2);
+    }
+
     public static void Verificar(DrawingContext dc)
     {
         dc.DrawEllipse(Brushes.White, Caneta(Grafite, 2.5), new Point(16, 16), 12, 12);
