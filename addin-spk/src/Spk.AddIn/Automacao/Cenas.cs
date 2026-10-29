@@ -19,6 +19,7 @@ static class Cenas
         "subgeralComFileiras" => SubgeralComFileiras(doc),
         "arquiteturaVinculada" => ArquiteturaVinculada(doc),
         "andarComSalas" => AndarComSalas(doc),
+        "andarEmL" => AndarEmL(doc),
         "salaComVigas" => SalaComVigas(doc, grelha: false),
         "salaComGrelha" => SalaComVigas(doc, grelha: true),
         _ => throw new InvalidOperationException($"Cena desconhecida: \"{nome}\"."),
@@ -210,6 +211,69 @@ static class Cenas
             t.Commit();
         }
         return new Cena("Andar vinculado (deslocado 20 m e 10 m): corredor de 24 × 2,5 m e 4 salas de 6 × 8 m com forro a 2,80 m.", [], []);
+    }
+
+    /// <summary>
+    /// Como <see cref="AndarComSalas" />, com o corredor em L (2,5 m de largura): uma perna ao longo de x (de 0 a 16,5, y de 0
+    /// a 2,5) e outra ao longo de y (x de 14 a 16,5, até y = 18,5). Salas: 1 e 2 (7 × 8 m) ao norte da primeira perna; 5 (7 ×
+    /// 8 m) a oeste da segunda, em cima da 2; 3 e 4 (8 × 6 m) a leste da segunda. A sala 2 fica no canto, ao lado das duas.
+    /// </summary>
+    static Cena AndarEmL(Document doc)
+    {
+        var app = doc.Application;
+        var pasta = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "SPK", "testes", "saida");
+        System.IO.Directory.CreateDirectory(pasta);
+        var arquivo = System.IO.Path.Combine(pasta, "vinculo-andar-em-l.rvt");
+        double M(double metros) => GeradorMalha.Pes(metros);
+
+        var arq = app.NewProjectDocument(Template(app, "DefaultBRAPTB.rte"));
+        using (var t = new Transaction(arq, "SPK — andar em L de teste"))
+        {
+            t.Start();
+            var (terreo, superior) = Niveis(arq);
+            var tipoParede = arq.GetDefaultElementTypeId(ElementTypeGroup.WallType);
+            XYZ P(double x, double y) => new(M(x), M(y), terreo.Elevation);
+            // Cada parede uma vez só (parede sobreposta vira aviso do Revit).
+            var paredes = new (double, double, double, double)[]
+            {
+                (0, 0, 16.5, 0), (16.5, 0, 16.5, 18.5), (16.5, 18.5, 14, 18.5), (14, 18.5, 14, 2.5), (14, 2.5, 0, 2.5), (0, 2.5, 0, 0),
+                (0, 2.5, 0, 10.5), (7, 2.5, 7, 18.5), (0, 10.5, 14, 10.5), (7, 18.5, 14, 18.5),
+                (16.5, 4, 24.5, 4), (24.5, 4, 24.5, 16), (24.5, 16, 16.5, 16), (16.5, 10, 24.5, 10),
+            };
+            foreach (var (x0, y0, x1, y1) in paredes) Wall.Create(arq, Line.CreateBound(P(x0, y0), P(x1, y1)), tipoParede, terreo.Id, M(4), 0, false, false);
+            arq.Regenerate();
+            var corredor = arq.Create.NewRoom(terreo, new UV(M(8), M(1.25)));
+            corredor.get_Parameter(BuiltInParameter.ROOM_NAME).Set("Corredor");
+            corredor.get_Parameter(BuiltInParameter.ROOM_NUMBER).Set("200");
+            var tipoForro = new FilteredElementCollector(arq).OfClass(typeof(CeilingType)).FirstElementId();
+            var salas = new (string Numero, double X0, double Y0, double X1, double Y1)[]
+            {
+                ("201", 0, 2.5, 7, 10.5), ("202", 7, 2.5, 14, 10.5), ("203", 16.5, 4, 24.5, 10), ("204", 16.5, 10, 24.5, 16), ("205", 7, 10.5, 14, 18.5),
+            };
+            foreach (var (numero, x0, y0, x1, y1) in salas)
+            {
+                var sala = arq.Create.NewRoom(terreo, new UV(M((x0 + x1) / 2), M((y0 + y1) / 2)));
+                sala.get_Parameter(BuiltInParameter.ROOM_NAME).Set($"Sala {numero[^1]}");
+                sala.get_Parameter(BuiltInParameter.ROOM_NUMBER).Set(numero);
+                var forro = Ceiling.Create(arq, [Retangulo(M(x0 + 0.1), M(y0 + 0.1), M(x1 - 0.1), M(y1 - 0.1), terreo.Elevation)], tipoForro, terreo.Id);
+                forro.get_Parameter(BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM).Set(M(2.8));
+            }
+            Floor.Create(arq, [Retangulo(0, 0, M(24.5), M(18.5), superior.Elevation)], arq.GetDefaultElementTypeId(ElementTypeGroup.FloorType), superior.Id);
+            t.Commit();
+        }
+        arq.SaveAs(arquivo, new SaveAsOptions { OverwriteExistingFile = true });
+        arq.Close(false);
+
+        using (var t = new Transaction(doc, "SPK — vínculo de teste"))
+        {
+            t.Start();
+            ApagarRede(doc);
+            var tipo = RevitLinkType.Create(doc, ModelPathUtils.ConvertUserVisiblePathToModelPath(arquivo), new RevitLinkOptions(false));
+            var instancia = RevitLinkInstance.Create(doc, tipo.ElementId);
+            ElementTransformUtils.MoveElement(doc, instancia.Id, new XYZ(M(20), M(10), 0));
+            t.Commit();
+        }
+        return new Cena("Andar vinculado (deslocado 20 m e 10 m): corredor em L (16,5 m + 18,5 m, 2,5 m de largura) e 5 salas com forro a 2,80 m.", [], []);
     }
 
     /// <summary>

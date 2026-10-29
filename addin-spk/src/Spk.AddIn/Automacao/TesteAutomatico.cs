@@ -818,6 +818,9 @@ static class TesteAutomatico
         foreach (var trecho in esperado.TextoDaRede ?? [])
             if (!(r.Rede ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
                 falhas.Add($"gerar rede: \"{trecho}\" não apareceu");
+        foreach (var trecho in esperado.TextoDaGeral ?? [])
+            if (!(r.Geral ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
+                falhas.Add($"geral: \"{trecho}\" não apareceu");
         foreach (var trecho in esperado.TextoDasEdicoes ?? [])
             if (!(r.Edicoes ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
                 falhas.Add($"editar bicos: \"{trecho}\" não apareceu");
@@ -1316,6 +1319,9 @@ sealed class Esperado
 
     /// <summary>Trechos que precisam aparecer no resultado de Conferir na planta.</summary>
     public List<string>? TextoDaConferencia { get; set; }
+
+    /// <summary>Trechos que precisam aparecer em alguma linha da geral (Juntar as salas num setor ou Ligar à geral).</summary>
+    public List<string>? TextoDaGeral { get; set; }
 
     /// <summary>Trechos que precisam aparecer em alguma linha das edições de bico (uma por operação).</summary>
     public List<string>? TextoDasEdicoes { get; set; }

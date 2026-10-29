@@ -88,7 +88,7 @@ Duas telas aparecem antes do plugin carregar e o teste não consegue responder:
 
 ## Cenários de regressão
 
-A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado esperado de cada cenário. Para rodar: copiar para `Documentos\SPK\testes\fila.json`, abrir o Revit e, no fim, olhar `Passou` de cada cenário no relatório. São 39:
+A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado esperado de cada cenário. Para rodar: copiar para `Documentos\SPK\testes\fila.json`, abrir o Revit e, no fim, olhar `Passou` de cada cenário no relatório. São 40:
 
 | Grupo | Cenários | O que prova |
 |---|---|---|
@@ -102,6 +102,7 @@ A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado
 | Cores e material | o setor automático marcado VGA 01 e calculado; cores por diâmetro, setor, velocidade e pressão na planta (uma imagem de cada em `saida`), depois Tirar cores; lista de material | as quatro pinturas com legenda, tudo volta ao normal; resumo com metros por DN e as tabelas SPK criadas |
 | Mover bicos | o setor automático; o último bico de um ramal 50 cm para fora, dois bicos 30 cm na linha dos ramais (mover vários) e um bico 70 cm de lado | os três primeiros deslizam (ramal estica ou encolhe), o de lado é religado; 16 bicos, verificação sem erro, ATENDE |
 | Ligar tubos | tubos soltos desenhados pelo teste, longe da arquitetura | tê no meio do destino (rede de 4 peças), tê com subida de 40 cm (9 peças), cotovelo no canto com a ponta do destino (3 peças) e recusa de tubos em linha |
+| Corredor em L | `andarEmL` (corredor em L de 16,5 m + 18,5 m, 5 salas, uma no canto), Gerar rede com `geralPor` = Corredor, Marcar setor, cores por diâmetro | geral pelas duas pernas com cotovelo no canto, as 5 salas ligadas (cada uma na perna que tem à frente), 20 bicos, verificação sem erro, ATENDE como VGA 01, 4 folhas |
 | Setor automático | `andarComSalas`, Gerar rede nas salas com `geralPor` = Corredor | as 4 salas com a entrada voltada para o corredor, geral pelo eixo dele: 1 setor, 16 bicos, verificação sem erro nem aviso, ATENDE; 4 folhas |
 | Setor com várias salas | `andarComSalas`, rede nas 4 salas, geral pelo corredor a 3,00 m e a 3,40 m (com subida) | as 4 redes ligadas: 1 setor, 16 bicos, verificação sem erro e sem ponta aberta, ATENDE; 4 folhas |
 | Gerar rede | arquitetura vinculada, risco leve, espinha de peixe e lateral | na sala com forro: 4 bicos, rede a 3,00 m, 2 ramais, diâmetros da tabela, verificação sem erro, ATENDE e 4 folhas; o depósito com viga e laje baixa é recusado com o motivo (sem espaço entre o defletor e o teto) |
