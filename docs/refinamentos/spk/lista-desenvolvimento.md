@@ -87,12 +87,14 @@ Pronto quando um setor da Nova Era (ou de um projeto do engenheiro) é desenhado
 - [x] Conferir na planta (modo assistido): a conferência da norma desenhada na planta aberta, só como anotação da vista. Círculo cinza com o alcance de cada bico; bico fora da regra com círculo vermelho e a nota do que falta (espaçamento, área por bico, distância à parede, altura do defletor); trecho de parede ou ponto do piso sem cobertura com círculo vermelho. Rodar de novo ou Limpar conferência apaga só as marcas do SPK.
 - [x] Marcar setor (modo assistido): rede sem VGA desenhada ganha nome e entrada escolhidos pelo projetista (clique no tubo da descida da VGA; a ponta solta mais perto vira a fonte). Gravado no .rvt; vale no Calcular, Diâmetros, memorial e folhas, e o "Qual setor?" lista os marcados pelo nome. Marca que perdeu a rede (tubo apagado) vira aviso no cálculo.
 - [x] Ligar tubos (modo assistido): o tubo que chega e o de destino; no meio do destino, tê (com subida se a altura é outra), na ponta dele, cotovelo no canto; tubos em linha são recusados com o motivo. Mesma ligação do Ligar à geral. Falta: tubos em linha (luva), destino vertical (coluna), ligar ponta de tubo direto em bico.
-- [ ] Modo assistido, na ordem combinada: pintar a rede por diâmetro ou pressão e lista de material; mover vários bicos e deslizar o bico no ramal.
+- [x] Cores da rede: pinta a vista por diâmetro, setor, velocidade ou pressão (substituição gráfica por elemento, funciona com template), legenda na planta, Tirar cores desfaz só o que foi pintado.
+- [x] Lista de material: resumo (metros por DN, conexões por tipo, bicos, válvulas) e tabelas do Revit "SPK — ..." que se atualizam sozinhas. Falta: lista por setor.
+- [x] Mover vários bicos (mesmo deslocamento, os da frente primeiro) e deslizar o bico na linha do ramal (bico, descida e tê andam; o ramal estica). Na cruzeta não desliza (arrastaria o outro ramal): apaga e insere.
 - [ ] Aviso de colisão com viga e duto, e de inclinação.
 - [ ] Rede seguindo telhado inclinado.
 - [ ] Setorização: área de cada setor contra a Tabela 8; depois, sugestão de cortes.
 - [ ] Tubo geral até a casa de bombas.
-- [ ] Complementos baratos, a qualquer momento: pintar a rede por pressão ou velocidade; lista de material (metros de tubo por diâmetro, conexões).
+- [x] Complementos baratos: pintar a rede por pressão ou velocidade; lista de material (feitos: Cores da rede e Lista de material).
 
 ## 7. Dimensionamento
 

@@ -98,12 +98,29 @@ public class MoverBicoCommand : ExternalCommand
         var doc = ui.Document;
         try
         {
-            var bico = EdicaoUi.Bicos(ui.Selection.GetElementIds().Select(doc.GetElement)).FirstOrDefault()
-                       ?? (FamilyInstance)doc.GetElement(ui.Selection.PickObject(ObjectType.Element, new EdicaoUi.SoBicos(), "Clique no bico a mover"));
-            var ponto = ui.Selection.PickPoint("Clique no lugar novo do bico, em planta");
-            var feito = EditarBicos.Mover(doc, bico, ponto);
-            if (feito.Bico is not null) ui.Selection.SetElementIds([feito.Bico]);
-            TaskDialog.Show(Titulo, feito.Texto("Bico movido e religado ao ramal.") + "\n\nDepois: Diâmetros, Verificar modelo e Calcular. Ctrl+Z desfaz.");
+            var bicos = EdicaoUi.Bicos(ui.Selection.GetElementIds().Select(doc.GetElement));
+            if (bicos.Count == 0)
+                bicos = [(FamilyInstance)doc.GetElement(ui.Selection.PickObject(ObjectType.Element, new EdicaoUi.SoBicos(), "Clique no bico a mover"))];
+            if (bicos.Count == 1)
+            {
+                var ponto = ui.Selection.PickPoint("Clique no lugar novo do bico, em planta");
+                var feito = EditarBicos.Mover(doc, bicos[0], ponto);
+                if (feito.Bico is not null) ui.Selection.SetElementIds([feito.Bico]);
+                TaskDialog.Show(Titulo, feito.Texto("Bico movido e religado ao ramal.") + "\n\nDepois: Diâmetros, Verificar modelo e Calcular. Ctrl+Z desfaz.");
+                return;
+            }
+
+            // Vários: o mesmo deslocamento para todos, como o Mover do Revit (ponto de referência e destino).
+            var de = ui.Selection.PickPoint($"{bicos.Count} bicos: clique no ponto de referência");
+            var para = ui.Selection.PickPoint("Clique no destino do ponto de referência");
+            var feitos = EditarBicos.MoverVarios(doc, bicos, para - de);
+            var novos = feitos.Select(f => f.Bico).OfType<ElementId>().ToList();
+            if (novos.Count > 0) ui.Selection.SetElementIds(novos);
+            var recusas = feitos.Where(f => f.Recusa is not null).Select(f => f.Recusa!).Distinct().ToList();
+            var avisos = feitos.SelectMany(f => f.Avisos).Distinct().ToList();
+            TaskDialog.Show(Titulo, $"{novos.Count} de {bicos.Count} bico(s) movido(s) e religado(s) ({feitos.Count(f => f.Deslizou)} deslizaram na linha do ramal)." +
+                                    string.Concat(recusas.Select(r => "\n• não movido: " + r)) + string.Concat(avisos.Select(a => "\n• " + a)) +
+                                    "\n\nDepois: Diâmetros, Verificar modelo e Calcular. Ctrl+Z desfaz cada bico.");
         }
         catch (Autodesk.Revit.Exceptions.OperationCanceledException)
         {

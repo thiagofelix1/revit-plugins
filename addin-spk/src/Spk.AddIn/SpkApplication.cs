@@ -112,6 +112,15 @@ public class SpkApplication : IExternalApplication
             "Folhas", Icones.Folha,
             "Monta a setorização das VGAs, o isométrico geral com os quadros e as folhas do último setor calculado (planta " +
             "com a área de cálculo, 3D e corte), preenche o carimbo e exporta o PDF.");
+        Pequenos(resultados,
+            (typeof(CoresDaRedeCommand), "Cores da rede", Icones.Diametros,
+                "Pinta a rede da vista aberta por diâmetro, setor, velocidade nos tubos ou pressão nos bicos, com legenda na planta. " +
+                "Só nesta vista; não muda o modelo."),
+            (typeof(TirarCoresCommand), "Tirar cores", Icones.Diametros,
+                "Volta a cor normal do que Cores da rede pintou nesta vista e apaga a legenda."),
+            (typeof(ListaDeMaterialCommand), "Lista de material", Icones.Documento,
+                "Metros de tubo por diâmetro, conexões, bicos e válvulas: o resumo na hora e tabelas do Revit (SPK — ...) que se " +
+                "atualizam sozinhas e vão para a folha."));
         Margem(resultados);
 
         var ajuda = application.CreateRibbonPanel(Aba, "Ajuda");

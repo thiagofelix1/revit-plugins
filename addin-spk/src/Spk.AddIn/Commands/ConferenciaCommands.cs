@@ -37,7 +37,8 @@ public class ConferirNaPlantaCommand : ExternalCommand
                     : $"{resultado.BicosFora} bico(s) fora da regra e {resultado.PontosDescobertos} trecho(s) sem cobertura",
                 MainContent = resultado.Texto() + "\n\nCírculo cinza: alcance de cada bico. Círculo vermelho: bico fora da regra ou trecho sem " +
                               "cobertura. Se os bicos não aparecem, a planta corta abaixo deles: use a planta de forro ou suba o corte do " +
-                              "intervalo de vista. Corrija com Mover, Inserir ou Apagar bico e rode de novo; Limpar conferência apaga as marcas.",
+                              "intervalo de vista. Corrija com Mover, Inserir ou Apagar bico e rode de novo; Limpar conferência apaga as marcas." +
+                              (CoresDaRede.FaseDiferente(doc, planta) is { } fase ? "\n\nAtenção:" + fase : ""),
             }.Show();
         }
         catch (InvalidOperationException e)

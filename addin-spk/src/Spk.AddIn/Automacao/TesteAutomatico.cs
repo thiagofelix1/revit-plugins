@@ -366,31 +366,12 @@ static class TesteAutomatico
                 Etapa(relatorio, "conferirNaPlanta", () =>
                 {
                     var dados = DadosProjeto.Carregar(doc!) ?? throw new InvalidOperationException("Mande \"dados\" no cenário.");
-                    var bicos = new FilteredElementCollector(doc!).OfCategory(BuiltInCategory.OST_Sprinklers).WhereElementIsNotElementType()
-                        .OfType<FamilyInstance>().ToList();
-                    var nivel = Folhas.LeituraSetores.NivelDaMaioria(doc!, bicos);
-                    var planta = new FilteredElementCollector(doc!).OfClass(typeof(ViewPlan)).Cast<ViewPlan>()
-                        .FirstOrDefault(v => !v.IsTemplate && v.ViewType == ViewType.FloorPlan && v.GenLevel?.Id == nivel.Id);
-                    if (planta is null)
-                    {
-                        using var t = new Transaction(doc!, "SPK — planta de teste");
-                        t.Start();
-                        var tipo = new FilteredElementCollector(doc!).OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>().First(v => v.ViewFamily == ViewFamily.FloorPlan);
-                        planta = ViewPlan.Create(doc!, tipo.Id, nivel.Id);
-                        t.Commit();
-                    }
+                    var planta = PlantaDosBicos(doc!);
                     var feito = Modelagem.ConferenciaVisual.Executar(doc!, planta, dados, new Modelagem.OpcoesBicos());
                     var circulos = new FilteredElementCollector(doc!, planta.Id).OfClass(typeof(CurveElement)).Cast<CurveElement>()
                         .Count(c => c.LineStyle?.Name == "SPK Cobertura");
                     // A planta em imagem, para ver o desenho da conferência.
-                    var imagem = Path.Combine(PastaSaida, Seguro(cenario.Nome) + "-conferencia");
-                    var opcoesImagem = new ImageExportOptions
-                    {
-                        FilePath = imagem, ExportRange = ExportRange.SetOfViews, HLRandWFViewsFileType = ImageFileType.PNG,
-                        ImageResolution = ImageResolution.DPI_150, ZoomType = ZoomFitType.FitToPage, PixelSize = 2400,
-                    };
-                    opcoesImagem.SetViewsAndSheets([planta.Id]);
-                    doc!.ExportImage(opcoesImagem);
+                    Imagem(doc!, planta, Path.Combine(PastaSaida, Seguro(cenario.Nome) + "-conferencia"));
                     relatorio.Conferencia = [feito.Texto(), $"{circulos} círculo(s) de alcance na planta {planta.Name}"];
                     return string.Join("\n", relatorio.Conferencia);
                 });
@@ -433,6 +414,44 @@ static class TesteAutomatico
                     var resultado = Calcular(doc!, pedido);
                     relatorio.Calculo = Resumo(resultado);
                     return resultado.Texto();
+                });
+
+            if (cenario.Cores is { Count: > 0 } criterios)
+                Etapa(relatorio, "cores", () =>
+                {
+                    // Planta de forro: na de piso a rede fica acima do corte e não aparece (como numa planta de arquitetura).
+                    var planta = PlantaDosBicos(doc!, ViewFamily.CeilingPlan);
+                    // A vista na fase da rede, como o projetista teria (a cópia de teste cria vistas numa fase anterior).
+                    using (var tf = new Transaction(doc!, "SPK — fase da vista de teste"))
+                    {
+                        tf.Start();
+                        Folhas.VistasSpk.FaseDaRede(doc!, planta);
+                        tf.Commit();
+                    }
+                    var linhas = new List<string>();
+                    foreach (var nome in criterios)
+                    {
+                        var criterio = Enum.Parse<Modelagem.CriterioDeCor>(nome, ignoreCase: true);
+                        var feito = Modelagem.CoresDaRede.Pintar(doc!, planta, criterio);
+                        Imagem(doc!, planta, Path.Combine(PastaSaida, $"{Seguro(cenario.Nome)}-cores-{nome}"));
+                        linhas.Add($"{nome}: {feito.Faixas.Count} faixa(s), legenda {(feito.Legenda ? "sim" : "não")}\n{feito.Texto()}");
+                    }
+                    using (var t = new Transaction(doc!, "SPK — Tirar cores"))
+                    {
+                        t.Start();
+                        linhas.Add($"tirar cores: {Modelagem.CoresDaRede.Limpar(doc!, planta)} elemento(s) voltaram ao normal");
+                        t.Commit();
+                    }
+                    relatorio.Cores = linhas;
+                    return string.Join("\n", linhas);
+                });
+
+            if (cenario.ListaDeMaterial)
+                Etapa(relatorio, "listaDeMaterial", () =>
+                {
+                    var resumo = Folhas.ListaDeMaterial.Gerar(doc!);
+                    relatorio.Material = resumo.Texto().Split('\n').Append("tabelas criadas: " + string.Join(", ", resumo.TabelasCriadas)).ToList();
+                    return string.Join("\n", relatorio.Material);
                 });
 
             if (cenario.Folhas)
@@ -483,6 +502,36 @@ static class TesteAutomatico
         return relatorio;
     }
 
+    /// <summary>A planta (de piso, ou de forro) do nível da maioria dos bicos; cria uma se não houver.</summary>
+    static ViewPlan PlantaDosBicos(Document doc, ViewFamily familia = ViewFamily.FloorPlan)
+    {
+        var bicos = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Sprinklers).WhereElementIsNotElementType()
+            .OfType<FamilyInstance>().ToList();
+        var nivel = Folhas.LeituraSetores.NivelDaMaioria(doc, bicos);
+        var tipoDeVista = familia == ViewFamily.CeilingPlan ? ViewType.CeilingPlan : ViewType.FloorPlan;
+        var planta = new FilteredElementCollector(doc).OfClass(typeof(ViewPlan)).Cast<ViewPlan>()
+            .FirstOrDefault(v => !v.IsTemplate && v.ViewType == tipoDeVista && v.GenLevel?.Id == nivel.Id);
+        if (planta is not null) return planta;
+        using var t = new Transaction(doc, "SPK — planta de teste");
+        t.Start();
+        var tipo = new FilteredElementCollector(doc).OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>().First(v => v.ViewFamily == familia);
+        planta = ViewPlan.Create(doc, tipo.Id, nivel.Id);
+        t.Commit();
+        return planta;
+    }
+
+    /// <summary>A vista em PNG, para ver o desenho que o teste fez.</summary>
+    static void Imagem(Document doc, View vista, string arquivo)
+    {
+        var opcoes = new ImageExportOptions
+        {
+            FilePath = arquivo, ExportRange = ExportRange.SetOfViews, HLRandWFViewsFileType = ImageFileType.PNG,
+            ImageResolution = ImageResolution.DPI_150, ZoomType = ZoomFitType.FitToPage, PixelSize = 2400,
+        };
+        opcoes.SetViewsAndSheets([vista.Id]);
+        doc.ExportImage(opcoes);
+    }
+
     /// <summary>Roda uma edição de bico do cenário e devolve o texto dela.</summary>
     static string Editar(Document doc, OperacaoDeBico e)
     {
@@ -497,6 +546,10 @@ static class TesteAutomatico
                 return Modelagem.EditarBicos.Apagar(doc, BicoPerto(e.Perto!)).Texto("apagado");
             case "mover":
                 return Modelagem.EditarBicos.Mover(doc, BicoPerto(e.Perto!), P(e.Para!)).Texto("movido");
+            case "moverVarios":
+                var feitos = Modelagem.EditarBicos.MoverVarios(doc, e.Pertos!.Select(BicoPerto).ToList(), P(e.Para!));
+                return $"{feitos.Count(f => f.Recusa is null)} de {feitos.Count} movido(s), {feitos.Count(f => f.Deslizou)} deslizaram" +
+                       string.Concat(feitos.Where(f => f.Recusa is not null).Select(f => "\n• " + f.Recusa));
             case "inserir":
                 var alvo = P(e.Em!);
                 var ramal = new FilteredElementCollector(doc).OfClass(typeof(Autodesk.Revit.DB.Plumbing.Pipe)).Cast<Autodesk.Revit.DB.Plumbing.Pipe>()
@@ -765,6 +818,15 @@ static class TesteAutomatico
         foreach (var trecho in esperado.TextoDaRede ?? [])
             if (!(r.Rede ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
                 falhas.Add($"gerar rede: \"{trecho}\" não apareceu");
+        foreach (var trecho in esperado.TextoDasEdicoes ?? [])
+            if (!(r.Edicoes ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
+                falhas.Add($"editar bicos: \"{trecho}\" não apareceu");
+        foreach (var trecho in esperado.TextoDasCores ?? [])
+            if (!(r.Cores ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
+                falhas.Add($"cores da rede: \"{trecho}\" não apareceu");
+        foreach (var trecho in esperado.TextoDoMaterial ?? [])
+            if (!(r.Material ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
+                falhas.Add($"lista de material: \"{trecho}\" não apareceu");
         foreach (var trecho in esperado.TextoDasLigacoes ?? [])
             if (!(r.Ligacoes ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
                 falhas.Add($"ligar tubos: \"{trecho}\" não apareceu");
@@ -1130,6 +1192,12 @@ sealed class Cenario
     /// <summary>Conferir na planta do nível da maioria dos bicos, depois das edições.</summary>
     public bool ConferirNaPlanta { get; set; }
 
+    /// <summary>Cores da rede nessa planta, depois de calcular, um critério de cada vez ("diametro", "setor", "velocidade", "pressao"); no fim, tirar cores.</summary>
+    public List<string>? Cores { get; set; }
+
+    /// <summary>Lista de material (tabelas e resumo), depois de calcular.</summary>
+    public bool ListaDeMaterial { get; set; }
+
     /// <summary>Numeração e código das folhas a gravar no padrão antes de gerar.</summary>
     public AjustePadrao? Padrao { get; set; }
     public Esperado? Esperado { get; set; }
@@ -1146,6 +1214,9 @@ sealed class OperacaoDeBico
     public double[]? Perto { get; set; }
     public double[]? Em { get; set; }
     public double[]? Para { get; set; }
+
+    /// <summary>"moverVarios": os bicos mais perto destes pontos, todos deslocados por <see cref="Para" /> (um vetor, em m).</summary>
+    public List<double[]>? Pertos { get; set; }
 }
 
 /// <summary>Um tubo solto: pontas [x, y, altura acima do nível] em m, e o DN.</summary>
@@ -1246,6 +1317,15 @@ sealed class Esperado
     /// <summary>Trechos que precisam aparecer no resultado de Conferir na planta.</summary>
     public List<string>? TextoDaConferencia { get; set; }
 
+    /// <summary>Trechos que precisam aparecer em alguma linha das edições de bico (uma por operação).</summary>
+    public List<string>? TextoDasEdicoes { get; set; }
+
+    /// <summary>Trechos que precisam aparecer no resultado de Cores da rede.</summary>
+    public List<string>? TextoDasCores { get; set; }
+
+    /// <summary>Trechos que precisam aparecer no resumo da Lista de material.</summary>
+    public List<string>? TextoDoMaterial { get; set; }
+
     /// <summary>Trechos que precisam aparecer em alguma linha de Ligar tubos (uma por par).</summary>
     public List<string>? TextoDasLigacoes { get; set; }
 }
@@ -1288,6 +1368,9 @@ sealed class RelatorioCenario
 
     /// <summary>Uma linha por par de Ligar tubos.</summary>
     public List<string>? Ligacoes { get; set; }
+
+    public List<string>? Cores { get; set; }
+    public List<string>? Material { get; set; }
     public ResumoDiametros? Diametros { get; set; }
     public List<string>? ConexoesAntes { get; set; }
     public List<string>? Conexoes { get; set; }

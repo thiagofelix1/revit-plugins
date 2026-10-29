@@ -409,7 +409,7 @@ static class VistasSpk
     /// A vista na fase em que a rede foi construída (a de mais bicos). A vista nova nasce numa fase qualquer do projeto,
     /// e numa fase anterior à da rede o Revit não mostra nada dela: os bicos "ainda não existem".
     /// </summary>
-    static void FaseDaRede(Document doc, View vista)
+    internal static void FaseDaRede(Document doc, View vista)
     {
         var fase = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Sprinklers).WhereElementIsNotElementType()
             .GroupBy(b => b.CreatedPhaseId).OrderByDescending(g => g.Count()).Select(g => g.Key).FirstOrDefault();

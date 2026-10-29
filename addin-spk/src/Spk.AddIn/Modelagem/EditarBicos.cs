@@ -4,10 +4,10 @@ using Autodesk.Revit.DB.Structure;
 namespace Spk.AddIn.Modelagem;
 
 /// <summary>O que uma edição fez: o bico novo (se houve), avisos e por que não foi feita.</summary>
-public sealed record EdicaoDeBico(string? Recusa, ElementId? Bico, IReadOnlyList<string> Avisos)
+public sealed record EdicaoDeBico(string? Recusa, ElementId? Bico, IReadOnlyList<string> Avisos, bool Deslizou = false)
 {
     public string Texto(string feito) =>
-        Recusa is not null ? "Não feito: " + Recusa : string.Join("\n", new[] { feito }.Concat(Avisos.Select(a => "• " + a)));
+        Recusa is not null ? "Não feito: " + Recusa : string.Join("\n", new[] { feito + (Deslizou ? " (deslizou na linha do ramal)" : "") }.Concat(Avisos.Select(a => "• " + a)));
 }
 
 /// <summary>
@@ -53,6 +53,7 @@ public static class EditarBicos
 
     public static EdicaoDeBico Mover(Document doc, FamilyInstance bico, XYZ ponto)
     {
+        if (Deslizar(doc, bico, ponto) is { } deslizado) return deslizado;
         if (MoldeDe(doc, bico) is not { } molde) return new EdicaoDeBico("o bico não tem nível ou tipo", null, []);
         using var grupo = new TransactionGroup(doc, "SPK — Mover bico");
         grupo.Start();
@@ -72,6 +73,125 @@ public static class EditarBicos
         }
         grupo.Assimilate();
         return feito;
+    }
+
+    /// <summary>
+    ///     Vários bicos com o mesmo deslocamento. Os da frente (no sentido do deslocamento) vão primeiro: assim um bico que
+    ///     desliza no ramal não esbarra no vizinho que ainda não saiu do lugar.
+    /// </summary>
+    public static List<EdicaoDeBico> MoverVarios(Document doc, IReadOnlyList<FamilyInstance> bicos, XYZ deslocamento)
+    {
+        var d = Horizontal(deslocamento);
+        return bicos.Where(b => b.Location is LocationPoint)
+            .OrderByDescending(b => Horizontal(((LocationPoint)b.Location).Point).DotProduct(d))
+            .Select(b => Mover(doc, b, ((LocationPoint)b.Location).Point + d))
+            .ToList();
+    }
+
+    /// <summary>Quanto o ponto pode sair da linha do ramal (em planta) e o bico ainda deslizar.</summary>
+    static readonly double ForaDaLinha = GeradorMalha.Pes(0.10);
+
+    /// <summary>O menor tubo que pode sobrar entre o bico que desliza e a peça seguinte.</summary>
+    static readonly double TuboMinimo = GeradorMalha.Pes(0.10);
+
+    /// <summary>
+    ///     O bico que anda ao longo da linha em que está ligado (o ramal, ou o braço) não precisa sair da rede: o bico, a
+    ///     descida e a peça do encontro andam juntos, e os tubos dessa linha esticam ou encolhem. É o que resolve o último bico
+    ///     do ramal (apagar e inserir cortaria a ponta do ramal) e mantém as peças. Nulo quando não é o caso (o ponto sai da
+    ///     linha, a peça seguinte ficaria a menos de 10 cm, o Revit não acompanhou): aí o Mover apaga e insere.
+    /// </summary>
+    static EdicaoDeBico? Deslizar(Document doc, FamilyInstance bico, XYZ ponto)
+    {
+        if (bico.Location is not LocationPoint lp) return null;
+        var pedido = Horizontal(ponto - lp.Point);
+        if (pedido.GetLength() < GeradorMalha.Pes(0.01)) return null;
+
+        // Do bico até a linha onde ele desliza: um tubo horizontal na direção pedida (ele estica) ou um encontro com a corrida
+        // nessa direção (os dois tubos da corrida esticam). Tudo antes disso anda junto com o bico.
+        var andam = new List<ElementId> { bico.Id };
+        var esticam = new List<(Pipe Tubo, Connector Ponta)>();
+        XYZ? eixo = null;
+        Element atual = bico;
+        var vindo = Conectores(bico).FirstOrDefault(c => c.IsConnected);
+        while (vindo is not null && eixo is null)
+        {
+            if (Ligado(vindo, atual) is not { } proximo) return null;
+            var dono = proximo.Owner;
+            if (dono is Pipe tubo && tubo.Location is LocationCurve { Curve: Line linha } && Math.Abs(linha.Direction.Z) < 0.05
+                && ForaDoEixo(pedido, linha.Direction) <= ForaDaLinha)
+            {
+                eixo = Horizontal(linha.Direction).Normalize();
+                esticam.Add((tubo, proximo));
+                break;
+            }
+            var deste = Conectores(dono).ToList();
+            if (dono is FamilyInstance peca && deste.Count >= 3)
+            {
+                // Só tê: numa cruzeta, o quarto ramo seria arrastado de lado junto com a peça.
+                if (deste.Count != 3) return null;
+                var corrida = deste.Where(c => Math.Abs(c.CoordinateSystem.BasisZ.Z) < 0.05 && ForaDoEixo(pedido, c.CoordinateSystem.BasisZ) <= ForaDaLinha)
+                    .Select(c => Ligado(c, peca)).OfType<Connector>().Where(c => c.Owner is Pipe).ToList();
+                if (corrida.Count != 2) return null;
+                eixo = Horizontal(corrida[0].CoordinateSystem.BasisZ).Normalize();
+                andam.Add(peca.Id);
+                esticam.AddRange(corrida.Select(c => ((Pipe)c.Owner, c)));
+                break;
+            }
+            andam.Add(dono.Id);
+            atual = dono;
+            vindo = deste.FirstOrDefault(c => c.IsConnected && c.Origin.DistanceTo(proximo.Origin) > GeradorMalha.Pes(0.001));
+        }
+        if (eixo is null) return null;
+
+        // O deslocamento fica exatamente na linha; o tubo que encolhe não pode sumir.
+        var v = eixo * pedido.DotProduct(eixo);
+        foreach (var (tubo, ponta) in esticam)
+        {
+            var linha = (Line)((LocationCurve)tubo.Location).Curve;
+            var fixo = linha.GetEndPoint(0).DistanceTo(ponta.Origin) < linha.GetEndPoint(1).DistanceTo(ponta.Origin) ? linha.GetEndPoint(1) : linha.GetEndPoint(0);
+            if (fixo.DistanceTo(ponta.Origin + v) < TuboMinimo) return null;
+        }
+
+        // A outra ponta de cada tubo que estica tem que ficar onde está e ligada (o Revit às vezes leva o tubo inteiro).
+        var destinos = esticam.Select(e =>
+        {
+            var linha = (Line)((LocationCurve)e.Tubo.Location).Curve;
+            var fixo = linha.GetEndPoint(0).DistanceTo(e.Ponta.Origin) < linha.GetEndPoint(1).DistanceTo(e.Ponta.Origin) ? linha.GetEndPoint(1) : linha.GetEndPoint(0);
+            return (e.Tubo.Id, Alvo: e.Ponta.Origin + v, Fixo: fixo, Ligados: Conectores(e.Tubo).Count(c => c.IsConnected));
+        }).ToList();
+        using var grupo = new TransactionGroup(doc, "SPK — Mover bico");
+        grupo.Start();
+        var motivo = TransacaoSegura.Executar(doc, "SPK — Deslizar o bico", () =>
+        {
+            ElementTransformUtils.MoveElements(doc, andam, v);
+            doc.Regenerate();
+            // O Revit leva a ponta dos tubos ligados junto; se não levou, a rede ficaria aberta.
+            foreach (var (id, alvo, fixo, ligados) in destinos)
+            {
+                var pontas = doc.GetElement(id) is Pipe tubo ? Conectores(tubo).ToList() : [];
+                if (!pontas.Any(c => c.IsConnected && c.Origin.DistanceTo(alvo) < GeradorMalha.Pes(0.002))
+                    || !pontas.Any(c => c.Origin.DistanceTo(fixo) < GeradorMalha.Pes(0.002))
+                    || pontas.Count(c => c.IsConnected) != ligados)
+                    throw new InvalidOperationException("o tubo não acompanhou o bico");
+            }
+            return null;
+        });
+        if (motivo is not null)
+        {
+            grupo.RollBack();
+            return null;
+        }
+        grupo.Assimilate();
+        return new EdicaoDeBico(null, bico.Id, Espacamento(doc, bico), Deslizou: true);
+    }
+
+    /// <summary>Quanto o deslocamento sai da reta com esta direção, em planta.</summary>
+    static double ForaDoEixo(XYZ deslocamento, XYZ direcao)
+    {
+        var d = Horizontal(direcao);
+        if (d.GetLength() < 1e-9) return double.MaxValue;
+        d = d.Normalize();
+        return Math.Abs(deslocamento.X * d.Y - deslocamento.Y * d.X);
     }
 
     static EdicaoDeBico InserirNa(Document doc, Molde molde, XYZ ponto, List<Pipe> ramais, string nome)
