@@ -52,7 +52,7 @@ A tela **Seu projeto agora**, aqui no Guia, também mostra quantos erros e aviso
 | **Bicos sem fator K e área confirmados** (erro) | O tipo de bico existe no modelo mas não foi confirmado em Famílias, então o SPK não sabe a vazão dele. | Em **Famílias**, marque o tipo como **Chuveiro** e informe o fator K (L/min/bar½) e a área de cobertura (m²). |
 | **Bicos que não chegam a nenhuma VGA** (erro) | Seguindo as conexões a partir desses bicos, não se chega a nenhuma válvula marcada como Fonte. | Procure, no mesmo setor, peças encostadas sem ligação ou derivações sem tê entre os bicos e a VGA. |
 | **Tubo ou conexão com saída livre** (aviso) | Uma ponta ficou sem continuação, tampão ou bico (por exemplo, um tê com uma boca vazia). | Confira se falta um pedaço de rede. Se a ponta for de propósito (dreno, teste), pode deixar. |
-| **Nenhuma VGA marcada como Fonte** (aviso) | O mapeamento não tem válvula com o papel Fonte. | Em **Famílias**, marque a família da VGA como **Fonte**. Sem ela, o cálculo começa na ponta de tubo mais baixa de cada rede. |
+| **Nenhuma VGA marcada como Fonte** (aviso) | O mapeamento não tem válvula com o papel Fonte. | Em **Famílias**, marque a família da VGA como **Fonte**. Sem ela, o cálculo começa na ponta aberta do tubo mais grosso de cada rede (a mais baixa no empate); para escolher outra, use **Marcar setor**. |
 | **Entrada da rede sem VGA** (info) | Sem VGA, o SPK usa a ponta de baixo da descida como entrada de cada rede. | Nada a fazer numa rede gerada pelo SPK. Num projeto real, modele e marque a VGA. |
 
 ## Redes separadas

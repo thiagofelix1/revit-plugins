@@ -11,7 +11,7 @@ public sealed record EntradaMarcada(EntradaDeSetor Entrada, string? Substituida,
 /// <summary>
 ///     Setor sem VGA desenhada: o projetista clica no tubo por onde a água chega (a descida da VGA) e dá o nome. A leitura
 ///     da rede (<see cref="LeitorRede" />) passa a usar essa ponta como fonte e esse nome no cálculo, no memorial e nas
-///     folhas, em vez da ponta mais baixa e de "Setor 1". Fica gravado no .rvt; uma rede tem uma entrada só.
+///     folhas, em vez da ponta escolhida sozinha (a do tubo mais grosso) e de "Setor 1". Fica gravado no .rvt; uma rede tem uma entrada só.
 /// </summary>
 static class EntradasDeSetor
 {

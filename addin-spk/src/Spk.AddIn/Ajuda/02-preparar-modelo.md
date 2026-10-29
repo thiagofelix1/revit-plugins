@@ -4,7 +4,7 @@ O cálculo só é tão bom quanto a rede que ele lê. O SPK segue a água pelas 
 
 - **Peças ligadas.** Bicos, tubos, conexões e válvulas conectados entre si, não apenas encostados. Ao desenhar com as ferramentas de tubulação do Revit isso acontece sozinho; peças copiadas, movidas ou desenhadas soltas costumam ficar desligadas.
 - **Sistema de incêndio.** Tubos de sprinkler num tipo de sistema de proteção contra incêndio (molhado, seco ou pré-ação), e não em água fria, hidrônico ou outro.
-- **Uma VGA por setor no caminho da água.** A válvula de cada setor modelada entre o tubo que vem da bomba e a rede de bicos, e marcada como **Fonte** em Famílias. Sem a VGA desenhada, use **Marcar setor** (painel Cálculo): clique no tubo por onde a água chega (a descida da VGA) e dê o nome do setor. O cálculo, o memorial e as folhas passam a usar essa entrada e esse nome; sem marca, cada rede separada vira "Setor 1", "Setor 2"..., com a entrada na ponta mais baixa.
+- **Uma VGA por setor no caminho da água.** A válvula de cada setor modelada entre o tubo que vem da bomba e a rede de bicos, e marcada como **Fonte** em Famílias. Sem a VGA desenhada, use **Marcar setor** (painel Cálculo): clique no tubo por onde a água chega (a descida da VGA) e dê o nome do setor. O cálculo, o memorial e as folhas passam a usar essa entrada e esse nome; sem marca, cada rede separada vira "Setor 1", "Setor 2"..., com a entrada na ponta aberta do tubo mais grosso (num modelo real, a ponta mais baixa costuma ser um dreno fino).
 - **Bicos com fator K e área.** O fator K em L/min/bar½ (K 5,6 americano equivale a 80; K 25,2 equivale a 360) e a área de cobertura de cada bico em m².
 - **Diâmetros reais.** O diâmetro interno vem do tipo de tubo; sem ele, o SPK usa o nominal e avisa.
 

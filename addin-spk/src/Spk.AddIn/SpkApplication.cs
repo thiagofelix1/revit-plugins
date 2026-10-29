@@ -89,7 +89,7 @@ public class SpkApplication : IExternalApplication
         Botao<MarcarSetorCommand>(calculo,
             "Marcar\nsetor", Icones.Setor,
             "Para rede sem a VGA desenhada: clique no tubo por onde a água chega (a descida da VGA) e dê o nome do setor. " +
-            "Calcular, Diâmetros, o memorial e as folhas usam essa entrada e esse nome, em vez da ponta mais baixa e de \"Setor 1\". " +
+            "Calcular, Diâmetros, o memorial e as folhas usam essa entrada e esse nome, em vez da ponta solta do tubo mais grosso e de \"Setor 1\". " +
             "Clique de novo na mesma rede para trocar o nome ou tirar a marca.");
         Botao<VerificarModeloCommand>(calculo,
             "Verificar\nmodelo", Icones.Verificar,

@@ -58,7 +58,7 @@ public class MarcarSetorCommand : ExternalCommand
                 t.Commit();
                 TaskDialog.Show(Titulo, saiu is null
                     ? "Esta rede não tinha marca."
-                    : $"A marca \"{saiu}\" saiu. A rede volta a ser um setor sem nome, com a entrada na ponta mais baixa.");
+                    : $"A marca \"{saiu}\" saiu. A rede volta a ser um setor sem nome, com a entrada na ponta aberta do tubo mais grosso.");
                 return;
             }
             var feito = EntradasDeSetor.Marcar(doc, tubo, perto, janela.Nome);

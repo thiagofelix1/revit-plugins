@@ -155,20 +155,28 @@ public static class Topologia
     }
 
     /// <summary>
-    /// Cada pedaço de rede contínuo que tem bico, com a sua fonte: a ponta de tubo (nó de grau 1, que não é bico) mais
-    /// baixa, onde a descida encontraria a VGA. Num modelo sem as VGAs desenhadas, cada setor fica um pedaço separado.
-    /// Ordem: mais bicos primeiro; empate pela posição da fonte, para a numeração dos setores sair sempre igual.
+    /// Cada pedaço de rede contínuo que tem bico, com a sua fonte: a ponta de tubo aberta (nó de grau 1, que não é bico
+    /// nem ponta fechada) do tubo mais grosso, e entre as do mesmo diâmetro a mais baixa. É por ali que a VGA alimentaria:
+    /// num modelo real, a ponta mais baixa costuma ser um dreno fino, e a entrada é a da tubulação mais grossa. Num modelo
+    /// sem as VGAs desenhadas, cada setor fica um pedaço separado. Ordem: mais bicos primeiro; empate pela posição da
+    /// fonte, para a numeração dos setores sair sempre igual.
     /// </summary>
+    /// <param name="fechados">Nós que nunca são entrada (tampões): ficam por último na escolha.</param>
     public static List<(string Fonte, HashSet<string> Nos, int Bicos)> Componentes(IReadOnlyDictionary<string, No> nos,
-        IEnumerable<Trecho> trechos, ISet<string> nosDeBico)
+        IEnumerable<Trecho> trechos, ISet<string> nosDeBico, ISet<string>? fechados = null)
     {
         var lista = trechos.ToList();
         var adj = Adjacencia(lista);
         var grau = new Dictionary<string, int>(StringComparer.Ordinal);
+        var diametro = new Dictionary<string, double>(StringComparer.Ordinal);
         foreach (var trecho in lista)
         {
             grau[trecho.De] = (grau.TryGetValue(trecho.De, out var g1) ? g1 : 0) + 1;
             grau[trecho.Para] = (grau.TryGetValue(trecho.Para, out var g2) ? g2 : 0) + 1;
+            // Ao milímetro: diferenças de arredondamento não podem desempatar.
+            var d = Math.Round(trecho.DiametroInterno);
+            foreach (var no in new[] { trecho.De, trecho.Para })
+                if (!diametro.TryGetValue(no, out var atual) || d > atual) diametro[no] = d;
         }
 
         var visto = new HashSet<string>(StringComparer.Ordinal);
@@ -191,7 +199,9 @@ public static class Topologia
             var candidatos = comp.Where(id => !nosDeBico.Contains(id)).Select(id => nos[id]).ToList();
             var fonte = candidatos
                             .Where(n => grau.TryGetValue(n.Id, out var g) && g == 1)
-                            .OrderBy(n => n.Z).ThenBy(n => n.Id, StringComparer.Ordinal)
+                            .OrderBy(n => fechados?.Contains(n.Id) == true ? 1 : 0)
+                            .ThenByDescending(n => diametro.TryGetValue(n.Id, out var d) ? d : 0)
+                            .ThenBy(n => n.Z).ThenBy(n => n.Id, StringComparer.Ordinal)
                             .Select(n => n.Id).FirstOrDefault()
                         ?? candidatos.OrderBy(n => n.Z).ThenBy(n => n.Id, StringComparer.Ordinal).Select(n => n.Id).FirstOrDefault();
             if (fonte is null) continue;

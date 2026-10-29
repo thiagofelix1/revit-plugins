@@ -20,7 +20,7 @@ static class LeitorRede
     public sealed record RedeLida(Rede Rede, IReadOnlyList<string> Avisos, string Setor,
         IReadOnlyDictionary<string, ElementId> Bicos, IReadOnlyDictionary<string, ElementId> Tubos, int TotalDeSetores = 1);
 
-    /// <param name="fonte">A VGA do setor. Nula: cada pedaço de rede é um setor, com a fonte na ponta de tubo mais baixa.</param>
+    /// <param name="fonte">A VGA do setor. Nula: cada pedaço de rede é um setor, com a fonte na ponta aberta do tubo mais grosso (a mais baixa no empate).</param>
     /// <param name="vgas">Todas as VGAs do modelo. A leitura não passa por elas, o que separa um setor do outro.</param>
     /// <param name="elementoDoSetor">Sem VGA: um bico ou tubo do setor a calcular. Nulo: o setor com mais bicos.</param>
     /// <param name="indiceSetor">Sem VGA: o setor pela ordem (0 é o de mais bicos). Tem precedência sobre o elemento.</param>
@@ -157,7 +157,11 @@ static class LeitorRede
         }
         else
         {
-            var componentes = Topologia.Componentes(nos, trechos, nosDeBico);
+            // Peça de uma boca só (tampão) fecha a ponta: nunca é a entrada da água.
+            var tampoes = naRede.Select(doc.GetElement).OfType<FamilyInstance>()
+                .Where(p => !idsBico.Contains(p.Id) && Conectores(p).Count() == 1).Select(p => IdPeca(p.Id))
+                .ToHashSet(StringComparer.Ordinal);
+            var componentes = Topologia.Componentes(nos, trechos, nosDeBico, tampoes);
             if (componentes.Count == 0) throw new InvalidOperationException("Os bicos não formam uma rede contínua com os tubos encontrados.");
             var nomes = AplicarEntradas(doc, componentes, nos, avisos);
             indiceEscolhido = IndiceDoSetor(componentes, elementoDoSetor, indiceSetor, trechos, tuboDoTrecho);
@@ -191,7 +195,7 @@ static class LeitorRede
             ? $"Fonte: VGA \"{fonte.Symbol?.Family?.Name}\" (id {fonte.Id.Value}), cota {cotaFonte:0.00} m."
             : nomeMarcado is not null
                 ? $"Fonte: entrada marcada do setor \"{nomeMarcado}\", cota {cotaFonte:0.00} m."
-                : $"Fonte adotada: ponta de tubo mais baixa (nó {noFonte}, cota {cotaFonte:0.00} m). " +
+                : $"Fonte adotada: ponta aberta do tubo mais grosso da rede (nó {noFonte}, cota {cotaFonte:0.00} m). " +
                   "Para escolher a entrada e o nome do setor, use Marcar setor; com a VGA desenhada, marque a família dela como Fonte em Famílias.");
         avisos.Add($"{chuveiros.Count} bicos em {ramalDe.Values.Distinct().Count()} ramais.");
 
@@ -239,7 +243,7 @@ static class LeitorRede
 
     /// <summary>
     /// As entradas marcadas pelo projetista (<see cref="Modelagem.EntradasDeSetor" />): cada uma vira a fonte do pedaço de
-    /// rede onde cai, no lugar da ponta mais baixa. Devolve o nome de cada pedaço (nulo onde não há marca).
+    /// rede onde cai, no lugar da ponta escolhida pela regra do tubo mais grosso. Devolve o nome de cada pedaço (nulo onde não há marca).
     /// </summary>
     static string?[] AplicarEntradas(Document doc, List<(string Fonte, HashSet<string> Nos, int Bicos)> componentes,
         Dictionary<string, No> nos, List<string> avisos)

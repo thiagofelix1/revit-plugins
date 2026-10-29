@@ -342,6 +342,13 @@ static class TesteAutomatico
                     return string.Join("\n", linhas);
                 });
 
+            if (cenario.InspecionarRedes)
+                Etapa(relatorio, "inspecionarRedes", () =>
+                {
+                    relatorio.Redes = Diagnostico.Redes(doc!);
+                    return string.Join("\n", relatorio.Redes);
+                });
+
             if (cenario.MarcarSetor is { Count: > 0 } marcas)
                 Etapa(relatorio, "marcarSetor", () =>
                 {
@@ -884,6 +891,68 @@ static class TesteAutomatico
 static class Diagnostico
 {
     /// <summary>
+    /// As redes do modelo pelos conectores (só tubos, conexões, acessórios e bicos): quantas têm bico, e as maiores, com
+    /// os bicos por família e as válvulas (acessórios) que estão nelas. Para medir o quanto o modelo está ligado.
+    /// </summary>
+    public static List<string> Redes(Document doc, int maiores = 12)
+    {
+        var categorias = new ElementMulticategoryFilter(new[]
+        {
+            BuiltInCategory.OST_PipeCurves, BuiltInCategory.OST_FlexPipeCurves, BuiltInCategory.OST_PipeFitting,
+            BuiltInCategory.OST_PipeAccessory, BuiltInCategory.OST_Sprinklers,
+        });
+        var elementos = new FilteredElementCollector(doc).WherePasses(categorias).WhereElementIsNotElementType().ToElements()
+            .ToDictionary(e => e.Id);
+        var visto = new HashSet<ElementId>();
+        var redes = new List<List<Element>>();
+        foreach (var inicio in elementos.Values)
+        {
+            if (!visto.Add(inicio.Id)) continue;
+            var rede = new List<Element>();
+            var fila = new Queue<Element>([inicio]);
+            while (fila.Count > 0)
+            {
+                var e = fila.Dequeue();
+                rede.Add(e);
+                var gerente = e switch { MEPCurve m => m.ConnectorManager, FamilyInstance f => f.MEPModel?.ConnectorManager, _ => null };
+                if (gerente is null) continue;
+                foreach (Connector c in gerente.Connectors)
+                foreach (Connector r in c.AllRefs)
+                    if (r.Owner is not null && elementos.TryGetValue(r.Owner.Id, out var vizinho) && visto.Add(vizinho.Id)) fila.Enqueue(vizinho);
+            }
+            redes.Add(rede);
+        }
+        bool Bico(Element e) => e.Category?.Id.Value == (long)BuiltInCategory.OST_Sprinklers;
+        var comBico = redes.Where(r => r.Any(Bico)).OrderByDescending(r => r.Count(Bico)).ToList();
+        var linhas = new List<string>
+        {
+            $"{comBico.Count} rede(s) com bico; {comBico.Sum(r => r.Count(Bico))} bicos; " +
+            $"redes com 1 bico: {comBico.Count(r => r.Count(Bico) == 1)}, 2 a 9: {comBico.Count(r => r.Count(Bico) is >= 2 and < 10)}, " +
+            $"10 ou mais: {comBico.Count(r => r.Count(Bico) >= 10)}",
+        };
+        foreach (var r in comBico.Take(maiores))
+        {
+            var bicos = r.Where(Bico).OfType<FamilyInstance>().GroupBy(b => b.Symbol?.Family?.Name ?? "?")
+                .OrderByDescending(g => g.Count()).Select(g => $"{g.Count()} {g.Key}");
+            var valvulas = r.Where(e => e.Category?.Id.Value == (long)BuiltInCategory.OST_PipeAccessory).OfType<FamilyInstance>()
+                .GroupBy(v => v.Symbol?.Family?.Name ?? "?").OrderByDescending(g => g.Count()).Take(4).Select(g => $"{g.Count()} {g.Key}");
+            linhas.Add($"rede com {r.Count(Bico)} bico(s) e {r.Count(e => e is MEPCurve)} tubo(s): {string.Join(", ", bicos)}" +
+                       $" | acessórios: {string.Join(", ", valvulas)} | um bico: {r.First(Bico).Id.Value}");
+            // As pontas soltas de tubo da rede, das mais grossas: a entrada de verdade costuma ser a da tubulação mais grossa.
+            var pontas = r.OfType<Autodesk.Revit.DB.Plumbing.Pipe>()
+                .SelectMany(t => t.ConnectorManager.Connectors.Cast<Connector>()
+                    .Where(c => c.ConnectorType == ConnectorType.End && !c.IsConnected).Select(c => (Tubo: t, c.Origin)))
+                .OrderByDescending(p => p.Tubo.Diameter).ThenBy(p => p.Origin.Z).ToList();
+            if (r.Count(Bico) >= 10)
+                linhas.Add($"   {pontas.Count} ponta(s) solta(s); as mais grossas: " + string.Join("; ", pontas.Take(5).Select(p =>
+                    $"DN {p.Tubo.Diameter * 304.8:0} z={p.Origin.Z * 0.3048:0.00} ({p.Origin.X * 0.3048:0.0}, {p.Origin.Y * 0.3048:0.0}) tubo {p.Tubo.Id.Value}")) +
+                           $"; a mais baixa: " + string.Join("", pontas.OrderBy(p => p.Origin.Z).Take(1).Select(p =>
+                    $"DN {p.Tubo.Diameter * 304.8:0} z={p.Origin.Z * 0.3048:0.00} tubo {p.Tubo.Id.Value}")));
+        }
+        return linhas;
+    }
+
+    /// <summary>
     /// Quantas ligações de tubulação o modelo tem (pares de conectores ligados). Corrigir só pode aumentar: cada ligação
     /// feita soma pelo menos uma, e nenhuma que existia pode sumir.
     /// </summary>
@@ -1198,6 +1267,9 @@ sealed class Cenario
     /// <summary>Ligar tubos aos pares, em ordem, depois de desenhar os tubos.</summary>
     public List<ParDeTubos>? LigarTubos { get; set; }
 
+    /// <summary>Lista as redes do modelo pelos conectores (as maiores, com bicos e válvulas), depois das correções.</summary>
+    public bool InspecionarRedes { get; set; }
+
     /// <summary>Corrigir as derivações sem tê que Verificar modelo achar (depois de desenhar ou ligar tubos).</summary>
     public bool PorTe { get; set; }
 
@@ -1211,6 +1283,7 @@ sealed class Cenario
     public bool ConferirNaPlanta { get; set; }
 
     /// <summary>Cores da rede nessa planta, depois de calcular, um critério de cada vez ("diametro", "setor", "velocidade", "pressao"); no fim, tirar cores.</summary>
+    public List<string>? Redes { get; set; }
     public List<string>? Cores { get; set; }
 
     /// <summary>Lista de material (tabelas e resumo), depois de calcular.</summary>
@@ -1390,6 +1463,7 @@ sealed class RelatorioCenario
     /// <summary>Uma linha por par de Ligar tubos.</summary>
     public List<string>? Ligacoes { get; set; }
 
+    public List<string>? Redes { get; set; }
     public List<string>? Cores { get; set; }
     public List<string>? Material { get; set; }
     public ResumoDiametros? Diametros { get; set; }

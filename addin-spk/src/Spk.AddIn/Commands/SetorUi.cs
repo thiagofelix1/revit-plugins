@@ -94,7 +94,7 @@ static class SetorUi
             MainContent = (motivo ?? "O modelo não tem VGA marcada em Famílias.") +
                           (marcados.Count > 0
                               ? " Cada rede sem ligação com as outras é um setor; os marcados com Marcar setor têm nome e entrada escolhidos."
-                              : " Cada rede sem ligação com as outras é tratada como um setor, com a entrada na ponta mais baixa da descida. " +
+                              : " Cada rede sem ligação com as outras é tratada como um setor, com a entrada na ponta aberta do tubo mais grosso. " +
                                 "Para dar nome e escolher a entrada de cada um, use Marcar setor."),
             CommonButtons = TaskDialogCommonButtons.Cancel,
         };

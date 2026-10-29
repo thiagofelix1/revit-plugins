@@ -191,4 +191,26 @@ public class TopologiaTestes
         Assert.Equal(("B0", 2), (componentes[1].Fonte, componentes[1].Bicos));
         Assert.Contains("SB2", componentes[1].Nos);
     }
+
+    [Fact]
+    public void A_fonte_e_a_ponta_aberta_do_tubo_mais_grosso_e_nao_o_dreno_mais_baixo()
+    {
+        // Como na Nova Era: a geral de 150 mm chega a 2 m de altura (GERAL); um dreno de 25 mm desce até -6 m (DRENO); a ponta
+        // da subgeral tem tampão (TAMPAO), também de 150 mm e mais baixa que a geral.
+        var nos = Indice([
+            new No("GERAL", 0, 0, 2), new No("N1", 5, 0, 3), new No("N2", 10, 0, 3), new No("TAMPAO", 15, 0, 1.5),
+            new No("DRENO", 10, 0, -6), new No("S1", 5, 0, 2.7), new No("S2", 10, 3, 2.7),
+        ]);
+        Trecho Com(string de, string para, double mm) => new($"{de}-{para}", de, para, mm, 1, 120);
+        var trechos = new[]
+        {
+            Com("GERAL", "N1", 150), Com("N1", "N2", 150), Com("N2", "TAMPAO", 150), Com("N2", "DRENO", 25),
+            Com("N1", "S1", 25), Com("N2", "S2", 25),
+        };
+        var bicos = new HashSet<string> { "S1", "S2" };
+
+        Assert.Equal("GERAL", Topologia.Componentes(nos, trechos, bicos, new HashSet<string> { "TAMPAO" }).Single().Fonte);
+        // Sem dizer qual é tampão, a ponta de 150 mm mais baixa ganha: a do tampão.
+        Assert.Equal("TAMPAO", Topologia.Componentes(nos, trechos, bicos).Single().Fonte);
+    }
 }

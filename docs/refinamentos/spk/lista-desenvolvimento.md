@@ -49,7 +49,9 @@ Pronto quando houver pelo menos três projetos reais conferidos pelo engenheiro 
 
 - [ ] Cada projeto real cedido vira cenário em `testes/regressao.json`, com o resultado conferido pelo engenheiro como esperado.
 - [ ] Comparar memorial do SPK com o memorial que o escritório entregou para a mesma obra (pressão, vazão, área, reserva).
-- [ ] Tempo de cálculo em rede grande (hoje ~8 min em 700 bicos lidos por proximidade): medir num modelo bem conectado.
+- [x] Tempo de cálculo em rede grande: na cópia da Nova Era, depois de Corrigir encostados e derivações, a maior rede (276 bicos ESFR, 1 126 trechos) calcula só pelas conexões em 15 s (antes ~8 min por proximidade). ATENDE, bico crítico 2,83 bar e 606 L/min (o memorial tem 603 a 606 L/min), 18,16 bar na entrada.
+- [x] Entrada sem VGA nem marca: a ponta aberta do tubo mais grosso da rede (tampão nunca), a mais baixa no empate. Antes era a mais baixa: na Nova Era era um dreno de DN 25 oito metros abaixo da geral de DN 150, e a pressão passava de 100 MPa.
+- [ ] Comparar a Nova Era com o memorial ponto a ponto (**depende do engenheiro**: qual rede é a VGA 4 e onde fica a VGA de cada uma; as VGAs não estão ligadas no modelo, e o depósito aparece em três redes, de 276, 186 e 24 bicos, com a geral de DN 150 em x ≈ 10 m, y = 74 m). Depois, Marcar setor na entrada certa e conferir 14,50 bar (o memorial tem um dispositivo de 2,50 bar fora do modelo).
 
 ## 4. Pronto para distribuir
 
