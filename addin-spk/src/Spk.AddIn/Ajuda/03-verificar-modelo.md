@@ -21,6 +21,15 @@ No grupo **Peças encostadas, mas não ligadas**, o botão **Corrigir** liga as 
 
 Tudo vira um passo só no desfazer: **Ctrl+Z** volta o modelo como estava. Na Nova Era, o Corrigir ligou 910 dos 971 pontos em menos de um minuto, sem desfazer nenhuma ligação existente.
 
+## Corrigir sozinho as derivações sem tê
+
+No grupo **Tubo que termina no meio de outro, sem tê**, o botão **Corrigir** resolve os casos comuns:
+
+- **tubo chegando no corpo de outro**: estica a ponta até o eixo do outro, parte o tubo de passagem ali e põe o tê; dois tubos chegando no mesmo ponto, de lados opostos, viram cruzeta;
+- **conexão posta por cima de um tubo inteiro** (tê ou luva colocada sobre o tubo sem parti-lo): parte o tubo nas bocas da conexão, tira o pedaço que ficou dentro dela e liga as pontas às bocas.
+
+Ficam para você, com o motivo no relatório: tubo que chega acima, abaixo ou de lado do eixo do outro (precisa de subida: use **Ligar tubos**), encontro a menos de 10 cm da ponta do tubo, conexão de diâmetro diferente do tubo, **tê mecânico** (braçadeira que abraça o tubo: na obra o tubo não é cortado) e o que o Revit recusar (cota presa ao tubo, por exemplo). Como no item anterior, nenhuma ligação existente pode ser desfeita: se seria, aquela derivação volta atrás. O Corrigir repete sozinho (até 3 vezes) enquanto achar o que corrigir, e um **Ctrl+Z** desfaz tudo. Na Nova Era, depois das peças encostadas, ele corrigiu 967 das 1 032 derivações em pouco mais de 3 minutos, e a rede passou de 1 044 pedaços separados para 326.
+
 A tela **Seu projeto agora**, aqui no Guia, também mostra quantos erros e avisos o modelo tem.
 
 ## O que cada cor quer dizer
@@ -36,7 +45,7 @@ A tela **Seu projeto agora**, aqui no Guia, também mostra quantos erros e aviso
 | Problema | O que é | Como corrigir |
 |---|---|---|
 | **Peças encostadas, mas não ligadas** (erro) | No desenho as peças se tocam (a menos de 5 cm), mas o Revit não as conectou. É o caso mais comum em modelos copiados ou desenhados à mão, e foi o que impediu a leitura da Nova Era. | Botão **Corrigir** (acima). O que ele não ligar: arraste a ponta do tubo até o conector da outra peça (o Revit liga quando o cursor mostra o conector), ou apague o trecho e redesenhe com a ferramenta de tubo. |
-| **Tubo que termina no meio de outro, sem tê** (erro) | A ponta de um tubo (ou de um tê) encosta no corpo de outro tubo, sem conexão. A água não passa. | Apague o tubo que chega e redesenhe partindo do outro tubo: o Revit cria o tê sozinho. |
+| **Tubo que termina no meio de outro, sem tê** (erro) | A ponta de um tubo (ou de um tê) encosta no corpo de outro tubo, sem conexão. A água não passa. | Botão **Corrigir** (acima). O que ele não resolver: apague o tubo que chega e redesenhe partindo do outro tubo (o Revit cria o tê sozinho), ou use **Ligar tubos**. |
 | **Bico sem tubo** (erro) | O bico não está ligado a nada, e nada encosta nele. | Selecione o bico e use a ferramenta **Conectar a** (Connect Into) para ligá-lo ao ramal, ou apague se sobrou. |
 | **Família de bico sem conector** (erro) | A família do bico não tem conector de tubulação, então nunca vai ligar. Comum em símbolos 2D usados como bico. | Troque por uma família de sprinkler com conector. Se for só símbolo de desenho, marque o tipo como **Ignorar** em Famílias. |
 | **Tubos fora de sistema de incêndio** (erro) | Tubos ligados aos bicos estão num sistema de água fria, hidrônico ou outro. Na Nova Era, 610 tubos estavam em "Fornecimento hidrônico". | Use **Selecionar todos do grupo** e troque o **Tipo de sistema** nas propriedades para um sistema de proteção contra incêndio (molhado, seco ou pré-ação). |

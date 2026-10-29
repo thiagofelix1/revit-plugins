@@ -111,8 +111,9 @@ public static class VerificacaoModelo
             "No desenho as peças se tocam, mas o Revit não as conectou, e o cálculo não passa por aí. Selecione e reconecte " +
             "(arrastar a ponta até o conector, ou apagar e redesenhar o trecho com a ferramenta de tubo).");
         var derivacoes = Novo(resultado, "derivacao-sem-conexao", Gravidade.Erro, "Tubo que termina no meio de outro, sem tê",
-            "A ponta do tubo encosta no corpo de outro tubo, sem conexão. Para a água passar, a derivação precisa de um tê: " +
-            "redesenhe o tubo partindo do outro, que o Revit cria o tê.");
+            "A ponta do tubo encosta no corpo de outro tubo, sem conexão. Para a água passar, a derivação precisa de um tê. " +
+            "Corrigir põe o tê (ou a cruzeta) onde o tubo chega no eixo do outro; o que chega acima, abaixo ou de lado precisa " +
+            "de subida e fica para Ligar tubos.");
         var bicosSoltos = Novo(resultado, "bico-sem-tubo", Gravidade.Erro, "Bico sem tubo",
             "O bico não está ligado a nenhum tubo nem conexão, e nada encosta nele. Ligue-o ao ramal (ferramenta Conectar a).");
         var semConector = Novo(resultado, "bico-sem-conector", Gravidade.Erro, "Família de bico sem conector de tubulação",
@@ -128,6 +129,16 @@ public static class VerificacaoModelo
         foreach (var porta in abertas)
         {
             var dono = porta.Dono;
+            // Ponta no corpo de um tubo é derivação, mesmo que encoste também na ponta de outro tubo: dois tubos chegando de
+            // lados opostos ao mesmo ponto do tubo de passagem são uma cruzeta, não duas peças encostadas. Um tê com duas
+            // bocas no mesmo tubo é uma derivação só.
+            if (escopo.Contains(dono.Id) && Corpo(segmentos, porta) is { } passagem)
+            {
+                if (derivados.Add((dono.Id.Value, passagem.Id.Value)))
+                    derivacoes.Ocorrencias.Add(new Ocorrencia($"{Nome(dono)} encosta no corpo de {Nome(passagem)}, em {Onde(porta.Ponto)}",
+                        [dono.Id, passagem.Id]));
+                continue;
+            }
             var vizinha = Vizinha(grade, porta);
             if (vizinha is not null)
             {
@@ -141,14 +152,6 @@ public static class VerificacaoModelo
             }
 
             if (!escopo.Contains(dono.Id)) continue;
-            if (Corpo(segmentos, porta) is { } alvo)
-            {
-                // Um tê com duas bocas no mesmo tubo é uma derivação só.
-                if (derivados.Add((dono.Id.Value, alvo.Id.Value)))
-                    derivacoes.Ocorrencias.Add(new Ocorrencia($"{Nome(dono)} encosta no corpo de {Nome(alvo)}, em {Onde(porta.Ponto)}",
-                        [dono.Id, alvo.Id]));
-                continue;
-            }
 
             if (EhBico(dono))
             {

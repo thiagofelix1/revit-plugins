@@ -34,7 +34,9 @@ static class VerificacaoUi
         if (janela.ShowDialog() != true) return;
         if (janela.ParaCorrigir is { } grupo)
         {
-            var feito = Reconexao.Executar(ui.Document, grupo.Ocorrencias);
+            var feito = grupo.Codigo == "derivacao-sem-conexao"
+                ? Derivacoes.ExecutarAteParar(ui.Document, grupo.Ocorrencias)
+                : Reconexao.Executar(ui.Document, grupo.Ocorrencias);
             TaskDialog.Show("SPK — Corrigir", feito.Texto() + "\n\nCtrl+Z desfaz a correção inteira.");
             Mostrar(ui, VerificacaoModelo.Verificar(ui.Document));
             return;

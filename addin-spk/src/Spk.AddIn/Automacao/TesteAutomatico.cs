@@ -330,6 +330,18 @@ static class TesteAutomatico
                     return string.Join("\n", linhas);
                 });
 
+            if (cenario.PorTe)
+                Etapa(relatorio, "porTe", () =>
+                {
+                    var derivacoes = VerificacaoModelo.Verificar(doc!).Grupos.FirstOrDefault(g => g.Codigo == "derivacao-sem-conexao");
+                    var antes = Diagnostico.Ligacoes(doc!);
+                    var feito = Derivacoes.ExecutarAteParar(doc!, derivacoes?.Ocorrencias ?? []);
+                    var linhas = new List<string> { $"{derivacoes?.Ocorrencias.Count ?? 0} derivação(ões) sem tê; " + feito.Texto().Replace("\n", " | ") };
+                    linhas.Add($"ligações do modelo: {antes} antes, {Diagnostico.Ligacoes(doc!)} depois");
+                    relatorio.Ligacoes = [.. relatorio.Ligacoes ?? [], .. linhas];
+                    return string.Join("\n", linhas);
+                });
+
             if (cenario.MarcarSetor is { Count: > 0 } marcas)
                 Etapa(relatorio, "marcarSetor", () =>
                 {
@@ -1185,6 +1197,9 @@ sealed class Cenario
 
     /// <summary>Ligar tubos aos pares, em ordem, depois de desenhar os tubos.</summary>
     public List<ParDeTubos>? LigarTubos { get; set; }
+
+    /// <summary>Corrigir as derivações sem tê que Verificar modelo achar (depois de desenhar ou ligar tubos).</summary>
+    public bool PorTe { get; set; }
 
     /// <summary>Marcar setor depois de gerar e ligar a rede: o nome e o ponto em planta perto da ponta de entrada.</summary>
     public List<MarcaDeSetor>? MarcarSetor { get; set; }

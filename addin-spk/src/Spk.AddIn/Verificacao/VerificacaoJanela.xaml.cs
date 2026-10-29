@@ -27,11 +27,11 @@ public partial class VerificacaoJanela : Window
     /// <summary>Os elementos a selecionar e mostrar no modelo, se o engenheiro pediu.</summary>
     public IReadOnlyList<ElementId>? Escolhidos { get; private set; }
 
-    /// <summary>Grupo que o engenheiro pediu para corrigir (hoje, só as peças encostadas).</summary>
+    /// <summary>Grupo que o engenheiro pediu para corrigir (peças encostadas ou derivações sem tê).</summary>
     public Grupo? ParaCorrigir { get; private set; }
 
     /// <summary>Grupos que o SPK sabe corrigir sozinho.</summary>
-    static readonly HashSet<string> Corrigiveis = ["encostado-sem-ligar"];
+    static readonly HashSet<string> Corrigiveis = ["encostado-sem-ligar", "derivacao-sem-conexao"];
 
     public VerificacaoJanela(ResultadoVerificacao resultado)
     {
