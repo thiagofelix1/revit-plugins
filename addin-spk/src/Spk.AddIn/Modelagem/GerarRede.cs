@@ -22,6 +22,9 @@ public sealed record OpcoesRede
     /// dele. Nulo: cada sala com a sua entrada (a descida até o piso).
     /// </summary>
     public string? GeralPor { get; init; }
+
+    /// <summary>Com geral: põe os bicos do corredor pela norma e liga cada um direto na geral (tê e descida).</summary>
+    public bool BicosNoCorredor { get; init; } = true;
 }
 
 /// <summary>A geral gerada pelo corredor e a ligação das salas a ela, ou por que não foi feita.</summary>
@@ -107,7 +110,7 @@ static class GerarRede
         if (corredor is null) return (Executar(doc, dados, edificio, salas, opcoes, criados, null), null);
         GeralGerada Recusa(string motivo) => new(corredor, motivo, null, null, []);
 
-        var avisos = new List<string> { "o corredor ficou sem bicos: ponha com Bicos por ambiente e ligue à geral com Ligar bicos ou Traçar ramais" };
+        var avisos = new List<string>();
         var trechos = CaminhoDoCorredor(corredor, avisos);
         if (trechos.Count == 0)
             return (Executar(doc, dados, edificio, salas, opcoes, criados, null), Recusa("o ambiente é estreito demais para a geral (menos de 60 cm entre as paredes)"));
@@ -117,13 +120,56 @@ static class GerarRede
         var feitas = redes.Where(r => r.Recusa is null && r.AlturaDaRede is not null).ToList();
         if (feitas.Count == 0) return (redes, Recusa("nenhuma sala ganhou rede"));
 
-        // Altura: a das redes das salas (a mais alta), sem encostar na laje do corredor.
+        // Bicos do corredor, pela norma como numa sala, em fileira ao longo da geral: cada um liga direto nela. Sem forro, o
+        // defletor desce até 30 cm da laje (o máximo sob teto liso), para a geral caber acima dele com o tê e a descida.
+        var bicosDoCorredor = new List<ElementId>();
+        double? defletorDoCorredor = null;
+        if (opcoes.BicosNoCorredor)
+        {
+            var opcoesCorredor = opcoes.Bicos with { Rumo = trechos[0].Direcao };
+            if (corredor.OrigemDoTeto is not OrigemDoTeto.Forro)
+                opcoesCorredor = opcoesCorredor with { DefletorM = Math.Max(opcoesCorredor.DefletorM, 0.30) };
+            using var grupoBicos = new TransactionGroup(doc, "SPK — Bicos do corredor");
+            grupoBicos.Start();
+            var posicionados = BicosPorAmbiente.Posicionar(doc, edificio, [corredor], BicosPorAmbiente.Limites(dados, opcoes.Bicos), opcoesCorredor, bicosDoCorredor).Single();
+            if (posicionados.Recusa is null && posicionados.Defletor is { } defletor && bicosDoCorredor.Count > 0)
+            {
+                grupoBicos.Assimilate();
+                defletorDoCorredor = defletor;
+            }
+            else
+            {
+                grupoBicos.RollBack();
+                bicosDoCorredor.Clear();
+                avisos.Add("o corredor ficou sem bicos (" + (posicionados.Recusa ?? "nenhum bico coube") + "): ponha com Bicos por ambiente e ligue à geral com Ligar bicos");
+            }
+        }
+        else
+        {
+            avisos.Add("o corredor ficou sem bicos: ponha com Bicos por ambiente e ligue à geral com Ligar bicos ou Traçar ramais");
+        }
+
+        // Altura: a das redes das salas (a mais alta), acima dos bicos do corredor pelo drop, sem encostar na laje do corredor.
         var z = feitas.Max(r => r.AlturaDaSubgeral ?? r.AlturaDaRede!.Value);
+        if (defletorDoCorredor is { } dc && z < dc + opcoes.DropM) z = dc + opcoes.DropM;
         if (corredor.OrigemDoTeto is OrigemDoTeto.Laje or OrigemDoTeto.Telhado && corredor.Teto is { } teto && z > teto - FolgaDoTeto)
         {
             z = teto - FolgaDoTeto;
-            avisos.Add($"geral baixada para {z:0.00} m, 10 cm abaixo do teto do corredor");
+            avisos.Add($"geral a {z:0.00} m, 10 cm abaixo do teto do corredor");
         }
+        if (defletorDoCorredor is { } dc2 && z - dc2 < DropMinimo - 1e-6)
+        {
+            TransacaoSegura.Executar(doc, "SPK — Tirar bicos do corredor", () =>
+            {
+                doc.Delete(bicosDoCorredor);
+                return null;
+            });
+            bicosDoCorredor.Clear();
+            avisos.Add($"o corredor ficou sem bicos: não cabe a geral 15 cm acima do defletor ({dc2:0.00}) e 10 cm abaixo do teto");
+        }
+        criados.AddRange(bicosDoCorredor);
+        var pontosDosBicos = bicosDoCorredor.Select(doc.GetElement).OfType<FamilyInstance>()
+            .Select(b => ((LocationPoint)b.Location).Point).Select(p => new Ponto2(Metros(p.X), Metros(p.Y))).ToList();
 
         var dasSalas = feitas.Select(r => criados.Select(doc.GetElement).OfType<FamilyInstance>()
                 .FirstOrDefault(b => b.Category?.Id.Value == (long)BuiltInCategory.OST_Sprinklers && Dentro(r.Ambiente, b)))
@@ -131,8 +177,9 @@ static class GerarRede
 
         // A geral vai da descida (ponta A do primeiro trecho) até 50 cm depois da entrada da última sala, e não até o fim do
         // corredor: depois do último tê não passa água. O último trecho sem sala nenhuma sai; o que sobra é encurtado.
+        // Os bicos do corredor também seguram a geral: ela vai até 50 cm depois do último deles.
         var entradas = dasSalas.Select(r => LigarAGeral.Entrada(doc, r)).OfType<LigarAGeral.EntradaDaRede>()
-            .Select(e => new Ponto2(Metros(e.Ponto.X), Metros(e.Ponto.Y))).ToList();
+            .Select(e => new Ponto2(Metros(e.Ponto.X), Metros(e.Ponto.Y))).Concat(pontosDosBicos).ToList();
         while (trechos.Count > 0)
         {
             var ultimo = trechos[^1];
@@ -187,6 +234,61 @@ static class GerarRede
 
         var ligacao = LigarAGeral.Executar(doc, geral, dasSalas);
         criados.AddRange(ligacao.Criados);
+
+        // Os bicos do corredor na geral: os pedaços dela são os tubos horizontais da rede na linha de algum trecho.
+        if (bicosDoCorredor.Count > 0)
+        {
+            var naLinha = LigarAGeral.Rede(doc, geral[0]).Select(doc.GetElement).OfType<Pipe>()
+                .Where(t => t.Location is LocationCurve { Curve: Line l } && Math.Abs(l.Direction.Z) < 0.05
+                            && trechos.Any(tr => NaLinha(tr, l.Evaluate(0.5, true))))
+                .ToList();
+            var noCorredor = LigarBicos.Executar(doc, bicosDoCorredor.Select(doc.GetElement).OfType<FamilyInstance>(), naLinha);
+            criados.AddRange(noCorredor.Criados);
+            // Bico que caiu em cima do tê de uma sala (ou do cotovelo) não liga ali: anda um pouco ao longo da geral e tenta
+            // de novo, como o projetista faria. O que não couber sai: a rede gerada não fica com bico solto.
+            bool Solto(FamilyInstance b) => b.MEPModel?.ConnectorManager?.Connectors.Cast<Connector>().Any(c => c.IsConnected) != true;
+            var deslocados = new List<string>();
+            foreach (var bico in bicosDoCorredor.Select(doc.GetElement).OfType<FamilyInstance>().Where(Solto).ToList())
+            {
+                var lp = ((LocationPoint)bico.Location).Point;
+                var trecho = TrechoDaEntrada(new Ponto2(Metros(lp.X), Metros(lp.Y)), trechos);
+                var dir = new XYZ(trecho.Direcao.X, trecho.Direcao.Y, 0);
+                foreach (var passo in new[] { 0.25, -0.25, 0.40, -0.40 })
+                {
+                    if (TransacaoSegura.Executar(doc, "SPK — Deslocar bico do corredor", () =>
+                        {
+                            ElementTransformUtils.MoveElement(doc, bico.Id, dir * Pes(passo));
+                            return null;
+                        }) is not null) break;
+                    var pedacos = LigarAGeral.Rede(doc, geral.First(g => g.IsValidObject)).Select(doc.GetElement).OfType<Pipe>()
+                        .Where(t => t.Location is LocationCurve { Curve: Line l } && Math.Abs(l.Direction.Z) < 0.05 && trechos.Any(tr => NaLinha(tr, l.Evaluate(0.5, true))));
+                    var outra = LigarBicos.Executar(doc, [bico], pedacos);
+                    if (outra.Ligados == 1)
+                    {
+                        criados.AddRange(outra.Criados);
+                        deslocados.Add($"{Math.Abs(passo) * 100:0} cm");
+                        break;
+                    }
+                    TransacaoSegura.Executar(doc, "SPK — Voltar bico do corredor", () =>
+                    {
+                        ElementTransformUtils.MoveElement(doc, bico.Id, dir * Pes(-passo));
+                        return null;
+                    });
+                }
+            }
+            if (deslocados.Count > 0)
+                avisos.Add($"{deslocados.Count} bico(s) do corredor andaram ao longo da geral ({string.Join(", ", deslocados)}) para não cair no tê de uma sala: confira o espaçamento");
+            var soltos = bicosDoCorredor.Select(doc.GetElement).OfType<FamilyInstance>().Where(Solto).Select(b => b.Id).ToList();
+            if (soltos.Count > 0)
+                TransacaoSegura.Executar(doc, "SPK — Tirar bicos soltos do corredor", () =>
+                {
+                    doc.Delete(soltos);
+                    return null;
+                });
+            avisos.Insert(0, $"corredor: {bicosDoCorredor.Count - soltos.Count} de {bicosDoCorredor.Count} bico(s) ligados direto na geral" +
+                             (soltos.Count > 0 ? $"; {soltos.Count} não couberam e saíram (" + string.Join("; ", noCorredor.Recusados.Distinct()) +
+                                                 "): confira a cobertura com Conferir na planta" : ""));
+        }
 
         ResultadoDiametros? diametros = null;
         if (opcoes.AplicarDiametros && TabelaDeDiametros.TemTabela(dados.Classe) && ligacao.Ligadas > 0)
@@ -275,6 +377,14 @@ static class GerarRede
         }).First();
 
     static double Comprimento(Eixo e) => Distancia(e.A, e.B);
+
+    /// <summary>O ponto (em pés) está na reta do trecho, em planta, a até 5 cm.</summary>
+    static bool NaLinha(Eixo trecho, XYZ p)
+    {
+        var d = trecho.Direcao;
+        var (x, y) = (Metros(p.X), Metros(p.Y));
+        return Math.Abs((x - trecho.A.X) * d.Y - (y - trecho.A.Y) * d.X) < 0.05;
+    }
     static double Distancia(Ponto2 a, Ponto2 b) => Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
 
     /// <summary>A reta de A até B toda dentro do corredor, a 30 cm ou mais das paredes.</summary>
@@ -292,7 +402,7 @@ static class GerarRede
 
     /// <summary>
     /// O eixo da geral no corredor: na direção da parede mais comprida, a reta (afastada pelo menos 30 cm das paredes)
-    /// com o trecho contínuo dentro do ambiente mais comprido; no empate, a mais perto do meio. As pontas ficam 30 cm
+    /// com o trecho contínuo dentro do ambiente mais comprido; no empate, a mais longe das paredes. As pontas ficam 30 cm
     /// antes das paredes.
     /// </summary>
     static Eixo? EixoDoCorredor(Ambiente corredor)
@@ -330,7 +440,9 @@ static class GerarRede
                 {
                     var fim = livre ? u : u - 0.10;
                     var comprimento = fim - i0;
-                    var meio = Math.Abs(v - (n0 + n1) / 2);
+                    // Desempate: a reta mais longe das paredes (o centro da perna). Medir pelo meio do ambiente inteiro
+                    // puxava a geral de um corredor em L para a parede de dentro.
+                    var meio = -Spk.Motor.Geracao.BicosNoAmbiente.DistanciaAoContorno(corredor.Contornos, P((i0 + fim) / 2, v));
                     if (comprimento > 0.5 && (melhor is not { } m || comprimento > m.Comprimento + 0.05
                                               || Math.Abs(comprimento - m.Comprimento) <= 0.05 && meio < m.Meio))
                         melhor = (comprimento, meio, new Eixo(P(i0, v), P(fim, v)));

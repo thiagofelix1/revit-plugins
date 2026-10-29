@@ -246,6 +246,12 @@ static class Cenas
             corredor.get_Parameter(BuiltInParameter.ROOM_NAME).Set("Corredor");
             corredor.get_Parameter(BuiltInParameter.ROOM_NUMBER).Set("200");
             var tipoForro = new FilteredElementCollector(arq).OfClass(typeof(CeilingType)).FirstElementId();
+            // Forro também no corredor, a 2,80 m, como num escritório (no andarComSalas o corredor fica só com a laje).
+            var laco = new CurveLoop();
+            var cantos = new[] { (0.1, 0.1), (16.4, 0.1), (16.4, 18.4), (14.1, 18.4), (14.1, 2.4), (0.1, 2.4) };
+            for (var i = 0; i < cantos.Length; i++)
+                laco.Append(Line.CreateBound(P(cantos[i].Item1, cantos[i].Item2), P(cantos[(i + 1) % cantos.Length].Item1, cantos[(i + 1) % cantos.Length].Item2)));
+            Ceiling.Create(arq, [laco], tipoForro, terreo.Id).get_Parameter(BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM).Set(M(2.8));
             var salas = new (string Numero, double X0, double Y0, double X1, double Y1)[]
             {
                 ("201", 0, 2.5, 7, 10.5), ("202", 7, 2.5, 14, 10.5), ("203", 16.5, 4, 24.5, 10), ("204", 16.5, 10, 24.5, 16), ("205", 7, 10.5, 14, 18.5),

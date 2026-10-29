@@ -65,6 +65,7 @@ public partial class BicosPorAmbienteJanela : Window
             GeralPor.SelectedItem = nomes.FirstOrDefault(n => n.Ambiente.Id == rede.GeralPor)
                                     ?? nomes.FirstOrDefault(n => PareceCorredor(n.Ambiente.Nome)) ?? nomes.FirstOrDefault();
             JuntarNumSetor.IsChecked = rede.GeralPor is not null;
+            BicosNoCorredor.IsChecked = rede.BicosNoCorredor;
         }
         Resumo.Text = resumo;
         // Começa com os ambientes da última vez (nenhum na primeira): o engenheiro escolhe onde mexer, e marcar o prédio
@@ -109,6 +110,7 @@ public partial class BicosPorAmbienteJanela : Window
                     AplicarDiametros = Diametros.IsChecked == true,
                     Bicos = Opcoes,
                     GeralPor = JuntarNumSetor.IsChecked == true ? (GeralPor.SelectedItem as ItemDeAmbiente)?.Ambiente.Id : null,
+                    BicosNoCorredor = BicosNoCorredor.IsChecked == true,
                 };
             Posicionar = posicionar;
             ultimosMarcados.Clear();
