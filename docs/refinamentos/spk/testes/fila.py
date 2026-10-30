@@ -15,7 +15,7 @@ GRUPOS = {
     "calculo": ("ex-", "sab-", "nova-era-folhas", "nova-era-colisao", "projeto2-"),
     "geracao": ("cena-arquitetura", "cena-bicos-ambiente", "cena-gerar-rede", "cena-setor-", "cena-corredor-l", "cena-vga-meio",
                 "cena-vigas", "cena-grelha-"),
-    "nova-era": ("arquitetura-nova-era", "nova-era-reconectar", "nova-era-derivacoes", "nova-era-calculo"),
+    "nova-era": ("arquitetura-nova-era", "nova-era-reconectar", "nova-era-derivacoes", "nova-era-desagrupado", "nova-era-calculo"),
 }
 NOVA_ERA_EXATO = {"nova-era"}
 
