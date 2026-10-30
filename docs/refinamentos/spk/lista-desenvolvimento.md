@@ -6,7 +6,7 @@ Atualizada em 29/10/2026. Como o engenheiro usa o plugin de ponta a ponta: [flux
 
 ## 0. Base (feito)
 
-- [x] Motor hidráulico: Hazen-Williams, pressão total, comprimento equivalente, árvore e anel (gradiente global), busca da área mais desfavorável, ESFR de 12 bicos. Conferido com o memorial Sprinkler-CALC da Nova Era (0,01 bar nó a nó).
+- [x] Motor hidráulico: Hazen-Williams, pressão total, comprimento equivalente, árvore e anel (gradiente global), busca da área mais desfavorável, ESFR de 12 bicos. Conferido com o memorial Sprinkler-CALC da Nova Era (0,01 bar nó a nó). Mesmo modelo, mesmo resultado: a leitura segue os conectores pela ordem deles na família (o Revit muda a ordem do conjunto a cada abertura e a perda de cotovelo e válvula caía ora num lado, ora no outro, ora em lado nenhum; a Nova Era desagrupada variava 18,7 a 19,0 bar).
 - [x] Add-in para Revit 2025, 2026 e 2027 (aba SPK): Dados do projeto, Famílias, Dados do esboço, Gerar, Rede de exemplo (5 cenários), Calcular, Memorial (.docx), Folhas (PDF), Guia.
 - [x] Padrão do escritório importado de outro projeto: carimbo, etiqueta de tubo, templates, legendas.
 - [x] Folhas: setorização, isométrico geral, planta + 3D do setor com área de cálculo, corte.

@@ -444,6 +444,9 @@ static class TesteAutomatico
                 {
                     var resultado = Calcular(doc!, pedido);
                     relatorio.Calculo = Resumo(resultado);
+                    // Cada cenário guarda o seu memorial: o da pasta do SPK é sobrescrito a cada cálculo, e comparar trecho a trecho precisa dos dois.
+                    var memorial = Path.Combine(resultado.PastaMemorial, "memorial.md");
+                    if (File.Exists(memorial)) File.Copy(memorial, Path.Combine(PastaSaida, Seguro(cenario.Nome) + "-memorial.md"), true);
                     return resultado.Texto();
                 });
 

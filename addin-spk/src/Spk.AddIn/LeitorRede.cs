@@ -299,7 +299,7 @@ static class LeitorRede
     /// Cotovelo: no trecho de um dos lados. Tê e cruzeta: só no ramo que desvia o fluxo (9.4.4.7 e), que é o
     /// conector fora do par alinhado de maior diâmetro. Válvula: pelo nome da família.
     /// </summary>
-    static void AplicarConexoes(Document doc, HashSet<ElementId> naRede, HashSet<ElementId> idsBico, List<Trecho> trechos,
+    static void AplicarConexoes(Document doc, SortedSet<ElementId> naRede, HashSet<ElementId> idsBico, List<Trecho> trechos,
         Dictionary<ElementId, List<int>> trechosDoTubo, Dictionary<string, int> entrePecas, double fatorC, List<string> avisos)
     {
         var c = Math.Clamp(fatorC, 100, 150);
@@ -307,17 +307,18 @@ static class LeitorRede
         var semTabela = new SortedSet<string>(StringComparer.Ordinal);
         var desconhecidas = new SortedSet<string>(StringComparer.Ordinal);
 
-        void Somar(Connector? conector, string no, TipoConexao tipo, string nome)
+        // Falso quando não há trecho do lado deste conector (do outro lado está um bico, ou nada da rede).
+        bool Somar(Connector? conector, string no, TipoConexao tipo, string nome)
         {
-            if (conector is null) return;
+            if (conector is null) return false;
             var indice = TrechoDoConector(conector, no, trechos, trechosDoTubo, entrePecas);
-            if (indice is null) return;
+            if (indice is null) return false;
             var trecho = trechos[indice.Value];
             var dn = DnTabelado(trecho.DiametroNominal);
             if (dn is null)
             {
                 semTabela.Add($"{nome} DN {trecho.DiametroNominal?.ToString() ?? "?"}");
-                return;
+                return true;
             }
 
             double equivalente;
@@ -328,7 +329,7 @@ static class LeitorRede
             catch (ArgumentException)
             {
                 semTabela.Add($"{nome} DN {dn}");
-                return;
+                return true;
             }
 
             trechos[indice.Value] = trecho with
@@ -337,6 +338,7 @@ static class LeitorRede
                 Conexoes = string.IsNullOrEmpty(trecho.Conexoes) ? nome : trecho.Conexoes + ", " + nome,
             };
             aplicadas++;
+            return true;
         }
 
         foreach (var id in naRede)
@@ -353,7 +355,9 @@ static class LeitorRede
                 {
                     var desvio = 180 - conectores[0].CoordinateSystem.BasisZ.AngleTo(conectores[1].CoordinateSystem.BasisZ) * 180 / Math.PI;
                     var tipo = desvio <= 50 ? TipoConexao.Cotovelo45 : TipoConexao.Cotovelo90Padrao;
-                    Somar(conectores[0], no, tipo, desvio <= 50 ? "cotovelo 45°" : "cotovelo 90°");
+                    // No trecho de um dos lados; se de um lado não há trecho (bico direto no cotovelo), no do outro.
+                    foreach (var lado in conectores.Take(2))
+                        if (Somar(lado, no, tipo, desvio <= 50 ? "cotovelo 45°" : "cotovelo 90°")) break;
                 }
                 else if (conexao.PartType is PartType.Tee or PartType.Cross)
                 {
@@ -370,12 +374,15 @@ static class LeitorRede
                     desconhecidas.Add(peca.Symbol?.Family?.Name ?? "acessório sem família");
                     continue;
                 }
-                Somar(conectores[0], no, tipo.Value, tipo switch
+                var nomeValvula = tipo switch
                 {
                     TipoConexao.ValvulaBorboleta => "válvula borboleta",
                     TipoConexao.ValvulaGaveta => "válvula gaveta",
                     _ => "válvula de retenção",
-                });
+                };
+                // Como no cotovelo: no trecho de um dos lados, ou no do outro se deste não há trecho.
+                foreach (var lado in conectores.Take(2))
+                    if (Somar(lado, no, tipo.Value, nomeValvula)) break;
             }
         }
 
@@ -440,7 +447,7 @@ static class LeitorRede
     /// entre os nós das duas, com o diâmetro do conector; sem ele a rede se parte ali. Bico ligado em peça é com LigarBicos.
     /// </summary>
     /// <returns>O trecho de cada par de peças (pela chave <see cref="Par" />).</returns>
-    static Dictionary<string, int> LigarPecas(Document doc, HashSet<ElementId> naRede, HashSet<ElementId> idsBico,
+    static Dictionary<string, int> LigarPecas(Document doc, SortedSet<ElementId> naRede, HashSet<ElementId> idsBico,
         Dictionary<string, No> nos, List<Trecho> trechos, ref int seq, double fatorC)
     {
         var entrePecas = new Dictionary<string, int>(StringComparer.Ordinal);
@@ -499,7 +506,8 @@ static class LeitorRede
     }
 
     /// <summary>Tudo que os bicos alcançam pelos conectores. Os limites (VGAs) entram, mas a busca não passa por eles.</summary>
-    static HashSet<ElementId> Alcançaveis(Document doc, HashSet<ElementId> idsBico, HashSet<ElementId> limites)
+    /// <remarks>Em ordem de id: a ordem da busca segue a dos conectores, que muda a cada sessão do Revit.</remarks>
+    static SortedSet<ElementId> Alcançaveis(Document doc, HashSet<ElementId> idsBico, HashSet<ElementId> limites)
     {
         var visitados = new HashSet<ElementId>();
         var fila = new Queue<ElementId>(idsBico);
@@ -520,7 +528,7 @@ static class LeitorRede
                 }
             }
         }
-        return visitados;
+        return new SortedSet<ElementId>(visitados, Comparer<ElementId>.Create((a, b) => a.Value.CompareTo(b.Value)));
     }
 
     static List<(double T, string No, XYZ Ponto)> Pontos(Pipe tubo, Curve curva, HashSet<ElementId> idsBico)
@@ -530,6 +538,9 @@ static class LeitorRede
 
         var inicio = curva.GetEndParameter(0);
         var fim = curva.GetEndParameter(1);
+        // A ponta 0 é a do conector mais perto do início da curva, não o primeiro conector da lista.
+        if (extremos[0].Origin.DistanceTo(curva.GetEndPoint(0)) > extremos[1].Origin.DistanceTo(curva.GetEndPoint(0)))
+            extremos.Reverse();
         var pontos = new List<(double T, string No, XYZ Ponto)>
         {
             (0, NoDoConector(extremos[0], tubo, idsBico), extremos[0].Origin),
@@ -1121,10 +1132,10 @@ static class LeitorRede
             FamilyInstance { MEPModel: { } modelo } => modelo.ConnectorManager,
             _ => null,
         };
-        if (gerente is null) yield break;
-        foreach (Connector conector in gerente.Connectors)
-            if (EhFisico(conector.ConnectorType))
-                yield return conector;
+        if (gerente is null) return [];
+        // Pelo número do conector na família: o conjunto do Revit muda de ordem a cada sessão, e a leitura (que lado do
+        // cotovelo leva a perda, de que peça sai o diâmetro entre duas peças) dava resultado diferente no mesmo modelo.
+        return gerente.Connectors.Cast<Connector>().Where(c => EhFisico(c.ConnectorType)).OrderBy(c => c.Id).ToList();
     }
 
     static string IdBico(Element elemento) => IdBico(elemento.Id);
