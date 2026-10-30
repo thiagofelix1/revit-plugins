@@ -213,4 +213,23 @@ public class TopologiaTestes
         // Sem dizer qual é tampão, a ponta de 150 mm mais baixa ganha: a do tampão.
         Assert.Equal("TAMPAO", Topologia.Componentes(nos, trechos, bicos).Single().Fonte);
     }
+
+    [Fact]
+    public void Ponta_morta_grossa_pendurada_numa_rede_fina_nao_e_a_entrada()
+    {
+        // Como depois de Diâmetros: a descida e a subgeral ficaram em 40 mm; a ponta da subgeral depois do último tê, sem
+        // tampão e sem vazão, ficou com os 65 mm de antes. A entrada continua sendo a descida.
+        var nos = Indice([
+            new No("PE", 0, 0, 0), new No("COTOVELO", 0, 0, 3), new No("TE1", 0, 3, 3), new No("TE2", 0, 6, 3),
+            new No("MORTA", 0, 9, 3), new No("S1", 1, 3, 2.7), new No("S2", 1, 6, 2.7),
+        ]);
+        Trecho Com(string de, string para, double mm) => new($"{de}-{para}", de, para, mm, 1, 120);
+        var trechos = new[]
+        {
+            Com("PE", "COTOVELO", 40), Com("COTOVELO", "TE1", 40), Com("TE1", "TE2", 40), Com("TE2", "MORTA", 65),
+            Com("TE1", "S1", 25), Com("TE2", "S2", 25),
+        };
+
+        Assert.Equal("PE", Topologia.Componentes(nos, trechos, new HashSet<string> { "S1", "S2" }).Single().Fonte);
+    }
 }

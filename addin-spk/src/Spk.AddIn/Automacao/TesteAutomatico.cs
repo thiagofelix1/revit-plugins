@@ -944,10 +944,17 @@ static class Diagnostico
                     .Where(c => c.ConnectorType == ConnectorType.End && !c.IsConnected).Select(c => (Tubo: t, c.Origin)))
                 .OrderByDescending(p => p.Tubo.Diameter).ThenBy(p => p.Origin.Z).ToList();
             if (r.Count(Bico) >= 10)
+            {
+                // Vertical com a ponta embaixo: pé de descida (ou de coluna). Horizontal: ponta de tubo deitado.
+                string Jeito(Autodesk.Revit.DB.Plumbing.Pipe t, XYZ o) =>
+                    t.Location is LocationCurve { Curve: Line l } && Math.Abs(l.Direction.Z) > 0.9
+                        ? (o.Z <= Math.Min(l.GetEndPoint(0).Z, l.GetEndPoint(1).Z) + 0.01 ? "pé de descida" : "topo de coluna")
+                        : "deitado";
                 linhas.Add($"   {pontas.Count} ponta(s) solta(s); as mais grossas: " + string.Join("; ", pontas.Take(5).Select(p =>
-                    $"DN {p.Tubo.Diameter * 304.8:0} z={p.Origin.Z * 0.3048:0.00} ({p.Origin.X * 0.3048:0.0}, {p.Origin.Y * 0.3048:0.0}) tubo {p.Tubo.Id.Value}")) +
+                    $"DN {p.Tubo.Diameter * 304.8:0} {Jeito(p.Tubo, p.Origin)} z={p.Origin.Z * 0.3048:0.00} ({p.Origin.X * 0.3048:0.0}, {p.Origin.Y * 0.3048:0.0}) tubo {p.Tubo.Id.Value}")) +
                            $"; a mais baixa: " + string.Join("", pontas.OrderBy(p => p.Origin.Z).Take(1).Select(p =>
-                    $"DN {p.Tubo.Diameter * 304.8:0} z={p.Origin.Z * 0.3048:0.00} tubo {p.Tubo.Id.Value}")));
+                    $"DN {p.Tubo.Diameter * 304.8:0} {Jeito(p.Tubo, p.Origin)} z={p.Origin.Z * 0.3048:0.00} tubo {p.Tubo.Id.Value}")));
+            }
         }
         return linhas;
     }

@@ -88,7 +88,9 @@ Duas telas aparecem antes do plugin carregar e o teste não consegue responder:
 
 ## Cenários de regressão
 
-A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado esperado de cada cenário. Para rodar: copiar para `Documentos\SPK\testes\fila.json`, abrir o Revit e, no fim, olhar `Passou` de cada cenário no relatório. São 43:
+A suíte fica em [testes/regressao.json](testes/regressao.json), com o resultado esperado de cada cenário. Para rodar: copiar para `Documentos\SPK\testes\fila.json`, abrir o Revit e, no fim, olhar `Passou` de cada cenário no relatório.
+
+Inteira ela leva uns 30 minutos. Para rodar em pedaços, [testes/fila.py](testes/fila.py) monta a fila de um grupo: `python -I fila.py calculo` (exemplos, sabotagens e numeração de folhas, ~8 min), `assistida` (ferramentas de modelagem, ~6 min), `geracao` (arquitetura, bicos, Gerar rede, setor, corredor, VGA, vigas, ~7 min) ou `nova-era` (reconectar, derivações e o cálculo da maior rede, ~12 min); `tudo` monta a suíte inteira. Cenário novo sem grupo cai em `assistida`, com aviso. São 43:
 
 | Grupo | Cenários | O que prova |
 |---|---|---|

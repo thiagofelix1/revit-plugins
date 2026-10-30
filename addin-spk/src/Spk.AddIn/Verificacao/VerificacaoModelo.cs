@@ -121,8 +121,9 @@ public static class VerificacaoModelo
         var pontas = Novo(resultado, "ponta-aberta", Gravidade.Aviso, "Tubo ou conexão com saída livre",
             "Uma ponta ficou sem continuação, tampão ou bico. O cálculo trata como ponta morta; confira se falta um pedaço de rede.");
         var entradas = Novo(resultado, "entrada-sem-vga", Gravidade.Informacao, "Entrada da rede sem VGA",
-            "A ponta aberta do tubo mais grosso de cada rede (a mais baixa no empate) é tratada como entrada, porque não há VGA " +
-            "marcada como Fonte em Famílias. Se não for ali, use Marcar setor.");
+            "O pé de descida mais grosso de cada rede (o mais baixo no empate) é tratado como entrada, porque não há VGA " +
+            "marcada como Fonte em Famílias. O cálculo pode escolher a ponta da geral, se ela for mais grossa; para escolher " +
+            "você mesmo, use Marcar setor.");
 
         var pares = new HashSet<(long, long)>();
         var derivados = new HashSet<(long, long)>();
@@ -166,9 +167,10 @@ public static class VerificacaoModelo
         foreach (var bico in bicos.Where(b => Conectores(b).Count == 0))
             semConector.Ocorrencias.Add(new Ocorrencia($"{Nome(bico)}", [bico.Id]));
 
-        // Redes separadas (componentes ligados com bico) e a entrada de cada uma quando não há VGA: a mesma regra do cálculo,
-        // a ponta aberta do tubo mais grosso da rede, e a mais baixa no empate (num modelo real a mais baixa costuma ser um
-        // dreno fino). As outras pontas abertas continuam como aviso.
+        // Redes separadas (componentes ligados com bico) e a entrada de cada uma quando não há VGA: o pé de descida (ponta
+        // de baixo de tubo vertical) mais grosso, e o mais baixo no empate. Pedaço sem descida não ganha entrada: a ponta
+        // dele é falta de rede. As outras pontas abertas continuam como aviso. (O cálculo escolhe pelo diâmetro efetivo,
+        // em Topologia.Componentes, e vale mesmo para geral deitada.)
         var componentes = Componentes(bicos.Where(b => Conectores(b).Count > 0)).Where(c => c.Count > 1).ToList();
         resultado.Setores = componentes.Count;
         if (vgas.Count == 0)
@@ -177,7 +179,7 @@ public static class VerificacaoModelo
             {
                 var maisBaixa = pontas.Ocorrencias
                     .Select(o => (Ocorrencia: o, Elemento: doc.GetElement(o.Elementos[0])))
-                    .Where(p => componente.Contains(p.Elemento.Id) && p.Elemento is Pipe)
+                    .Where(p => componente.Contains(p.Elemento.Id) && PontaDeBaixoDeDescida(p.Elemento))
                     .Select(p => (p.Ocorrencia, Diametro: Math.Round(((Pipe)p.Elemento).Diameter * 304.8), Z: PontoMaisBaixo(p.Elemento)))
                     .OrderByDescending(p => p.Diametro).ThenBy(p => p.Z)
                     .FirstOrDefault();
@@ -373,6 +375,13 @@ public static class VerificacaoModelo
             or MEPSystemClassification.FireProtectPreaction or MEPSystemClassification.FireProtectOther;
 
     /// <summary>Tubo quase vertical com a ponta de baixo aberta.</summary>
+    static bool PontaDeBaixoDeDescida(Element? e)
+    {
+        if (e is not MEPCurve { Location: LocationCurve { Curve: Line linha } } tubo || Math.Abs(linha.Direction.Z) < 0.9) return false;
+        var baixo = linha.GetEndPoint(0).Z < linha.GetEndPoint(1).Z ? linha.GetEndPoint(0) : linha.GetEndPoint(1);
+        return Conectores(tubo).Any(c => !c.IsConnected && c.Origin.DistanceTo(baixo) < Encosto);
+    }
+
     static double PontoMaisBaixo(Element? e) =>
         e is null ? double.MaxValue : Conectores(e).Where(c => !c.IsConnected).Select(c => c.Origin.Z).DefaultIfEmpty(double.MaxValue).Min();
 

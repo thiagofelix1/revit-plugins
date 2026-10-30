@@ -155,11 +155,11 @@ public static class Topologia
     }
 
     /// <summary>
-    /// Cada pedaço de rede contínuo que tem bico, com a sua fonte: a ponta de tubo aberta (nó de grau 1, que não é bico
-    /// nem ponta fechada) do tubo mais grosso, e entre as do mesmo diâmetro a mais baixa. É por ali que a VGA alimentaria:
-    /// num modelo real, a ponta mais baixa costuma ser um dreno fino, e a entrada é a da tubulação mais grossa. Num modelo
-    /// sem as VGAs desenhadas, cada setor fica um pedaço separado. Ordem: mais bicos primeiro; empate pela posição da
-    /// fonte, para a numeração dos setores sair sempre igual.
+    /// Cada pedaço de rede contínuo que tem bico, com a sua fonte: a ponta aberta (nó de grau 1, que não é bico nem ponta
+    /// fechada) de maior diâmetro efetivo (ver <see cref="DiametroEfetivo" />), e entre as iguais a mais baixa. É por ali
+    /// que a VGA alimentaria: num modelo real a ponta mais baixa costuma ser um dreno fino, e uma ponta morta sem tampão
+    /// pode ser mais grossa que a rede em que ela se pendura. Num modelo sem as VGAs desenhadas, cada setor fica um pedaço
+    /// separado. Ordem: mais bicos primeiro; empate pela posição da fonte, para a numeração dos setores sair sempre igual.
     /// </summary>
     /// <param name="fechados">Nós que nunca são entrada (tampões): ficam por último na escolha.</param>
     public static List<(string Fonte, HashSet<string> Nos, int Bicos)> Componentes(IReadOnlyDictionary<string, No> nos,
@@ -168,15 +168,17 @@ public static class Topologia
         var lista = trechos.ToList();
         var adj = Adjacencia(lista);
         var grau = new Dictionary<string, int>(StringComparer.Ordinal);
-        var diametro = new Dictionary<string, double>(StringComparer.Ordinal);
+        var arestas = new Dictionary<string, List<(string Outro, double Diametro)>>(StringComparer.Ordinal);
         foreach (var trecho in lista)
         {
             grau[trecho.De] = (grau.TryGetValue(trecho.De, out var g1) ? g1 : 0) + 1;
             grau[trecho.Para] = (grau.TryGetValue(trecho.Para, out var g2) ? g2 : 0) + 1;
             // Ao milímetro: diferenças de arredondamento não podem desempatar.
             var d = Math.Round(trecho.DiametroInterno);
-            foreach (var no in new[] { trecho.De, trecho.Para })
-                if (!diametro.TryGetValue(no, out var atual) || d > atual) diametro[no] = d;
+            if (!arestas.TryGetValue(trecho.De, out var a)) arestas[trecho.De] = a = [];
+            if (!arestas.TryGetValue(trecho.Para, out var b)) arestas[trecho.Para] = b = [];
+            a.Add((trecho.Para, d));
+            b.Add((trecho.De, d));
         }
 
         var visto = new HashSet<string>(StringComparer.Ordinal);
@@ -200,7 +202,7 @@ public static class Topologia
             var fonte = candidatos
                             .Where(n => grau.TryGetValue(n.Id, out var g) && g == 1)
                             .OrderBy(n => fechados?.Contains(n.Id) == true ? 1 : 0)
-                            .ThenByDescending(n => diametro.TryGetValue(n.Id, out var d) ? d : 0)
+                            .ThenByDescending(n => DiametroEfetivo(n.Id, arestas, nosDeBico))
                             .ThenBy(n => n.Z).ThenBy(n => n.Id, StringComparer.Ordinal)
                             .Select(n => n.Id).FirstOrDefault()
                         ?? candidatos.OrderBy(n => n.Z).ThenBy(n => n.Id, StringComparer.Ordinal).Select(n => n.Id).FirstOrDefault();
@@ -212,6 +214,31 @@ public static class Topologia
             .OrderByDescending(c => c.Bicos)
             .ThenBy(c => nos[c.Fonte].X).ThenBy(c => nos[c.Fonte].Y)
             .ToList();
+    }
+
+    /// <summary>
+    /// O diâmetro com que a ponta alimenta a rede: o mais fino do caminho dela até o primeiro encontro (passando por
+    /// cotovelos), comparado com o maior dos outros tubos desse encontro. A entrada de verdade tem a tubulação grossa dos
+    /// dois lados (a coluna de 150 mm sobe para a geral de 150 mm); um dreno é fino; uma ponta morta sem tampão, mesmo
+    /// grossa, só alimenta a rede mais fina em que se pendura.
+    /// </summary>
+    static double DiametroEfetivo(string ponta, Dictionary<string, List<(string Outro, double Diametro)>> arestas, ISet<string> nosDeBico)
+    {
+        var anterior = (string?)null;
+        var atual = ponta;
+        var minimo = double.MaxValue;
+        for (var passos = 0; passos < 1000; passos++)
+        {
+            if (!arestas.TryGetValue(atual, out var deste)) break;
+            var seguintes = deste.Where(a => a.Outro != anterior).ToList();
+            if (anterior is not null && (seguintes.Count != 1 || nosDeBico.Contains(atual)))
+                return seguintes.Count == 0 ? minimo : Math.Min(minimo, seguintes.Max(a => a.Diametro));
+            if (seguintes.Count == 0) break;
+            var (outro, diametro) = seguintes[0];
+            minimo = Math.Min(minimo, diametro);
+            (anterior, atual) = (atual, outro);
+        }
+        return minimo == double.MaxValue ? 0 : minimo;
     }
 
     /// <summary>
