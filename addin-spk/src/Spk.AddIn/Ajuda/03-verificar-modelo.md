@@ -17,7 +17,8 @@ No grupo **Peças encostadas, mas não ligadas**, o botão **Corrigir** liga as 
 - não move tubo nenhum; só traz até o conector um bico ou conexão solta, sem nenhuma outra ligação;
 - confere cada ligação: se ela desligaria uma peça vizinha ou faria o Revit mover uma peça presa a outras, ela é desfeita e aparece no relatório com o motivo;
 - tubo e conexão precisam ter o mesmo diâmetro; bico pode ligar em tubo maior;
-- dois tubos ponta a ponta ganham luva (alinhados) ou cotovelo (em ângulo), pelas preferências de roteamento do tipo de tubo.
+- dois tubos ponta a ponta ganham luva (alinhados) ou cotovelo (em ângulo), pelas preferências de roteamento do tipo de tubo;
+- quando a ligação é recusada e a peça é de um grupo de modelo, o relatório diz o nome do grupo: desagrupe (ou edite o grupo) e corrija de novo.
 
 Tudo vira um passo só no desfazer: **Ctrl+Z** volta o modelo como estava. Na Nova Era, o Corrigir ligou 910 dos 971 pontos em menos de um minuto, sem desfazer nenhuma ligação existente.
 
@@ -27,8 +28,9 @@ No grupo **Tubo que termina no meio de outro, sem tê**, o botão **Corrigir** r
 
 - **tubo chegando no corpo de outro**: estica a ponta até o eixo do outro, parte o tubo de passagem ali e põe o tê; dois tubos chegando no mesmo ponto, de lados opostos, viram cruzeta;
 - **conexão posta por cima de um tubo inteiro** (tê ou luva colocada sobre o tubo sem parti-lo): parte o tubo nas bocas da conexão, tira o pedaço que ficou dentro dela e liga as pontas às bocas.
+- **tê mecânico sentado em cima do tubo** (as bocas da passagem uns 3 cm fora do eixo): traz o tê até o eixo junto com o que está pendurado nele (bucha, bico) até o primeiro tubo, que estica esses centímetros, e encaixa como no item anterior.
 
-Ficam para você, com o motivo no relatório: tubo que chega acima, abaixo ou de lado do eixo do outro (precisa de subida: use **Ligar tubos**), encontro a menos de 10 cm da ponta do tubo, conexão de diâmetro diferente do tubo, **tê mecânico** (braçadeira que abraça o tubo: na obra o tubo não é cortado) e o que o Revit recusar (cota presa ao tubo, por exemplo). Como no item anterior, nenhuma ligação existente pode ser desfeita: se seria, aquela derivação volta atrás. O Corrigir repete sozinho (até 3 vezes) enquanto achar o que corrigir, e um **Ctrl+Z** desfaz tudo. Na Nova Era, depois das peças encostadas, ele corrigiu 967 das 1 032 derivações em pouco mais de 3 minutos, e a rede passou de 1 044 pedaços separados para 326.
+Ficam para você, com o motivo no relatório: tubo que chega acima, abaixo ou de lado do eixo do outro (precisa de subida: use **Ligar tubos**), encontro a menos de 10 cm da ponta do tubo, conexão de diâmetro diferente do tubo, peça fixada com alfinete, **peça de grupo de modelo** (o Revit não deixa mexer numa peça do grupo sem mudar todas as cópias dele: desagrupe, ou edite o grupo, e rode o Corrigir de novo) e o que o Revit recusar (cota presa ao tubo, por exemplo). Como no item anterior, nenhuma ligação existente pode ser desfeita: se seria, aquela derivação volta atrás. O Corrigir repete sozinho (até 3 vezes) enquanto achar o que corrigir, e um **Ctrl+Z** desfaz tudo. Na Nova Era, depois das peças encostadas, ele corrigiu 978 das 1 032 derivações em pouco mais de 3 minutos, e a rede passou de 1 044 pedaços separados para 326.
 
 A tela **Seu projeto agora**, aqui no Guia, também mostra quantos erros e avisos o modelo tem.
 

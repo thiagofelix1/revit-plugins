@@ -46,7 +46,7 @@ public static class Reconexao
             if (a is null || b is null) continue;
             var motivo = Ligar(doc, a, b);
             if (motivo is null) ligadas++;
-            else recusadas.Add(motivo);
+            else recusadas.Add(NoGrupo(doc, [a, b]) ?? motivo);
         }
         grupo.Assimilate();
         return new ResultadoReconexao(ligadas, recusadas);
@@ -155,6 +155,16 @@ public static class Reconexao
     static string FolgaGrande(double distancia) =>
         $"folga de {UnitUtils.ConvertFromInternalUnits(distancia, UnitTypeId.Centimeters).ToString("0", Entrada.Cultura)} cm ou mais: " +
         "arraste a ponta até o conector (o SPK não move tubo, para não desmontar o vizinho)";
+
+    /// <summary>
+    ///     Peça de grupo de modelo não se move nem se parte sozinha (o Revit a prende ao grupo, e mexer no grupo muda todas
+    ///     as cópias dele): quando a correção é recusada e uma das peças é de grupo, o motivo que vale é esse.
+    /// </summary>
+    internal static string? NoGrupo(Document doc, IEnumerable<Element> elementos)
+    {
+        var grupo = elementos.Where(e => e.IsValidObject && e.GroupId != ElementId.InvalidElementId).Select(e => doc.GetElement(e.GroupId)).FirstOrDefault();
+        return grupo is null ? null : $"a peça está no grupo de modelo \"{grupo.Name}\": desagrupe (ou edite o grupo) e corrija de novo";
+    }
 
     static bool EhBico(Element e) => e.Category?.Id.Value == (long)BuiltInCategory.OST_Sprinklers;
 

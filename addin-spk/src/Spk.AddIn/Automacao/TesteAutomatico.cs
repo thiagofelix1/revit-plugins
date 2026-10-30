@@ -216,6 +216,18 @@ static class TesteAutomatico
             if (cenario.Sabotar is { Count: > 0 } sabotagens)
                 Etapa(relatorio, "sabotar", () => Sabotagem.Aplicar(doc!, sabotagens));
 
+            if (cenario.Desagrupar)
+                Etapa(relatorio, "desagrupar", () =>
+                {
+                    using var transacao = new Transaction(doc!, "SPK — teste: desagrupar");
+                    transacao.Start();
+                    var grupos = new FilteredElementCollector(doc!).OfClass(typeof(Autodesk.Revit.DB.Group)).OfCategory(BuiltInCategory.OST_IOSModelGroups)
+                        .Cast<Autodesk.Revit.DB.Group>().ToList();
+                    var pecas = grupos.Sum(g => g.UngroupMembers().Count);
+                    transacao.Commit();
+                    return $"{grupos.Count} grupo(s) de modelo desfeito(s), {pecas} peça(s) soltas";
+                });
+
             if (cenario.Reconectar)
                 Etapa(relatorio, "reconectar", () =>
                 {
@@ -1245,6 +1257,9 @@ sealed class Cenario
 
     /// <summary>Liga as peças encostadas (o Corrigir de Verificar modelo), depois de sabotar e antes de verificar.</summary>
     public bool Reconectar { get; set; }
+
+    /// <summary>Desfaz todos os grupos de modelo antes de reconectar (o que o projetista faria antes do Corrigir).</summary>
+    public bool Desagrupar { get; set; }
     public bool InspecionarCarimbo { get; set; }
 
     /// <summary>Lista os vínculos (Revit, IFC, DWG) e o que há em cada um: ambientes, forros, lajes, vigas...</summary>
