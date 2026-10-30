@@ -22,6 +22,7 @@ static class Cenas
         "andarEmL" => AndarEmL(doc),
         "salaComVigas" => SalaComVigas(doc, grelha: false),
         "salaComGrelha" => SalaComVigas(doc, grelha: true),
+        "teMecanico" => TeMecanico(doc),
         _ => throw new InvalidOperationException($"Cena desconhecida: \"{nome}\"."),
     };
 
@@ -516,6 +517,147 @@ static class Cenas
         doc.Regenerate();
         foreach (var bico in bicos) GeradorMalha.AjustarAltura(bico, zBico, nivel.Elevation);
         return bicos;
+    }
+
+    /// <summary>
+    /// Tês mecânicos sentados num tubo DN65 de 15 m (a 3 m de altura, ao longo de x, de x = 60 a 75 m), como o projetista
+    /// os põe: a boca da passagem 34 mm abaixo do eixo, a saída para baixo. A família é criada aqui, do modelo de conexão
+    /// hidráulica do Revit (nada de família de cliente): as duas bocas da passagem no mesmo ponto, em sentidos opostos.
+    /// Cada tê leva um bico (o Verificar modelo só olha a rede que chega aos bicos). A (x = 62): descida DN25 de 30 cm e o
+    /// bico na ponta. B (66): bico direto na saída. D (70): bico direto, tê fixado (alfinete). E (74): tê e bico num grupo
+    /// de modelo. O Corrigir deve encaixar A e B e recusar D e E.
+    /// </summary>
+    static Cena TeMecanico(Document doc)
+    {
+        double M(double metros) => GeradorMalha.Pes(metros);
+        // A família é salva e carregada antes da transação da cena (o documento da família tem a transação dele).
+        var arquivoFamilia = FamiliaTeMecanico(doc.Application);
+
+        using var transacao = new Transaction(doc, "SPK — cena de teste");
+        transacao.Start();
+        ApagarRede(doc);
+        var nivel = GeradorMalha.Nivel(doc) ?? throw new InvalidOperationException("O projeto não tem nível.");
+        var tipo = GeradorMalha.TipoComTe(doc);
+        var sistema = GeradorMalha.Sistema(doc) ?? throw new InvalidOperationException("O projeto não tem sistema de tubulação.");
+        var z = nivel.Elevation + M(3.0);
+        var tubo = GeradorMalha.CriarTubo(doc, sistema.Id, tipo.Id, nivel.Id, new XYZ(M(60), 0, z), new XYZ(M(75), 0, z),
+            GeradorMalha.DiametroComTe(doc, tipo, 65), marcar: false);
+        var dn25 = GeradorMalha.DiametroComTe(doc, tipo, 25) ?? M(0.025);
+        doc.Regenerate();
+
+        if (!doc.LoadFamily(arquivoFamilia, out var familia))
+            familia = new FilteredElementCollector(doc).OfClass(typeof(Family)).Cast<Family>().First(f => f.Name == NomeTeMecanico);
+        var simbolo = (FamilySymbol)doc.GetElement(familia.GetFamilySymbolIds().First());
+        if (!simbolo.IsActive) simbolo.Activate();
+        // As bocas da família nascem com o diâmetro do tubo e da descida.
+        foreach (var (nome, valor) in new[] { ("Passagem", tubo.Diameter), ("Saida", dn25) })
+            simbolo.LookupParameter(nome)?.Set(valor);
+        doc.Regenerate();
+
+        var desvio = M(0.034);
+        FamilyInstance Te(double x) => doc.Create.NewFamilyInstance(new XYZ(M(x), 0, z - desvio), simbolo, StructuralType.NonStructural);
+        Connector Saida(FamilyInstance te) => te.MEPModel.ConnectorManager.Connectors.Cast<Connector>()
+            .Single(c => c.CoordinateSystem.BasisZ.Z < -0.99);
+        FamilyInstance BicoNaSaida(FamilyInstance te)
+        {
+            var saida = Saida(te);
+            var bico = Bicos(doc, nivel, saida.Origin.Z, [(UnitUtils.ConvertFromInternalUnits(saida.Origin.X, UnitTypeId.Meters), 0, false)])[0];
+            if (GeradorMalha.OrigemDoConector(bico) is { } conector) ElementTransformUtils.MoveElement(doc, bico.Id, saida.Origin - conector);
+            doc.Regenerate();
+            var boca = bico.MEPModel.ConnectorManager.Connectors.Cast<Connector>().First(c => c.ConnectorType == ConnectorType.End);
+            boca.ConnectTo(Saida(te));
+            return bico;
+        }
+
+        var a = Te(62);
+        var b = Te(66);
+        var d = Te(70);
+        var e = Te(74);
+        doc.Regenerate();
+
+        // A: descida DN25 de 30 cm na saída e o bico na ponta de baixo dela.
+        var saidaA = Saida(a).Origin;
+        var descida = GeradorMalha.CriarTubo(doc, sistema.Id, tipo.Id, nivel.Id, saidaA, saidaA - new XYZ(0, 0, M(0.3)), dn25, marcar: false);
+        doc.Regenerate();
+        var pontas = descida.ConnectorManager.Connectors.Cast<Connector>().OrderBy(k => k.Origin.DistanceTo(saidaA)).ToList();
+        pontas[0].ConnectTo(Saida(a));
+        var bicoA = Bicos(doc, nivel, pontas[1].Origin.Z, [(60 + 2, 0, false)])[0];
+        if (GeradorMalha.OrigemDoConector(bicoA) is { } conectorA) ElementTransformUtils.MoveElement(doc, bicoA.Id, pontas[1].Origin - conectorA);
+        doc.Regenerate();
+        bicoA.MEPModel.ConnectorManager.Connectors.Cast<Connector>().First(k => k.ConnectorType == ConnectorType.End).ConnectTo(pontas[1]);
+
+        var bicos = new List<FamilyInstance> { bicoA, BicoNaSaida(b), BicoNaSaida(d) };
+        d.Pinned = true;
+        var bicoE = BicoNaSaida(e);
+        bicos.Add(bicoE);
+        doc.Regenerate();
+        var grupo = doc.Create.NewGroup([e.Id, bicoE.Id]);
+        grupo.GroupType.Name = "SPK teste - tê mecânico com bico";
+        transacao.Commit();
+        return new Cena("Tubo DN65 de 15 m com 4 tês mecânicos 34 mm abaixo do eixo, cada um com bico: por descida, direto, fixado e em grupo.", bicos, [tubo]);
+    }
+
+    const string NomeTeMecanico = "SPK teste - tê mecânico";
+
+    /// <summary>
+    /// Cria, do modelo de conexão hidráulica métrica do Revit, a família de um tê mecânico: duas meias-caixas de 4 cm
+    /// encostadas em x = 0 (as bocas da passagem, no mesmo ponto, uma para +x e outra para -x) e um toco para baixo, com a
+    /// boca da saída 6 cm abaixo. Os diâmetros das bocas são os parâmetros de tipo "Passagem" e "Saida". Devolve o .rfa.
+    /// </summary>
+    static string FamiliaTeMecanico(Autodesk.Revit.ApplicationServices.Application app)
+    {
+        var pastaModelos = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Autodesk",
+            $"RVT {app.VersionNumber}", "Family Templates");
+        var modelo = System.IO.Directory.GetFiles(pastaModelos, "*.rft", System.IO.SearchOption.AllDirectories)
+            .FirstOrDefault(f => System.IO.Path.GetFileName(f) is "Conexão hidráulica métrica.rft" or "Metric Pipe Fitting.rft")
+            ?? throw new InvalidOperationException($"Modelo de família de conexão hidráulica não encontrado em {pastaModelos}.");
+        var familia = app.NewFamilyDocument(modelo);
+        double M(double metros) => GeradorMalha.Pes(metros);
+        using (var t = new Transaction(familia, "SPK — tê mecânico de teste"))
+        {
+            t.Start();
+            // O modelo em português sai como peça hidrossanitária: a família vira conexão de tubo, tipo tê.
+            familia.OwnerFamily.FamilyCategory = Category.GetCategory(familia, BuiltInCategory.OST_PipeFitting);
+            familia.OwnerFamily.get_Parameter(BuiltInParameter.FAMILY_CONTENT_PART_TYPE)?.Set((int)PartType.Tee);
+            var gerente = familia.FamilyManager;
+            if (gerente.CurrentType is null) gerente.NewType("Padrão");
+            var passagem = gerente.AddParameter("Passagem", GroupTypeId.Mechanical, SpecTypeId.PipeSize, false);
+            var saida = gerente.AddParameter("Saida", GroupTypeId.Mechanical, SpecTypeId.PipeSize, false);
+            gerente.Set(passagem, M(0.065));
+            gerente.Set(saida, M(0.025));
+
+            var a = M(0.02);
+            var esquerda = Caixa(familia, -a, 0, -a, a, -a, a);
+            var direita = Caixa(familia, 0, a, -a, a, -a, a);
+            var toco = Caixa(familia, -a / 2, a / 2, -a / 2, a / 2, -M(0.06), -a);
+            familia.Regenerate();
+            foreach (var (forma, normal, parametro) in new[] { (esquerda, XYZ.BasisX, passagem), (direita, -XYZ.BasisX, passagem), (toco, -XYZ.BasisZ, saida) })
+            {
+                var face = forma.get_Geometry(new Options { ComputeReferences = true }).OfType<Solid>().SelectMany(s => s.Faces.OfType<PlanarFace>())
+                    .First(f => f.FaceNormal.IsAlmostEqualTo(normal));
+                var conector = ConnectorElement.CreatePipeConnector(familia, Autodesk.Revit.DB.Plumbing.PipeSystemType.Fitting, face.Reference);
+                gerente.AssociateElementParameterToFamilyParameter(conector.get_Parameter(BuiltInParameter.CONNECTOR_DIAMETER), parametro);
+            }
+            t.Commit();
+        }
+        var pasta = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "SPK", "testes", "saida");
+        System.IO.Directory.CreateDirectory(pasta);
+        var arquivo = System.IO.Path.Combine(pasta, NomeTeMecanico + ".rfa");
+        familia.SaveAs(arquivo, new SaveAsOptions { OverwriteExistingFile = true });
+        familia.Close(false);
+        return arquivo;
+    }
+
+    /// <summary>Caixa sólida de x0 a x1, y0 a y1 e z0 a z1 (pés), no documento da família.</summary>
+    static Extrusion Caixa(Document familia, double x0, double x1, double y0, double y1, double z0, double z1)
+    {
+        var perfil = new CurveArray();
+        var p = new[] { new XYZ(x0, y0, z0), new XYZ(x1, y0, z0), new XYZ(x1, y1, z0), new XYZ(x0, y1, z0) };
+        for (var i = 0; i < 4; i++) perfil.Append(Line.CreateBound(p[i], p[(i + 1) % 4]));
+        var laco = new CurveArrArray();
+        laco.Append(perfil);
+        var plano = SketchPlane.Create(familia, Plane.CreateByNormalAndOrigin(XYZ.BasisZ, new XYZ(0, 0, z0)));
+        return familia.FamilyCreate.NewExtrusion(true, laco, plano, z1 - z0);
     }
 
     /// <summary>
