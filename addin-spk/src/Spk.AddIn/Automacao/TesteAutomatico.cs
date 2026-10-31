@@ -126,6 +126,14 @@ static class TesteAutomatico
                     return $"Projeto novo ({(string.IsNullOrEmpty(modelo) ? "sem modelo" : Path.GetFileName(modelo))})";
                 }
                 var origem = cenario.Abrir ?? throw new InvalidOperationException("O cenário precisa de \"abrir\" ou \"novo\".");
+                if (cenario.NoLugar)
+                {
+                    var antes = Path.Combine(Path.GetDirectoryName(origem)!, Path.GetFileNameWithoutExtension(origem) + "-antes-do-teste.rvt");
+                    File.Copy(origem, antes, true);
+                    arquivo = origem;
+                    doc = app.OpenDocumentFile(arquivo);
+                    return $"{origem} (no lugar; cópia em {Path.GetFileName(antes)})";
+                }
                 File.Copy(origem, arquivo, true);
                 doc = app.OpenDocumentFile(arquivo);
                 return $"Cópia de {origem}";
@@ -143,6 +151,12 @@ static class TesteAutomatico
 
             if (cenario.Vincular is { } vinculos)
                 Etapa(relatorio, "vincular", () => Cenas.Vincular(doc!, vinculos));
+
+            if (cenario.RecarregarVinculos is { Count: > 0 } recarregar)
+                Etapa(relatorio, "recarregarVinculos", () => Cenas.RecarregarVinculos(doc!, recarregar));
+
+            if (cenario.NiveisDosVinculos)
+                Etapa(relatorio, "niveisDosVinculos", () => Cenas.NiveisDosVinculos(doc!));
 
             relatorio.Vgas = MapeamentoGravado.Vgas(doc!).Select(v => new VgaLida
             {
@@ -1058,8 +1072,9 @@ static class Diagnostico
         var ambientes = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType()
             .Cast<SpatialElement>().ToList();
         var comArea = ambientes.Count(a => a.Area > 0);
-        var niveis = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().OrderBy(n => n.Elevation)
-            .Select(n => $"{n.Name} {n.Elevation * 0.3048:0.00}").ToList();
+        var niveis = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().OrderBy(n => n.ProjectElevation)
+            .Select(n => $"{n.Name} {n.ProjectElevation * 0.3048:0.00}" +
+                         (Math.Abs(n.Elevation - n.ProjectElevation) > 0.01 ? $" (cota {n.Elevation * 0.3048:0.00})" : "")).ToList();
         var exemplos = ambientes.Where(a => a.Area > 0).Take(4).Select(a => $"{a.Name} ({a.Area * 0.092903:0.0} m²)");
         return $"{niveis.Count} níveis [{string.Join("; ", niveis.Take(8))}], {comArea} ambientes com área de {ambientes.Count} " +
                $"[{string.Join("; ", exemplos)}], {Contar(BuiltInCategory.OST_Ceilings)} forros, {Contar(BuiltInCategory.OST_Floors)} lajes/pisos, " +
@@ -1227,6 +1242,18 @@ sealed class Cenario
 
     /// <summary>Vincula modelos que já existem (origem interna com origem interna), logo depois de abrir.</summary>
     public PedidoVinculos? Vincular { get; set; }
+
+    /// <summary>
+    /// Trabalha no próprio arquivo de "abrir", sem copiar para a pasta de saída (os vínculos de caminho relativo continuam
+    /// achando os arquivos). Antes, guarda uma cópia ao lado: nome-antes-do-teste.rvt.
+    /// </summary>
+    public bool NoLugar { get; set; }
+
+    /// <summary>Recarrega vínculos de outro arquivo: nome do arquivo vinculado hoje → caminho do arquivo novo.</summary>
+    public Dictionary<string, string>? RecarregarVinculos { get; set; }
+
+    /// <summary>Põe no projeto os níveis dos ambientes da arquitetura vinculada, com planta de piso e de forro (ver Cenas).</summary>
+    public bool NiveisDosVinculos { get; set; }
     public List<AjusteMapeamento>? Mapeamento { get; set; }
     public bool RedeExemplo { get; set; }
 

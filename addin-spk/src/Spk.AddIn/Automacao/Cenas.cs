@@ -457,6 +457,130 @@ static class Cenas
         return string.Join("; ", linhas);
     }
 
+    /// <summary>Recarrega cada vínculo cujo arquivo tem o nome pedido a partir do caminho novo (fora de transação, como pede o Revit).</summary>
+    public static string RecarregarVinculos(Document doc, Dictionary<string, string> pedido)
+    {
+        var linhas = new List<string>();
+        var tipos = new FilteredElementCollector(doc).OfClass(typeof(RevitLinkType)).Cast<RevitLinkType>().ToList();
+        foreach (var (nome, novo) in pedido)
+        {
+            if (!System.IO.File.Exists(novo)) throw new InvalidOperationException($"Arquivo não encontrado: {novo}");
+            var tipo = tipos.FirstOrDefault(t => t.GetExternalFileReference() is { } r && string.Equals(
+                    System.IO.Path.GetFileName(ModelPathUtils.ConvertModelPathToUserVisiblePath(r.GetAbsolutePath())), nome,
+                    StringComparison.OrdinalIgnoreCase));
+            if (tipo is null)
+            {
+                linhas.Add($"nenhum vínculo aponta para {nome}: nada a recarregar");
+                continue;
+            }
+            var resultado = tipo.LoadFrom(ModelPathUtils.ConvertUserVisiblePathToModelPath(novo), new WorksetConfiguration());
+            linhas.Add($"{nome} → {System.IO.Path.GetFileName(novo)}: {resultado.LoadResult}");
+        }
+        return string.Join("; ", linhas);
+    }
+
+    /// <summary>
+    /// Os níveis do projeto passam a ser os dos ambientes da arquitetura vinculada (só os níveis com ambiente: cobertura,
+    /// platibanda e fundação não interessam à rede; vínculo nenhum com ambiente, vale todo nível). O nível do projeto na mesma
+    /// altura (5 cm, pela origem interna) ganha o nome do vínculo, e as plantas dele também; o que falta é criado com planta de piso e de forro,
+    /// do mesmo tipo e template das plantas que o projeto já tem; o nível do projeto que não corresponde a nenhum e não tem
+    /// nada além de vistas (os níveis 1 e 2 do modelo do Revit) sai, com as vistas dele.
+    /// </summary>
+    public static string NiveisDosVinculos(Document doc)
+    {
+        var tolerancia = GeradorMalha.Pes(0.05);
+        var instancias = new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance)).Cast<RevitLinkInstance>()
+            .Where(i => i.GetLinkDocument() is not null).OrderBy(i => i.GetLinkDocument().Title).ToList();
+        if (instancias.Count == 0) throw new InvalidOperationException("Nenhum vínculo carregado.");
+
+        // ProjectElevation é a altura na origem interna; Elevation segue a base do tipo de nível, e a arquitetura com cota de
+        // levantamento (a altitude do terreno, 54,80 m) poria o nível dezenas de metros acima dos ambientes.
+        var alvos = new List<(string Nome, double Elevacao)>();
+        void Somar(IEnumerable<Level> niveis, double dz)
+        {
+            foreach (var n in niveis.OrderBy(n => n.ProjectElevation))
+                if (!alvos.Any(a => Math.Abs(a.Elevacao - (n.ProjectElevation + dz)) < tolerancia)) alvos.Add((n.Name, n.ProjectElevation + dz));
+        }
+        foreach (var i in instancias)
+        {
+            var vinculado = i.GetLinkDocument();
+            var dosAmbientes = new FilteredElementCollector(vinculado).OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType()
+                .Cast<SpatialElement>().Where(r => r.Area > 0).Select(r => r.LevelId).Distinct()
+                .Select(id => vinculado.GetElement(id)).OfType<Level>();
+            Somar(dosAmbientes, i.GetTotalTransform().Origin.Z);
+        }
+        if (alvos.Count == 0)
+            foreach (var i in instancias)
+                Somar(new FilteredElementCollector(i.GetLinkDocument()).OfClass(typeof(Level)).Cast<Level>(), i.GetTotalTransform().Origin.Z);
+
+        var plantas = new FilteredElementCollector(doc).OfClass(typeof(ViewPlan)).Cast<ViewPlan>().Where(v => !v.IsTemplate).ToList();
+        ElementId TipoDe(ViewType tipoVista, ViewFamily familia) =>
+            plantas.FirstOrDefault(v => v.ViewType == tipoVista)?.GetTypeId()
+            ?? new FilteredElementCollector(doc).OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>().First(v => v.ViewFamily == familia).Id;
+        var modelos = new[] { (ViewType.FloorPlan, ViewFamily.FloorPlan), (ViewType.CeilingPlan, ViewFamily.CeilingPlan) }
+            .Select(m => (Tipo: TipoDe(m.Item1, m.Item2), Modelo: plantas.FirstOrDefault(v => v.ViewType == m.Item1))).ToList();
+
+        var linhas = new List<string>();
+        using var t = new Transaction(doc, "SPK — níveis dos vínculos");
+        t.Start();
+        var existentes = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().ToList();
+        var usados = new List<ElementId>();
+        var novos = new List<(Level Nivel, string Nome)>();
+        foreach (var (nome, elevacao) in alvos)
+        {
+            var nivel = existentes.FirstOrDefault(n => !usados.Contains(n.Id) && Math.Abs(n.ProjectElevation - elevacao) < tolerancia);
+            if (nivel is null)
+            {
+                // O nome vem depois de apagar os que sobram: um nível velho com o mesmo nome em outra altura o bloquearia.
+                nivel = Level.Create(doc, elevacao);
+                foreach (var (tipo, modelo) in modelos)
+                {
+                    var vista = ViewPlan.Create(doc, tipo, nivel.Id);
+                    if (modelo is null) continue;
+                    if (modelo.ViewTemplateId != ElementId.InvalidElementId) vista.ViewTemplateId = modelo.ViewTemplateId;
+                    else vista.Discipline = modelo.Discipline;
+                }
+                novos.Add((nivel, nome));
+            }
+            else if (nivel.Name != nome)
+            {
+                var antigo = nivel.Name;
+                Renomear(nivel, nome);
+                foreach (var vista in plantas.Where(v => v.GenLevel?.Id == nivel.Id && v.Name.StartsWith(antigo)))
+                    Renomear(vista, nivel.Name + vista.Name.Substring(antigo.Length));
+                linhas.Add($"{antigo} → {nivel.Name} ({Metros(elevacao):0.00} m)");
+            }
+            usados.Add(nivel.Id);
+        }
+        foreach (var nivel in existentes.Where(n => !usados.Contains(n.Id)))
+        {
+            var ocupado = new FilteredElementCollector(doc).WherePasses(new ElementLevelFilter(nivel.Id)).WhereElementIsNotElementType()
+                .Any(e => e is not View);
+            if (ocupado) { linhas.Add($"{nivel.Name} ficou (tem elementos)"); continue; }
+            var nome = nivel.Name;
+            doc.Delete(nivel.Id);
+            linhas.Add($"{nome} apagado com as vistas");
+        }
+        foreach (var (nivel, nome) in novos)
+        {
+            var provisorio = nivel.Name;
+            Renomear(nivel, nome);
+            foreach (var vista in new FilteredElementCollector(doc).OfClass(typeof(ViewPlan)).Cast<ViewPlan>()
+                         .Where(v => !v.IsTemplate && v.GenLevel?.Id == nivel.Id && v.Name.StartsWith(provisorio)))
+                Renomear(vista, nivel.Name + vista.Name.Substring(provisorio.Length));
+            linhas.Add($"criado {nivel.Name} ({Metros(nivel.ProjectElevation):0.00} m; cota pelo tipo {Metros(nivel.Elevation):0.00} m)");
+        }
+        t.Commit();
+        return string.Join("; ", linhas);
+
+        static void Renomear(Element e, string nome)
+        {
+            try { e.Name = nome; }
+            catch (Autodesk.Revit.Exceptions.ArgumentException) { }
+        }
+        static double Metros(double pes) => pes * 0.3048;
+    }
+
     /// <summary>Apaga bicos, tubos, conexões e acessórios: a cópia começa sem rede, e só a que o teste gerar entra no cálculo.</summary>
     static int ApagarRede(Document doc)
     {
