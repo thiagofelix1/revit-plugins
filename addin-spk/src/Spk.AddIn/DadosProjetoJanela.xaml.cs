@@ -33,6 +33,7 @@ public partial class DadosProjetoJanela : Window
         Hidrantes.Text = Entrada.F(dados.VazaoHidrantesLmin);
         Duracao.Text = Entrada.F(dados.DuracaoMin);
         FatorC.Text = Entrada.F(dados.FatorC);
+        Inclinacao.Text = Entrada.F(dados.InclinacaoTetoPct);
         Estatica.Text = Entrada.F(dados.PressaoEstaticaKPa);
         Residual.Text = Entrada.F(dados.PressaoResidualKPa);
         VazaoResidual.Text = Entrada.F(dados.VazaoResidualLmin);
@@ -90,6 +91,7 @@ public partial class DadosProjetoJanela : Window
             VazaoHidrantesLmin = Entrada.Opcional(Hidrantes.Text, "Demanda de hidrantes", 0, 20000),
             DuracaoMin = Entrada.Opcional(Duracao.Text, "Duração", 10, 600),
             FatorC = Entrada.Numero(FatorC.Text, "Fator C", 80, 150),
+            InclinacaoTetoPct = Entrada.Numero(Inclinacao.Text, "Inclinação do teto", 0, 200),
             PressaoEstaticaKPa = Entrada.Opcional(Estatica.Text, "Pressão estática", 50, 5000),
             PressaoResidualKPa = Entrada.Opcional(Residual.Text, "Pressão residual", 0, 5000),
             VazaoResidualLmin = Entrada.Opcional(VazaoResidual.Text, "Vazão residual", 1, 100000),

@@ -41,9 +41,39 @@ public class EquacoesTestes
     }
 
     [Theory]
+    [InlineData("Padrão Cobre - NBR 13206 - Classe A", false, 150.0)]
+    [InlineData("Plástico PVC - NBR 5648", false, 150.0)]
+    [InlineData("Ferro Galvanizado Vermelho BSP Aço Carbono - Tabela 40", false, 120.0)]
+    [InlineData("Ferro Galvanizado Groved Aço Carbono - Tabela 40", true, 120.0)]
+    [InlineData("Aço Carbono - Tabela 40", false, 120.0)]
+    [InlineData("Aço Carbono - Tabela 40", true, 100.0)]
+    [InlineData("Ferro fundido dúctil", false, 100.0)]
+    [InlineData("Ferro fundido dúctil com cimento", false, 140.0)]
+    public void Tabela_30_pelo_nome_do_tubo(string nome, bool seco, double c) =>
+        Assert.Equal(c, Nbr10897.FatorC(Nbr10897.TuboPeloNome(nome, seco)!.Value));
+
+    [Fact]
+    public void Nome_sem_material_nao_tem_linha_na_tabela_30() =>
+        Assert.Null(Nbr10897.TuboPeloNome("Padrão", false));
+
+    [Fact]
+    public void Teto_inclinado_aumenta_a_area_em_30_por_cento_sem_mudar_a_densidade()
+    {
+        var plano = BaseDeProjeto.PelaFigura42(ClasseRisco.Ordinario2, 140, new CondicoesAreaOperacao { InclinacaoTeto = 0.167 });
+        var inclinado = BaseDeProjeto.PelaFigura42(ClasseRisco.Ordinario2, 140, new CondicoesAreaOperacao { InclinacaoTeto = 0.20 });
+
+        Assert.Equal(140, plano.AreaOperacao, 6);
+        Assert.Equal(182, inclinado.AreaOperacao, 6);
+        Assert.Equal(plano.Densidade, inclinado.Densidade, 6);
+    }
+
+    [Theory]
     [InlineData(ClasseRisco.Ordinario2, 140, 8.1)]
     [InlineData(ClasseRisco.Ordinario2, 100, 8.1)]
-    [InlineData(ClasseRisco.Ordinario2, 370, 6.9)]
+    [InlineData(ClasseRisco.Ordinario2, 370, 6.1)]
+    [InlineData(ClasseRisco.Ordinario1, 370, 4.1)]
+    [InlineData(ClasseRisco.Extraordinario1, 465, 8.1)]
+    [InlineData(ClasseRisco.Extraordinario2, 465, 12.2)]
     [InlineData(ClasseRisco.Leve, 210, 3.475)]
     public void Curvas_da_Figura_42(ClasseRisco classe, double area, double densidade)
     {

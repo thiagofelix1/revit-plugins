@@ -83,16 +83,20 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <TextBlock Text="Fator C (Tabela 30)" VerticalAlignment="Center" Margin="0,4"/>
                     <TextBox x:Name="FatorC" Grid.Column="1" Margin="0,4" Padding="4"/>
-                    <TextBlock Grid.Row="1" Text="Pressão estática (kPa)" VerticalAlignment="Center" Margin="0,4"/>
-                    <TextBox x:Name="Estatica" Grid.Row="1" Grid.Column="1" Margin="0,4" Padding="4"/>
-                    <TextBlock Grid.Row="2" Text="Pressão residual (kPa)" VerticalAlignment="Center" Margin="0,4"/>
-                    <TextBox x:Name="Residual" Grid.Row="2" Grid.Column="1" Margin="0,4" Padding="4"/>
-                    <TextBlock Grid.Row="3" Text="Vazão na pressão residual (L/min)" VerticalAlignment="Center" Margin="0,4"/>
-                    <TextBox x:Name="VazaoResidual" Grid.Row="3" Grid.Column="1" Margin="0,4" Padding="4"/>
-                    <TextBlock Grid.Row="4" Grid.ColumnSpan="2" TextWrapping="Wrap" Foreground="#6B6B6B" FontSize="12" Margin="0,4,0,0"
+                    <TextBlock Grid.Row="1" Text="Inclinação do teto (%)" VerticalAlignment="Center" Margin="0,4"
+                               ToolTip="Acima de 16,7 %, a área da Figura 42 sobe 30 % (NBR 8.5.5.4). Sobre densidade e área digitadas, some você."/>
+                    <TextBox x:Name="Inclinacao" Grid.Row="1" Grid.Column="1" Margin="0,4" Padding="4"/>
+                    <TextBlock Grid.Row="2" Text="Pressão estática (kPa)" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox x:Name="Estatica" Grid.Row="2" Grid.Column="1" Margin="0,4" Padding="4"/>
+                    <TextBlock Grid.Row="3" Text="Pressão residual (kPa)" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox x:Name="Residual" Grid.Row="3" Grid.Column="1" Margin="0,4" Padding="4"/>
+                    <TextBlock Grid.Row="4" Text="Vazão na pressão residual (L/min)" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox x:Name="VazaoResidual" Grid.Row="4" Grid.Column="1" Margin="0,4" Padding="4"/>
+                    <TextBlock Grid.Row="5" Grid.ColumnSpan="2" TextWrapping="Wrap" Foreground="#6B6B6B" FontSize="12" Margin="0,4,0,0"
                                Text="Abastecimento opcional: os três campos juntos, ou nenhum. 1 bar = 100 kPa; 1 m.c.a. ≈ 9,8 kPa."/>
                 </Grid>
             </GroupBox>

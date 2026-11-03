@@ -62,12 +62,16 @@ static class ServicoCalculo
     {
         ValidarFatorK(leitura.Bicos);
         var lida = LeitorRede.Montar(doc, leitura.Bicos, dados.FatorC, fonte, vgas, doSetor, indiceSetor);
-        var projeto = dados.CriarProjeto(leitura.Gerados ? "Malha gerada" : "Rede lida do modelo", lida.Rede) with { AlturaDoTeto = AlturasDoTeto(doc, dados, lida) };
+        var ambientes = dados.Classe == Spk.Motor.Normas.ClasseRisco.Armazenamento ? [] : Arquitetura.LeituraDoEdificio.Ler(doc).Ambientes;
+        var projeto = dados.CriarProjeto(leitura.Gerados ? "Malha gerada" : "Rede lida do modelo", lida.Rede) with { AlturaDoTeto = AlturasDoTeto(doc, lida, ambientes) };
         var relatorio = CalculoSpk.Executar(projeto);
-        // O que tira o valor do resultado vem primeiro, e vai também para o memorial: o K sem confirmar e os bicos fora do cálculo.
+        // O que tira o valor do resultado vem primeiro, e vai também para o memorial.
         var atencao = lida.Avisos.Where(a => a.StartsWith(Atencao));
         if (leitura.AvisoDoFatorK is { } avisoDoK) atencao = atencao.Append(avisoDoK);
-        relatorio = relatorio with { Avisos = atencao.Concat(relatorio.Avisos).ToList() };
+        atencao = atencao.Concat(AvisosDaInclinacao(doc, dados, lida, ambientes));
+        var (fatorCAtencao, fatorCInforma) = AvisosDoFatorC(doc, dados, lida);
+        atencao = atencao.Concat(fatorCAtencao);
+        relatorio = relatorio with { Avisos = atencao.Concat(relatorio.Avisos).Concat(fatorCInforma).ToList() };
 
         var pasta = PastasSpk.Calculo;
         Directory.CreateDirectory(pasta);
@@ -81,32 +85,75 @@ static class ServicoCalculo
     /// <summary>
     /// A altura do teto sobre os bicos que podem estar sob teto alto: a do ambiente da arquitetura em que o bico está; sem
     /// ambiente, a do próprio bico acima do nível, que é o mínimo que o teto tem. Abaixo de 5 m o bico não fica sob um teto de
-    /// 6,1 m (o defletor fica a no máximo 56 cm do teto) e a arquitetura nem é lida.
+    /// 6,1 m (o defletor fica a no máximo 56 cm do teto).
     /// </summary>
-    static IReadOnlyDictionary<string, double>? AlturasDoTeto(Document doc, DadosProjeto dados, LeitorRede.RedeLida lida)
+    static IReadOnlyDictionary<string, double>? AlturasDoTeto(Document doc, LeitorRede.RedeLida lida, IReadOnlyList<Spk.Motor.Modelo.Ambiente> ambientes)
     {
-        if (dados.Classe == Spk.Motor.Normas.ClasseRisco.Armazenamento) return null;
-        var candidatos = new List<(string Id, double X, double Y, double Z, double AcimaDoNivel)>();
+        var alturas = new Dictionary<string, double>();
         foreach (var (id, elemento) in lida.Bicos)
         {
             if (doc.GetElement(elemento) is not FamilyInstance { Location: LocationPoint { Point: { } ponto } } bico
                 || doc.GetElement(bico.LevelId) is not Level nivel) continue;
             var acima = Metros(ponto.Z - nivel.ProjectElevation);
-            if (acima >= 5) candidatos.Add((id, Metros(ponto.X), Metros(ponto.Y), Metros(ponto.Z), acima));
+            if (acima >= 5) alturas[id] = AmbienteDoBico(ambientes, ponto)?.PeDireito ?? acima;
         }
-        if (candidatos.Count == 0) return null;
-
-        var ambientes = Arquitetura.LeituraDoEdificio.Ler(doc).Ambientes;
-        var alturas = new Dictionary<string, double>();
-        foreach (var bico in candidatos)
-        {
-            var ponto = new Spk.Motor.Modelo.Ponto2(bico.X, bico.Y);
-            var ambiente = ambientes.FirstOrDefault(a => a.PeDireito is not null && a.Piso <= bico.Z && a.Teto + 0.1 >= bico.Z
-                                                         && Spk.Motor.Geracao.BicosNoAmbiente.Dentro(a.Contornos, ponto));
-            alturas[bico.Id] = ambiente?.PeDireito ?? bico.AcimaDoNivel;
-        }
-        return alturas;
+        return alturas.Count == 0 ? null : alturas;
     }
+
+    static Spk.Motor.Modelo.Ambiente? AmbienteDoBico(IReadOnlyList<Spk.Motor.Modelo.Ambiente> ambientes, XYZ ponto)
+    {
+        var (z, emPlanta) = (Metros(ponto.Z), new Spk.Motor.Modelo.Ponto2(Metros(ponto.X), Metros(ponto.Y)));
+        return ambientes.FirstOrDefault(a => a.PeDireito is not null && a.Piso <= z && a.Teto + 0.1 >= z
+                                             && Spk.Motor.Geracao.BicosNoAmbiente.Dentro(a.Contornos, emPlanta));
+    }
+
+    /// <summary>
+    /// A inclinação informada em Dados do projeto contra a medida no modelo e contra a base de cálculo. Só avisa: a medida é de um
+    /// ponto do ambiente, e quem conhece o telhado é o engenheiro.
+    /// </summary>
+    static IEnumerable<string> AvisosDaInclinacao(Document doc, DadosProjeto dados, LeitorRede.RedeLida lida, IReadOnlyList<Spk.Motor.Modelo.Ambiente> ambientes)
+    {
+        var limite = Spk.Motor.Normas.Nbr10897.InclinacaoTetoLimite;
+        var informada = dados.InclinacaoTetoPct / 100;
+        var medidas = lida.Bicos.Values.Select(doc.GetElement).OfType<FamilyInstance>()
+            .Select(b => b.Location is LocationPoint { Point: { } p } ? AmbienteDoBico(ambientes, p) : null)
+            .OfType<Spk.Motor.Modelo.Ambiente>().Where(a => a.Inclinacao > limite).ToList();
+        if (medidas.Count > 0 && informada <= limite)
+        {
+            var maior = medidas.OrderByDescending(a => a.Inclinacao).First();
+            yield return $"ATENÇÃO: o teto sobre {medidas.Count} bico(s) tem cerca de {maior.Inclinacao * 100:0} % de inclinação (ambiente {maior.Numero} {maior.Nome}), e Dados do projeto está com " +
+                         $"{dados.InclinacaoTetoPct:0.#} %. Acima de 16,7 %, a área de operação sobe 30 % (NBR 8.5.5.4): confirme no modelo e informe em Dados do projeto.";
+        }
+        if (informada <= limite) yield break;
+        if (dados.Base == TipoBase.DensidadeArea)
+            yield return "ATENÇÃO: teto com inclinação acima de 16,7 %: a área digitada em Dados do projeto precisa já incluir os 30 % da NBR 8.5.5.4; o SPK não soma sobre ela.";
+        if (dados.Base == TipoBase.Esfr)
+            yield return "ATENÇÃO: os critérios da IT-24 valem só para teto com inclinação de até 16,7 % (IT-24/2019 5.1.7).";
+    }
+
+    /// <summary>
+    /// O C de Dados do projeto contra a Tabela 30, pelo tipo e pelo segmento de cada tubo do setor. C acima da tabela dá pressão
+    /// menor que a real, e é ATENÇÃO; C abaixo é a favor da segurança, e só informa.
+    /// </summary>
+    static (List<string> Atencao, List<string> Informa) AvisosDoFatorC(Document doc, DadosProjeto dados, LeitorRede.RedeLida lida)
+    {
+        var (atencao, informa) = (new List<string>(), new List<string>());
+        var tubos = lida.Tubos.Values.Distinct().Select(doc.GetElement).OfType<Autodesk.Revit.DB.Plumbing.Pipe>();
+        foreach (var grupo in tubos.GroupBy(t => (Nome: GeradorMalha.NomeDoTipo(doc, t.PipeType), Seco: EmSistemaSeco(doc, t))))
+        {
+            if (Spk.Motor.Normas.Nbr10897.TuboPeloNome(grupo.Key.Nome, grupo.Key.Seco) is not { } linha) continue;
+            var tabela = Spk.Motor.Normas.Nbr10897.FatorC(linha);
+            if (dados.FatorC > tabela + 1e-6)
+                atencao.Add($"ATENÇÃO: {grupo.Count()} tubo(s) {grupo.Key.Nome}{(grupo.Key.Seco ? " em sistema seco" : "")}: a Tabela 30 dá C {tabela:0}, e o cálculo usou C {dados.FatorC:0}. A pressão calculada fica menor que a real: ajuste em Dados do projeto.");
+            else if (dados.FatorC < tabela - 1e-6)
+                informa.Add($"{grupo.Count()} tubo(s) {grupo.Key.Nome}: a Tabela 30 dá C {tabela:0}, e o cálculo usou C {dados.FatorC:0}, a favor da segurança.");
+        }
+        return (atencao, informa);
+    }
+
+    static bool EmSistemaSeco(Document doc, Autodesk.Revit.DB.Plumbing.Pipe tubo) =>
+        doc.GetElement(tubo.get_Parameter(BuiltInParameter.RBS_PIPING_SYSTEM_TYPE_PARAM)?.AsElementId() ?? ElementId.InvalidElementId)
+            is Autodesk.Revit.DB.Plumbing.PipingSystemType { SystemClassification: MEPSystemClassification.FireProtectDry or MEPSystemClassification.FireProtectPreaction };
 
     static double Metros(double pes) => UnitUtils.ConvertFromInternalUnits(pes, UnitTypeId.Meters);
 

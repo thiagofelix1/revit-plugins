@@ -24,6 +24,9 @@ public sealed record Ambiente(
 {
     /// <summary>Pé-direito até o teto, em metros.</summary>
     public double? PeDireito => Teto - Piso;
+
+    /// <summary>Inclinação do teto medida em volta do ponto do ambiente, como fração (0,20 = 20 %). Nula: não deu para medir.</summary>
+    public double? Inclinacao { get; init; }
 }
 
 /// <summary>Uma viga: eixo em planta, largura e as cotas do fundo e do topo, em metros.</summary>

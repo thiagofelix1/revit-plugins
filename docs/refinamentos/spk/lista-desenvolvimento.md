@@ -99,7 +99,7 @@ Pronto quando um setor da Nova Era (ou de um projeto do engenheiro) é desenhado
 - [x] Lista de material: resumo (metros por DN, conexões por tipo, bicos, válvulas) e tabelas do Revit "SPK — ..." que se atualizam sozinhas. Falta: lista por setor.
 - [x] Mover vários bicos (mesmo deslocamento, os da frente primeiro) e deslizar o bico na linha do ramal (bico, descida e tê andam; o ramal estica). Na cruzeta não desliza (arrastaria o outro ramal): apaga e insere.
 - [ ] Aviso de colisão com viga e duto, e de inclinação.
-- [ ] Rede seguindo telhado inclinado.
+- [ ] Rede seguindo telhado inclinado. Decidido pelo engenheiro (novembro de 2026): o ramal acompanha o telhado, em vez de ficar plano com descidas de alturas diferentes.
 - [ ] Setorização: a área de cada setor já é conferida no cálculo (Tabela 1 da IT-23/2025, 4 800 m² por VGA e pavimento em leve e ordinário). Falta: sugestão de cortes quando passar.
 - [ ] Tubo geral até a casa de bombas.
 - [x] Complementos baratos: pintar a rede por pressão ou velocidade; lista de material (feitos: Cores da rede e Lista de material).

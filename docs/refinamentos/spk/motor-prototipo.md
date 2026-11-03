@@ -46,10 +46,10 @@ Outros dados que o memorial responde: tubos **BS 3600** e **BS 1387** galvanizad
 
 1. **Figura 42.** O PDF só traz o gráfico, sem tabela. Usei estes extremos de cada reta (densidade em L/min/m² na área mínima → na área máxima):
    - leve: 4,1 em 140 m² → 2,85 em 280 m²;
-   - ordinário 1: 6,1 em 140 m² → 4,9 em 370 m²;
-   - ordinário 2: 8,1 em 140 m² → 6,9 em 370 m²;
-   - extra 1: 12,2 em 230 m² → 10,2 em 465 m²;
-   - extra 2: 16,3 em 230 m² → 14,3 em 465 m².
+   - ordinário 1: 6,1 em 140 m² → 4,1 em 370 m²;
+   - ordinário 2: 8,1 em 140 m² → 6,1 em 370 m²;
+   - extra 1: 12,2 em 230 m² → 8,1 em 465 m²;
+   - extra 2: 16,3 em 230 m² → 12,2 em 465 m².
 
    Ele usa esses valores? Qual ponto da curva costuma escolher?
 2. **Ajustes da área de operação somados.** Com resposta rápida (−35 % a 4 m) e teto inclinado (+30 %), considerei −5 % sobre a área original (8.5.5.7). É assim que ele faz, ou aplica um ajuste em cima do outro?

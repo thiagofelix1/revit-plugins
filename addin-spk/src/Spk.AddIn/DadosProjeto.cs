@@ -35,6 +35,9 @@ public sealed class DadosProjeto
 
     public double FatorC { get; set; } = 120;
 
+    /// <summary>Inclinação do teto, em %. Acima de 16,7 %, a área da Figura 42 sobe 30 % (NBR 8.5.5.4). O engenheiro informa; o cálculo avisa se o telhado medido no modelo não bater.</summary>
+    public double InclinacaoTetoPct { get; set; }
+
     /// <summary>Ensaio do abastecimento. Os três juntos ou nenhum; sem eles o cálculo não compara com a fonte.</summary>
     public double? PressaoEstaticaKPa { get; set; }
     public double? PressaoResidualKPa { get; set; }
@@ -48,7 +51,7 @@ public sealed class DadosProjeto
     {
         TipoBase.Esfr => BaseDeProjeto.Esfr(PressaoMinimaKPa, string.IsNullOrWhiteSpace(ItemNorma) ? "IT-24" : ItemNorma),
         TipoBase.DensidadeArea => new BaseDensidadeArea(DensidadeLminM2, AreaOperacaoM2) { Classe = Classe },
-        _ => BaseDeProjeto.PelaFigura42(Classe, AreaOperacaoM2),
+        _ => BaseDeProjeto.PelaFigura42(Classe, AreaOperacaoM2, new CondicoesAreaOperacao { InclinacaoTeto = InclinacaoTetoPct / 100 }),
     };
 
     public CurvaAbastecimento? CriarAbastecimento() =>

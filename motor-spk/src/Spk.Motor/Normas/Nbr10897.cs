@@ -73,6 +73,22 @@ public static class Nbr10897
         _ => throw new ArgumentOutOfRangeException(nameof(tubo)),
     };
 
+    /// <summary>
+    /// A linha da Tabela 30 pelo nome do tipo de tubo e do segmento. Nulo: o nome não diz o material, e nada é conferido.
+    /// O galvanizado vale para qualquer sistema; o aço preto cai para C 100 em sistema seco ou de ação prévia.
+    /// </summary>
+    public static TuboFatorC? TuboPeloNome(string nome, bool sistemaSeco)
+    {
+        var n = nome.ToLowerInvariant();
+        bool Tem(params string[] termos) => termos.Any(t => n.Contains(t));
+        if (Tem("cobre", "copper", "inox", "stainless")) return TuboFatorC.CobreOuInox;
+        if (Tem("pvc", "plástico", "plastico", "plastic", "pead", "polietileno")) return TuboFatorC.PlasticoCertificado;
+        if (Tem("galvan")) return TuboFatorC.Galvanizado;
+        if (Tem("fundido", "dúctil", "ductil", "ductile")) return Tem("cimento", "cement") ? TuboFatorC.FerroFundidoComCimento : TuboFatorC.FerroFundidoSemRevestimento;
+        if (Tem("aço", "aco ", "steel", "ferro")) return sistemaSeco ? TuboFatorC.AcoPretoSistemaSeco : TuboFatorC.AcoPretoSistemaMolhado;
+        return null;
+    }
+
     /// <summary>9.4.1.2: DN 25 para material ferroso, DN 20 para cobre e não metálicos.</summary>
     public static int DiametroNominalMinimo(Material material) => material == Material.Aco ? 25 : 20;
 }

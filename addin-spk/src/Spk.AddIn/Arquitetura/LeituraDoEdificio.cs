@@ -125,8 +125,35 @@ static class LeituraDoEdificio
 
             yield return new Ambiente($"{fonte.Nome}#{ambiente.Id.Value}", ambiente.get_Parameter(BuiltInParameter.ROOM_NAME)?.AsString() ?? ambiente.Name,
                 ambiente.Number, ambiente.Level?.Name ?? "", fonte.Nome, contornos, ambiente.Area * 0.09290304, Metros(piso),
-                teto is { } t ? Metros(t) : null, origem);
+                teto is { } t ? Metros(t) : null, origem)
+            {
+                Inclinacao = acima is null ? null : Inclinacao(doc, raio, ponto, inicio.Z, nivel, acima, contornos),
+            };
         }
+    }
+
+    /// <summary>
+    /// Mede a inclinação com o mesmo raio, 1 m para cada lado do ponto do ambiente, nas duas direções. Só vale o mesmo elemento
+    /// que formou o teto: passar para outro telhado ou forro é desnível, não inclinação. Sem par nenhum, nula.
+    /// </summary>
+    static double? Inclinacao(Document doc, ReferenceIntersector raio, XYZ ponto, double inicioZ, double nivel, ReferenceWithContext teto,
+        IReadOnlyList<IReadOnlyList<Ponto2>> contornos)
+    {
+        var mesmo = Elemento(doc, teto.GetReference())?.Elemento.Id;
+        double? Altura(double dx, double dy)
+        {
+            var (x, y) = (ponto.X + Pes(dx), ponto.Y + Pes(dy));
+            if (!Spk.Motor.Geracao.BicosNoAmbiente.Dentro(contornos, new Ponto2(Metros(x), Metros(y)))) return null;
+            var inicio = new XYZ(x, y, inicioZ);
+            var achado = raio.Find(inicio, XYZ.BasisZ).Where(r => r.Proximity > 1e-6 && inicioZ + r.Proximity - nivel >= Pes(PeDireitoMinimo))
+                .OrderBy(r => r.Proximity).FirstOrDefault();
+            return achado is not null && Elemento(doc, achado.GetReference())?.Elemento.Id == mesmo ? inicioZ + achado.Proximity : null;
+        }
+        double? Eixo(double dx, double dy) => Altura(dx, dy) is { } a && Altura(-dx, -dy) is { } b ? (a - b) / Pes(2) : null;
+
+        var (emX, emY) = (Eixo(1, 0), Eixo(0, 1));
+        if (emX is null && emY is null) return null;
+        return Math.Sqrt((emX ?? 0) * (emX ?? 0) + (emY ?? 0) * (emY ?? 0));
     }
 
     /// <summary>A categoria do elemento achado, no arquivo ou dentro do vínculo.</summary>

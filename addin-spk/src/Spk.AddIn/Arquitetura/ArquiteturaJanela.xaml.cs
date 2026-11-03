@@ -35,7 +35,7 @@ public partial class ArquiteturaJanela : Window
         string.Join("\n", edificio.Fontes.Concat(edificio.Avisos)
             .Concat(edificio.Ambientes.Select(a =>
                 $"{a.Nivel} | {a.Numero} {a.Nome} | {a.Area:0.0} m² | piso {a.Piso:0.00} | teto {(a.Teto is { } t ? t.ToString("0.00") : "—")} " +
-                $"({TextoDoTeto(a.OrigemDoTeto)}) | pé-direito {(a.PeDireito is { } pd ? pd.ToString("0.00") : "—")} | {Extensao(a)} | {a.Origem}"))
+                $"({TextoDoTeto(a.OrigemDoTeto)}) | pé-direito {(a.PeDireito is { } pd ? pd.ToString("0.00") : "—")}{(a.Inclinacao is > 0.02 ? $" | inclinação {a.Inclinacao * 100:0.#} %" : "")} | {Extensao(a)} | {a.Origem}"))
             .Concat(edificio.Vigas.Select(v =>
                 $"viga | {v.Comprimento:0.00} m × {v.Largura:0.00} m | fundo {v.Fundo:0.00} | topo {v.Topo:0.00} | " +
                 $"de {v.A.X:0.00};{v.A.Y:0.00} a {v.B.X:0.00};{v.B.Y:0.00} | {v.Origem}")));

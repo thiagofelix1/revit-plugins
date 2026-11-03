@@ -788,6 +788,7 @@ static class TesteAutomatico
         return new ResumoCalculo
         {
             Atende = r.Relatorio.Atende,
+            AreaOperacaoM2 = r.Relatorio.Projeto.Base is Spk.Motor.Normas.BaseDensidadeArea area ? area.AreaOperacao : 0,
             Setor = r.Lida.Setor,
             TotalDeSetores = r.Lida.TotalDeSetores,
             Bicos = r.Lida.Rede.Chuveiros.Count,
@@ -934,6 +935,7 @@ static class TesteAutomatico
             falhas.Add($"o Revit abriu {janelas} janela(s) que o engenheiro teria que fechar: {r.Dialogos!.First(d => !d.StartsWith("TaskDialog_Unresolved_References"))}");
         var c = r.Calculo;
         if (esperado.Atende is { } atende && c?.Atende != atende) falhas.Add($"atende: esperado {atende}, veio {c?.Atende}");
+        if (esperado.AreaOperacaoM2 is { } areaOperacao && Math.Abs((c?.AreaOperacaoM2 ?? 0) - areaOperacao) > 0.05) falhas.Add($"área de operação: esperado {areaOperacao} m², veio {c?.AreaOperacaoM2}");
         if (esperado.Bicos is { } bicos && c?.Bicos != bicos) falhas.Add($"bicos: esperado {bicos}, veio {c?.Bicos}");
         if (esperado.PressaoKPa is { } pressao && (c is null || Math.Abs(c.PressaoKPa - pressao) > 0.5))
             falhas.Add($"pressão: esperado {pressao} kPa, veio {c?.PressaoKPa}");
@@ -1564,6 +1566,7 @@ sealed class Esperado
 {
     public bool? Atende { get; set; }
     public int? Bicos { get; set; }
+    public double? AreaOperacaoM2 { get; set; }
     public double? PressaoKPa { get; set; }
     public string? Critico { get; set; }
 
@@ -1773,6 +1776,7 @@ sealed class ResumoCalculo
     public int Bicos { get; set; }
     public int Trechos { get; set; }
     public int AreasAvaliadas { get; set; }
+    public double AreaOperacaoM2 { get; set; }
     public double PressaoKPa { get; set; }
     public double VazaoChuveirosLmin { get; set; }
     public double VazaoTotalLmin { get; set; }

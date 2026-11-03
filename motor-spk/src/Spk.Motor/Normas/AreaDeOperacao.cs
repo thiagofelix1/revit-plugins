@@ -17,15 +17,15 @@ public sealed record CurvaDensidadeArea(
 
 public static class Figura42
 {
-    // Extremos das retas lidos no gráfico da NBR 8.5.2 (equivalentes SI das curvas da NFPA 13).
-    // CONFERIR com o projetista: o PDF não traz os valores em tabela.
+    // Extremos das retas da NBR 8.5.2, lidos das linhas da figura e calibrados pelos rótulos dos eixos: a norma não traz os
+    // valores em tabela. Na Leve a figura dá 2,8 em 280 m²; fica 2,85 (equivalente de 0,07 gpm/ft²), a diferença é a da leitura.
     public static CurvaDensidadeArea Curva(ClasseRisco classe) => classe switch
     {
         ClasseRisco.Leve => new(classe, 140, 4.1, 280, 2.85),
-        ClasseRisco.Ordinario1 => new(classe, 140, 6.1, 370, 4.9),
-        ClasseRisco.Ordinario2 => new(classe, 140, 8.1, 370, 6.9),
-        ClasseRisco.Extraordinario1 => new(classe, 230, 12.2, 465, 10.2),
-        ClasseRisco.Extraordinario2 => new(classe, 230, 16.3, 465, 14.3),
+        ClasseRisco.Ordinario1 => new(classe, 140, 6.1, 370, 4.1),
+        ClasseRisco.Ordinario2 => new(classe, 140, 8.1, 370, 6.1),
+        ClasseRisco.Extraordinario1 => new(classe, 230, 12.2, 465, 8.1),
+        ClasseRisco.Extraordinario2 => new(classe, 230, 16.3, 465, 12.2),
         _ => throw new ArgumentException("Armazenamento não usa a Figura 42: use as curvas e tabelas da IT-24."),
     };
 }
