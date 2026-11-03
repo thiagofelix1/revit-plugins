@@ -113,6 +113,9 @@ static class SituacaoDoProjeto
         if (ResultadoGravado.Ler(doc) is not { } resultado)
             return new Etapa("4. Cálculo", Etapa.Falta, "Ainda não calculado neste projeto.", acoes);
 
+        if (Servicos.AssinaturaDaRede.Mudou(doc, resultado))
+            return new Etapa("4. Cálculo", Etapa.Falta, $"A rede ou os Dados do projeto mudaram depois do último cálculo (setor {resultado.Setor}). Rode Calcular de novo.", acoes);
+
         var situacao = resultado.Atende ? "ATENDE" : "NÃO ATENDE";
         return new Etapa("4. Cálculo", resultado.Atende ? Etapa.Feito : Etapa.Falta,
             $"Último cálculo: setor {resultado.Setor}, {situacao}. {resultado.DaArea.Count()} bicos na área, " +

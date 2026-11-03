@@ -20,6 +20,18 @@ public class AbrirMemorialCommand : ExternalCommand
             return;
         }
 
+        if (Context.ActiveDocument is { } doc && ResultadoGravado.Ler(doc) is { } calculo && Servicos.AssinaturaDaRede.Mudou(doc, calculo))
+        {
+            var pergunta = new TaskDialog("SPK — Memorial")
+            {
+                MainInstruction = "A rede mudou depois do último cálculo",
+                MainContent = "A rede ou os Dados do projeto mudaram, e este memorial mostra o resultado antigo. Rode Calcular de novo para atualizá-lo.\n\nAbrir mesmo assim?",
+                CommonButtons = TaskDialogCommonButtons.Yes | TaskDialogCommonButtons.No,
+                DefaultButton = TaskDialogResult.No,
+            };
+            if (pergunta.Show() != TaskDialogResult.Yes) return;
+        }
+
         Process.Start(new ProcessStartInfo(caminho) { UseShellExecute = true });
     }
 }

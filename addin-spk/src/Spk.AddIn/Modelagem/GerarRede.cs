@@ -625,8 +625,8 @@ static class GerarRede
         var opcoesRamais = zSubgeral < zRede - 0.01
             ? new OpcoesRamais { Altura = AlturaDoRamal.RelativaASubgeral, AlturaM = zRede - zSubgeral }
             : new OpcoesRamais();
-        // Sob laje ou telhado a descida tem 15 cm, e o tê do DN inicial não cabe nela: o Revit desfaz o tubo invertido e só o
-        // último bico de cada ramal, com cotovelo, ficava ligado. O ramal nasce no menor DN, e a tabela sobe o que precisar.
+        // Sob laje ou telhado sobram poucos centímetros entre o ramal e o conector do bico (9 cm no bico K5.6 da Tyco, com 15 cm até
+        // o defletor), e o tê de um ramal grosso não cabe, mesmo com a descida fina. O ramal nasce no menor DN, e a tabela sobe o que precisar.
         if (opcoes.AplicarDiametros && zRede - defletor < DropComDnDoEsboco) opcoesRamais = opcoesRamais with { DnRamal = DnNaDescidaCurta };
         var ramais = TracarRamal.Executar(doc, bicosDoAmbiente, subgeral[0], opcoesRamais);
         criados.AddRange(ramais.Criados);

@@ -481,6 +481,9 @@ static class TesteAutomatico
                     return resultado.Texto();
                 });
 
+            if (cenario.ConferirCalculo is { Count: > 0 } mudancas)
+                Etapa(relatorio, "conferirCalculo", () => ConferirCalculo(doc!, mudancas));
+
             if (cenario.Cores is { Count: > 0 } criterios)
                 Etapa(relatorio, "cores", () =>
                 {
@@ -637,6 +640,57 @@ static class TesteAutomatico
             default:
                 return "operação desconhecida";
         }
+    }
+
+    /// <summary>
+    /// O cálculo acabou de ser feito e tem de estar em dia; cada mudança, aplicada e desfeita, tem de ser acusada: "dn", "apagar"
+    /// (um tubo), "mover" (um bico), "tuboNovo" (ligado numa ponta aberta), "dados".
+    /// </summary>
+    static string ConferirCalculo(Document doc, List<string> mudancas)
+    {
+        var gravado = ResultadoGravado.Ler(doc) ?? throw new InvalidOperationException("Sem cálculo gravado.");
+        if (gravado.Assinatura is null) throw new InvalidOperationException("O cálculo não gravou a assinatura.");
+        if (AssinaturaDaRede.Mudou(doc, gravado)) throw new InvalidOperationException("Acusou mudança logo depois de calcular.");
+        var tubos = gravado.Tubos.Select(id => doc.GetElement(new ElementId(id))).OfType<Autodesk.Revit.DB.Plumbing.Pipe>().ToList();
+        foreach (var mudanca in mudancas)
+        {
+            using var t = new Transaction(doc, "SPK — mudança de teste");
+            t.Start();
+            switch (mudanca)
+            {
+                case "dn":
+                    tubos[0].get_Parameter(BuiltInParameter.RBS_PIPE_DIAMETER_PARAM).Set(tubos[0].Diameter * 1.5);
+                    break;
+                case "apagar":
+                    doc.Delete(tubos[tubos.Count - 1].Id);
+                    break;
+                case "mover":
+                    ElementTransformUtils.MoveElement(doc, new ElementId(gravado.Chuveiros[0].Elemento), new XYZ(GeradorMalha.Pes(0.1), 0, 0));
+                    break;
+                case "tuboNovo":
+                    var ponta = tubos.SelectMany(p => p.ConnectorManager.Connectors.Cast<Connector>())
+                        .First(c => c.ConnectorType == ConnectorType.End && !c.IsConnected);
+                    var dono = (Autodesk.Revit.DB.Plumbing.Pipe)ponta.Owner;
+                    var sistema = dono.get_Parameter(BuiltInParameter.RBS_PIPING_SYSTEM_TYPE_PARAM).AsElementId();
+                    var novo = GeradorMalha.CriarTubo(doc, sistema, dono.PipeType.Id, dono.ReferenceLevel.Id, ponta.Origin,
+                        ponta.Origin + ponta.CoordinateSystem.BasisZ * GeradorMalha.Pes(1), dono.Diameter, marcar: false);
+                    novo.ConnectorManager.Connectors.Cast<Connector>().OrderBy(c => c.Origin.DistanceTo(ponta.Origin)).First().ConnectTo(ponta);
+                    break;
+                case "dados":
+                    var dados = DadosProjeto.Carregar(doc) ?? throw new InvalidOperationException("Sem dados.");
+                    dados.FatorC += 1;
+                    ArmazenamentoSpk.Gravar(doc, DadosProjeto.Chave, dados);
+                    break;
+                default:
+                    throw new InvalidOperationException($"Mudança desconhecida: {mudanca}.");
+            }
+            doc.Regenerate();
+            var acusou = AssinaturaDaRede.Mudou(doc, gravado);
+            t.RollBack();
+            if (!acusou) throw new InvalidOperationException($"A mudança \"{mudanca}\" não foi acusada.");
+        }
+        if (AssinaturaDaRede.Mudou(doc, gravado)) throw new InvalidOperationException("Acusou mudança depois de desfazer tudo.");
+        return $"em dia depois de calcular; {mudancas.Count} mudança(s) acusadas";
     }
 
     /// <summary>Os tipos de tubo (segmentos, tamanhos e tê nas preferências) e os tubos do modelo por tipo, DN e segmento.</summary>
@@ -1324,6 +1378,9 @@ sealed class Cenario
 
     /// <summary>Põe no projeto os níveis dos ambientes da arquitetura vinculada, com planta de piso e de forro (ver Cenas).</summary>
     public bool NiveisDosVinculos { get; set; }
+
+    /// <summary>Depois de calcular: aplica e desfaz estas mudanças e exige que cada uma seja acusada: "dn", "apagar", "mover", "tuboNovo", "dados".</summary>
+    public List<string>? ConferirCalculo { get; set; }
 
     /// <summary>Mede os níveis do projeto pela cota do terreno, com o ponto de levantamento esta altura (m) abaixo da origem.</summary>
     public double? CotaDeTerreno { get; set; }

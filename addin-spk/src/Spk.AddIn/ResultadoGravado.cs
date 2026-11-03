@@ -26,6 +26,9 @@ public sealed class ResultadoGravado
 
     public List<long> Tubos { get; set; } = [];
 
+    /// <summary>O que o cálculo levou em conta (<see cref="Servicos.AssinaturaDaRede" />). Nula num resultado de versão anterior.</summary>
+    public string? Assinatura { get; set; }
+
     public IEnumerable<BicoGravado> DaArea => Chuveiros.Where(c => c.NaArea);
 
     public void Salvar(Document doc) => ArmazenamentoSpk.Gravar(doc, Chave, this);

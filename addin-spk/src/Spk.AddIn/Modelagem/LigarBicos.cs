@@ -33,6 +33,8 @@ public static class LigarBicos
     static readonly double BracoMinimo = GeradorMalha.Pes(0.15);
     static readonly double Encontro = GeradorMalha.Pes(0.04);
     static readonly double Recuo = GeradorMalha.Pes(0.01);
+    const int DnDaDescida = 25;
+    static readonly double DescidaCurta = GeradorMalha.Pes(0.30);
 
     public static ResultadoLigacao Executar(Document doc, IEnumerable<FamilyInstance> bicos, IEnumerable<Pipe> ramais)
     {
@@ -55,11 +57,21 @@ public static class LigarBicos
             }
             else
             {
-                recusados.Add(motivo);
+                recusados.Add(Explicar(motivo, bico, candidatos));
             }
         }
         grupo.Assimilate();
         return new ResultadoLigacao(ligados, recusados, criados);
+    }
+
+    /// <summary>O Revit recusa com uma mensagem da geometria dele ("direção oposta"): numa descida curta, diz o que isso quer dizer.</summary>
+    static string Explicar(string motivo, FamilyInstance bico, List<Pipe> ramais)
+    {
+        if (!motivo.StartsWith("o Revit") || Livre(bico) is not { } conector || Ramal(ramais, conector.Origin) is not { } achado) return motivo;
+        var descida = Math.Abs(conector.Origin.Z - achado.Ponto.Z);
+        if (descida >= DescidaCurta) return motivo;
+        return $"a descida de {UnitUtils.ConvertFromInternalUnits(descida, UnitTypeId.Centimeters):0} cm é curta para as peças do ramal de " +
+               $"{UnitUtils.ConvertFromInternalUnits(achado.Ramal.Diameter, UnitTypeId.Millimeters):0} mm: afaste o ramal do bico ou reduza o DN dele ({motivo})";
     }
 
     /// <summary>Nulo se ligou; senão, por que não.</summary>
@@ -82,7 +94,9 @@ public static class LigarBicos
         if (sistema == ElementId.InvalidElementId) return "o ramal não tem tipo de sistema";
         var nivel = ramal.ReferenceLevel;
         var tipo = ramal.PipeType.Id;
-        var diametro = ramal.Diameter;
+        // Quem desce só leva água a um bico: no meio do ramal, sai do tê com o DN do bico, e não com o do ramal, cujo tê grande não
+        // cabe numa descida curta. Na ponta o tubo segue o ramal: o cotovelo não reduz.
+        var diametro = naPonta ? ramal.Diameter : Math.Min(ramal.Diameter, GeradorMalha.DiametroComTe(doc, ramal.PipeType, DnDaDescida) ?? ramal.Diameter);
 
         // No meio do ramal, parte o tubo no ponto mais perto do bico (os dois pedaços ficam com a ponta ali, sem ligação) e
         // põe um tê. Na ponta livre do ramal, o último bico: sem partir, com cotovelo.

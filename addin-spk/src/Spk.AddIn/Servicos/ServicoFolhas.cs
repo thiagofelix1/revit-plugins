@@ -27,6 +27,8 @@ static class ServicoFolhas
     /// <param name="pastaPdf">Onde gravar o PDF; nula: ao lado do projeto, na pasta SPK.</param>
     public static Resultado Gerar(Document doc, string? pastaPdf = null)
     {
+        if (ResultadoGravado.Ler(doc) is { } calculo && AssinaturaDaRede.Mudou(doc, calculo))
+            throw new InvalidOperationException("A rede ou os Dados do projeto mudaram desde o último cálculo, e as folhas mostrariam o resultado antigo. Rode Calcular de novo.");
         var contexto = new ContextoFolhas(doc);
         var textos = new List<string>();
         var folhas = new List<ElementId>();

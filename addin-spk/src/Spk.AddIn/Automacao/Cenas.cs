@@ -15,6 +15,7 @@ static class Cenas
     public static Cena Montar(Document doc, string nome) => nome switch
     {
         "ramalComBicosSoltos" => RamalComBicosSoltos(doc),
+        "ramalComDescidaCurta" => RamalComBicosSoltos(doc, descida: 0.15, dn: 65),
         "subgeralComBicosSoltos" => SubgeralComBicosSoltos(doc),
         "subgeralComFileiras" => SubgeralComFileiras(doc),
         "arquiteturaVinculada" => ArquiteturaVinculada(doc),
@@ -801,11 +802,11 @@ static class Cenas
     }
 
     /// <summary>
-    /// Ramal reto de 15 m a 3 m de altura, com descida até o piso na ponta de origem, e bicos soltos 30 cm abaixo: três
+    /// Ramal reto de 15 m a 3 m de altura, com descida até o piso na ponta de origem, e bicos soltos abaixo: três
     /// embaixo do ramal, dois 60 cm de lado (pedem braço e cotovelo) e um 2 m depois do fim do ramal (deve ser recusado,
     /// e fica sem a marca da malha gerada para o cálculo não contar com ele).
     /// </summary>
-    static Cena RamalComBicosSoltos(Document doc)
+    static Cena RamalComBicosSoltos(Document doc, double descida = 0.3, int dn = 40)
     {
         using var transacao = new Transaction(doc, "SPK — cena de teste");
         transacao.Start();
@@ -813,17 +814,17 @@ static class Cenas
         var nivel = GeradorMalha.Nivel(doc) ?? throw new InvalidOperationException("O projeto não tem nível.");
         var tipo = GeradorMalha.TipoComTe(doc);
         var sistema = GeradorMalha.Sistema(doc) ?? throw new InvalidOperationException("O projeto não tem sistema de tubulação.");
-        var diametro = GeradorMalha.DiametroComTe(doc, tipo, 40);
+        var diametro = GeradorMalha.DiametroComTe(doc, tipo, dn);
         double M(double metros) => GeradorMalha.Pes(metros);
         var z = nivel.Elevation;
         var zRamal = z + M(3.0);
 
-        var descida = GeradorMalha.CriarTubo(doc, sistema.Id, tipo.Id, nivel.Id, new XYZ(0, 0, z), new XYZ(0, 0, zRamal), diametro);
+        var entrada = GeradorMalha.CriarTubo(doc, sistema.Id, tipo.Id, nivel.Id, new XYZ(0, 0, z), new XYZ(0, 0, zRamal), diametro);
         var ramal = GeradorMalha.CriarTubo(doc, sistema.Id, tipo.Id, nivel.Id, new XYZ(0, 0, zRamal), new XYZ(M(15), 0, zRamal), diametro);
         doc.Regenerate();
-        GeradorMalha.Ligar(doc, [descida, ramal], [], nivel);
+        GeradorMalha.Ligar(doc, [entrada, ramal], [], nivel);
 
-        var bicos = Bicos(doc, nivel, zRamal - M(0.3),
+        var bicos = Bicos(doc, nivel, zRamal - M(descida),
             [(1.5, 0, true), (4.5, 0, true), (7.5, 0.6, true), (10.5, -0.6, true), (13.5, 0, true), (17, 0, false)]);
         transacao.Commit();
 

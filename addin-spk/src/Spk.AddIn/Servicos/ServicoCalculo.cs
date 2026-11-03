@@ -173,6 +173,7 @@ static class ServicoCalculo
             ChuveiroCritico = relatorio.Resultado.ChuveiroCritico,
             Chuveiros = bicos,
             Tubos = lida.Tubos.Values.Distinct().Select(i => i.Value).ToList(),
+            Assinatura = AssinaturaDaRede.Calcular(doc, lida.Bicos.Values.Concat(lida.Tubos.Values)),
         }.Salvar(doc);
 
         if (transacao.Commit() != TransactionStatus.Committed)

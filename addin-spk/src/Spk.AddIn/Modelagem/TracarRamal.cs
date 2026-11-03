@@ -10,6 +10,7 @@ public sealed record OpcoesRamais
     /// <summary>DN dos ramais, em mm. Nulo: o de Dados do esboço.</summary>
     public int? DnRamal { get; init; }
 
+
     public AlturaDoRamal Altura { get; init; } = AlturaDoRamal.NaSubgeral;
 
     /// <summary>Metros acima da subgeral (negativo: abaixo) ou acima do nível da subgeral, conforme <see cref="Altura" />.</summary>
