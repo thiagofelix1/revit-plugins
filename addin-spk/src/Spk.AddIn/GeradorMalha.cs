@@ -22,21 +22,21 @@ static class GeradorMalha
             "O projeto não tem família de sprinkler carregada. Carregue uma e rode Gerar de novo.");
         if (!simbolo.IsActive) simbolo.Activate();
 
-        var zTubo = nivel.Elevation + Pes(dados.AlturaRedeM);
+        var zTubo = nivel.ProjectElevation + Pes(dados.AlturaRedeM);
         var zBico = zTubo - Pes(dados.DropM);
         var desenho = Desenhar(dados, origemNaPlanta.X, origemNaPlanta.Y);
 
         var bicos = new List<FamilyInstance>();
         foreach (var (x, y) in desenho.Bicos)
         {
-            var bico = doc.Create.NewFamilyInstance(new XYZ(x, y, nivel.Elevation), simbolo, nivel, StructuralType.NonStructural);
+            var bico = doc.Create.NewFamilyInstance(new XYZ(x, y, nivel.ProjectElevation), simbolo, nivel, StructuralType.NonStructural);
             bico.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.Set(DadosEsboco.Marca);
             bico.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.Set(DadosEsboco.Marca);
             bicos.Add(bico);
         }
 
         doc.Regenerate();
-        foreach (var bico in bicos) AjustarAltura(bico, zBico, nivel.Elevation);
+        foreach (var bico in bicos) AjustarAltura(bico, zBico, nivel.ProjectElevation);
         doc.Regenerate();
 
         var tubos = new List<Pipe>();
@@ -50,7 +50,7 @@ static class GeradorMalha
             tubos.Add(CriarTubo(doc, tipoSistema.Id, tipoTubo.Id, nivel.Id,
                 new XYZ(t.X0, t.Y0, zTubo), new XYZ(t.X1, t.Y1, zTubo), t.Subgeral ? diametroSubgeral : diametroRamal));
         tubos.Add(CriarTubo(doc, tipoSistema.Id, tipoTubo.Id, nivel.Id,
-            new XYZ(desenho.Descida.X, desenho.Descida.Y, zTubo), new XYZ(desenho.Descida.X, desenho.Descida.Y, nivel.Elevation), diametroSubgeral));
+            new XYZ(desenho.Descida.X, desenho.Descida.Y, zTubo), new XYZ(desenho.Descida.X, desenho.Descida.Y, nivel.ProjectElevation), diametroSubgeral));
 
         doc.Regenerate();
         var ligacoes = Ligar(doc, tubos, bicos, nivel);
@@ -211,27 +211,82 @@ static class GeradorMalha
         return tubo;
     }
 
-    internal static PipeType TipoComTe(Document doc)
+    /// <summary>
+    /// O tipo de tubo da rede nova: o pedido pelo nome; sem pedido, o que o projetista escolheu da última vez (Dados do
+    /// esboço) e, na primeira vez, a sugestão. Quem gera pela janela vê o nome antes e pode trocar.
+    /// </summary>
+    internal static PipeType TipoComTe(Document doc, string? nome = null)
     {
         var tipos = new FilteredElementCollector(doc).OfClass(typeof(PipeType)).Cast<PipeType>().ToList();
         if (tipos.Count == 0)
             throw new InvalidOperationException("O projeto não tem tipo de tubo. Carregue um tipo de tubulação.");
-        return tipos.FirstOrDefault(t => t.RoutingPreferenceManager.GetNumberOfRules(RoutingPreferenceRuleGroupType.Junctions) > 0)
-               ?? throw new InvalidOperationException(
-                   "Nenhum tipo de tubo tem tê na preferência de roteamento. Abra o tipo de tubo e inclua um tê para o diâmetro usado.");
+        if (nome is not null)
+            return tipos.FirstOrDefault(t => t.Name == nome) ?? throw new InvalidOperationException($"O projeto não tem o tipo de tubo \"{nome}\".");
+        var comTe = tipos.Where(TemJuncao).ToList();
+        if (comTe.Count == 0)
+            throw new InvalidOperationException(
+                "Nenhum tipo de tubo tem tê na preferência de roteamento. Abra o tipo de tubo e inclua um tê para o diâmetro usado.");
+        return comTe.FirstOrDefault(t => t.Name == DadosEsboco.Carregar(doc).TipoDeTubo) ?? Sugestao(doc, comTe);
     }
 
-    /// <summary>O DN pedido; se o tipo de tubo não tiver tê nele, o DN com tê mais próximo.</summary>
+    /// <summary>Os tipos de tubo que o SPK consegue usar (têm tê nas preferências de roteamento), para o projetista escolher.</summary>
+    internal static IReadOnlyList<PipeType> TiposComTe(Document doc) =>
+        new FilteredElementCollector(doc).OfClass(typeof(PipeType)).Cast<PipeType>().Where(TemJuncao).OrderBy(t => t.Name).ToList();
+
+    /// <summary>Tipo e segmento, para o projetista conferir o material: Padrão (Cobre - NBR 13206 - Classe A).</summary>
+    internal static string NomeDoTipo(Document doc, PipeType tipo) =>
+        Segmentos(doc, tipo).Select(s => s.Segmento.Name).FirstOrDefault() is { Length: > 0 } segmento ? $"{tipo.Name} ({segmento})" : tipo.Name;
+
+    static bool TemJuncao(PipeType tipo) => tipo.RoutingPreferenceManager.GetNumberOfRules(RoutingPreferenceRuleGroupType.Junctions) > 0;
+
+    /// <summary>Sugestão sem escolha anterior: o tipo mais usado nos tubos do modelo; num projeto vazio, o primeiro de aço.</summary>
+    static PipeType Sugestao(Document doc, IReadOnlyList<PipeType> comTe)
+    {
+        var usados = new FilteredElementCollector(doc).OfClass(typeof(Pipe)).Cast<Pipe>().GroupBy(t => t.PipeType.Id)
+            .OrderByDescending(g => g.Count()).Select(g => g.Key).ToList();
+        return usados.Select(id => comTe.FirstOrDefault(t => t.Id == id)).FirstOrDefault(t => t is not null)
+               ?? comTe.FirstOrDefault(t => Segmentos(doc, t).Any(s => s.Segmento.Name.IndexOf("Aço", StringComparison.CurrentCultureIgnoreCase) >= 0
+                                                                       || s.Segmento.Name.IndexOf("Steel", StringComparison.OrdinalIgnoreCase) >= 0))
+               ?? comTe[0];
+    }
+
+    /// <summary>Os segmentos das preferências de roteamento do tipo, com a faixa de tamanhos de cada um (nulo: todos).</summary>
+    static List<(PipeSegment Segmento, double? Minimo, double? Maximo)> Segmentos(Document doc, PipeType tipo)
+    {
+        var regras = tipo.RoutingPreferenceManager;
+        var segmentos = new List<(PipeSegment, double?, double?)>();
+        for (var i = 0; i < regras.GetNumberOfRules(RoutingPreferenceRuleGroupType.Segments); i++)
+        {
+            var regra = regras.GetRule(RoutingPreferenceRuleGroupType.Segments, i);
+            if (doc.GetElement(regra.MEPPartId) is not PipeSegment segmento) continue;
+            var tamanho = Enumerable.Range(0, regra.NumberOfCriteria).Select(c => regra.GetCriterion(c)).OfType<PrimarySizeCriterion>().FirstOrDefault();
+            segmentos.Add((segmento, tamanho?.MinimumSize, tamanho?.MaximumSize));
+        }
+        return segmentos;
+    }
+
+    /// <summary>Os diâmetros nominais que o tipo de tubo tem de verdade, em ordem. Vazio se o tipo não tem segmento nas preferências.</summary>
+    internal static IReadOnlyList<double> Tamanhos(Document doc, PipeType tipo) =>
+        Segmentos(doc, tipo).SelectMany(s => s.Segmento.GetSizes().Select(z => z.NominalDiameter)
+                .Where(d => (s.Minimo is not { } min || d >= min - 1e-6) && (s.Maximo is not { } max || d <= max + 1e-6)))
+            .Distinct().OrderBy(d => d).ToList();
+
+    /// <summary>
+    /// O DN pedido; se o tipo de tubo não tiver esse diâmetro ou não tiver tê nele, o diâmetro com tê mais próximo que o tipo
+    /// tem (empate: o maior). Um diâmetro fora do segmento o Revit até aceita, mas o tubo fica sem segmento (cobre não tem DN 65).
+    /// </summary>
     internal static double? DiametroComTe(Document doc, PipeType tipo, int dnPedido)
     {
         var regras = tipo.RoutingPreferenceManager;
         var n = regras.GetNumberOfRules(RoutingPreferenceRuleGroupType.Junctions);
         double[] usuaisMm = [25, 32, 40, 50, 65, 80, 100, 125, 150, 200];
-        foreach (var mm in usuaisMm.Prepend(dnPedido).Distinct().OrderBy(d => Math.Abs(d - dnPedido)))
-        {
-            var pes = UnitUtils.ConvertToInternalUnits(mm / 1000.0, UnitTypeId.Meters);
+        var pedido = UnitUtils.ConvertToInternalUnits(dnPedido / 1000.0, UnitTypeId.Meters);
+        var doTipo = Tamanhos(doc, tipo);
+        var candidatos = doTipo.Count > 0
+            ? doTipo
+            : usuaisMm.Prepend(dnPedido).Distinct().Select(mm => UnitUtils.ConvertToInternalUnits(mm / 1000.0, UnitTypeId.Meters)).ToList();
+        foreach (var pes in candidatos.OrderBy(d => Math.Round(Math.Abs(d - pedido), 6)).ThenByDescending(d => d))
             if (TemTeNesseDiametro(doc, regras, n, pes)) return pes;
-        }
 
         for (var i = 0; i < n; i++)
         {

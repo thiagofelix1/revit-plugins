@@ -95,9 +95,9 @@ public class RedeExemploCommand : ExternalCommand
     static Level NivelNaCota(Document doc, Level baseNivel, double cotaM)
     {
         if (Math.Abs(cotaM) < 1e-6) return baseNivel;
-        var elevacao = baseNivel.Elevation + Pes(cotaM);
+        var elevacao = baseNivel.ProjectElevation + Pes(cotaM);
         var existente = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>()
-            .FirstOrDefault(n => Math.Abs(n.Elevation - elevacao) < Pes(0.05));
+            .FirstOrDefault(n => Math.Abs(n.ProjectElevation - elevacao) < Pes(0.05));
         if (existente is not null) return existente;
         var novo = Level.Create(doc, elevacao);
         try { novo.Name = $"SPK +{cotaM.ToString("0.00", Entrada.Cultura)}"; }

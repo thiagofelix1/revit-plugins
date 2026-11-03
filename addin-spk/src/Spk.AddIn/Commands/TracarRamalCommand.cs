@@ -50,7 +50,7 @@ public class TracarRamalCommand : ExternalCommand
         }
 
         var subgeral = tubos[0];
-        var cota = UnitUtils.ConvertFromInternalUnits(((LocationCurve)subgeral.Location).Curve.GetEndPoint(0).Z - subgeral.ReferenceLevel.Elevation,
+        var cota = UnitUtils.ConvertFromInternalUnits(((LocationCurve)subgeral.Location).Curve.GetEndPoint(0).Z - subgeral.ReferenceLevel.ProjectElevation,
             UnitTypeId.Meters);
         var dn = UnitUtils.ConvertFromInternalUnits(subgeral.Diameter, UnitTypeId.Millimeters);
         var janela = new TracarRamaisJanela(

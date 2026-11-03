@@ -155,6 +155,13 @@ static class TesteAutomatico
             if (cenario.RecarregarVinculos is { Count: > 0 } recarregar)
                 Etapa(relatorio, "recarregarVinculos", () => Cenas.RecarregarVinculos(doc!, recarregar));
 
+            if (cenario.InspecionarContornos is { Count: > 0 } contornos)
+                Etapa(relatorio, "inspecionarContornos", () =>
+                {
+                    relatorio.Contornos = InspecionarContornos(doc!, contornos);
+                    return $"{relatorio.Contornos.Count} linhas";
+                });
+
             if (cenario.NiveisDosVinculos)
                 Etapa(relatorio, "niveisDosVinculos", () => Cenas.NiveisDosVinculos(doc!));
 
@@ -174,6 +181,9 @@ static class TesteAutomatico
                     cena = Cenas.Montar(doc!, nomeCena);
                     return cena.Resumo;
                 });
+
+            if (cenario.CotaDeTerreno is { } cota)
+                Etapa(relatorio, "cotaDeTerreno", () => Cenas.CotaDeTerreno(doc!, cota));
 
             if (cenario.TracarRamal || cenario.Ramais is not null)
                 Etapa(relatorio, "tracarRamal", () =>
@@ -519,6 +529,13 @@ static class TesteAutomatico
                     return folhas.Texto();
                 });
 
+            if (cenario.InspecionarTubos)
+                Etapa(relatorio, "inspecionarTubos", () =>
+                {
+                    relatorio.Tubos = InspecionarTubos(doc!);
+                    return $"{relatorio.Tubos.Count} linhas";
+                });
+
             Etapa(relatorio, "salvar", () =>
             {
                 if (cenario.Novo) doc!.SaveAs(arquivo, new SaveAsOptions { OverwriteExistingFile = true });
@@ -613,6 +630,42 @@ static class TesteAutomatico
             default:
                 return "operação desconhecida";
         }
+    }
+
+    /// <summary>Os tipos de tubo (segmentos, tamanhos e tê nas preferências) e os tubos do modelo por tipo, DN e segmento.</summary>
+    static List<string> InspecionarTubos(Document doc)
+    {
+        var linhas = new List<string>();
+        foreach (var tipo in new FilteredElementCollector(doc).OfClass(typeof(Autodesk.Revit.DB.Plumbing.PipeType)).Cast<Autodesk.Revit.DB.Plumbing.PipeType>())
+        {
+            var regras = tipo.RoutingPreferenceManager;
+            var segmentos = Enumerable.Range(0, regras.GetNumberOfRules(RoutingPreferenceRuleGroupType.Segments))
+                .Select(i => doc.GetElement(regras.GetRule(RoutingPreferenceRuleGroupType.Segments, i).MEPPartId) as Autodesk.Revit.DB.Plumbing.PipeSegment)
+                .Select(s => s is null ? "(sem segmento)" : $"{s.Name}: " + string.Join(" ", s.GetSizes().Select(z => $"{z.NominalDiameter * 304.8:0.#}")));
+            linhas.Add($"tipo {tipo.Id.Value} \"{tipo.Name}\" | junções {regras.GetNumberOfRules(RoutingPreferenceRuleGroupType.Junctions)} | {string.Join(" ; ", segmentos)}");
+        }
+        foreach (var g in new FilteredElementCollector(doc).OfClass(typeof(Autodesk.Revit.DB.Plumbing.Pipe)).Cast<Autodesk.Revit.DB.Plumbing.Pipe>()
+                     .GroupBy(t => $"{t.PipeType.Name} | {t.Diameter * 304.8:0.#} mm | segmento {(t.PipeSegment is null ? "nulo" : "\"" + t.PipeSegment.Name + "\"")}"))
+            linhas.Add($"tubos: {g.Key} | {g.Count()}");
+        return linhas;
+    }
+
+    /// <summary>O contorno de cada ambiente pedido e onde os bicos cairiam, sem criar nada: para entender uma recusa.</summary>
+    static List<string> InspecionarContornos(Document doc, List<string> nomes)
+    {
+        var dados = DadosProjeto.Carregar(doc) ?? new DadosProjeto();
+        var opcoes = new OpcoesBicos();
+        var limites = BicosPorAmbiente.Limites(dados, opcoes);
+        string P(Spk.Motor.Modelo.Ponto2 p) => $"{p.X:0.###};{p.Y:0.###}";
+        var linhas = new List<string> { $"classe {dados.Classe}, base {dados.Base}, área máx. {limites.AreaMaxima}, distância máx. {limites.DistanciaMaxima}, parede {limites.ParedeMinima} a {limites.ParedeMaxima}" };
+        foreach (var a in Filtrar(Arquitetura.LeituraDoEdificio.Ler(doc).Ambientes, nomes))
+        {
+            linhas.Add($"{a.Numero} {a.Nome}: {a.Contornos.Count} laço(s)");
+            foreach (var laco in a.Contornos) linhas.Add("  laço " + string.Join(" ", laco.Select(P)));
+            var posicao = Spk.Motor.Geracao.BicosNoAmbiente.Posicionar(a.Contornos, limites);
+            linhas.Add($"  ramais {P(posicao.DirecaoDosRamais)}, passos {posicao.PassoNoRamal:0.##} e {posicao.PassoEntreRamais:0.##}, {posicao.Bicos.Count} bicos: " + string.Join(" ", posicao.Bicos.Select(P)));
+        }
+        return linhas;
     }
 
     static IReadOnlyList<Spk.Motor.Modelo.Ambiente> Filtrar(IReadOnlyList<Spk.Motor.Modelo.Ambiente> ambientes, List<string>? nomes) =>
@@ -887,6 +940,9 @@ static class TesteAutomatico
         foreach (var trecho in esperado.TextoDosBicos ?? [])
             if (!(r.Bicos ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
                 falhas.Add($"bicos por ambiente: \"{trecho}\" não apareceu");
+        foreach (var trecho in esperado.TextoDosTubos ?? [])
+            if (!(r.Tubos ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
+                falhas.Add($"tubos: \"{trecho}\" não apareceu");
         foreach (var trecho in esperado.TextoDaArquitetura ?? [])
             if (!(r.Arquitetura ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
                 falhas.Add($"arquitetura: \"{trecho}\" não apareceu");
@@ -1254,6 +1310,15 @@ sealed class Cenario
 
     /// <summary>Põe no projeto os níveis dos ambientes da arquitetura vinculada, com planta de piso e de forro (ver Cenas).</summary>
     public bool NiveisDosVinculos { get; set; }
+
+    /// <summary>Mede os níveis do projeto pela cota do terreno, com o ponto de levantamento esta altura (m) abaixo da origem.</summary>
+    public double? CotaDeTerreno { get; set; }
+
+    /// <summary>Lista os tipos de tubo, com segmentos e tamanhos, e os tubos do modelo por tipo, DN e segmento.</summary>
+    public bool InspecionarTubos { get; set; }
+
+    /// <summary>Contorno dos ambientes com estes nomes (ou parte deles) e onde os bicos cairiam, sem criar nada.</summary>
+    public List<string>? InspecionarContornos { get; set; }
     public List<AjusteMapeamento>? Mapeamento { get; set; }
     public bool RedeExemplo { get; set; }
 
@@ -1451,6 +1516,9 @@ sealed class Esperado
     /// <summary>Trechos que precisam aparecer em alguma linha da leitura da arquitetura.</summary>
     public List<string>? TextoDaArquitetura { get; set; }
 
+    /// <summary>Trechos que precisam aparecer em alguma linha de inspecionarTubos (tipo, DN e segmento dos tubos).</summary>
+    public List<string>? TextoDosTubos { get; set; }
+
     /// <summary>Trechos que precisam aparecer em alguma linha de Bicos por ambiente (posicionar | ... e conferir | ...).</summary>
     public List<string>? TextoDosBicos { get; set; }
 
@@ -1524,6 +1592,8 @@ sealed class RelatorioCenario
     public List<string>? Carimbos { get; set; }
     public List<string>? Vinculos { get; set; }
     public List<string>? Arquitetura { get; set; }
+    public List<string>? Tubos { get; set; }
+    public List<string>? Contornos { get; set; }
     public List<string>? Bicos { get; set; }
     public List<string>? Rede { get; set; }
     public List<string>? Geral { get; set; }

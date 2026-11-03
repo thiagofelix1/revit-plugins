@@ -35,7 +35,7 @@ public static class BicosNoAmbiente
         var (u0, u1, v0, v1) = (us.Min(), us.Max(), vs.Min(), vs.Max());
         if (direcao is null && v1 - v0 > u1 - u0)
         {
-            (u, v) = (v, new Ponto2(-v.X, -v.Y));
+            (u, v) = Eixos(externo, v);
             us = externo.Select(p => Dot(p, u)).ToList();
             vs = externo.Select(p => Dot(p, v)).ToList();
             (u0, u1, v0, v1) = (us.Min(), us.Max(), vs.Min(), vs.Max());
@@ -270,14 +270,24 @@ public static class BicosNoAmbiente
         }));
 
     /// <summary>
+    /// Abaixo disso, um recorte do contorno é detalhe da parede (pilar, recuo, degrau de modelagem), não outra parte da
+    /// sala: a grade não se divide por ele. Bico que cair dentro do recorte sai e o canto descoberto ganha outro, como em
+    /// qualquer ambiente; a conferência continua pelo contorno exato.
+    /// </summary>
+    const double Detalhe = 0.60;
+
+    /// <summary>
     /// Ambiente de paredes em ângulo reto cortado em retângulos (u0, u1, v0, v1): faixas entre os vértices ao longo de u,
-    /// cada uma com os trechos de v que ficam dentro; faixas vizinhas com os mesmos trechos se juntam.
+    /// cada uma com os trechos de v que ficam dentro. Faixas vizinhas com os mesmos trechos (a menos de um detalhe) se juntam,
+    /// e faixa estreita entra na vizinha; vazio menor que um detalhe (pilar solto) não corta a sala.
     /// </summary>
     static List<(double U0, double U1, double V0, double V1)> Retangulos(IReadOnlyList<IReadOnlyList<Ponto2>> contornos, Ponto2 u, Ponto2 v)
     {
-        var lacos = contornos.Select(l => l.Select(p => (U: Dot(p, u), V: Dot(p, v))).ToList()).ToList();
+        var lacos = contornos.Select((l, i) => (Laco: l.Select(p => (U: Dot(p, u), V: Dot(p, v))).ToList(), Externo: i == 0))
+            .Where(l => l.Externo || Math.Min(l.Laco.Max(p => p.U) - l.Laco.Min(p => p.U), l.Laco.Max(p => p.V) - l.Laco.Min(p => p.V)) >= Detalhe)
+            .Select(l => l.Laco).ToList();
         var cortes = lacos.SelectMany(l => l.Select(p => Math.Round(p.U, 4))).Distinct().OrderBy(x => x).ToList();
-        var faixas = new List<(double A, double B, List<(double V0, double V1)> Trechos)>();
+        var faixas = new List<Faixa>();
         for (var k = 0; k + 1 < cortes.Count; k++)
         {
             var meio = (cortes[k] + cortes[k + 1]) / 2;
@@ -289,18 +299,36 @@ public static class BicosNoAmbiente
                     if ((p.U > meio) != (q.U > meio)) cruzamentos.Add(p.V + (q.V - p.V) * (meio - p.U) / (q.U - p.U));
                 }
             cruzamentos.Sort();
-            var trechos = new List<(double, double)>();
-            for (var i = 0; i + 1 < cruzamentos.Count; i += 2) trechos.Add((cruzamentos[i], cruzamentos[i + 1]));
-            if (faixas.Count > 0 && faixas[faixas.Count - 1].B == cortes[k] && Iguais(faixas[faixas.Count - 1].Trechos, trechos))
-                faixas[faixas.Count - 1] = (faixas[faixas.Count - 1].A, cortes[k + 1], faixas[faixas.Count - 1].Trechos);
+            var trechos = new List<(double V0, double V1)>();
+            for (var i = 0; i + 1 < cruzamentos.Count; i += 2)
+                if (cruzamentos[i + 1] - cruzamentos[i] >= Detalhe) trechos.Add((cruzamentos[i], cruzamentos[i + 1]));
+            var faixa = new Faixa(cortes[k], cortes[k + 1], trechos, trechos);
+            if (faixas.Count == 0)
+            {
+                faixas.Add(faixa);
+                continue;
+            }
+            var anterior = faixas[faixas.Count - 1];
+            if (Parecidos(anterior.Base, trechos))
+                faixas[faixas.Count - 1] = anterior with { B = faixa.B, Trechos = Envolver(anterior.Trechos, trechos) };
+            else if (faixa.B - faixa.A < Detalhe)
+                faixas[faixas.Count - 1] = anterior with { B = faixa.B };
+            else if (anterior.B - anterior.A < Detalhe)
+                faixas[faixas.Count - 1] = faixa with { A = anterior.A };
             else
-                faixas.Add((cortes[k], cortes[k + 1], trechos));
+                faixas.Add(faixa);
         }
         return faixas.SelectMany(f => f.Trechos.Select(t => (f.A, f.B, t.V0, t.V1))).ToList();
 
-        static bool Iguais(List<(double V0, double V1)> a, List<(double, double)> b) =>
-            a.Count == b.Count && a.Zip(b, (x, y) => Math.Abs(x.V0 - y.Item1) < 1e-4 && Math.Abs(x.V1 - y.Item2) < 1e-4).All(ok => ok);
+        static bool Parecidos(List<(double V0, double V1)> a, List<(double V0, double V1)> b) =>
+            a.Count == b.Count && a.Zip(b, (x, y) => Math.Abs(x.V0 - y.V0) < Detalhe && Math.Abs(x.V1 - y.V1) < Detalhe).All(ok => ok);
+
+        static List<(double V0, double V1)> Envolver(List<(double V0, double V1)> a, List<(double V0, double V1)> b) =>
+            a.Zip(b, (x, y) => (Math.Min(x.V0, y.V0), Math.Max(x.V1, y.V1))).ToList();
     }
+
+    /// <summary>Faixa de u com os trechos de v dentro do ambiente; Base são os trechos com que ela começou, para o desvio não se acumular.</summary>
+    sealed record Faixa(double A, double B, List<(double V0, double V1)> Trechos, List<(double V0, double V1)> Base);
 
     /// <summary>Menor número de bicos em cada direção que atende distância e área máximas.</summary>
     static (int Nu, int Nv) Contagem(double lu, double lv, LimitesDeBico limites)

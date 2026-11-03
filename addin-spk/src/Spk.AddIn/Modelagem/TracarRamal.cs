@@ -162,7 +162,7 @@ public static class TracarRamal
         var zRamal = opcoes.Altura switch
         {
             AlturaDoRamal.RelativaASubgeral => inicio.Z + GeradorMalha.Pes(opcoes.AlturaM),
-            AlturaDoRamal.RelativaAoPiso => nivel.Elevation + GeradorMalha.Pes(opcoes.AlturaM),
+            AlturaDoRamal.RelativaAoPiso => nivel.ProjectElevation + GeradorMalha.Pes(opcoes.AlturaM),
             _ => inicio.Z,
         };
         var subida = Math.Abs(zRamal - inicio.Z) > GeradorMalha.Pes(0.02);

@@ -78,9 +78,9 @@ static class AplicarDiametros
                 recusados.Add("tubo de vínculo ou apagado");
                 continue;
             }
-            if (Tamanho(tubo, dn) is not { } pes)
+            if (Tamanho(doc, tubo, dn) is not { } pes)
             {
-                recusados.Add($"o segmento \"{tubo.PipeSegment?.Name}\" não tem DN {dn} ou maior");
+                recusados.Add($"o tipo de tubo {GeradorMalha.NomeDoTipo(doc, tubo.PipeType)} não tem DN {dn} ou maior");
                 continue;
             }
             alvo[id] = pes;
@@ -195,12 +195,16 @@ static class AplicarDiametros
         return Math.Abs(Diametro(tubo) - pes) > 1e-6 ? "o Revit não aceitou o DN novo" : null;
     }
 
-    /// <summary>O menor tamanho do segmento do tubo com DN nominal maior ou igual ao pedido.</summary>
-    static double? Tamanho(Pipe tubo, int dnMm)
+    /// <summary>
+    /// O menor tamanho do tipo do tubo com DN nominal maior ou igual ao pedido. Pelo tipo, não pelo segmento do tubo: um tubo
+    /// com um diâmetro que o segmento não tem fica sem segmento no Revit, e é justamente ele que precisa de um DN válido.
+    /// </summary>
+    static double? Tamanho(Document doc, Pipe tubo, int dnMm)
     {
         var pedido = UnitUtils.ConvertToInternalUnits(dnMm, UnitTypeId.Millimeters);
-        return tubo.PipeSegment?.GetSizes().Select(s => s.NominalDiameter).Where(d => d >= pedido - 1e-6)
-            .OrderBy(d => d).Cast<double?>().FirstOrDefault();
+        var tamanhos = GeradorMalha.Tamanhos(doc, tubo.PipeType);
+        if (tamanhos.Count == 0 && tubo.PipeSegment is { } segmento) tamanhos = segmento.GetSizes().Select(s => s.NominalDiameter).OrderBy(d => d).ToList();
+        return tamanhos.Where(d => d >= pedido - 1e-6).Cast<double?>().FirstOrDefault();
     }
 
     static double Diametro(Pipe tubo) => tubo.get_Parameter(BuiltInParameter.RBS_PIPE_DIAMETER_PARAM).AsDouble();

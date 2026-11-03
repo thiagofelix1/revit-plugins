@@ -50,7 +50,7 @@ public class GerarMalhaCommand : ExternalCommand
                 if (transacao.GetStatus() == TransactionStatus.Started) transacao.RollBack();
                 throw;
             }
-            TaskDialog.Show("SPK — Gerar malha", gerado.Resumo + "\n\nAgora use Calcular.");
+            TaskDialog.Show("SPK — Gerar malha", gerado.Resumo + $"\n\nTubos: {GeradorMalha.NomeDoTipo(ui.Document, GeradorMalha.TipoComTe(ui.Document))}\n\nAgora use Calcular.");
         }
         catch (Autodesk.Revit.Exceptions.OperationCanceledException)
         {

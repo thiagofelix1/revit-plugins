@@ -457,6 +457,22 @@ static class Cenas
         return string.Join("; ", linhas);
     }
 
+    /// <summary>
+    /// Mede os níveis pela cota do terreno, como faz muita arquitetura brasileira (o térreo na altitude do lote): o Elevation
+    /// do nível passa a valer a cota, enquanto a altura na origem interna, a das peças, não muda.
+    /// </summary>
+    public static string CotaDeTerreno(Document doc, double metros)
+    {
+        using var t = new Transaction(doc, "SPK — cota de terreno");
+        t.Start();
+        doc.ActiveProjectLocation.SetProjectPosition(XYZ.Zero, new ProjectPosition(0, 0, GeradorMalha.Pes(metros), 0));
+        foreach (var tipo in new FilteredElementCollector(doc).OfClass(typeof(LevelType)))
+            tipo.get_Parameter(BuiltInParameter.LEVEL_RELATIVE_BASE_TYPE)?.Set(1);
+        t.Commit();
+        return string.Join("; ", new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>()
+            .Select(n => $"{n.Name}: cota {n.Elevation * 0.3048:0.00}, altura {n.ProjectElevation * 0.3048:0.00}"));
+    }
+
     /// <summary>Recarrega cada vínculo cujo arquivo tem o nome pedido a partir do caminho novo (fora de transação, como pede o Revit).</summary>
     public static string RecarregarVinculos(Document doc, Dictionary<string, string> pedido)
     {

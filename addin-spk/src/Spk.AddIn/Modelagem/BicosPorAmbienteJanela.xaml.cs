@@ -47,9 +47,10 @@ public partial class BicosPorAmbienteJanela : Window
     static readonly HashSet<string> ultimosMarcados = [];
     public IReadOnlyList<Ambiente> Escolhidos => linhas.Where(l => l.Marcado).Select(l => l.Ambiente).ToList();
 
-    /// <param name="rede">Com ela, a janela é a do Gerar rede: mostra arranjo, drop e diâmetros, e o botão principal gera.</param>
+    /// <param name="rede">Com ela, a janela é a do Gerar rede: mostra tipo de tubo, arranjo, drop e diâmetros, e o botão principal gera.</param>
+    /// <param name="tiposDeTubo">Nome de cada tipo de tubo e o texto com o material, para o projetista escolher.</param>
     public BicosPorAmbienteJanela(Edificio edificio, IReadOnlyList<string> tipos, string? tipoPadrao, string resumo, OpcoesBicos opcoes,
-        OpcoesRede? rede = null)
+        OpcoesRede? rede = null, IReadOnlyList<(string Nome, string Texto)>? tiposDeTubo = null)
     {
         InitializeComponent();
         if (rede is not null)
@@ -59,6 +60,9 @@ public partial class BicosPorAmbienteJanela : Window
             Geracao.Visibility = System.Windows.Visibility.Visible;
             BotaoConferir.Visibility = System.Windows.Visibility.Collapsed;
             BotaoPrincipal.Content = "Gerar rede";
+            var tubos = (tiposDeTubo ?? []).Select(t => new ItemDeTubo(t.Nome, t.Texto)).ToList();
+            TipoDeTubo.ItemsSource = tubos;
+            TipoDeTubo.SelectedItem = tubos.FirstOrDefault(t => t.Nome == rede.TipoDeTubo) ?? tubos.FirstOrDefault();
             Arranjo.SelectedIndex = rede.Arranjo == AddIn.Arranjo.Lateral ? 1 : 0;
             Drop.Text = Entrada.F(rede.DropM);
             Diametros.IsChecked = rede.AplicarDiametros;
@@ -110,6 +114,7 @@ public partial class BicosPorAmbienteJanela : Window
                 {
                     Arranjo = Arranjo.SelectedIndex == 1 ? AddIn.Arranjo.Lateral : AddIn.Arranjo.EspinhaDePeixe,
                     DropM = Entrada.Numero(Drop.Text, "Do defletor ao ramal", 0.15, 2),
+                    TipoDeTubo = (TipoDeTubo.SelectedItem as ItemDeTubo)?.Nome,
                     AplicarDiametros = Diametros.IsChecked == true,
                     Bicos = Opcoes,
                     GeralPor = JuntarNumSetor.IsChecked == true ? (GeralPor.SelectedItem as ItemDeAmbiente)?.Ambiente.Id : null,
@@ -128,6 +133,11 @@ public partial class BicosPorAmbienteJanela : Window
     }
 
     /// <summary>Um ambiente na lista da geral: "nível — número nome".</summary>
+    sealed record ItemDeTubo(string Nome, string Texto)
+    {
+        public override string ToString() => Texto;
+    }
+
     sealed record ItemDeAmbiente(Ambiente Ambiente)
     {
         public override string ToString() => $"{Ambiente.Nivel} — {Ambiente.Numero} {Ambiente.Nome}".Trim();

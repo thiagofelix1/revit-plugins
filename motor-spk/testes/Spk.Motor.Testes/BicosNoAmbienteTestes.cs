@@ -9,6 +9,8 @@ public class BicosNoAmbienteTestes
     static IReadOnlyList<IReadOnlyList<Ponto2>> Retangulo(double x0, double y0, double x1, double y1) =>
         [new List<Ponto2> { new(x0, y0), new(x1, y0), new(x1, y1), new(x0, y1) }];
 
+    static List<Ponto2> Laco(params (double X, double Y)[] pontos) => pontos.Select(p => new Ponto2(p.X, p.Y)).ToList();
+
     static readonly LimitesDeBico Leve = EspacamentoDeBicos.Padrao(ClasseRisco.Leve);
     static readonly LimitesDeBico Ordinario = EspacamentoDeBicos.Padrao(ClasseRisco.Ordinario2);
 
@@ -129,6 +131,51 @@ public class BicosNoAmbienteTestes
         var vigas = new List<(Ponto2, Ponto2, double)> { (new Ponto2(0, 4), new Ponto2(10, 4), 0.3), (new Ponto2(0, 4.2), new Ponto2(10, 4.2), 0.3) };
         var p = BicosNoAmbiente.PosicionarPorVaos(sala, vigas, Leve)!;
         Assert.All(p.Bicos, b => Assert.True(b.Y < 3.85 - 0.1 + 1e-9 || b.Y > 4.35 + 0.1 - 1e-9, $"bico em y {b.Y} sobre as vigas"));
+    }
+
+    /// <summary>Contorno real (refeitório da MNEVVM): recorte de pilar, degraus de milímetros e um vazio de 15 × 4 cm.</summary>
+    [Fact]
+    public void Pilar_e_degrau_na_parede_nao_dividem_a_grade()
+    {
+        var externo = Laco((49.415, 64.857), (46.363, 64.857), (46.363, 56.103), (46.363, 55.753), (51.663, 55.753), (51.963, 55.753),
+            (52.063, 55.753), (52.063, 56.103), (52.363, 56.103), (52.363, 55.753), (57.224, 55.753), (57.224, 55.956), (57.271, 55.956),
+            (57.271, 58.466), (57.273, 58.466), (57.273, 58.866), (57.271, 58.866), (57.271, 64.856), (49.815, 64.857));
+        var vazio = Laco((55.855, 60.202), (55.705, 60.202), (55.705, 60.241), (55.855, 60.241));
+        IReadOnlyList<IReadOnlyList<Ponto2>> contornos = [externo, vazio];
+
+        var posicao = BicosNoAmbiente.Posicionar(contornos, Ordinario);
+
+        Assert.Equal(9, posicao.Bicos.Count);
+        Assert.Equal(3, posicao.Bicos.Select(b => Math.Round(b.Y, 1)).Distinct().Count());
+        Assert.Equal(3, posicao.Bicos.Select(b => Math.Round(b.X, 1)).Distinct().Count());
+        Assert.All(posicao.Bicos, b => Assert.True(BicosNoAmbiente.DistanciaAoContorno([externo], b) > 1.0, $"{b} perto da parede"));
+        Assert.Empty(BicosNoAmbiente.Conferir(contornos, posicao.Bicos, Ordinario, posicao.DirecaoDosRamais));
+    }
+
+    /// <summary>A parede mais longa em linha reta não é o lado maior da sala: os dois eixos da grade têm de continuar em ângulo reto.</summary>
+    [Fact]
+    public void Parede_longa_no_lado_menor_nao_entorta_os_eixos()
+    {
+        // 12 × 9 m com o lado de 12 m partido ao meio por um recuo: a parede mais longa em linha reta é a de 9 m.
+        IReadOnlyList<IReadOnlyList<Ponto2>> contorno = [Laco((0, 0), (5, 0), (5, 0.3), (7, 0.3), (7, 0), (12, 0), (12, 9), (7, 9), (7, 8.7), (5, 8.7), (5, 9), (0, 9))];
+
+        var posicao = BicosNoAmbiente.Posicionar(contorno, Ordinario);
+
+        Assert.Equal(1, Math.Abs(posicao.DirecaoDosRamais.X), 3);
+        Assert.True(posicao.Bicos.Select(b => Math.Round(b.Y, 1)).Distinct().Count() >= 2);
+        Assert.DoesNotContain(BicosNoAmbiente.Conferir(contorno, posicao.Bicos, Ordinario, posicao.DirecaoDosRamais), f => f.Tipo == TipoDeFalha.PontoDescoberto);
+    }
+
+    [Fact]
+    public void Recorte_grande_ainda_divide_a_grade()
+    {
+        // Corte de 3 × 3 m no canto: não é detalhe, cada parte tem a sua grade e nenhum bico cai no recorte.
+        IReadOnlyList<IReadOnlyList<Ponto2>> contorno = [Laco((0, 0), (12, 0), (12, 5), (9, 5), (9, 8), (0, 8))];
+
+        var posicao = BicosNoAmbiente.Posicionar(contorno, Ordinario);
+
+        Assert.All(posicao.Bicos, b => Assert.True(BicosNoAmbiente.Dentro(contorno, b)));
+        Assert.DoesNotContain(BicosNoAmbiente.Conferir(contorno, posicao.Bicos, Ordinario, posicao.DirecaoDosRamais), f => f.Tipo == TipoDeFalha.PontoDescoberto);
     }
 
     [Fact]

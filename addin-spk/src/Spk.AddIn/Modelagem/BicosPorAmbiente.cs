@@ -67,6 +67,9 @@ static class BicosPorAmbiente
         LimitesDeBico limites, OpcoesBicos opcoes, List<ElementId> criados)
     {
         var simbolo = Simbolo(doc, opcoes.Tipo) ?? throw new InvalidOperationException("O projeto não tem família de sprinkler carregada.");
+        if (Hospedado(simbolo))
+            throw new InvalidOperationException($"O bico \"{Nome(simbolo)}\" é de família hospedada (presa a uma face): o SPK posiciona bicos pelo nível " +
+                                                "e ela não sobe até o teto. Escolha ou carregue um bico sem hospedeiro.");
         var marcar = !EhConfirmado(doc, simbolo);
         var resultados = new List<ResultadoAmbiente>();
         using var grupo = new TransactionGroup(doc, "SPK — Bicos por ambiente");
@@ -203,7 +206,7 @@ static class BicosPorAmbiente
         var nivel = Nivel(doc, Pes(piso));
         foreach (var p in pontos)
         {
-            var bico = doc.Create.NewFamilyInstance(new XYZ(Pes(p.X), Pes(p.Y), nivel.Elevation), simbolo, nivel, StructuralType.NonStructural);
+            var bico = doc.Create.NewFamilyInstance(new XYZ(Pes(p.X), Pes(p.Y), nivel.ProjectElevation), simbolo, nivel, StructuralType.NonStructural);
             if (marcar) bico.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.Set(DadosEsboco.Marca);
             criados.Add(bico.Id);
         }
@@ -239,8 +242,8 @@ static class BicosPorAmbiente
     /// <summary>O nível do projeto de incêndio logo abaixo do piso do ambiente (ou o mais baixo).</summary>
     internal static Level Nivel(Document doc, double piso)
     {
-        var niveis = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().OrderBy(n => n.Elevation).ToList();
-        return niveis.LastOrDefault(n => n.Elevation <= piso + Pes(0.05)) ?? niveis.First();
+        var niveis = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().OrderBy(n => n.ProjectElevation).ToList();
+        return niveis.LastOrDefault(n => n.ProjectElevation <= piso + Pes(0.05)) ?? niveis.First();
     }
 
     public static IEnumerable<FamilySymbol> Simbolos(Document doc) =>
@@ -250,7 +253,7 @@ static class BicosPorAmbiente
     public static string Nome(FamilySymbol s) => $"{s.FamilyName} : {s.Name}";
 
     /// <summary>
-    /// O tipo pedido; sem ele, o bico confirmado em Famílias; sem isso, o primeiro que não é ESFR (o ESFR é de
+    /// O tipo pedido; sem ele, o bico confirmado em Famílias; sem isso, o primeiro que não é hospedado nem ESFR (o ESFR é de
     /// armazenamento, que Bicos por ambiente não faz).
     /// </summary>
     static FamilySymbol? Simbolo(Document doc, string? tipo)
@@ -258,9 +261,13 @@ static class BicosPorAmbiente
         var simbolos = Simbolos(doc).ToList();
         if (tipo is not null && simbolos.FirstOrDefault(s => Nome(s) == tipo) is { } pedido) return pedido;
         return simbolos.FirstOrDefault(s => EhConfirmado(doc, s))
-               ?? simbolos.FirstOrDefault(s => !Nome(s).Contains("ESFR", StringComparison.OrdinalIgnoreCase))
+               ?? simbolos.FirstOrDefault(s => !Hospedado(s) && !Nome(s).Contains("ESFR", StringComparison.OrdinalIgnoreCase))
+               ?? simbolos.FirstOrDefault(s => !Hospedado(s))
                ?? simbolos.FirstOrDefault();
     }
+
+    /// <summary>Família presa a uma face ou parede: criada pelo nível, ela fica no piso sem subir até o teto, e a rede não liga nela.</summary>
+    static bool Hospedado(FamilySymbol s) => s.Family?.FamilyPlacementType is FamilyPlacementType.WorkPlaneBased or FamilyPlacementType.OneLevelBasedHosted;
 
     /// <summary>O tipo que a janela mostra de início: o mesmo que vale sem escolha.</summary>
     public static string? TipoPadrao(Document doc) => Simbolo(doc, null) is { } s ? Nome(s) : null;

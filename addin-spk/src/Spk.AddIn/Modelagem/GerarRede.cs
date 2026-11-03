@@ -14,6 +14,9 @@ public sealed record OpcoesRede
     /// <summary>Do defletor até o ramal, em m.</summary>
     public double DropM { get; init; } = 0.3;
 
+    /// <summary>Nome do tipo de tubo da rede, escolhido pelo projetista. Nulo: a última escolha ou a sugestão.</summary>
+    public string? TipoDeTubo { get; init; }
+
     public bool AplicarDiametros { get; init; } = true;
     public OpcoesBicos Bicos { get; init; } = new();
 
@@ -225,7 +228,7 @@ static class GerarRede
         var motivo = TransacaoSegura.Executar(doc, "SPK — Geral", () =>
         {
             var nivel = BicosPorAmbiente.Nivel(doc, Pes(corredor.Piso));
-            var tipo = GeradorMalha.TipoComTe(doc);
+            var tipo = GeradorMalha.TipoComTe(doc, opcoes.TipoDeTubo);
             var sistema = GeradorMalha.Sistema(doc) ?? throw new InvalidOperationException("O projeto não tem sistema de tubulação.");
             var esboco = DadosEsboco.Carregar(doc);
             var diametro = GeradorMalha.DiametroComTe(doc, tipo, esboco.DnSubgeral > 0 ? esboco.DnSubgeral : esboco.DnTubo);
@@ -558,13 +561,19 @@ static class GerarRede
         // das vigas e sobe até cada bico, que tem de ser em pé.
         var vigasDosVaos = BicosPorAmbiente.VigasDosVaos(edificio, ambiente, limites, opcoesBicos);
         var grelha = vigasDosVaos is not null && Spk.Motor.Geracao.BicosNoAmbiente.EhGrelha(vigasDosVaos.Select(v => (v.A, v.B, v.Largura)).ToList());
-        if (vigasDosVaos is not null && !grelha) opcoesBicos = opcoesBicos with { DefletorM = Math.Max(opcoesBicos.DefletorM, FolgaDoTeto + DropMinimo) };
+        // Sob laje ou telhado a rede passa entre o defletor e o teto: 10 cm abaixo do teto e 15 cm acima do bico, dentro dos 30 cm
+        // que o teto liso permite. Sob forro ela atravessa por cima, e o defletor fica onde o projetista pediu.
+        var defletorPedido = opcoesBicos.DefletorM;
+        if ((vigasDosVaos is not null && !grelha) || (vigasDosVaos is null && ambiente.OrigemDoTeto is OrigemDoTeto.Laje or OrigemDoTeto.Telhado))
+            opcoesBicos = opcoesBicos with { DefletorM = Math.Max(opcoesBicos.DefletorM, FolgaDoTeto + DropMinimo) };
         var bicos = BicosPorAmbiente.Posicionar(doc, edificio, [ambiente], limites, opcoesBicos, criados).Single();
         if (bicos.Recusa is not null) return Recusa(bicos.Recusa);
         if (bicos.Posicao is not { Bicos.Count: > 0 } posicao || bicos.Defletor is not { } defletor) return Recusa("nenhum bico coube no ambiente");
         var bicosDoAmbiente = criados.Select(doc.GetElement).OfType<FamilyInstance>().ToList();
 
         var avisos = new List<string>();
+        if (vigasDosVaos is null && opcoesBicos.DefletorM > defletorPedido + 1e-6)
+            avisos.Add($"defletor a {opcoesBicos.DefletorM * 100:0} cm do teto, não {defletorPedido * 100:0} cm: é o mínimo para a rede caber embaixo da {(ambiente.OrigemDoTeto == OrigemDoTeto.Laje ? "laje" : "cobertura")}");
         double zRede, zSubgeral;
         if (bicos.VaosEntreVigas is { Count: > 0 } vaos && grelha)
         {
@@ -608,7 +617,7 @@ static class GerarRede
             }
         }
         var subgeral = new List<Pipe>();
-        var motivo = TransacaoSegura.Executar(doc, "SPK — Subgeral", () => Subgeral(doc, ambiente, posicao, zSubgeral, opcoes.Arranjo, criados, avisos, subgeral, geral));
+        var motivo = TransacaoSegura.Executar(doc, "SPK — Subgeral", () => Subgeral(doc, ambiente, posicao, zSubgeral, opcoes.Arranjo, criados, avisos, subgeral, geral, opcoes.TipoDeTubo));
         if (motivo is not null) return Recusa(motivo);
 
         var opcoesRamais = zSubgeral < zRede - 0.01
@@ -649,7 +658,7 @@ static class GerarRede
     /// piso (a entrada do setor), e termina 20 cm depois da última fileira (o mínimo para o tê).
     /// </summary>
     static string? Subgeral(Document doc, Ambiente ambiente, Spk.Motor.Geracao.PosicaoDeBicos posicao, double zRede, Arranjo arranjo,
-        List<ElementId> criados, List<string> avisos, List<Pipe> subgeral, Eixo? geral)
+        List<ElementId> criados, List<string> avisos, List<Pipe> subgeral, Eixo? geral, string? tipoDeTubo)
     {
         var u = posicao.DirecaoDosRamais;
         var v = new Ponto2(-u.Y, u.X);
@@ -671,9 +680,11 @@ static class GerarRede
             if (arranjo == Arranjo.EspinhaDePeixe) avisos.Add("uma coluna de bicos só: subgeral junto à parede (lateral)");
             uSub = (u0 + colunas[0]) / 2;
         }
-        // A entrada fica na parede de menor v; com geral, na parede do lado dela.
+        // A entrada fica na parede de menor v; com geral, na parede do lado dela. Sem geral, se a primeira fileira fica colada
+        // a essa parede e não cabe o tê, a entrada vai para a parede oposta.
         double vInicio, vFim;
-        if (geral is not null && V(geral.A) > (v0 + v1) / 2)
+        var pelaOposta = geral is not null ? V(geral.A) > (v0 + v1) / 2 : fileiras[0] - (v0 + 0.30) < 0.20;
+        if (pelaOposta)
         {
             vInicio = v1 - 0.30;
             vFim = Math.Max(fileiras[0] - 0.20, v0 + 0.10);
@@ -698,7 +709,7 @@ static class GerarRede
             }
 
         var nivel = BicosPorAmbiente.Nivel(doc, Pes(ambiente.Piso));
-        var tipo = GeradorMalha.TipoComTe(doc);
+        var tipo = GeradorMalha.TipoComTe(doc, tipoDeTubo);
         var sistema = GeradorMalha.Sistema(doc) ?? throw new InvalidOperationException("O projeto não tem sistema de tubulação.");
         var esboco = DadosEsboco.Carregar(doc);
         var diametro = GeradorMalha.DiametroComTe(doc, tipo, esboco.DnSubgeral > 0 ? esboco.DnSubgeral : esboco.DnTubo);

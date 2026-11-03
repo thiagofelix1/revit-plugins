@@ -55,7 +55,10 @@ public class GerarRedeCommand : ExternalCommand
             var resumo = $"Para cada ambiente marcado: bicos pela norma ({DadosProjeto.NomeClasse(dados.Classe)}: até {limites.AreaMaxima:0.0} m² " +
                          $"por bico e {limites.DistanciaMaxima:0.0} m entre bicos), a subgeral com a descida até o piso na parede de entrada, " +
                          "os ramais, a ligação dos bicos e os diâmetros. Depois: Verificar modelo e Calcular.";
-            var janela = new BicosPorAmbienteJanela(edificio, tipos, BicosPorAmbiente.TipoPadrao(doc), resumo, ultimas.Bicos, ultimas);
+            // O tipo de tubo aparece já preenchido (a última escolha neste projeto ou a sugestão) e é o projetista quem confirma.
+            var tiposDeTubo = GeradorMalha.TiposComTe(doc).Select(t => (t.Name, GeradorMalha.NomeDoTipo(doc, t))).ToList();
+            var janela = new BicosPorAmbienteJanela(edificio, tipos, BicosPorAmbiente.TipoPadrao(doc), resumo, ultimas.Bicos,
+                ultimas with { TipoDeTubo = GeradorMalha.TipoComTe(doc).Name }, tiposDeTubo);
             if (janela.ShowDialog() != true || janela.Rede is not { } opcoes) return;
             ultimas = opcoes;
             if (opcoes.GeralPor is not null && janela.VgaNoClique)
@@ -81,6 +84,10 @@ public class GerarRedeCommand : ExternalCommand
                 }
             }
 
+            var esboco = DadosEsboco.Carregar(doc);
+            esboco.TipoDeTubo = opcoes.TipoDeTubo;
+            ArmazenamentoSpk.GravarComTransacao(doc, DadosEsboco.Chave, esboco, "SPK — Tipo de tubo");
+
             var criados = new List<ElementId>();
             var (redes, geral) = GerarRede.ExecutarComGeral(doc, dados, edificio, janela.Escolhidos, opcoes, criados);
             criados = criados.Where(id => doc.GetElement(id) is not null).ToList();
@@ -89,7 +96,7 @@ public class GerarRedeCommand : ExternalCommand
             {
                 MainInstruction = $"Rede gerada em {redes.Count(r => r.Recusa is null)} de {redes.Count} ambiente(s)" +
                                   (geral is { Ligacao: { } l } ? $", {l.Ligadas} ligada(s) à geral" : ""),
-                MainContent = string.Join("\n", redes.Select(r => r.Texto())) + (geral is null ? "" : "\n\n" + geral.Texto()) +
+                MainContent = $"Tubos: {GeradorMalha.NomeDoTipo(doc, GeradorMalha.TipoComTe(doc, opcoes.TipoDeTubo))}\n\n" + string.Join("\n", redes.Select(r => r.Texto())) + (geral is null ? "" : "\n\n" + geral.Texto()) +
                               "\n\nO que foi criado fica selecionado. Ctrl+Z desfaz cada etapa. Depois: Verificar modelo e Calcular.",
             }.Show();
         }

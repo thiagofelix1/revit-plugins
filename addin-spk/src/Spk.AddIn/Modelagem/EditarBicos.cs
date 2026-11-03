@@ -202,10 +202,10 @@ public static class EditarBicos
         var motivo = TransacaoSegura.Executar(doc, "SPK — Bico novo", () =>
         {
             if (!molde.Simbolo.IsActive) molde.Simbolo.Activate();
-            novo = doc.Create.NewFamilyInstance(new XYZ(ponto.X, ponto.Y, molde.Nivel.Elevation), molde.Simbolo, molde.Nivel, StructuralType.NonStructural);
+            novo = doc.Create.NewFamilyInstance(new XYZ(ponto.X, ponto.Y, molde.Nivel.ProjectElevation), molde.Simbolo, molde.Nivel, StructuralType.NonStructural);
             if (molde.Marca is not null) novo.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)?.Set(molde.Marca);
             doc.Regenerate();
-            GeradorMalha.AjustarAltura(novo, molde.Z, molde.Nivel.Elevation);
+            GeradorMalha.AjustarAltura(novo, molde.Z, molde.Nivel.ProjectElevation);
             return null;
         });
         if (motivo is not null || novo is null)

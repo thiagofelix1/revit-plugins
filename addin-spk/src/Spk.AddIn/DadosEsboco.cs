@@ -40,6 +40,9 @@ public sealed class DadosEsboco
     /// <summary>DN da subgeral e da descida, em mm. Zero: o mesmo dos ramais.</summary>
     public int DnSubgeral { get; set; }
 
+    /// <summary>Nome do tipo de tubo da última rede gerada: o projetista escolhe na janela. Nulo: a sugestão do SPK.</summary>
+    public string? TipoDeTubo { get; set; }
+
     public Arranjo Arranjo { get; set; } = Arranjo.Lateral;
 
     /// <summary>

@@ -27,24 +27,28 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Text="Arranjo" VerticalAlignment="Center" Margin="0,4,8,4"/>
-            <ComboBox x:Name="Arranjo" Grid.Column="1" Margin="0,4,16,4">
+            <TextBlock Text="Tipo de tubo" VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <ComboBox x:Name="TipoDeTubo" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,4"
+                      ToolTip="O material da rede é decisão sua: confira antes de gerar. O SPK lembra da última escolha neste projeto."/>
+            <TextBlock Grid.Row="1" Text="Arranjo" VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <ComboBox x:Name="Arranjo" Grid.Row="1" Grid.Column="1" Margin="0,4,16,4">
                 <ComboBoxItem Content="Espinha de peixe: subgeral no meio, ramais para os dois lados"/>
                 <ComboBoxItem Content="Lateral: subgeral junto à parede, ramais para um lado"/>
             </ComboBox>
-            <TextBlock Grid.Column="2" Text="Do defletor ao ramal (m)" VerticalAlignment="Center" Margin="0,4,8,4"/>
-            <TextBox x:Name="Drop" Grid.Column="3" Margin="0,4" Padding="4"/>
-            <CheckBox x:Name="Diametros" Grid.Row="1" Grid.ColumnSpan="4" Margin="0,4"
+            <TextBlock Grid.Row="1" Grid.Column="2" Text="Do defletor ao ramal (m)" VerticalAlignment="Center" Margin="0,4,8,4"/>
+            <TextBox x:Name="Drop" Grid.Row="1" Grid.Column="3" Margin="0,4" Padding="4"/>
+            <CheckBox x:Name="Diametros" Grid.Row="2" Grid.ColumnSpan="4" Margin="0,4"
                       Content="Aplicar os diâmetros da tabela no fim (risco leve e ordinário; depois confira com Calcular)"/>
-            <CheckBox x:Name="JuntarNumSetor" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,4,8,4" VerticalAlignment="Center"
+            <CheckBox x:Name="JuntarNumSetor" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,4,8,4" VerticalAlignment="Center"
                       Content="Juntar as salas num setor, com a geral passando pelo ambiente:"
                       ToolTip="As salas marcadas ganham a rede com a entrada voltada para a geral; a geral corre pelo eixo do ambiente escolhido (o corredor, reto ou em L), com a descida da VGA numa ponta, e as salas são ligadas a ela (Ligar à geral)."/>
-            <ComboBox x:Name="GeralPor" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,4"/>
-            <CheckBox x:Name="BicosNoCorredor" Grid.Row="3" Grid.ColumnSpan="2" Margin="20,4,8,4"
+            <ComboBox x:Name="GeralPor" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,4"/>
+            <CheckBox x:Name="BicosNoCorredor" Grid.Row="4" Grid.ColumnSpan="2" Margin="20,4,8,4"
                       IsEnabled="{Binding IsChecked, ElementName=JuntarNumSetor}"
                       Content="Pôr bicos também no corredor, ligados direto na geral"/>
-            <CheckBox x:Name="VgaNoCliqueCaixa" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,4"
+            <CheckBox x:Name="VgaNoCliqueCaixa" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,4"
                       IsEnabled="{Binding IsChecked, ElementName=JuntarNumSetor}"
                       Content="VGA no ponto que eu clicar"
                       ToolTip="Desmarcado: a descida da VGA fica na ponta do corredor (num L, na ponta longe do canto). Marcado: depois de Gerar rede, clique no corredor onde fica a VGA; a geral sai dela para os dois lados, com tê."/>
