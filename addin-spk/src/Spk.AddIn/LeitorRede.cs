@@ -132,7 +132,7 @@ static class LeitorRede
         }
 
         var soltos = bicos.Count - ligados.Count;
-        if (soltos > 0) avisos.Add($"{soltos} bico(s) sem tubo ligado ficaram de fora.");
+        if (soltos > 0) avisos.Add($"ATENÇÃO: {soltos} de {bicos.Count} bico(s) sem tubo ligado ficaram fora do cálculo: o resultado vale só para os ligados. Veja em Verificar modelo.");
         if (ligados.Count == 0) throw new InvalidOperationException("Nenhum bico confirmado está ligado a um tubo.");
         if (trechos.Count == 0) throw new InvalidOperationException("Não há tubos na rede ligada aos bicos.");
 

@@ -7,6 +7,9 @@ public enum AlturaDoRamal { NaSubgeral, RelativaASubgeral, RelativaAoPiso }
 /// <summary>Como traçar: a altura do ramal, quando dois bicos são da mesma fileira e se os bicos são ligados.</summary>
 public sealed record OpcoesRamais
 {
+    /// <summary>DN dos ramais, em mm. Nulo: o de Dados do esboço.</summary>
+    public int? DnRamal { get; init; }
+
     public AlturaDoRamal Altura { get; init; } = AlturaDoRamal.NaSubgeral;
 
     /// <summary>Metros acima da subgeral (negativo: abaixo) ou acima do nível da subgeral, conforme <see cref="Altura" />.</summary>
@@ -172,7 +175,7 @@ public static class TracarRamal
         var sistema = subgeral.get_Parameter(BuiltInParameter.RBS_PIPING_SYSTEM_TYPE_PARAM)?.AsElementId() ?? ElementId.InvalidElementId;
         if (sistema == ElementId.InvalidElementId) return "a subgeral não tem tipo de sistema";
         var tipo = subgeral.PipeType;
-        var diametro = GeradorMalha.DiametroComTe(doc, tipo, DadosEsboco.Carregar(doc).DnTubo) ?? subgeral.Diameter;
+        var diametro = GeradorMalha.DiametroComTe(doc, tipo, opcoes.DnRamal ?? DadosEsboco.Carregar(doc).DnTubo) ?? subgeral.Diameter;
 
         // O ramal sai do topo da subida (ou do cruzamento) para cada lado que tem bico, até o último bico.
         var topo = new XYZ(inicio.X, inicio.Y, zRamal);

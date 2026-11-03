@@ -85,6 +85,8 @@ static class GerarRede
 {
     static readonly double FolgaDoTeto = 0.10;
     static readonly double DropMinimo = 0.15;
+    const double DropComDnDoEsboco = 0.25;
+    const int DnNaDescidaCurta = 25;
 
     public static IReadOnlyList<RedeNoAmbiente> Executar(Document doc, DadosProjeto dados, Edificio edificio, IEnumerable<Ambiente> ambientes,
         OpcoesRede opcoes, List<ElementId> criados) =>
@@ -623,6 +625,9 @@ static class GerarRede
         var opcoesRamais = zSubgeral < zRede - 0.01
             ? new OpcoesRamais { Altura = AlturaDoRamal.RelativaASubgeral, AlturaM = zRede - zSubgeral }
             : new OpcoesRamais();
+        // Sob laje ou telhado a descida tem 15 cm, e o tê do DN inicial não cabe nela: o Revit desfaz o tubo invertido e só o
+        // último bico de cada ramal, com cotovelo, ficava ligado. O ramal nasce no menor DN, e a tabela sobe o que precisar.
+        if (opcoes.AplicarDiametros && zRede - defletor < DropComDnDoEsboco) opcoesRamais = opcoesRamais with { DnRamal = DnNaDescidaCurta };
         var ramais = TracarRamal.Executar(doc, bicosDoAmbiente, subgeral[0], opcoesRamais);
         criados.AddRange(ramais.Criados);
         if (ramais.Tracados == 0) return Recusa("nenhum ramal traçado: " + string.Join("; ", ramais.Fileiras.Select(f => f.Recusa).Distinct()));

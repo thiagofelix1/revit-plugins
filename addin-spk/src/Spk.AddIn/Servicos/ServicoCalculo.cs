@@ -13,6 +13,8 @@ static class ServicoCalculo
     /// <summary>Abaixo disso o número só pode ser K americano (gpm/psi½); o menor K métrico usual é 57.</summary>
     const double MenorKMetrico = 40;
 
+    const string Atencao = "ATENÇÃO";
+
     public sealed record Resultado(LeitorRede.RedeLida Lida, RelatorioSpk Relatorio, string? AvisoGravacao, string PastaMemorial)
     {
         public Spk.Motor.Calculo.ResultadoChuveiro Critico =>
@@ -22,7 +24,7 @@ static class ServicoCalculo
             Relatorio.Verificacoes.Where(v => !v.Atende).Select(v => $"{v.Descricao} ({v.Item}): {v.Detalhe}");
 
         public IEnumerable<string> Avisos =>
-            Relatorio.Avisos.Concat(Lida.Avisos).Append(AvisoGravacao).OfType<string>();
+            Relatorio.Avisos.Concat(Lida.Avisos.Where(a => !a.StartsWith(Atencao))).Append(AvisoGravacao).OfType<string>();
 
         public string Texto()
         {
@@ -62,8 +64,10 @@ static class ServicoCalculo
         var lida = LeitorRede.Montar(doc, leitura.Bicos, dados.FatorC, fonte, vgas, doSetor, indiceSetor);
         var projeto = dados.CriarProjeto(leitura.Gerados ? "Malha gerada" : "Rede lida do modelo", lida.Rede) with { AlturaDoTeto = AlturasDoTeto(doc, dados, lida) };
         var relatorio = CalculoSpk.Executar(projeto);
-        // O K muda a pressão inteira: o aviso vem primeiro, e vai também para o memorial.
-        if (leitura.AvisoDoFatorK is { } avisoDoK) relatorio = relatorio with { Avisos = relatorio.Avisos.Prepend(avisoDoK).ToList() };
+        // O que tira o valor do resultado vem primeiro, e vai também para o memorial: o K sem confirmar e os bicos fora do cálculo.
+        var atencao = lida.Avisos.Where(a => a.StartsWith(Atencao));
+        if (leitura.AvisoDoFatorK is { } avisoDoK) atencao = atencao.Append(avisoDoK);
+        relatorio = relatorio with { Avisos = atencao.Concat(relatorio.Avisos).ToList() };
 
         var pasta = PastasSpk.Calculo;
         Directory.CreateDirectory(pasta);
