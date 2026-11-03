@@ -18,6 +18,9 @@ public sealed record ProjetoSpk(string Nome, Rede Rede, ClasseRisco Classe, Base
 
     /// <summary>Altura do teto sobre cada chuveiro (Id → m), para as tabelas de teto alto; quem não está aqui não é teto alto.</summary>
     public IReadOnlyDictionary<string, double>? AlturaDoTeto { get; init; }
+
+    /// <summary>Bicos fora da Tabela 15 (<see cref="ObstrucaoDeBico" />). Nulo: não houve como conferir, e nada entra no relatório.</summary>
+    public IReadOnlyList<ObstrucaoAcusada>? Obstrucoes { get; init; }
 }
 
 public sealed record Verificacao(string Descricao, string Item, bool Atende, string Detalhe);
@@ -80,6 +83,16 @@ public static class CalculoSpk
 
         var verificacoes = Verificar(projeto, resultado, busca, vazaoHidrantes, pressaoDisponivel);
         verificacoes.AddRange(TetoAlto.Verificar(projeto, duracao));
+        if (projeto.Obstrucoes is { } obstrucoes)
+        {
+            var macicas = obstrucoes.Where(o => !o.PareceTrelica).ToList();
+            var trelicas = obstrucoes.Where(o => o.PareceTrelica).ToList();
+            verificacoes.Add(new Verificacao("Obstrução à descarga por viga", ObstrucaoDeBico.Item, macicas.Count == 0,
+                macicas.Count == 0 ? "nenhum bico fora da tabela" : $"{macicas.Count} bico(s) fora da tabela; o pior: {macicas.OrderByDescending(o => o.AcimaDoFundo - o.Permitido).First().Descricao}"));
+            if (trelicas.Count > 0)
+                avisos.Insert(0, $"ATENÇÃO: {trelicas.Count} bico(s) perto de peça com mais de {ObstrucaoDeBico.AlturaDeTrelica:0} m de altura, que parece treliça ou tesoura: o modelo não diz as barras dela, e o SPK não reprovou. Confira pela NBR 10897 7.10.1.2.5 e 7.10.1.2.6.");
+        }
+
         return new RelatorioSpk(projeto, resultado, busca, vazaoHidrantes, duracao, pressaoDisponivel, verificacoes, avisos);
     }
 

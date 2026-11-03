@@ -25,7 +25,7 @@ Conferência feita em 29/10/2026 contra a Instrução Técnica 23/2025 do Corpo 
 ## O que é aviso, porque o modelo não diz
 
 - **Resposta rápida em risco leve** (8.10.1): sistema novo em risco leve usa chuveiro de resposta rápida. A família do Revit não traz isso, e o cálculo passou a avisar.
-- **Obstruções** (7.10, 8.13.3): a IT remete à NBR 10897 (distância do bico à viga × altura do defletor). Hoje é aviso.
+- **Obstruções** (7.10, 8.13.3): a IT remete à NBR 10897. A distância do bico à viga × altura do defletor (Tabela 15 da NBR) já reprova no Calcular; pilar, duto e treliça ainda não. Ver [aderência à NBR](aderencia-nbr10897-2020.md).
 
 ## Pontos para o engenheiro confirmar
 

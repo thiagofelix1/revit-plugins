@@ -574,6 +574,8 @@ static class GerarRede
         var bicosDoAmbiente = criados.Select(doc.GetElement).OfType<FamilyInstance>().ToList();
 
         var avisos = new List<string>();
+        if (bicos.Falhas.Where(f => f.Tipo == Spk.Motor.Geracao.TipoDeFalha.Obstrucao).ToList() is { Count: > 0 } obstruidos)
+            avisos.Add($"{obstruidos.Count} bico(s) obstruídos por viga: {obstruidos[0].Descricao}. Mova o bico ou confira em Conferir na planta");
         if (vigasDosVaos is null && opcoesBicos.DefletorM > defletorPedido + 1e-6)
             avisos.Add($"defletor a {opcoesBicos.DefletorM * 100:0} cm do teto, não {defletorPedido * 100:0} cm: é o mínimo para a rede caber embaixo da {(ambiente.OrigemDoTeto == OrigemDoTeto.Laje ? "laje" : "cobertura")}");
         double zRede, zSubgeral;

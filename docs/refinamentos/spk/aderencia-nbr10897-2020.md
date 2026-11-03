@@ -6,7 +6,7 @@ Lido no detalhe: seções 3 a 10 e Anexo A. Lido por cima, por estarem fora do q
 
 ## Divergências, da mais grave para a menor
 
-Corrigidos em novembro de 2026, e mantidos na tabela como registro: 1 (campo de inclinação em Dados do projeto e aviso quando o teto medido não bate), 2 (aviso quando o C não bate com a Tabela 30 pelo nome do tubo; o C continua digitado) e 6 (Figura 42).
+Corrigidos em novembro de 2026, e mantidos na tabela como registro: 1 (campo de inclinação em Dados do projeto e aviso quando o teto medido não bate), 2 (aviso quando o C não bate com a Tabela 30 pelo nome do tubo; o C continua digitado) e 6 (Figura 42). O 3 foi feito para viga e bico de cobertura-padrão (Tabela 15 e a exceção de 7.10.1.1.2): reprova no Calcular e aparece em Bicos por ambiente, Gerar rede e Conferir na planta; peça com mais de 1 m de altura, que parece treliça, só avisa. Faltam pilar, duto e viga inteira abaixo do bico (Tabela 16 e Figura 28), porque o SPK ainda não lê pilar nem duto.
 
 | # | Item da NBR | O que a norma pede | O que o SPK faz | Efeito |
 |---|---|---|---|---|

@@ -6,7 +6,7 @@ namespace Spk.Motor.Geracao;
 /// <summary>Os bicos de um ambiente e a direção dos ramais usada para posicioná-los.</summary>
 public sealed record PosicaoDeBicos(IReadOnlyList<Ponto2> Bicos, Ponto2 DirecaoDosRamais, double PassoNoRamal, double PassoEntreRamais);
 
-public enum TipoDeFalha { AreaPorBico, DistanciaEntreBicos, PertoDeOutroBico, PertoDaParede, LongeDaParede, PontoDescoberto, ForaDoAmbiente, Defletor }
+public enum TipoDeFalha { AreaPorBico, DistanciaEntreBicos, PertoDeOutroBico, PertoDaParede, LongeDaParede, PontoDescoberto, ForaDoAmbiente, Defletor, Obstrucao }
 
 /// <summary>Uma regra de espaçamento não atendida, com o ponto em planta (m) e a explicação.</summary>
 public sealed record FalhaDeEspacamento(TipoDeFalha Tipo, Ponto2 Onde, string Descricao);

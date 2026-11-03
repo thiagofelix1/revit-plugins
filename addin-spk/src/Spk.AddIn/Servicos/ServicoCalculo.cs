@@ -1,4 +1,5 @@
 using System.IO;
+using Spk.AddIn.Modelagem;
 using Spk.Motor.Calculo;
 using Spk.Motor.Relatorios;
 
@@ -62,8 +63,14 @@ static class ServicoCalculo
     {
         ValidarFatorK(leitura.Bicos);
         var lida = LeitorRede.Montar(doc, leitura.Bicos, dados.FatorC, fonte, vgas, doSetor, indiceSetor);
-        var ambientes = dados.Classe == Spk.Motor.Normas.ClasseRisco.Armazenamento ? [] : Arquitetura.LeituraDoEdificio.Ler(doc).Ambientes;
-        var projeto = dados.CriarProjeto(leitura.Gerados ? "Malha gerada" : "Rede lida do modelo", lida.Rede) with { AlturaDoTeto = AlturasDoTeto(doc, lida, ambientes) };
+        // A Tabela 15 é de bico spray de cobertura-padrão: ESFR e armazenamento têm tabela própria (Tabela 22), ainda sem conferência.
+        var edificio = dados.Classe == Spk.Motor.Normas.ClasseRisco.Armazenamento ? null : Arquitetura.LeituraDoEdificio.Ler(doc);
+        var ambientes = edificio?.Ambientes ?? [];
+        var projeto = dados.CriarProjeto(leitura.Gerados ? "Malha gerada" : "Rede lida do modelo", lida.Rede) with
+        {
+            AlturaDoTeto = AlturasDoTeto(doc, lida, ambientes),
+            Obstrucoes = edificio is null || dados.Base == TipoBase.Esfr ? null : ObstrucoesDoSetor(doc, dados, lida, edificio),
+        };
         var relatorio = CalculoSpk.Executar(projeto);
         // O que tira o valor do resultado vem primeiro, e vai também para o memorial.
         var atencao = lida.Avisos.Where(a => a.StartsWith(Atencao));
@@ -98,6 +105,18 @@ static class ServicoCalculo
             if (acima >= 5) alturas[id] = AmbienteDoBico(ambientes, ponto)?.PeDireito ?? acima;
         }
         return alturas.Count == 0 ? null : alturas;
+    }
+
+    internal static IReadOnlyList<Spk.Motor.Normas.ObstrucaoAcusada> ObstrucoesDoSetor(Document doc, DadosProjeto dados, LeitorRede.RedeLida lida, Spk.Motor.Modelo.Edificio edificio)
+    {
+        var bicos = lida.Bicos.Select(b => (b.Key, Elemento: doc.GetElement(b.Value) as FamilyInstance))
+            .Where(b => b.Elemento?.Location is LocationPoint)
+            .Select(b =>
+            {
+                var p = ((LocationPoint)b.Elemento!.Location).Point;
+                return new Spk.Motor.Normas.BicoNoEspaco(b.Key, new Spk.Motor.Modelo.Ponto2(Metros(p.X), Metros(p.Y)), BicosPorAmbiente.AlturaDoDefletor(b.Elemento));
+            }).ToList();
+        return Spk.Motor.Normas.ObstrucaoDeBico.Conferir(bicos, edificio.Vigas, BicosPorAmbiente.Limites(dados, new OpcoesBicos()).DistanciaMaxima);
     }
 
     static Spk.Motor.Modelo.Ambiente? AmbienteDoBico(IReadOnlyList<Spk.Motor.Modelo.Ambiente> ambientes, XYZ ponto)

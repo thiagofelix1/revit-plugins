@@ -470,16 +470,21 @@ static class TesteAutomatico
                     return verificacao.Resumo();
                 });
 
+            ServicoCalculo.Resultado? calculado = null;
             if (cenario.Calcular is { } pedido)
                 Etapa(relatorio, "calcular", () =>
                 {
                     var resultado = Calcular(doc!, pedido);
                     relatorio.Calculo = Resumo(resultado);
+                    calculado = resultado;
                     // Cada cenário guarda o seu memorial: o da pasta do SPK é sobrescrito a cada cálculo, e comparar trecho a trecho precisa dos dois.
                     var memorial = Path.Combine(resultado.PastaMemorial, "memorial.md");
                     if (File.Exists(memorial)) File.Copy(memorial, Path.Combine(PastaSaida, Seguro(cenario.Nome) + "-memorial.md"), true);
                     return resultado.Texto();
                 });
+
+            if (cenario.DeslocarBico is { } deslocar)
+                Etapa(relatorio, "deslocarBico", () => ConferirObstrucao(doc!, calculado ?? throw new InvalidOperationException("Mande \"calcular\" no cenário."), deslocar));
 
             if (cenario.ConferirCalculo is { Count: > 0 } mudancas)
                 Etapa(relatorio, "conferirCalculo", () => ConferirCalculo(doc!, mudancas));
@@ -640,6 +645,30 @@ static class TesteAutomatico
             default:
                 return "operação desconhecida";
         }
+    }
+
+    /// <summary>
+    /// Leva um bico para perto da viga numa transação desfeita no fim e exige que a Tabela 15 o acuse: a Rede e o Mover bico nunca
+    /// deixam um bico colado à viga e sem bico do outro lado, e é o caso que a regra tem de pegar.
+    /// </summary>
+    static string ConferirObstrucao(Document doc, ServicoCalculo.Resultado calculado, PedidoDeslocarBico pedido)
+    {
+        var alvo = new XYZ(GeradorMalha.Pes(pedido.Perto[0]), GeradorMalha.Pes(pedido.Perto[1]), 0);
+        var bico = calculado.Lida.Bicos.Values.Select(doc.GetElement).OfType<FamilyInstance>()
+            .OrderBy(b => { var p = ((LocationPoint)b.Location).Point; return new XYZ(p.X, p.Y, 0).DistanceTo(alvo); }).First();
+        var dados = DadosProjeto.Carregar(doc) ?? throw new InvalidOperationException("Sem dados.");
+        var edificio = Arquitetura.LeituraDoEdificio.Ler(doc);
+        if (ServicoCalculo.ObstrucoesDoSetor(doc, dados, calculado.Lida, edificio).Count > 0)
+            throw new InvalidOperationException("Já havia obstrução antes de deslocar o bico.");
+        using var t = new Transaction(doc, "SPK — deslocar bico de teste");
+        t.Start();
+        ((LocationPoint)bico.Location).Point += new XYZ(GeradorMalha.Pes(pedido.Dx), GeradorMalha.Pes(pedido.Dy), 0);
+        doc.Regenerate();
+        var acusadas = ServicoCalculo.ObstrucoesDoSetor(doc, dados, calculado.Lida, edificio);
+        t.RollBack();
+        return acusadas.FirstOrDefault(a => a.Bico == calculado.Lida.Bicos.First(b => b.Value == bico.Id).Key) is { } acusada
+            ? acusada.Descricao
+            : throw new InvalidOperationException("A Tabela 15 não acusou o bico deslocado.");
     }
 
     /// <summary>
@@ -1381,6 +1410,9 @@ sealed class Cenario
     /// <summary>Põe no projeto os níveis dos ambientes da arquitetura vinculada, com planta de piso e de forro (ver Cenas).</summary>
     public bool NiveisDosVinculos { get; set; }
 
+    /// <summary>Depois de calcular: leva o bico mais perto de "perto" para o lado (dx, dy, m) numa transação desfeita, e exige que a Tabela 15 o acuse.</summary>
+    public PedidoDeslocarBico? DeslocarBico { get; set; }
+
     /// <summary>Depois de calcular: aplica e desfaz estas mudanças e exige que cada uma seja acusada: "dn", "apagar", "mover", "tuboNovo", "dados".</summary>
     public List<string>? ConferirCalculo { get; set; }
 
@@ -1625,6 +1657,13 @@ sealed class Esperado
 
     /// <summary>Trechos que precisam aparecer em alguma linha de Ligar tubos (uma por par).</summary>
     public List<string>? TextoDasLigacoes { get; set; }
+}
+
+sealed class PedidoDeslocarBico
+{
+    public double[] Perto { get; set; } = [0, 0];
+    public double Dx { get; set; }
+    public double Dy { get; set; }
 }
 
 sealed class AjusteMapeamento

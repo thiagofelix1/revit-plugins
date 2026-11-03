@@ -110,7 +110,8 @@ static class BicosPorAmbiente
             }
             criados.AddRange(deste);
             resultados.Add(new ResultadoAmbiente(ambiente, posicao.Bicos.Count, defletor, altura,
-                BicosNoAmbiente.Conferir(ambiente.Contornos, posicao.Bicos, limites, posicao.DirecaoDosRamais), null)
+                BicosNoAmbiente.Conferir(ambiente.Contornos, posicao.Bicos, limites, posicao.DirecaoDosRamais)
+                    .Concat(Obstrucoes(posicao.Bicos.Select((p, i) => new BicoNoEspaco($"{i}", p, defletor!.Value)).ToList(), edificio, limites)).ToList(), null)
             {
                 Criados = deste,
                 Posicao = posicao,
@@ -120,6 +121,11 @@ static class BicosPorAmbiente
         grupo.Assimilate();
         return resultados;
     }
+
+    /// <summary>Os bicos fora da Tabela 15, como falhas da conferência.</summary>
+    static IEnumerable<FalhaDeEspacamento> Obstrucoes(IReadOnlyList<BicoNoEspaco> bicos, Edificio edificio, LimitesDeBico limites) =>
+        ObstrucaoDeBico.Conferir(bicos, edificio.Vigas, limites.DistanciaMaxima)
+            .Select(o => new FalhaDeEspacamento(TipoDeFalha.Obstrucao, o.Ponto, o.PareceTrelica ? o.Descricao + "; parece treliça: confira 7.10.1.2.5 e 7.10.1.2.6" : o.Descricao));
 
     /// <summary>Confere os bicos que já estão em cada ambiente: espaçamento, área por bico, paredes e altura do defletor.</summary>
     public static IReadOnlyList<ResultadoAmbiente> Conferir(Document doc, Edificio edificio, IEnumerable<Ambiente> ambientes,
@@ -135,6 +141,7 @@ static class BicosPorAmbiente
                                           && BicosNoAmbiente.Dentro(ambiente.Contornos, b.Ponto!.Value)).ToList();
             var falhas = BicosNoAmbiente.Conferir(ambiente.Contornos, dentro.Select(b => b.Ponto!.Value).ToList(), limites,
                 (opcoes.Rumo ?? Direcao(opcoes.Direcao))).ToList();
+            falhas.AddRange(Obstrucoes(dentro.Select(b => new BicoNoEspaco(b.Bico.Id.Value.ToString(), b.Ponto!.Value, b.Defletor)).ToList(), edificio, limites));
             var (esperado, _, _, _) = Defletor(edificio, ambiente, limites, opcoes);
             var abaixoDaViga = Vigas(edificio, ambiente).Any();
             foreach (var b in dentro)
@@ -227,7 +234,7 @@ static class BicosPorAmbiente
     }
 
     /// <summary>Cota do defletor em m: a ponta da caixa do bico do lado oposto ao conector.</summary>
-    static double AlturaDoDefletor(FamilyInstance bico)
+    internal static double AlturaDoDefletor(FamilyInstance bico)
     {
         var caixa = bico.get_BoundingBox(null);
         if (caixa is null) return Metros((bico.Location as LocationPoint)?.Point.Z ?? 0);
