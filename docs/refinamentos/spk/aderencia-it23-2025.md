@@ -20,6 +20,7 @@ Conferência feita em 29/10/2026 contra a Instrução Técnica 23/2025 do Corpo 
 | Tubo ferroso no mínimo DN 25 | 11.1.1.1 | verificação de diâmetro e tabelas |
 | Número de bicos por ramal e de ramais por subgeral limitado só pela água | 11.1.1.2 | não há limite no cálculo; os diâmetros por tabela são do método antigo |
 | Teto com inclinação acima de 16,7 %: área de operação +30 % | 10.4.4.4 | ajuste da área |
+| Teto acima de 6,1 m em área sem armazenagem: K mínimo, densidade e área, K 360 e duração da reserva | 8.16.7, Tabelas 7, 8, 10 e 11 | `TetoAlto`: no Calcular, a falta reprova; o teto é o do ambiente do bico. Cobertura estendida (Tabela 9) fica com o engenheiro |
 
 ## O que é aviso, porque o modelo não diz
 

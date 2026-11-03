@@ -132,7 +132,9 @@ public class DescobrirFamiliasCommand : ExternalCommand
             ValorAreaCobertura = c.ValorAreaCobertura,
         }).ToList());
 
-        TaskDialog.Show("Spk — Mapeamento confirmado", "Mapeamento gravado neste projeto. Agora use Calcular.");
+        var soltos = BicosDoModelo.SoltarConfirmados(doc);
+        TaskDialog.Show("Spk — Mapeamento confirmado", "Mapeamento gravado neste projeto." +
+            (soltos > 0 ? $" {soltos} bico(s) gerados passam a usar o K e a área confirmados." : "") + " Agora use Calcular.");
     }
 
     static string NomesDeParametros(Element elemento) =>

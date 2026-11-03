@@ -327,6 +327,13 @@ static class TesteAutomatico
                            (geral is null ? "" : "; " + geral.Texto().Split('\n')[0]);
                 });
 
+            if (cenario.MapeamentoDepois is { Count: > 0 } depois)
+                Etapa(relatorio, "mapeamentoDepois", () =>
+                {
+                    var texto = AjustarMapeamento(doc!, depois);
+                    return $"{texto}; {BicosDoModelo.SoltarConfirmados(doc!)} bico(s) soltos da marca";
+                });
+
             if (cenario.LigarAGeral is { } pedidoGeral)
                 Etapa(relatorio, "ligarAGeral", () =>
                 {
@@ -940,6 +947,13 @@ static class TesteAutomatico
         foreach (var trecho in esperado.TextoDosBicos ?? [])
             if (!(r.Bicos ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
                 falhas.Add($"bicos por ambiente: \"{trecho}\" não apareceu");
+        var doCalculo = (c?.Falhas ?? []).Concat(c?.Avisos ?? []).ToList();
+        foreach (var trecho in esperado.TextoDoCalculo ?? [])
+            if (!doCalculo.Any(t => t.Contains(trecho, StringComparison.Ordinal)))
+                falhas.Add($"cálculo: \"{trecho}\" não apareceu nas falhas nem nos avisos");
+        foreach (var trecho in esperado.SemTextoNoCalculo ?? [])
+            if (doCalculo.Any(t => t.Contains(trecho, StringComparison.Ordinal)))
+                falhas.Add($"cálculo: \"{trecho}\" não devia aparecer");
         foreach (var trecho in esperado.TextoDosTubos ?? [])
             if (!(r.Tubos ?? []).Any(t => t.Contains(trecho, StringComparison.Ordinal)))
                 falhas.Add($"tubos: \"{trecho}\" não apareceu");
@@ -1320,6 +1334,9 @@ sealed class Cenario
     /// <summary>Contorno dos ambientes com estes nomes (ou parte deles) e onde os bicos cairiam, sem criar nada.</summary>
     public List<string>? InspecionarContornos { get; set; }
     public List<AjusteMapeamento>? Mapeamento { get; set; }
+
+    /// <summary>Como "mapeamento", depois de gerar a rede: o projetista confirmando a família em Famílias com os bicos já no modelo.</summary>
+    public List<AjusteMapeamento>? MapeamentoDepois { get; set; }
     public bool RedeExemplo { get; set; }
 
     /// <summary>Cenário da Rede de exemplo pelo nome (ou começo do nome). Grava os critérios dele se não houver "dados".</summary>
@@ -1517,6 +1534,12 @@ sealed class Esperado
     public List<string>? TextoDaArquitetura { get; set; }
 
     /// <summary>Trechos que precisam aparecer em alguma linha de inspecionarTubos (tipo, DN e segmento dos tubos).</summary>
+    /// <summary>Trechos que precisam aparecer em alguma falha ou aviso do cálculo.</summary>
+    public List<string>? TextoDoCalculo { get; set; }
+
+    /// <summary>Trechos que não podem aparecer nas falhas nem nos avisos do cálculo.</summary>
+    public List<string>? SemTextoNoCalculo { get; set; }
+
     public List<string>? TextoDosTubos { get; set; }
 
     /// <summary>Trechos que precisam aparecer em alguma linha de Bicos por ambiente (posicionar | ... e conferir | ...).</summary>

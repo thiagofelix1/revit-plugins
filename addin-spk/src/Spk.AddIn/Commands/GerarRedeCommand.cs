@@ -97,6 +97,7 @@ public class GerarRedeCommand : ExternalCommand
                 MainInstruction = $"Rede gerada em {redes.Count(r => r.Recusa is null)} de {redes.Count} ambiente(s)" +
                                   (geral is { Ligacao: { } l } ? $", {l.Ligadas} ligada(s) à geral" : ""),
                 MainContent = $"Tubos: {GeradorMalha.NomeDoTipo(doc, GeradorMalha.TipoComTe(doc, opcoes.TipoDeTubo))}\n\n" + string.Join("\n", redes.Select(r => r.Texto())) + (geral is null ? "" : "\n\n" + geral.Texto()) +
+                              (BicosDoModelo.AvisoDoFatorK(BicosDoModelo.SemConfirmar(doc).Count, DadosEsboco.Carregar(doc)) is { } avisoDoK ? "\n\n" + avisoDoK : "") +
                               "\n\nO que foi criado fica selecionado. Ctrl+Z desfaz cada etapa. Depois: Verificar modelo e Calcular.",
             }.Show();
         }

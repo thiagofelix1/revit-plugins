@@ -60,8 +60,10 @@ static class ServicoCalculo
     {
         ValidarFatorK(leitura.Bicos);
         var lida = LeitorRede.Montar(doc, leitura.Bicos, dados.FatorC, fonte, vgas, doSetor, indiceSetor);
-        var projeto = dados.CriarProjeto(leitura.Gerados ? "Malha gerada" : "Rede lida do modelo", lida.Rede);
+        var projeto = dados.CriarProjeto(leitura.Gerados ? "Malha gerada" : "Rede lida do modelo", lida.Rede) with { AlturaDoTeto = AlturasDoTeto(doc, dados, lida) };
         var relatorio = CalculoSpk.Executar(projeto);
+        // O K muda a pressão inteira: o aviso vem primeiro, e vai também para o memorial.
+        if (leitura.AvisoDoFatorK is { } avisoDoK) relatorio = relatorio with { Avisos = relatorio.Avisos.Prepend(avisoDoK).ToList() };
 
         var pasta = PastasSpk.Calculo;
         Directory.CreateDirectory(pasta);
@@ -71,6 +73,38 @@ static class ServicoCalculo
         var aviso = GravarNoModelo(doc, lida, relatorio, dados);
         return new Resultado(lida, relatorio, aviso, pasta);
     }
+
+    /// <summary>
+    /// A altura do teto sobre os bicos que podem estar sob teto alto: a do ambiente da arquitetura em que o bico está; sem
+    /// ambiente, a do próprio bico acima do nível, que é o mínimo que o teto tem. Abaixo de 5 m o bico não fica sob um teto de
+    /// 6,1 m (o defletor fica a no máximo 56 cm do teto) e a arquitetura nem é lida.
+    /// </summary>
+    static IReadOnlyDictionary<string, double>? AlturasDoTeto(Document doc, DadosProjeto dados, LeitorRede.RedeLida lida)
+    {
+        if (dados.Classe == Spk.Motor.Normas.ClasseRisco.Armazenamento) return null;
+        var candidatos = new List<(string Id, double X, double Y, double Z, double AcimaDoNivel)>();
+        foreach (var (id, elemento) in lida.Bicos)
+        {
+            if (doc.GetElement(elemento) is not FamilyInstance { Location: LocationPoint { Point: { } ponto } } bico
+                || doc.GetElement(bico.LevelId) is not Level nivel) continue;
+            var acima = Metros(ponto.Z - nivel.ProjectElevation);
+            if (acima >= 5) candidatos.Add((id, Metros(ponto.X), Metros(ponto.Y), Metros(ponto.Z), acima));
+        }
+        if (candidatos.Count == 0) return null;
+
+        var ambientes = Arquitetura.LeituraDoEdificio.Ler(doc).Ambientes;
+        var alturas = new Dictionary<string, double>();
+        foreach (var bico in candidatos)
+        {
+            var ponto = new Spk.Motor.Modelo.Ponto2(bico.X, bico.Y);
+            var ambiente = ambientes.FirstOrDefault(a => a.PeDireito is not null && a.Piso <= bico.Z && a.Teto + 0.1 >= bico.Z
+                                                         && Spk.Motor.Geracao.BicosNoAmbiente.Dentro(a.Contornos, ponto));
+            alturas[bico.Id] = ambiente?.PeDireito ?? bico.AcimaDoNivel;
+        }
+        return alturas;
+    }
+
+    static double Metros(double pes) => UnitUtils.ConvertFromInternalUnits(pes, UnitTypeId.Meters);
 
     /// <summary>
     /// Preenche os parâmetros SPK de bicos e tubos do setor e grava o resultado. Bicos fora da área ficam com pressão e

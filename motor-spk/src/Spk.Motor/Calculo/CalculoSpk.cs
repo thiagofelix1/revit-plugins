@@ -15,6 +15,9 @@ public sealed record ProjetoSpk(string Nome, Rede Rede, ClasseRisco Classe, Base
     public double? DuracaoMinutos { get; init; }
 
     public CurvaAbastecimento? Abastecimento { get; init; }
+
+    /// <summary>Altura do teto sobre cada chuveiro (Id → m), para as tabelas de teto alto; quem não está aqui não é teto alto.</summary>
+    public IReadOnlyDictionary<string, double>? AlturaDoTeto { get; init; }
 }
 
 public sealed record Verificacao(string Descricao, string Item, bool Atende, string Detalhe);
@@ -76,6 +79,7 @@ public static class CalculoSpk
         }
 
         var verificacoes = Verificar(projeto, resultado, busca, vazaoHidrantes, pressaoDisponivel);
+        verificacoes.AddRange(TetoAlto.Verificar(projeto, duracao));
         return new RelatorioSpk(projeto, resultado, busca, vazaoHidrantes, duracao, pressaoDisponivel, verificacoes, avisos);
     }
 

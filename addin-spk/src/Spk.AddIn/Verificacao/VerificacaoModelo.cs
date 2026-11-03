@@ -224,6 +224,14 @@ public static class VerificacaoModelo
                     "Sem VGA, o cálculo começa na ponta aberta do tubo mais grosso de cada rede. Em Famílias, marque a válvula de cada setor como Fonte.")
                     .Ocorrencias.Add(new Ocorrencia("Nenhuma família com o papel Fonte no mapeamento", []));
         }
+        else
+        {
+            var esboco = DadosEsboco.Carregar(doc);
+            var doEsboco = Novo(resultado, "bico-k-do-esboco", Gravidade.Aviso, "Bicos com K e área de Dados do esboço",
+                $"O cálculo usa K {esboco.FatorK:0.##} e {esboco.AreaM2:0.##} m² nestes bicos, não os da família. Em Famílias, confirme o tipo como Chuveiro com o K e a área dele.");
+            foreach (var tipo in BicosDoModelo.SemConfirmar(doc).GroupBy(b => (b.Symbol?.Family?.Name ?? "?", b.Symbol?.Name ?? "?")))
+                doEsboco.Ocorrencias.Add(new Ocorrencia($"{tipo.Key.Item1} : {tipo.Key.Item2} ({tipo.Count()} no modelo)", tipo.Select(b => b.Id).ToList()));
+        }
 
         resultado.Bicos = bicos.Count;
         resultado.Tubos = elementos.Count(e => e is MEPCurve && escopo.Contains(e.Id));
