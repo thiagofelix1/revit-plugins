@@ -17,6 +17,16 @@ public class TetoAltoTestes
         };
     }
 
+    [Fact]
+    public void Pressao_acima_de_2070_kPa_reprova_o_tubo_de_aco()
+    {
+        var alta = CalculoSpk.Executar(Projeto(80, 5, new BaseDensidadeArea(60, 140)));
+        var normal = CalculoSpk.Executar(Projeto(80, 5, new BaseDensidadeArea(8.1, 140)));
+
+        Assert.Contains(alta.Verificacoes, v => v.Item == "5.3.2" && !v.Atende);
+        Assert.Contains(normal.Verificacoes, v => v.Item == "5.3.2" && v.Atende);
+    }
+
     [Theory]
     [InlineData(ClasseRisco.Leve, 7.0, 80, 4, 140)]
     [InlineData(ClasseRisco.Leve, 12.0, 115, 8, 230)]

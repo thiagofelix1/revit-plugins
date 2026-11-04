@@ -2,7 +2,7 @@ using Spk.Motor.Modelo;
 
 namespace Spk.Motor.Normas;
 
-/// <summary>NBR 4 e 8.3. Armazenamento segue a IT-24 (ou a ABNT NBR 13792).</summary>
+/// <summary>NBR 4 e 8.3. Armazenamento segue a IT-24 (ou a ABNT NBR 16981).</summary>
 public enum ClasseRisco { Leve, Ordinario1, Ordinario2, Extraordinario1, Extraordinario2, Armazenamento }
 
 public enum TuboFatorC
@@ -26,6 +26,9 @@ public static class Nbr10897
 
     /// <summary>9.4.4.11 (só risco extra ou extraordinário).</summary>
     public const double PressaoMaximaRiscoExtra = 1210;
+
+    /// <summary>5.3.2: pressão até a qual valem os tubos de aço das NBR 5580 e 5590 (conferido na edição de 2014).</summary>
+    public const double PressaoMaximaTuboAco = 2070;
 
     /// <summary>9.4.3.1.</summary>
     public const double ToleranciaBalanceamento = 1.0;
@@ -57,7 +60,7 @@ public static class Nbr10897
         ClasseRisco.Leve => (380, 30),
         ClasseRisco.Ordinario1 or ClasseRisco.Ordinario2 => (950, 60),
         ClasseRisco.Extraordinario1 or ClasseRisco.Extraordinario2 => (1900, 90),
-        _ => throw new ArgumentException("Armazenamento: consultar a IT-24 ou a ABNT NBR 13792."),
+        _ => throw new ArgumentException("Armazenamento: consultar a IT-24 ou a ABNT NBR 16981."),
     };
 
     /// <summary>Tabela 30 (tubos novos).</summary>

@@ -322,6 +322,7 @@ static class GerarRede
                 var lida = LeitorRede.Montar(doc, leitura.Bicos, dados.FatorC, null, [], umBico.Id);
                 diametros = AplicarDiametros.Executar(doc, lida, DimensionamentoPorTabela.Calcular(lida.Rede, dados.Classe));
                 avisos.AddRange(diametros.Recusados.Distinct());
+                if (diametros.AvisoDeApertadas() is { } apertadas) avisos.Add(apertadas);
             }
             catch (InvalidOperationException e)
             {
@@ -646,6 +647,7 @@ static class GerarRede
                 var lida = LeitorRede.Montar(doc, leitura.Bicos, dados.FatorC, null, [], ligado.Id);
                 diametros = AplicarDiametros.Executar(doc, lida, DimensionamentoPorTabela.Calcular(lida.Rede, dados.Classe));
                 avisos.AddRange(diametros.Recusados.Distinct());
+                if (diametros.AvisoDeApertadas() is { } apertadas) avisos.Add(apertadas);
             }
             catch (InvalidOperationException e)
             {

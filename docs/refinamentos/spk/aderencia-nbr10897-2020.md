@@ -68,13 +68,80 @@ O tratamento das conexões (9.4.4.7) foi conferido só pela leitura do código, 
 - **Vigotas e terças:** 7.8.1.2 e suas exceções, mais a Tabela 15.
 - **Sala pequena:** 7.6.2 e 7.7.2.1.3 permitem.
 - **Setor menor que a área de operação:** 8.5.4 a confirma a densidade de 140 m².
-- **Gôndolas:** 4.4 manda qualquer armazenamento, mesmo transitório e de qualquer altura, para a NBR 13792. O Anexo A cita lojas como Ordinário 2. A decisão continua com o engenheiro.
+- **Gôndolas:** 4.4 manda qualquer armazenamento, mesmo transitório e de qualquer altura, para a NBR 13792, cancelada e substituída pela NBR 16981:2021. O Anexo A cita lojas como Ordinário 2. A decisão continua com o engenheiro: ver abaixo o que a 16981 acrescenta.
 - **Classes do Anexo A úteis no MNEVVM:** lojas Ordinário 2; padaria e área de serviço de restaurante Ordinário 1; área de refeição e escritórios Leve.
+
+## NBR 16981:2021 e as gôndolas
+
+Conferência de 03/11/2026, sem mudança no código. Fonte: cópia da 1ª edição da NBR 16981 (28/07/2021), não licenciada para este projeto; a re-checar na norma oficial. Só itens e números. Lido por seções e Anexo A; do Anexo B, as regras de obstrução (B.3.1.5) e o detalhe de intraprateleiras (B.4) só por alto.
+
+A 16981 cancela a NBR 13792:1997 e é usada junto com a NBR 10897.
+
+| Tema | Item da 16981 | O que diz | Efeito no SPK, se a área for armazenamento |
+|---|---|---|---|
+| Gôndola | Toda a norma | As palavras "gôndola" e "supermercado" não aparecem | Enquadramento é decisão do engenheiro |
+| Até 3,7 m, classes I a IV | 5.2.1.1, 6.2.1.1, Tabela 62 | Mesmas exigências do transitório. O 5.2.1.1 cita a Tabela 58 por engano; lido como 62 | Classe I a IV define a curva, sem depender de ser transitório |
+| Hidrantes e duração | Tabela 62 | ORD1 e ORD2: 950 L/min por 90 min. EXT1: 1 900 L/min por 120 min | A Tabela 29 da 10897 dá 60 min em Ordinário: reserva maior |
+| Curvas | Figura 84 | Leitura do gráfico: ORD2 de 139 m² → 8,1 a 279 m² → cerca de 6,9 | Na área mínima, a densidade de ORD2 é a mesma da 10897 |
+| K mínimo | 4.2.2 | Densidade acima de 8,1 pede K 115; acima de 13,9, K 160 certificado | O motor não confere; só o teto alto tem K mínimo. Regra a criar se a área for armazenamento |
+| Atacarejo | B.5.1, Anexo B (informativo) | Porta-palete até 6,0 m como prateleira aberta, com condições. O Anexo B não se mistura com as seções 4 a 8 (B.1.3) | Caminho próprio, por número de chuveiros e pressão, fora do que o SPK calcula |
+
+A classe de mercadoria (I a IV, plásticos) é outra classificação, diferente do risco da 10897. Hoje o SPK tem uma classe só por projeto.
+
+**Pergunta ao engenheiro:** a área de vendas é loja (Ordinário 2 pelo Anexo A da 10897) ou armazenamento (16981)? Exemplo de ordem de grandeza, com 8,1 mm/min e cerca de 140 m²: 125 m³ de reserva como Ordinário 2 e 187 m³ como classe III até 3,7 m.
+
+## NBR 5580 e NBR 5590: diâmetros internos
+
+As correções no código que saíram desta conferência, e o que ainda falta, estão em [aderencia-tubos-e-bombas.md](aderencia-tubos-e-bombas.md): os temas `TubosAco`, DN 90, interno vindo do Revit e Tabela 3 da tabela abaixo já foram tratados lá.
+
+Conferência de 03/11/2026. Fontes: cópias da NBR 5590:2015 (4ª edição) e da NBR 5580:2002, não licenciadas para este projeto; a re-checar na norma oficial. A edição da 5580 precisa ser conferida: a 10897 a cita com outro título. Os internos são calculados: externo − 2 × espessura nominal.
+
+| DN | 5580 L | 5580 M | 5590 Sch 10 | 5590 Sch 40 |
+|---|---|---|---|---|
+| 25 | 28,4 | 27,0 | 27,9 | 26,6 |
+| 32 | 37,1 | 35,7 | 36,7 | 35,1 |
+| 40 | 42,3 | 41,6 | 42,8 | 40,9 |
+| 50 | 54,3 | 52,8 | 54,8 | 52,5 |
+| 65 | 69,4 | 68,6 | 66,9 | 62,7 |
+| 80 | 82,2 | 80,9 | 82,8 | 77,9 |
+| 90 | 94,1 | 93,1 | 95,5 | 90,1 |
+| 100 | 106,8 | 105,3 | 108,2 | 102,3 |
+| 125 | Não há | 130,2 | 134,5 | 128,2 |
+| 150 | Não há | 155,1 | 161,5 | 154,1 |
+| 200 | Não há | Não há | 211,6 | 202,7 |
+
+| Tema | O que há | Efeito no SPK |
+|---|---|---|
+| `TubosAco` | Sch 10 e Sch 40 de ASME B36.10 conferem com a Tabela A.4 da 5590, com diferença de até 0,05 mm, vinda do arredondamento do diâmetro externo. DN 90 não está lá, e a classe 5580 também não | O "CONFERIR" de `Conexoes.cs:70` fica respondido para a 5590. Falta decidir se a 5580 entra |
+| DN 90 | Existe nas duas normas e em `TabelaDeDiametros` | `ComprimentosEquivalentes` não tem DN 90: a conexão fica sem comprimento equivalente, com aviso (`LeitorRede.cs:393`). Perda menor que a real |
+| DN 150 Sch 40 e Sch 80 | A Tabela A.4 tem 15 espessuras e 14 rótulos: marca STD e 40 em 6,35 mm e XS e 80 em 9,52 mm; a A.5 usa 7,11 mm e 10,97 mm | Mantidos os valores da A.5, a confirmar na norma oficial |
+| Interno vindo do Revit | `LeitorRede.cs:1101` lê do tipo de tubo, sem comparar com nenhuma tabela | Tipo errado muda a perda sem aviso: DN 50 com Sch 10 no lugar de Sch 40 dá cerca de 19 % a menos; DN 65 com 5580 M no lugar de Sch 40, cerca de 35 % a menos |
+| Mesmo DN, externo diferente | DN 65: 76,1 mm na 5580 e 73,0 mm na 5590. DN 125 e DN 150 também diferem. Rosca ISO 7-1 na 5580 e NPT na 5590 | Projetista precisa saber qual norma o tipo de tubo segue |
+| Classe leve da 5580 | Só até DN 100 | Acima disso, classe M ou 5590 |
+| Tabela 3 da 10897 (edição 2014) | Parede mínima coincide com Sch 10 até DN 150; em DN 200 pede 4,78 mm, e o Sch 10 tem 3,76 mm | Sem conferência no SPK |
+
+## NBR 16704: bombas
+
+Conferência de 03/11/2026, sem mudança no código. Fonte: cópia da 1ª edição (27/02/2019), não licenciada para este projeto; a re-checar na norma oficial. Lido no detalhe: seções 1 a 8 e 12 e Anexo A. Seções 9 a 11 (painéis e diesel), só os títulos dos itens e os valores principais. Tabelas lidas pelo texto extraído, sem conferir na imagem.
+
+| Tema | Item | O que diz | Efeito no SPK |
+|---|---|---|---|
+| Escolha da bomba | 4.8.1, Anexo A | Vazão de projeto até 150 % da nominal; boa prática de 90 a 120 % | Regra para "Sugerir a bomba pela curva" |
+| Vazões nominais | Tabela 1 | Lista padronizada, de 95 a 18 925 L/min | Idem |
+| Pressão nominal | 4.8.2 | Pelo menos 2,7 bar | Idem |
+| Curva | 6.2 | Sem vazão, até 140 % da pressão nominal; a 150 % da vazão, pelo menos 65 % | `CurvaAbastecimento` só interpola os pontos informados e não confere isso |
+| Diâmetros | Tabela 2 | Sucção, descarga, alívio, medidor e cabeçote por vazão nominal | Serve para "Tubo geral até a casa de bombas" e para o quadro de bombas |
+| Sucção | 4.14.3.1, 6.1.2 | Sem pressão negativa; até −0,2 bar no flange com tanque na cota da bomba ou acima | Fora do cálculo hoje |
+| Casa de bombas | 4.12 | TRRF de 2 h; fora do prédio, a 15 m; diesel com chuveiros | Fora do que o SPK verifica; o projetista responde |
+| Ensaio | 12.1, 12.2 | 13,8 bar, ou 3,4 bar acima da máxima, por 2 h; em campo, 6 + 6 partidas e 1 h no total | Fora do que o SPK verifica |
+
+Exemplo de ordem de grandeza: demanda de 2 076 L/min leva à bomba de 1 892 L/min, operando a 110 %.
+
+A 16704 difere do Anexo B da 10897 de 2014 em sucção, ciclo de partida do diesel e fonte de energia. A comparação com a edição de 2020 ainda não foi feita. **Pergunta ao engenheiro:** para projeto novo, seguir a 16704 onde as duas divergem?
 
 ## Normas que faltam
 
-- ABNT NBR 13792 (armazenamento): pesa na decisão das gôndolas.
-- ABNT NBR 5580, NBR 5590 e NBR 13206: diâmetros internos dos tubos.
-- ABNT NBR 16704 (bombas) e NBR 13714 (hidrantes): quando o cálculo for até a bomba.
+- ABNT NBR 13206: diâmetros internos dos tubos de cobre.
+- ABNT NBR 13714 (hidrantes): quando o cálculo for até a bomba.
 - IT-24 vigente: a do repositório é de 2019.
 - IT-23 no site oficial: a usada é uma cópia, e a Portaria CCB-009/800/2025 anuncia alteração.

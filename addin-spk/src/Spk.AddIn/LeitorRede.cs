@@ -131,6 +131,9 @@ static class LeitorRede
                            "Confira no Revit a classificação do sistema dos tubos de sprinkler (deveria ser proteção contra incêndio).");
         }
 
+        var material = MaterialDaRede(doc, tuboDoTrecho.Values);
+        for (var i = 0; i < trechos.Count; i++) trechos[i] = trechos[i] with { Material = material };
+
         var soltos = bicos.Count - ligados.Count;
         if (soltos > 0) avisos.Add($"ATENÇÃO: {soltos} de {bicos.Count} bico(s) sem tubo ligado ficaram fora do cálculo: o resultado vale só para os ligados. Veja em Verificar modelo.");
         if (ligados.Count == 0) throw new InvalidOperationException("Nenhum bico confirmado está ligado a um tubo.");
@@ -292,7 +295,21 @@ static class LeitorRede
         return $"VGA {vga.Id.Value}";
     }
 
-    static readonly int[] DnsTabelados = [25, 32, 40, 50, 65, 80, 100, 125, 150, 200];
+    static readonly int[] DnsTabelados = [25, 32, 40, 50, 65, 80, 90, 100, 125, 150, 200];
+
+    /// <summary>
+    /// O material pelo nome do tipo e do segmento dos tubos, o mais comum na rede: o DN mínimo (9.4.1.2) e o limite de pressão (5.3.2)
+    /// dependem dele. Um nome que não diz o material conta como aço, o caso mais exigente.
+    /// </summary>
+    static Spk.Motor.Modelo.Material MaterialDaRede(Document doc, IEnumerable<ElementId> tubos) =>
+        tubos.Distinct().Select(doc.GetElement).OfType<Pipe>()
+            .GroupBy(t => Nbr10897.TuboPeloNome($"{t.PipeType.Name} {t.PipeSegment?.Name}", false) switch
+            {
+                TuboFatorC.CobreOuInox => Spk.Motor.Modelo.Material.Cobre,
+                TuboFatorC.PlasticoCertificado => Spk.Motor.Modelo.Material.Outro,
+                _ => Spk.Motor.Modelo.Material.Aco,
+            })
+            .OrderByDescending(g => g.Count()).Select(g => g.Key).DefaultIfEmpty(Spk.Motor.Modelo.Material.Aco).First();
 
     /// <summary>
     /// Soma o comprimento equivalente das conexões e válvulas (NBR 9.4.3.4) no trecho ligado a elas.
@@ -444,12 +461,19 @@ static class LeitorRede
 
     /// <summary>
     /// Peça ligada direto a outra peça, sem tubo no meio (cotovelo com luva de redução, tê com válvula): um trecho curto
-    /// entre os nós das duas, com o diâmetro do conector; sem ele a rede se parte ali. Bico ligado em peça é com LigarBicos.
+    /// entre os nós das duas, com o DN do conector; sem ele a rede se parte ali. Bico ligado em peça é com LigarBicos.
     /// </summary>
     /// <returns>O trecho de cada par de peças (pela chave <see cref="Par" />).</returns>
     static Dictionary<string, int> LigarPecas(Document doc, SortedSet<ElementId> naRede, HashSet<ElementId> idsBico,
         Dictionary<string, No> nos, List<Trecho> trechos, ref int seq, double fatorC)
     {
+        // O conector dá o nominal, e a perda de carga pede o interno real (9.4.2.1.1): o do mesmo DN no segmento dos tubos da rede.
+        var tamanhos = naRede.Select(doc.GetElement).OfType<Pipe>().Select(t => t.PipeSegment).OfType<PipeSegment>()
+            .GroupBy(s => s.Id).SelectMany(g => g.First().GetSizes()).ToList();
+        double Interno(double nominal) =>
+            tamanhos.Where(t => t.InnerDiameter > 1e-6 && Math.Abs(Milimetros(t.NominalDiameter) - nominal) < 0.5)
+                .Select(t => Milimetros(t.InnerDiameter)).DefaultIfEmpty(nominal).First();
+
         var entrePecas = new Dictionary<string, int>(StringComparer.Ordinal);
         foreach (var id in naRede)
         {
@@ -465,7 +489,7 @@ static class LeitorRede
                 if (mm <= 0) mm = 25;
                 var distancia = Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y) + (a.Z - b.Z) * (a.Z - b.Z));
                 entrePecas[par] = trechos.Count;
-                trechos.Add(new Trecho($"T{seq++}", a.Id, b.Id, mm, Math.Max(distancia, 0.001), fatorC)
+                trechos.Add(new Trecho($"T{seq++}", a.Id, b.Id, Interno(mm), Math.Max(distancia, 0.001), fatorC)
                 {
                     DiametroNominal = (int)Math.Round(mm),
                 });

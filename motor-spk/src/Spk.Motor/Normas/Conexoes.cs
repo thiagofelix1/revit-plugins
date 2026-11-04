@@ -18,18 +18,18 @@ public enum TipoConexao
 /// </summary>
 public static class ComprimentosEquivalentes
 {
-    static readonly int[] Dns = [25, 32, 40, 50, 65, 80, 100, 125, 150, 200];
+    static readonly int[] Dns = [25, 32, 40, 50, 65, 80, 90, 100, 125, 150, 200];
 
     // Valores em pés, na ordem de Dns. NaN = não tabelado.
     static readonly Dictionary<TipoConexao, double[]> Pes = new()
     {
-        [TipoConexao.Cotovelo45] = [1, 1, 2, 2, 3, 3, 4, 5, 7, 9],
-        [TipoConexao.Cotovelo90Padrao] = [2, 3, 4, 5, 6, 7, 10, 12, 14, 18],
-        [TipoConexao.Cotovelo90Longo] = [2, 2, 2, 3, 4, 5, 6, 8, 9, 13],
-        [TipoConexao.TeOuCruzetaFluxoDesviado] = [5, 6, 8, 10, 12, 15, 20, 25, 30, 35],
-        [TipoConexao.ValvulaBorboleta] = [double.NaN, double.NaN, double.NaN, 6, 7, 10, 12, 9, 10, 12],
-        [TipoConexao.ValvulaGaveta] = [double.NaN, double.NaN, double.NaN, 1, 1, 1, 2, 2, 3, 4],
-        [TipoConexao.ValvulaRetencao] = [5, 7, 9, 11, 14, 16, 22, 27, 32, 45],
+        [TipoConexao.Cotovelo45] = [1, 1, 2, 2, 3, 3, 3, 4, 5, 7, 9],
+        [TipoConexao.Cotovelo90Padrao] = [2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 18],
+        [TipoConexao.Cotovelo90Longo] = [2, 2, 2, 3, 4, 5, 5, 6, 8, 9, 13],
+        [TipoConexao.TeOuCruzetaFluxoDesviado] = [5, 6, 8, 10, 12, 15, 17, 20, 25, 30, 35],
+        [TipoConexao.ValvulaBorboleta] = [double.NaN, double.NaN, double.NaN, 6, 7, 10, double.NaN, 12, 9, 10, 12],
+        [TipoConexao.ValvulaGaveta] = [double.NaN, double.NaN, double.NaN, 1, 1, 1, 1, 2, 2, 3, 4],
+        [TipoConexao.ValvulaRetencao] = [5, 7, 9, 11, 14, 16, 19, 22, 27, 32, 45],
     };
 
     static readonly (double C, double Fator)[] CorrecaoC = [(100, 0.713), (120, 1.0), (130, 1.16), (140, 1.33), (150, 1.51)];
@@ -67,19 +67,22 @@ public static class ComprimentosEquivalentes
     }
 }
 
-/// <summary>Diâmetros internos (mm) de tubos de aço ASME B36.10. CONFERIR quais tubos o projetista usa (NBR 5580, NBR 5590).</summary>
+/// <summary>
+/// Diâmetros internos (mm) de tubos de aço ASME B36.10, referência dos comprimentos equivalentes. Conferem com a NBR 5590:2015,
+/// Tabela A.4, com até 0,05 mm de diferença. As classes de cada norma estão em <see cref="TubosNormalizados" />.
+/// </summary>
 public static class TubosAco
 {
     static readonly Dictionary<int, double> Sch40 = new()
     {
         [25] = 26.64, [32] = 35.05, [40] = 40.89, [50] = 52.50, [65] = 62.71,
-        [80] = 77.93, [100] = 102.26, [125] = 128.19, [150] = 154.05, [200] = 202.72,
+        [80] = 77.93, [90] = 90.12, [100] = 102.26, [125] = 128.19, [150] = 154.05, [200] = 202.72,
     };
 
     static readonly Dictionary<int, double> Sch10 = new()
     {
         [25] = 27.86, [32] = 36.62, [40] = 42.72, [50] = 54.79, [65] = 66.93,
-        [80] = 82.80, [100] = 108.20, [125] = 134.50, [150] = 161.47, [200] = 211.56,
+        [80] = 82.80, [90] = 95.50, [100] = 108.20, [125] = 134.50, [150] = 161.47, [200] = 211.56,
     };
 
     public static double Schedule40(int diametroNominal) =>

@@ -447,6 +447,13 @@ static class TesteAutomatico
             if (cenario.InspecionarVistas)
                 relatorio.Folhas = new ResumoFolhas { Vistas = Diagnostico.Vistas(doc!) };
 
+            if (cenario.Esperado?.PecasApertadas is not null)
+                Etapa(relatorio, "pecasApertadas", () =>
+                {
+                    relatorio.PecasApertadas = AplicarDiametros.Apertadas(doc!, new FilteredElementCollector(doc!).OfClass(typeof(Autodesk.Revit.DB.Plumbing.Pipe)).ToElementIds());
+                    return $"{relatorio.PecasApertadas.Count} tê(s) ou cruzeta(s) mais estreitos que os tubos";
+                });
+
             if (cenario.Verificar)
                 Etapa(relatorio, "verificar", () =>
                 {
@@ -996,6 +1003,8 @@ static class TesteAutomatico
             if (r.Diametros is { } d && d.Recusados.Count + d.Divergentes.Count + d.Inseridas.Count > 0)
                 falhas.Add($"diâmetros: {d.Recusados.Count} recusa(s), {d.Divergentes.Count} divergência(s), {d.Inseridas.Count} peça(s) inserida(s)");
         }
+        if (esperado.PecasApertadas is { } apertadas && r.PecasApertadas?.Count != apertadas)
+            falhas.Add($"peças apertadas: esperado {apertadas}, veio {r.PecasApertadas?.Count}: {string.Join("; ", (r.PecasApertadas ?? []).Take(3))}");
         if (esperado.RamaisTracados is { } tracados && r.Ligacao?.Ramais != tracados)
             falhas.Add($"traçar ramais: esperado {tracados} ramais, veio {r.Ligacao?.Ramais}");
         if (esperado.BicosLigados is { } ligados && r.Ligacao?.Ligados != ligados)
@@ -1616,6 +1625,9 @@ sealed class Esperado
     /// <summary>Quantos tubos ficaram com cada DN ("25": 4); sem recusa nem divergência.</summary>
     public Dictionary<string, int>? Diametros { get; set; }
 
+    /// <summary>Tês e cruzetas mais estreitos que os tubos dos dois lados, em todo o modelo.</summary>
+    public int? PecasApertadas { get; set; }
+
     /// <summary>A reconexão não pode desfazer ligação que existia: ligações depois ≥ antes + feitas.</summary>
     public bool? ReconexaoSemPerda { get; set; }
 
@@ -1709,6 +1721,7 @@ sealed class RelatorioCenario
     public List<string>? Cores { get; set; }
     public List<string>? Material { get; set; }
     public ResumoDiametros? Diametros { get; set; }
+    public List<string>? PecasApertadas { get; set; }
     public List<string>? ConexoesAntes { get; set; }
     public List<string>? Conexoes { get; set; }
     public List<string>? Carimbos { get; set; }

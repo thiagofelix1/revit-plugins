@@ -174,6 +174,13 @@ public static class CalculoSpk
                 maior <= Nbr10897.PressaoMaximaRiscoExtra, $"maior pressão {maior:0} kPa"));
         }
 
+        if (p.Rede.Trechos.Any(t => t.Material == Material.Aco))
+        {
+            var maior = Math.Max(r.PressaoNecessaria, r.Trechos.Select(t => t.PressaoMontante).DefaultIfEmpty(0).Max());
+            v.Add(new Verificacao("Pressão em tubos de aço até 2 070 kPa", "5.3.2",
+                maior <= Nbr10897.PressaoMaximaTuboAco, $"maior pressão {maior:0} kPa"));
+        }
+
         var abaixo = p.Rede.Trechos
             .Where(t => t.DiametroNominal is { } dn && dn < Nbr10897.DiametroNominalMinimo(t.Material))
             .Select(t => t.Id).ToList();

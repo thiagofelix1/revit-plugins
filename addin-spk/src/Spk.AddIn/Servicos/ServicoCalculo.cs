@@ -77,8 +77,9 @@ static class ServicoCalculo
         if (leitura.AvisoDoFatorK is { } avisoDoK) atencao = atencao.Append(avisoDoK);
         atencao = atencao.Concat(AvisosDaInclinacao(doc, dados, lida, ambientes));
         var (fatorCAtencao, fatorCInforma) = AvisosDoFatorC(doc, dados, lida);
-        atencao = atencao.Concat(fatorCAtencao);
-        relatorio = relatorio with { Avisos = atencao.Concat(relatorio.Avisos).Concat(fatorCInforma).ToList() };
+        var (tubosAtencao, tubosInforma) = AvisosDosTubos(doc, lida);
+        atencao = atencao.Concat(fatorCAtencao).Concat(tubosAtencao);
+        relatorio = relatorio with { Avisos = atencao.Concat(relatorio.Avisos).Concat(fatorCInforma).Concat(tubosInforma).ToList() };
 
         var pasta = PastasSpk.Calculo;
         Directory.CreateDirectory(pasta);
@@ -166,6 +167,24 @@ static class ServicoCalculo
                 atencao.Add($"ATENÇÃO: {grupo.Count()} tubo(s) {grupo.Key.Nome}{(grupo.Key.Seco ? " em sistema seco" : "")}: a Tabela 30 dá C {tabela:0}, e o cálculo usou C {dados.FatorC:0}. A pressão calculada fica menor que a real: ajuste em Dados do projeto.");
             else if (dados.FatorC < tabela - 1e-6)
                 informa.Add($"{grupo.Count()} tubo(s) {grupo.Key.Nome}: a Tabela 30 dá C {tabela:0}, e o cálculo usou C {dados.FatorC:0}, a favor da segurança.");
+        }
+        return (atencao, informa);
+    }
+
+    /// <summary>O diâmetro interno dos tubos do setor contra as NBR 5580 e 5590, por tipo e segmento. O tubo é do projetista: só avisa.</summary>
+    static (List<string> Atencao, List<string> Informa) AvisosDosTubos(Document doc, LeitorRede.RedeLida lida)
+    {
+        var (atencao, informa) = (new List<string>(), new List<string>());
+        var tubos = lida.Tubos.Values.Distinct().Select(doc.GetElement).OfType<Autodesk.Revit.DB.Plumbing.Pipe>();
+        foreach (var grupo in tubos.GroupBy(t => t.PipeSegment is { } segmento ? $"{t.PipeType.Name} ({segmento.Name})" : t.PipeType.Name))
+        {
+            var medidas = grupo
+                .Select(t => (Nominal: t.get_Parameter(BuiltInParameter.RBS_PIPE_DIAMETER_PARAM)?.AsDouble() ?? 0, Interno: t.get_Parameter(BuiltInParameter.RBS_PIPE_INNER_DIAM_PARAM)?.AsDouble() ?? 0))
+                .Where(m => m.Nominal > 1e-6 && m.Interno > 1e-6)
+                .Select(m => ((int)Math.Round(Metros(m.Nominal) * 1000), Math.Round(Metros(m.Interno) * 1000, 2)));
+            var (doTipoAtencao, doTipoInforma) = Spk.Motor.Normas.TubosNormalizados.Conferir(grupo.Key, medidas);
+            atencao.AddRange(doTipoAtencao);
+            informa.AddRange(doTipoInforma);
         }
         return (atencao, informa);
     }
