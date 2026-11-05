@@ -56,6 +56,7 @@ public class DiametrosCommand : ExternalCommand
                 TaskDialog.Show(Titulo, "Nenhum tubo do modelo nesse setor para dimensionar.");
                 return;
             }
+            var pontas = AplicarDiametros.PontasForaDaLinha(doc, plano.Lida, pedido);
             var previa = new TaskDialog(Titulo)
             {
                 MainInstruction = $"Diâmetros por tabela em {pedido.Count} tubos ({plano.Lida.Setor})",
@@ -64,12 +65,23 @@ public class DiametrosCommand : ExternalCommand
                               "Pela tabela: " + string.Join(", ", pedido.Values.GroupBy(d => d).OrderBy(g => g.Key)
                                   .Select(g => $"DN {g.Key}: {g.Count()}")) +
                               (plano.Dimensionamento.Avisos.Count > 0 ? "\n\n" + string.Join("\n", plano.Dimensionamento.Avisos.Select(a => "• " + a)) : "") +
-                              "\n\nO DN vira o menor tamanho do tubo que não fica abaixo da tabela. Ctrl+Z desfaz tudo.",
-                CommonButtons = TaskDialogCommonButtons.Ok | TaskDialogCommonButtons.Cancel,
+                              "\n\nO DN vira o menor tamanho do tubo que não fica abaixo da tabela. Ctrl+Z desfaz tudo." +
+                              (pontas.Count > 0
+                                  ? $"\n\n{pontas.Count} ponta(s) sem água depois da última derivação ficariam em DN diferente da linha. A tabela não dá DN a elas. " +
+                                    "Uma ponta mais larga deixa a peça ao lado maior que a linha, e a pressão calculada pode ficar menor que a real. " +
+                                    "Mantenha a ponta só se ela for de uma ampliação prevista."
+                                  : ""),
+                CommonButtons = pontas.Count > 0 ? TaskDialogCommonButtons.Cancel : TaskDialogCommonButtons.Ok | TaskDialogCommonButtons.Cancel,
             };
-            if (previa.Show() != TaskDialogResult.Ok) return;
+            if (pontas.Count > 0)
+            {
+                previa.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Aplicar e ajustar as pontas", "Cada ponta fica no DN do tubo em linha com ela.");
+                previa.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Aplicar sem mexer nas pontas", "O Calcular vai avisar se alguma ponta ficar mais larga que a linha.");
+            }
+            var resposta = previa.Show();
+            if (resposta is not (TaskDialogResult.Ok or TaskDialogResult.CommandLink1 or TaskDialogResult.CommandLink2)) return;
 
-            var resultado = AplicarDiametros.Executar(doc, plano.Lida, plano.Dimensionamento);
+            var resultado = AplicarDiametros.Executar(doc, plano.Lida, plano.Dimensionamento, ajustarPontas: resposta == TaskDialogResult.CommandLink1);
             if (resultado.Alterados.Count > 0) ui.Selection.SetElementIds(resultado.Alterados.ToList());
 
             var fim = new TaskDialog(Titulo)

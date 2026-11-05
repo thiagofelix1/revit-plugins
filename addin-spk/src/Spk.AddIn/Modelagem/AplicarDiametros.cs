@@ -71,32 +71,59 @@ static class AplicarDiametros
     }
 
     /// <summary>
-    /// A ponta de tubo depois do último tê ou cruzeta não leva água, e a tabela não dá DN a ela. Fica no DN do tubo em linha com
-    /// ela, do outro lado da peça: no DN do esboço, deixaria a peça maior que a linha. Só na rede que a geração acabou de criar:
-    /// uma ponta que o projetista deixou, para uma ampliação por exemplo, fica como está.
+    /// A ponta de tubo depois do último tê ou cruzeta não leva água, e a tabela não dá DN a ela: de um lado a peça, do outro nada
+    /// ou um tampão. O tubo da entrada da rede também tem uma ponta solta, mas leva água, e não entra. Junto vem o tubo em linha
+    /// com ela, do outro lado da peça.
     /// </summary>
-    static Dictionary<ElementId, int> PontasSemAgua(Document doc, LeitorRede.RedeLida lida, Dictionary<ElementId, int> pedido)
+    static List<(Pipe Ponta, Pipe Linha)> PontasELinhas(Document doc, LeitorRede.RedeLida lida)
     {
-        var pontas = new Dictionary<ElementId, int>();
-        foreach (var tubo in lida.Tubos.Values.Distinct().Where(id => !pedido.ContainsKey(id)).Select(doc.GetElement).OfType<Pipe>())
+        var daEntrada = lida.Rede.Trechos.Where(t => t.De == lida.Rede.NoFonte || t.Para == lida.Rede.NoFonte)
+            .Select(t => lida.Tubos.TryGetValue(t.Id, out var id) ? id : null).OfType<ElementId>().ToHashSet();
+        var pares = new List<(Pipe Ponta, Pipe Linha)>();
+        foreach (var tubo in lida.Tubos.Values.Distinct().Where(id => !daEntrada.Contains(id)).Select(doc.GetElement).OfType<Pipe>())
         {
-            if (Ligados(tubo) != 1 || Direcao(tubo) is not { } direcao) continue;
-            var pecas = Vizinhas(tubo).Where(p => p.MEPModel is MechanicalFitting { PartType: PartType.Tee or PartType.Cross }).ToList();
+            if (Direcao(tubo) is not { } direcao) continue;
+            var vizinhas = Vizinhas(tubo);
+            var tampoes = vizinhas.Count(p => p.MEPModel is MechanicalFitting { PartType: PartType.Cap });
+            if (Ligados(tubo) != 1 + tampoes) continue;
+            var pecas = vizinhas.Where(p => p.MEPModel is MechanicalFitting { PartType: PartType.Tee or PartType.Cross }).ToList();
             if (pecas is not [var peca]) continue;
             var emLinha = TubosDasBocas(peca).Tubos
-                .Where(t => t.Id != tubo.Id && pedido.ContainsKey(t.Id) && Direcao(t) is { } outra && Math.Abs(outra.DotProduct(direcao)) > 0.99).ToList();
-            if (emLinha is [var linha]) pontas[tubo.Id] = pedido[linha.Id];
+                .Where(t => t.Id != tubo.Id && Direcao(t) is { } outra && Math.Abs(outra.DotProduct(direcao)) > 0.99).ToList();
+            if (emLinha is [var linha]) pares.Add((tubo, linha));
         }
-        return pontas;
+        return pares;
     }
+
+    /// <summary>O DN de cada ponta sem água, se ela acompanhar a linha. No DN do esboço, ela deixaria a peça maior que a linha.</summary>
+    static Dictionary<ElementId, int> PontasSemAgua(Document doc, LeitorRede.RedeLida lida, Dictionary<ElementId, int> pedido) =>
+        PontasELinhas(doc, lida).Where(p => !pedido.ContainsKey(p.Ponta.Id) && pedido.ContainsKey(p.Linha.Id))
+            .ToDictionary(p => p.Ponta.Id, p => pedido[p.Linha.Id]);
+
+    /// <summary>As pontas sem água que ficariam em DN diferente da linha depois da tabela. Uma ponta pode ser do projetista, para uma ampliação: ele decide.</summary>
+    public static List<ElementId> PontasForaDaLinha(Document doc, LeitorRede.RedeLida lida, Dictionary<ElementId, int> pedido) =>
+        PontasSemAgua(doc, lida, pedido)
+            .Where(p => doc.GetElement(p.Key) is Pipe ponta && Tamanho(doc, ponta, p.Value) is { } pes && Math.Abs(Diametro(ponta) - pes) > 1e-6)
+            .Select(p => p.Key).ToList();
+
+    /// <summary>
+    /// Pontas sem água mais largas que a linha, como estão no modelo. A peça sai no DN da ponta, e a perda do desvio cai num trecho
+    /// largo: a pressão calculada fica menor que a real.
+    /// </summary>
+    public static List<ElementId> PontasLargas(Document doc, LeitorRede.RedeLida lida) =>
+        PontasELinhas(doc, lida).Where(p => Diametro(p.Ponta) > Diametro(p.Linha) + 1e-6).Select(p => p.Ponta.Id).ToList();
+
+    public static string? AvisoDePontasLargas(int pontas) => pontas == 0 ? null :
+        $"ATENÇÃO: {pontas} ponta(s) sem água mais larga(s) que a linha. A peça ao lado acompanha a ponta, e a pressão calculada pode ficar menor que a real. " +
+        "Em Diâmetros, ajuste as pontas, ou gere a rede de novo. Se a ponta for de uma ampliação prevista, deixe como está e confira esse ponto.";
 
     static XYZ? Direcao(Pipe tubo) => tubo.Location is LocationCurve { Curve: Line reta } ? reta.Direction : null;
 
-    /// <param name="redeRecemGerada">A rede lida é a que a geração acabou de criar: a ponta sem água acompanha a linha (ver <see cref="PontasSemAgua" />).</param>
-    public static ResultadoDiametros Executar(Document doc, LeitorRede.RedeLida lida, DiametrosPorTabela dimensionamento, bool redeRecemGerada = false)
+    /// <param name="ajustarPontas">A ponta sem água acompanha a linha (ver <see cref="PontasSemAgua" />): sempre na rede gerada; no botão Diâmetros, se o projetista escolher.</param>
+    public static ResultadoDiametros Executar(Document doc, LeitorRede.RedeLida lida, DiametrosPorTabela dimensionamento, bool ajustarPontas = false)
     {
         var pedido = Pedido(lida, dimensionamento);
-        if (redeRecemGerada)
+        if (ajustarPontas)
             foreach (var (id, dn) in PontasSemAgua(doc, lida, pedido))
                 pedido[id] = dn;
 

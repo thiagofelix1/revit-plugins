@@ -79,6 +79,7 @@ static class ServicoCalculo
         var (fatorCAtencao, fatorCInforma) = AvisosDoFatorC(doc, dados, lida);
         var (tubosAtencao, tubosInforma) = AvisosDosTubos(doc, lida);
         atencao = atencao.Concat(fatorCAtencao).Concat(tubosAtencao);
+        if (AplicarDiametros.AvisoDePontasLargas(AplicarDiametros.PontasLargas(doc, lida).Count) is { } pontasLargas) atencao = atencao.Append(pontasLargas);
         relatorio = relatorio with { Avisos = atencao.Concat(relatorio.Avisos).Concat(fatorCInforma).Concat(tubosInforma).ToList() };
 
         var pasta = PastasSpk.Calculo;

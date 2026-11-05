@@ -107,7 +107,9 @@ Pronto quando um setor da Nova Era (ou de um projeto do engenheiro) é desenhado
 
 ## 7. Dimensionamento
 
-- [ ] Subir diâmetros até atender, com a ordem de DN que o projetista usar.
+- [ ] Levar as peças para o motor: o leitor informa cada tê, cruzeta, cotovelo e válvula, com as bocas, a direção e o DN, e o motor decide em qual trecho entra a perda, pelo sentido da água. Hoje o `LeitorRede` escolhe o trecho e o motor recebe só os metros somados, então essa regra só é testada no Revit. Fazer depois dos testes em outros projetos, com regressão completa e comparação dos memoriais. Prepara a resposta do engenheiro sobre o tê com água entrando pelo ramo.
+- [ ] Separar plano e execução no Gerar rede: o motor calcula alturas, eixos e fileiras, e o add-in executa. Só quando um projeto novo forçar mudanças nessa parte.
+- [ ] Subir diâmetros até atender, com a ordem de DN que o projetista usar. Falta definir o alvo: sem curva de abastecimento, hoje quase nada reprova por pressão.
 - [ ] Visão de todos os setores juntos e do setor que dimensiona a bomba.
 - [ ] Sugerir a bomba pela curva de abastecimento.
 

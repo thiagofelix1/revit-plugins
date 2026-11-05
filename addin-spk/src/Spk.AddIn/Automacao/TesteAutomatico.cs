@@ -276,7 +276,7 @@ static class TesteAutomatico
                     var (dados, leitura, fonte, vgas, doSetor) = Setor(doc!, setorDiametros);
                     var lida = LeitorRede.Montar(doc!, leitura.Bicos, dados.FatorC, fonte, vgas, doSetor, setorDiametros.Setor);
                     var dimensionamento = DimensionamentoPorTabela.Calcular(lida.Rede, dados.Classe);
-                    var feito = AplicarDiametros.Executar(doc!, lida, dimensionamento);
+                    var feito = AplicarDiametros.Executar(doc!, lida, dimensionamento, setorDiametros.AjustarPontas);
                     relatorio.Diametros = new ResumoDiametros
                     {
                         Mudados = feito.Mudados,
@@ -483,6 +483,7 @@ static class TesteAutomatico
                 {
                     var resultado = Calcular(doc!, pedido);
                     relatorio.Calculo = Resumo(resultado);
+                    relatorio.PontasLargas = AplicarDiametros.PontasLargas(doc!, resultado.Lida).Count;
                     calculado = resultado;
                     // Cada cenário guarda o seu memorial: o da pasta do SPK é sobrescrito a cada cálculo, e comparar trecho a trecho precisa dos dois.
                     var memorial = Path.Combine(resultado.PastaMemorial, "memorial.md");
@@ -1003,6 +1004,8 @@ static class TesteAutomatico
             if (r.Diametros is { } d && d.Recusados.Count + d.Divergentes.Count + d.Inseridas.Count > 0)
                 falhas.Add($"diâmetros: {d.Recusados.Count} recusa(s), {d.Divergentes.Count} divergência(s), {d.Inseridas.Count} peça(s) inserida(s)");
         }
+        if (esperado.PontasLargas is { } pontasLargas && r.PontasLargas != pontasLargas)
+            falhas.Add($"pontas sem água mais largas que a linha: esperado {pontasLargas}, veio {r.PontasLargas?.ToString() ?? "nada"}");
         if (esperado.PecasApertadas is { } apertadas && r.PecasApertadas?.Count != apertadas)
             falhas.Add($"peças apertadas: esperado {apertadas}, veio {r.PecasApertadas?.Count}: {string.Join("; ", (r.PecasApertadas ?? []).Take(3))}");
         if (esperado.RamaisTracados is { } tracados && r.Ligacao?.Ramais != tracados)
@@ -1628,6 +1631,9 @@ sealed class Esperado
     /// <summary>Tês e cruzetas mais estreitos que os tubos dos dois lados, em todo o modelo.</summary>
     public int? PecasApertadas { get; set; }
 
+    /// <summary>Pontas sem água mais largas que a linha, lidas no Calcular.</summary>
+    public int? PontasLargas { get; set; }
+
     /// <summary>A reconexão não pode desfazer ligação que existia: ligações depois ≥ antes + feitas.</summary>
     public bool? ReconexaoSemPerda { get; set; }
 
@@ -1697,6 +1703,9 @@ sealed class PedidoCalculo
 
     /// <summary>Sem VGA: o setor pela ordem, 0 = o de mais bicos.</summary>
     public int? Setor { get; set; }
+
+    /// <summary>Em "diametros": a escolha do botão de levar as pontas sem água para o DN da linha.</summary>
+    public bool AjustarPontas { get; set; }
 }
 
 sealed class RelatorioCenario
@@ -1722,6 +1731,7 @@ sealed class RelatorioCenario
     public List<string>? Material { get; set; }
     public ResumoDiametros? Diametros { get; set; }
     public List<string>? PecasApertadas { get; set; }
+    public int? PontasLargas { get; set; }
     public List<string>? ConexoesAntes { get; set; }
     public List<string>? Conexoes { get; set; }
     public List<string>? Carimbos { get; set; }
