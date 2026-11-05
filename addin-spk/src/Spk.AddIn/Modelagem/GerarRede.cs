@@ -645,7 +645,7 @@ static class GerarRede
                 var ligado = bicosDoAmbiente.FirstOrDefault(b => b.MEPModel?.ConnectorManager?.Connectors.Cast<Connector>().Any(c => c.IsConnected) == true)
                              ?? bicosDoAmbiente[0];
                 var lida = LeitorRede.Montar(doc, leitura.Bicos, dados.FatorC, null, [], ligado.Id);
-                diametros = AplicarDiametros.Executar(doc, lida, DimensionamentoPorTabela.Calcular(lida.Rede, dados.Classe));
+                diametros = AplicarDiametros.Executar(doc, lida, DimensionamentoPorTabela.Calcular(lida.Rede, dados.Classe), redeRecemGerada: true);
                 avisos.AddRange(diametros.Recusados.Distinct());
                 if (diametros.AvisoDeApertadas() is { } apertadas) avisos.Add(apertadas);
             }

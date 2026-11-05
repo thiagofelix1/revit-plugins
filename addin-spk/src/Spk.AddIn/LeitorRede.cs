@@ -89,7 +89,6 @@ static class LeitorRede
         }
 
         var entrePecas = LigarPecas(doc, naRede, idsBico, nos, trechos, ref seq, fatorC);
-        AplicarConexoes(doc, naRede, idsBico, trechos, trechosDoTubo, entrePecas, fatorC, avisos);
         var tuboDoTrecho = new Dictionary<string, ElementId>(StringComparer.Ordinal);
         foreach (var (tubo, indices) in trechosDoTubo)
             foreach (var i in indices)
@@ -110,8 +109,10 @@ static class LeitorRede
         }
 
         var ligados = bicos.Where(b => grau.GetValueOrDefault(IdBico(b.Instancia)) > 0).ToList();
+        var lidaPorProximidade = ligados.Count == 0;
         if (ligados.Count == 0)
         {
+            avisos.Add("Nenhuma conexão ligada aos tubos: sem comprimento equivalente nesta rede.");
             foreach (var no in nos.Keys.Where(id => !id.StartsWith('S')).ToList()) nos.Remove(no);
             trechos.Clear();
             tuboDoTrecho.Clear();
@@ -172,6 +173,10 @@ static class LeitorRede
             nomeMarcado = nomes[indiceEscolhido];
             totalDeSetores = componentes.Count;
         }
+
+        // Só com a fonte conhecida: o empate na cruzeta se resolve pelo lado de onde vem a água.
+        if (!lidaPorProximidade)
+            AplicarConexoes(doc, naRede, idsBico, trechos, trechosDoTubo, entrePecas, fatorC, avisos, noFonte);
 
         var nosSetor = nos.Values.Where(n => setor.Contains(n.Id)).ToList();
         var trechosSetor = trechos.Where(t => setor.Contains(t.De) && setor.Contains(t.Para)).ToList();
@@ -317,10 +322,11 @@ static class LeitorRede
     /// conector fora do par alinhado de maior diâmetro. Válvula: pelo nome da família.
     /// </summary>
     static void AplicarConexoes(Document doc, SortedSet<ElementId> naRede, HashSet<ElementId> idsBico, List<Trecho> trechos,
-        Dictionary<ElementId, List<int>> trechosDoTubo, Dictionary<string, int> entrePecas, double fatorC, List<string> avisos)
+        Dictionary<ElementId, List<int>> trechosDoTubo, Dictionary<string, int> entrePecas, double fatorC, List<string> avisos, string noFonte)
     {
         var c = Math.Clamp(fatorC, 100, 150);
         var aplicadas = 0;
+        var distancia = DistanciasDaFonte(noFonte, trechos);
         var semTabela = new SortedSet<string>(StringComparer.Ordinal);
         var desconhecidas = new SortedSet<string>(StringComparer.Ordinal);
 
@@ -378,7 +384,14 @@ static class LeitorRede
                 }
                 else if (conexao.PartType is PartType.Tee or PartType.Cross)
                 {
-                    foreach (var ramo in Ramos(conectores))
+                    // O conector por onde a água entra: o trecho dele vem de um nó mais perto da fonte.
+                    bool Entrada(Connector conector)
+                    {
+                        if (TrechoDoConector(conector, no, trechos, trechosDoTubo, entrePecas) is not { } indice) return false;
+                        var outro = trechos[indice].De == no ? trechos[indice].Para : trechos[indice].De;
+                        return distancia.TryGetValue(outro, out var dOutro) && distancia.TryGetValue(no, out var dNo) && dOutro < dNo;
+                    }
+                    foreach (var ramo in Ramos(conectores, Entrada))
                         Somar(ramo, no, TipoConexao.TeOuCruzetaFluxoDesviado, conexao.PartType == PartType.Tee ? "tê" : "cruzeta");
                 }
             }
@@ -416,21 +429,24 @@ static class LeitorRede
     /// <remarks>
     /// Empate de diâmetro (cruzeta toda de um DN, com buchas de redução para o ramal) desempata pelo que está ligado
     /// depois da peça: a ordem dos conectores muda a cada sessão do Revit, e sem isso a perda do desvio caía ora no
-    /// ramal, ora na subgeral.
+    /// ramal, ora na subgeral. Empatando também aí (a ponta da subgeral no DN da linha), a passagem é o par por onde a
+    /// água entra, e os outros dois lados desviam o fluxo. Sem esse sinal (malha, peça de outro setor), vale o eixo do par,
+    /// que não depende da ordem dos conectores: refazer a peça no Diâmetros troca essa ordem.
     /// </remarks>
-    static IEnumerable<Connector> Ramos(List<Connector> conectores)
+    static IEnumerable<Connector> Ramos(List<Connector> conectores, Func<Connector, bool> entrada)
     {
         (Connector A, Connector B)? passagem = null;
-        (double Raio, double Alem) maior = (-1, -1);
+        (double Raio, double Alem, double Agua, double Eixo) maior = (-1, -1, -1, -1);
         for (var i = 0; i < conectores.Count; i++)
         for (var j = i + 1; j < conectores.Count; j++)
         {
             var a = conectores[i];
             var b = conectores[j];
             if (a.CoordinateSystem.BasisZ.DotProduct(b.CoordinateSystem.BasisZ) > -0.95) continue;
-            var chave = (Raio: Raio(a) + Raio(b), Alem: Alem(a) + Alem(b));
-            var ganha = chave.Raio > maior.Raio + 1e-6 || (Math.Abs(chave.Raio - maior.Raio) <= 1e-6 && chave.Alem > maior.Alem + 1e-6);
-            if (!ganha) continue;
+            var eixo = a.CoordinateSystem.BasisZ;
+            var chave = (Raio: Raio(a) + Raio(b), Alem: Alem(a) + Alem(b), Agua: entrada(a) || entrada(b) ? 1.0 : 0.0,
+                Eixo: Math.Abs(eixo.X) + Math.Abs(eixo.Y) / 1000);
+            if (!Maior(chave, maior)) continue;
             maior = chave;
             passagem = (a, b);
         }
@@ -438,6 +454,39 @@ static class LeitorRede
         return passagem is { } p
             ? conectores.Where(c => !ReferenceEquals(c, p.A) && !ReferenceEquals(c, p.B))
             : conectores.OrderBy(Raio).ThenBy(Alem).Take(1);
+    }
+
+    /// <summary>Compara na ordem dos campos; diferença abaixo de 1e-6 é empate e passa para o campo seguinte.</summary>
+    static bool Maior((double, double, double, double) a, (double, double, double, double) b)
+    {
+        foreach (var (x, y) in new[] { (a.Item1, b.Item1), (a.Item2, b.Item2), (a.Item3, b.Item3), (a.Item4, b.Item4) })
+            if (Math.Abs(x - y) > 1e-6) return x > y;
+        return false;
+    }
+
+    /// <summary>Quantos trechos separam cada nó da fonte. Nó de outro setor não aparece.</summary>
+    static Dictionary<string, int> DistanciasDaFonte(string noFonte, List<Trecho> trechos)
+    {
+        var vizinhos = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+        foreach (var trecho in trechos)
+        {
+            if (!vizinhos.TryGetValue(trecho.De, out var deDe)) vizinhos[trecho.De] = deDe = [];
+            if (!vizinhos.TryGetValue(trecho.Para, out var dePara)) vizinhos[trecho.Para] = dePara = [];
+            deDe.Add(trecho.Para);
+            dePara.Add(trecho.De);
+        }
+
+        var distancia = new Dictionary<string, int>(StringComparer.Ordinal) { [noFonte] = 0 };
+        var fila = new Queue<string>();
+        fila.Enqueue(noFonte);
+        while (fila.Count > 0)
+        {
+            var no = fila.Dequeue();
+            foreach (var vizinho in vizinhos.GetValueOrDefault(no) ?? [])
+                if (distancia.TryAdd(vizinho, distancia[no] + 1))
+                    fila.Enqueue(vizinho);
+        }
+        return distancia;
     }
 
     /// <summary>O raio do que está ligado ao conector, do outro lado: o tubo, ou o menor conector da peça (bucha de redução).</summary>

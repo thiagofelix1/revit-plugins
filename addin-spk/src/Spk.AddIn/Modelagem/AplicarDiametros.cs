@@ -70,9 +70,35 @@ static class AplicarDiametros
         return pedido;
     }
 
-    public static ResultadoDiametros Executar(Document doc, LeitorRede.RedeLida lida, DiametrosPorTabela dimensionamento)
+    /// <summary>
+    /// A ponta de tubo depois do último tê ou cruzeta não leva água, e a tabela não dá DN a ela. Fica no DN do tubo em linha com
+    /// ela, do outro lado da peça: no DN do esboço, deixaria a peça maior que a linha. Só na rede que a geração acabou de criar:
+    /// uma ponta que o projetista deixou, para uma ampliação por exemplo, fica como está.
+    /// </summary>
+    static Dictionary<ElementId, int> PontasSemAgua(Document doc, LeitorRede.RedeLida lida, Dictionary<ElementId, int> pedido)
+    {
+        var pontas = new Dictionary<ElementId, int>();
+        foreach (var tubo in lida.Tubos.Values.Distinct().Where(id => !pedido.ContainsKey(id)).Select(doc.GetElement).OfType<Pipe>())
+        {
+            if (Ligados(tubo) != 1 || Direcao(tubo) is not { } direcao) continue;
+            var pecas = Vizinhas(tubo).Where(p => p.MEPModel is MechanicalFitting { PartType: PartType.Tee or PartType.Cross }).ToList();
+            if (pecas is not [var peca]) continue;
+            var emLinha = TubosDasBocas(peca).Tubos
+                .Where(t => t.Id != tubo.Id && pedido.ContainsKey(t.Id) && Direcao(t) is { } outra && Math.Abs(outra.DotProduct(direcao)) > 0.99).ToList();
+            if (emLinha is [var linha]) pontas[tubo.Id] = pedido[linha.Id];
+        }
+        return pontas;
+    }
+
+    static XYZ? Direcao(Pipe tubo) => tubo.Location is LocationCurve { Curve: Line reta } ? reta.Direction : null;
+
+    /// <param name="redeRecemGerada">A rede lida é a que a geração acabou de criar: a ponta sem água acompanha a linha (ver <see cref="PontasSemAgua" />).</param>
+    public static ResultadoDiametros Executar(Document doc, LeitorRede.RedeLida lida, DiametrosPorTabela dimensionamento, bool redeRecemGerada = false)
     {
         var pedido = Pedido(lida, dimensionamento);
+        if (redeRecemGerada)
+            foreach (var (id, dn) in PontasSemAgua(doc, lida, pedido))
+                pedido[id] = dn;
 
         var recusados = new List<string>();
         var alterados = new List<ElementId>();
@@ -118,10 +144,11 @@ static class AplicarDiametros
             }
         }
         grupo.Assimilate();
-        // Saldo por família: a luva do bico que o Revit troca pela do DN novo, ou o cotovelo refeito, não contam.
+        // Saldo por família: a luva do bico que o Revit troca pela do DN novo, ou o cotovelo refeito, não contam. O saldo pode ser
+        // negativo: a redução que sobrava entre dois tubos sai quando eles ficam no mesmo DN.
         var depois = PorFamilia(doc, Pecas(doc));
         var antes = pecasAntes;
-        var inseridas = depois.SelectMany(p => Enumerable.Repeat(p.Key, p.Value - antes.GetValueOrDefault(p.Key))).ToList();
+        var inseridas = depois.SelectMany(p => Enumerable.Repeat(p.Key, Math.Max(0, p.Value - antes.GetValueOrDefault(p.Key)))).ToList();
 
         // Mudar um tubo pode redimensionar a peça ao lado e, por ela, o tubo vizinho: confere todos no fim.
         var divergentes = new List<string>();
