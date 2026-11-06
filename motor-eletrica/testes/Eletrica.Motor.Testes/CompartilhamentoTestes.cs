@@ -32,6 +32,20 @@ public class CompartilhamentoTestes
     }
 
     [Fact]
+    public void Quadro_sem_alimentador_e_calculado_e_acusado()
+    {
+        // Como no Snowdon: um quadro filho sem o circuito alimentador modelado. O cálculo não pode parar; o M-05 avisa.
+        var ex = new ApartamentoExemplo().Criar();
+        var quadros = ex.Quadros.Concat([new Quadro("QT", "QT — Quadro terminal", 2) { QuadroPai = "QD", No = "cxA-circ" }]).ToList();
+        var circuitos = ex.Circuitos.Select(c => c.Id == "C2" ? c with { Quadro = "QT" } : c).ToList();
+        var i = new Instalacao(ex.Nome, ex.Alimentacao, ex.Ambientes, quadros, circuitos, ex.Pontos, ex.Trechos);
+        var r = CalculoEletrica.Executar(i);
+        Assert.Contains(r.Circuitos, c => c.Id == "C2");
+        Assert.Equal(circuitos.Count, r.Circuitos.Count);
+        Assert.Contains(r.Problemas, p => p.Codigo == "M-05");
+    }
+
+    [Fact]
     public void Secoes_fora_de_tres_valores_sucessivos_e_erro()
     {
         var ex = new ApartamentoExemplo().Criar();

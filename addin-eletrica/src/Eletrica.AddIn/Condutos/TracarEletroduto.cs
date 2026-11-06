@@ -18,6 +18,12 @@ static class TracarEletroduto
     public sealed record Extremo(Element Elemento, XYZ Ponto, Connector? Conector);
 
     static readonly double Curto = Unidades.DeMetros(0.02);
+
+    /// <summary>
+    ///     Menor trecho entre duas curvas (ou entre a curva e o ponto) que deixa espaço para a conexão de um DN pequeno. Abaixo
+    ///     disso o Revit recusa: "não há espaço suficiente para criar as conexões necessárias".
+    /// </summary>
+    static readonly double Minimo = Unidades.DeMetros(0.30);
     static readonly double MargemPonta = Unidades.DeMetros(0.15);
 
     public static Opcoes OpcoesDoPadrao(Document doc, PadraoEletrica padrao)
@@ -34,7 +40,7 @@ static class TracarEletroduto
         {
             if (fi.MEPModel?.ConnectorManager is { } cm)
             {
-                var livre = cm.Connectors.Cast<Connector>().FirstOrDefault(k => k.Domain == Domain.DomainCableTrayConduit && !k.IsConnected);
+                var livre = cm.Connectors.Cast<Connector>().FirstOrDefault(k => k.Domain == Domain.DomainCableTrayConduit && GrafoDeCondutos.TemPosicao(k) && !k.IsConnected);
                 if (livre is not null) return new Extremo(e, livre.Origin, livre);
             }
             if ((fi.Location as LocationPoint)?.Point is { } p) return new Extremo(e, p, null);
@@ -119,11 +125,19 @@ static class TracarEletroduto
             AlturaDePassagem.Piso => nivel.ProjectElevation + Unidades.DeMetros(o.CotaPiso),
             _ => Math.Max(a.Z, b.Z),
         };
+        // Ponto quase na cota de passagem (luminária no teto com passagem a 10 cm dela): a descida seria curta demais para a
+        // curva. O eletroduto corre na cota do próprio ponto, como na laje sobre a luminária.
+        if (cotaFixa is null)
+        {
+            if (Math.Abs(a.Z - z) > Curto && Math.Abs(a.Z - z) < Minimo) z = a.Z;
+            else if (Math.Abs(b.Z - z) > Curto && Math.Abs(b.Z - z) < Minimo) z = b.Z;
+        }
         var pontos = new List<XYZ> { a };
         if (Math.Abs(a.Z - z) > Curto) pontos.Add(new XYZ(a.X, a.Y, z));
         var dx = Math.Abs(b.X - a.X);
         var dy = Math.Abs(b.Y - a.Y);
-        if (dx > Curto && dy > Curto)
+        // Em L quando as duas pernas cabem uma curva; com uma perna curta demais, reto na diagonal em planta.
+        if (dx > Curto && dy > Curto && Math.Min(dx, dy) >= Minimo)
             pontos.Add(dx >= dy ? new XYZ(b.X, a.Y, z) : new XYZ(a.X, b.Y, z));
         if (dx > Curto || dy > Curto) pontos.Add(new XYZ(b.X, b.Y, z));
         if (Math.Abs(b.Z - z) > Curto || pontos[pontos.Count - 1].DistanceTo(b) > Curto) pontos.Add(b);
@@ -200,7 +214,7 @@ static class TracarEletroduto
     }
 
     public static IEnumerable<Connector> Conectores(Conduit c) =>
-        c.ConnectorManager.Connectors.Cast<Connector>().Where(k => k.Domain == Domain.DomainCableTrayConduit);
+        c.ConnectorManager.Connectors.Cast<Connector>().Where(k => k.Domain == Domain.DomainCableTrayConduit && GrafoDeCondutos.TemPosicao(k));
 
     static void Diametro(Conduit c, int dnMm)
     {

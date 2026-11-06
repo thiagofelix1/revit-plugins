@@ -79,7 +79,7 @@ public sealed class GrafoDeCondutos
         {
             var nos = new List<string>();
             if (fi.MEPModel?.ConnectorManager is { } cm)
-                foreach (var k in cm.Connectors.Cast<Connector>().Where(k => k.Domain == Domain.DomainCableTrayConduit))
+                foreach (var k in cm.Connectors.Cast<Connector>().Where(k => k.Domain == Domain.DomainCableTrayConduit && TemPosicao(k)))
                     if (NoMaisProximo(k.Origin, 0.02) is { } no) nos.Add(no);
             if (nos.Count == 0 && (fi.Location as LocationPoint)?.Point is { } p && NoMaisProximo(p, ToleranciaCaixa) is { } noCentro) nos.Add(noCentro);
             foreach (var no in nos.Distinct())
@@ -105,7 +105,13 @@ public sealed class GrafoDeCondutos
         return nome.Contains("caixa") || nome.Contains("condulete") || nome.Contains("junction box") || nome.Contains("pull box") || nome.Contains("passagem");
     }
 
-    static IEnumerable<Connector> Conectores(ConnectorManager cm) => cm.Connectors.Cast<Connector>().Where(k => k.Domain != Domain.DomainUndefined);
+    static IEnumerable<Connector> Conectores(ConnectorManager cm) => cm.Connectors.Cast<Connector>().Where(k => k.Domain != Domain.DomainUndefined && TemPosicao(k));
+
+    /// <summary>
+    ///     Só os conectores físicos (ponta ou curva) têm posição: os lógicos e os de superfície (caixas e quadros de modelos de
+    ///     terceiros, como o Snowdon) lançam exceção em Origin.
+    /// </summary>
+    public static bool TemPosicao(Connector k) => k.ConnectorType is ConnectorType.End or ConnectorType.Curve or ConnectorType.Physical;
 
     // Grade espacial dos nós (células de 1 m): num prédio com milhares de eletrodutos, procurar nó a nó ficava quadrático.
     const double Celula = 1.0;
@@ -155,7 +161,7 @@ public sealed class GrafoDeCondutos
     public string? NoDe(FamilyInstance fi)
     {
         if (fi.MEPModel?.ConnectorManager is { } cm)
-            foreach (var k in cm.Connectors.Cast<Connector>().Where(k => k.Domain == Domain.DomainCableTrayConduit))
+            foreach (var k in cm.Connectors.Cast<Connector>().Where(k => k.Domain == Domain.DomainCableTrayConduit && TemPosicao(k)))
                 if (NoMaisProximo(k.Origin, 0.05) is { } no) return no;
         var p = (fi.Location as LocationPoint)?.Point ?? fi.get_BoundingBox(null)?.Min;
         return p is null ? null : NoMaisProximo(p);

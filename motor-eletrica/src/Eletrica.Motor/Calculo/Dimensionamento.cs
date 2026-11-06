@@ -39,11 +39,29 @@ public sealed class Dimensionamento
     {
         var entrada = _i.QuadroDeEntrada;
         var uo = _i.Alimentacao.TensaoFaseNeutro;
+        // Recomeça do zero: o cálculo chama este método mais de uma vez, e os quadros já vistos na chamada anterior não podem
+        // ficar de fora da nova ordem.
+        _impedanciaNoQuadro.Clear();
+        _impedanciaDeRetornoNoQuadro.Clear();
+        _quedaAteOQuadro.Clear();
         _impedanciaNoQuadro[entrada.Id] = _i.Alimentacao.IccPresumidaKA is { } icc ? ImpedanciaDaRede(icc, uo) : Impedancia.Zero;
         _impedanciaDeRetornoNoQuadro[entrada.Id] = Impedancia.Zero;
         _quedaAteOQuadro[entrada.Id] = [];
         var ordem = new List<ResultadoCircuito>();
         Percorrer(entrada, ordem);
+
+        // Quadros que a árvore de alimentadores não alcança (sem circuito alimentador modelado: o Verificar acusa M-05). Para
+        // nenhum circuito ficar sem resultado, cada um parte do ponto do quadro pai (ou da entrada), como se o alimentador
+        // tivesse comprimento nulo: a queda e o Zs saem otimistas até o alimentador ser modelado.
+        while (_i.Quadros.Where(q => !_impedanciaNoQuadro.ContainsKey(q.Id)).ToList() is { Count: > 0 } pendentes)
+        {
+            var quadro = pendentes.FirstOrDefault(q => q.QuadroPai is not { } p || _impedanciaNoQuadro.ContainsKey(p)) ?? pendentes[0];
+            var origem = quadro.QuadroPai is { } pai && _impedanciaNoQuadro.ContainsKey(pai) ? pai : entrada.Id;
+            _impedanciaNoQuadro[quadro.Id] = _impedanciaNoQuadro[origem];
+            _impedanciaDeRetornoNoQuadro[quadro.Id] = _impedanciaDeRetornoNoQuadro[origem];
+            _quedaAteOQuadro[quadro.Id] = _quedaAteOQuadro[origem];
+            Percorrer(quadro, ordem);
+        }
         return ordem;
     }
 

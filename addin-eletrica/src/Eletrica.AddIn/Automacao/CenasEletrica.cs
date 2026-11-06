@@ -87,6 +87,7 @@ static class CenasEletrica
         metricas["cena.portas"] = portas;
 
         FamilyInstance quadro;
+        DistributionSysType sistema;
         using (var t = new Transaction(doc, "AutoEletrica — cena apartamento"))
         {
             t.Start();
@@ -97,7 +98,7 @@ static class CenasEletrica
                     TensaoFaseNeutro = 127, TensaoFaseFase = 220, Fases = 3, Esquema = EsquemaAterramento.TNCS, IccPresumidaKA = 6,
                     LinhaAerea = true, DiasDeTrovoada = 40, Habitacao = true,
                 });
-            var sistema = GarantirSistema(doc, dados.TensaoFaseNeutro, dados.TensaoFaseFase);
+            sistema = GarantirSistema(doc, dados.TensaoFaseNeutro, dados.TensaoFaseFase);
             linhas.Add($"sistema de distribuição: {sistema.Name}");
 
             var padrao = PadraoEletrica.Carregar(doc);
@@ -134,12 +135,41 @@ static class CenasEletrica
             doc.Regenerate();
             Colocacao.AjustarAltura(doc, quadro, 1.50, nivel);
             quadro.get_Parameter(BuiltInParameter.RBS_ELEC_PANEL_NAME)?.Set("QD-1");
-            var ds = quadro.get_Parameter(BuiltInParameter.RBS_FAMILY_CONTENT_DISTRIBUTION_SYSTEM);
-            if (ds is { IsReadOnly: false }) ds.Set(sistema.Id);
-            else linhas.Add("aviso: o quadro não aceitou o sistema de distribuição");
             ParametrosEletrica.Garantir(doc);
             t.Commit();
         }
+
+        // O sistema de distribuição numa transação só dele: se o Revit recusar (erro "sistema de distribuição inválido"), só
+        // isso volta, a cena continua e o relatório diz por quê, com o conector do quadro e o sistema tentado.
+        var aceitou = TentarSistema(doc, quadro, sistema, out var recusa);
+        if (!aceitou)
+        {
+            linhas.Add($"aviso: o quadro recusou o sistema {Descrever(sistema)} ({recusa}); conector da família: {ConectorDaFamilia(doc, quadro)}");
+            // Diagnóstico: quais sistemas do projeto o Revit aceita neste quadro (cada teste é desfeito).
+            var aceitos = new List<string>();
+            foreach (var outro in new FilteredElementCollector(doc).OfClass(typeof(DistributionSysType)).Cast<DistributionSysType>().Where(d => d.Id != sistema.Id))
+            {
+                using var grupo = new TransactionGroup(doc, "AutoEletrica — sondar sistema");
+                grupo.Start();
+                if (TentarSistema(doc, quadro, outro, out _)) aceitos.Add(Descrever(outro));
+                grupo.RollBack();
+            }
+            linhas.Add("sistemas aceitos pelo quadro: " + (aceitos.Count == 0 ? "nenhum" : string.Join(" | ", aceitos)));
+            // Tentativa: um sistema novo com tipos de tensão próprios e faixa larga (±10 %).
+            DistributionSysType? novo = null;
+            using (var t = new Transaction(doc, "AutoEletrica — sistema novo (cena)"))
+            {
+                t.Start();
+                var config = ElectricalSetting.GetElectricalSettings(doc);
+                var ff = config.AddVoltageType($"{dados.TensaoFaseFase:0} V AE", V(dados.TensaoFaseFase), V(dados.TensaoFaseFase * 0.9), V(dados.TensaoFaseFase * 1.1));
+                var fn = config.AddVoltageType($"{dados.TensaoFaseNeutro:0} V AE", V(dados.TensaoFaseNeutro), V(dados.TensaoFaseNeutro * 0.9), V(dados.TensaoFaseNeutro * 1.1));
+                novo = config.AddDistributionSysType($"{dados.TensaoFaseNeutro:0}/{dados.TensaoFaseFase:0} V AE 2", ElectricalPhase.ThreePhase, ElectricalPhaseConfiguration.Wye, 4, ff, fn);
+                t.Commit();
+            }
+            aceitou = TentarSistema(doc, quadro, novo, out var recusaNovo);
+            linhas.Add(aceitou ? $"sistema novo aceito: {Descrever(novo)}" : $"sistema novo também recusado: {Descrever(novo)} ({recusaNovo})");
+        }
+        metricas["cena.sistemaNoQuadro"] = aceitou ? 1 : 0;
 
         // 3. Usos confirmados pelo nome (o vínculo precisa estar carregado para os ambientes aparecerem).
         var lidos = LeituraDeAmbientes.Ler(doc);
@@ -303,6 +333,57 @@ static class CenasEletrica
     }
 
     static double V(double volts) => UnitUtils.ConvertToInternalUnits(volts, UnitTypeId.Volts);
+
+    /// <summary>Põe o sistema no quadro numa transação só dele; se o Revit recusar, só ela volta e a mensagem sai em <paramref name="recusa" />.</summary>
+    static bool TentarSistema(Document doc, FamilyInstance quadro, DistributionSysType sistema, out string recusa)
+    {
+        using var t = new Transaction(doc, "AutoEletrica — sistema do quadro (cena)");
+        t.Start();
+        var falhas = DesfazerSeErro.Aplicar(t);
+        var parametro = quadro.get_Parameter(BuiltInParameter.RBS_FAMILY_CONTENT_DISTRIBUTION_SYSTEM);
+        if (parametro is not { IsReadOnly: false })
+        {
+            t.RollBack();
+            recusa = "o parâmetro de sistema de distribuição do quadro é só leitura";
+            return false;
+        }
+        parametro.Set(sistema.Id);
+        var aceitou = t.Commit() == TransactionStatus.Committed && falhas.Erros.Count == 0;
+        recusa = string.Join("; ", falhas.Erros);
+        return aceitou;
+    }
+
+    static string Descrever(DistributionSysType ds)
+    {
+        static string Faixa(VoltageType? v) => v is null ? "-" :
+            $"{Unidades.Volts(v.ActualValue):0} ({Unidades.Volts(v.MinValue):0}–{Unidades.Volts(v.MaxValue):0})";
+        try
+        {
+            return $"\"{ds.Name}\" {ds.ElectricalPhase} {ds.ElectricalPhaseConfiguration} {ds.NumWires} fios, " +
+                   $"FF {Faixa(ds.VoltageLineToLine)} V, FN {Faixa(ds.VoltageLineToGround)} V";
+        }
+        catch (Autodesk.Revit.Exceptions.ApplicationException e) { return $"\"{ds.Name}\" ({e.Message})"; }
+    }
+
+    /// <summary>Diagnóstico: o conector elétrico da família do quadro como o editor de famílias o vê (tensão, polos, sistema).</summary>
+    static string ConectorDaFamilia(Document doc, FamilyInstance quadro)
+    {
+        Document? familia = null;
+        try
+        {
+            familia = doc.EditFamily(quadro.Symbol.Family);
+            var partes = new List<string>();
+            foreach (var c in new FilteredElementCollector(familia).OfClass(typeof(ConnectorElement)).Cast<ConnectorElement>().Where(c => c.Domain == Domain.DomainElectrical))
+            {
+                var volts = c.get_Parameter(BuiltInParameter.RBS_ELEC_VOLTAGE) is { } pv ? Unidades.Volts(pv.AsDouble()).ToString("0") : "?";
+                var polos = c.get_Parameter(BuiltInParameter.RBS_ELEC_NUMBER_OF_POLES)?.AsInteger().ToString() ?? "?";
+                partes.Add($"{c.SystemClassification}, {volts} V, {polos} polo(s)");
+            }
+            return partes.Count == 0 ? "nenhum conector elétrico" : string.Join(" | ", partes);
+        }
+        catch (Exception e) when (e is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException) { return $"não lido ({e.Message})"; }
+        finally { familia?.Close(false); }
+    }
 
     // ----- traçado em estrela -----
 
