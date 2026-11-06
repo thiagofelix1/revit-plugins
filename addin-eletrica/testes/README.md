@@ -34,7 +34,11 @@ Tudo sai dos templates que vêm com o Revit em português, nada de família de c
 - **Famílias de teste** criadas pelos templates de família (instalação elétrica, luminária, equipamento elétrico): tomada 10 A (127 V, 100 VA), luminária (127 V, 100 VA), interruptor, chuveiro (220 V, 2 polos, 5 500 VA), quadro (painel, 220 V trifásico) e caixa de passagem; não hospedadas, com conector elétrico. Carimbo A1 pelo template, se o projeto não tiver.
 - **Sistema de distribuição** 127/220 V trifásico (criado com as tensões, se o template não tiver), **quadro QD-1** na circulação a 1,50 m, **padrão** com essas famílias, o tipo de eletroduto do template, DN 25 e passagem a 2,70 m, e os **usos** dos ambientes confirmados pelo nome.
 
-O traçado em estrela (passo `tracarEstrela`) liga, em cada ambiente, o quadro à luminária e a luminária a cada outro ponto, pela cota de passagem: é o que o projetista desenharia num apartamento pequeno, sem o roteamento automático da 1.0.
+O traçado da cena (passo `tracarEstrela`) liga, em cada ambiente, o quadro à luminária pela cota de passagem e depois cada ponto ao ponto já ligado mais perto, como o projetista encadeia pela parede. Entre dois pontos baixos o eletroduto corre na altura deles; um ponto sob outro sai dele, reto. É o que se desenharia num apartamento pequeno, sem o roteamento automático da 1.0.
+
+Limite conhecido: os eletrodutos do quadro às luminárias sobem sobrepostos, e a passagem leva os 9 circuitos pelo mesmo. Por isso o cálculo agrupa 9 circuitos num DN 25 (fator de agrupamento perto de 0,4, ocupação reprovada) e o resultado sai NÃO ATENDE, com seções grandes. Está certo para o que foi modelado; para números realistas, a cena teria de sair do quadro com eletrodutos separados.
+
+Os passos `diagnosticoGrafo`, `diagnosticoQuadros` e `sondarSistemas` só informam (pedaços do traçado e caminhos como o motor os vê; conectores das famílias de quadro; sistemas de distribuição aceitos). Foram eles que acharam, em 06/11/2026, a tensão dos tipos de tensão convertida como unidade interna e as conexões que partiam o caminho da fiação.
 
 ## Escrever um cenário
 
