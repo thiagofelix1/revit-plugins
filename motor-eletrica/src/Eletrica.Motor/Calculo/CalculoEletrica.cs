@@ -22,7 +22,9 @@ public static class CalculoEletrica
                 problemas.Add(new Problema("D-" + Sigla(p.Criterio), Gravidade.Erro, $"Circuito {c.Numero}: {p.Criterio} não atende ({p.Valor}; limite {p.Limite}).", p.Item, [c.Id]));
         foreach (var t in trechos)
             foreach (var p in t.Pareceres.Where(p => p.Reprovado))
-                problemas.Add(new Problema("E-" + Sigla(p.Criterio), Gravidade.Erro, $"Trecho {t.Id}: {p.Criterio} não atende ({p.Valor}; limite {p.Limite}).", p.Item, [t.Id]));
+                // 15 m e curvas já saem do Verificar (T-01, T-02) antes do cálculo; aqui só o que depende das seções.
+                if (p.Criterio is not ("trecho entre caixas" or "curvas"))
+                    problemas.Add(new Problema("E-" + Sigla(p.Criterio), Gravidade.Erro, $"Trecho {t.Id}: {p.Criterio} não atende ({p.Valor}; limite {p.Limite}).", p.Item, [t.Id]));
 
         cronometro.Stop();
         return new ResultadoInstalacao(i.Nome, i.Alimentacao, circuitos, quadros, trechos, problemas, cronometro.Elapsed);

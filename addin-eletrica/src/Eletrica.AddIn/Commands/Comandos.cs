@@ -24,6 +24,16 @@ static class Contexto
 
     /// <summary>Os dados confirmados; se ainda não houver, pede antes de seguir.</summary>
     public static DadosProjeto? Dados(Document doc) => DadosProjeto.Carregar(doc) ?? DadosProjetoUi.Editar(doc);
+
+    /// <summary>Verificar do motor (norma) + verificações do modelo do Revit (R-) + os problemas do cálculo, quando houver, num só relatório.</summary>
+    public static (IReadOnlyList<Problema> Problemas, IReadOnlyDictionary<string, ElementId> Mapa) VerificarTudo(Document doc, DadosProjeto dados, LeitorInstalacao.Lida lida,
+        IReadOnlyList<Problema>? doCalculo)
+    {
+        var problemas = new List<Problema>(doCalculo ?? Motor.Calculo.Verificacao.Verificar(lida.Instalacao));
+        var modelo = VerificacaoDoModelo.Verificar(doc, dados, lida, lida.Volumes);
+        problemas.AddRange(modelo.Problemas);
+        return (problemas, modelo.Elementos);
+    }
 }
 
 static class DadosProjetoUi
@@ -124,10 +134,10 @@ public class VerificarModeloCommand : ExternalCommand
         try
         {
             var lida = LeitorInstalacao.Ler(doc, dados);
-            var problemas = Motor.Calculo.Verificacao.Verificar(lida.Instalacao);
+            var (problemas, mapa) = Contexto.VerificarTudo(doc, dados, lida, null);
             var i = lida.Instalacao;
-            VerificacaoJanela.Mostrar(ui, problemas, lida.Elementos, lida.Avisos,
-                $"{i.Ambientes.Count} ambientes, {i.Quadros.Count} quadro(s), {i.Circuitos.Count} circuitos, {i.Pontos.Count} pontos e {i.Trechos.Count} trechos de eletroduto verificados.");
+            VerificacaoJanela.Mostrar(ui, problemas, mapa, lida.Avisos,
+                $"{i.Ambientes.Count} ambientes, {i.Quadros.Count} quadro(s), {i.Circuitos.Count} circuitos, {i.Pontos.Count} pontos, {i.Comandos.Count} comando(s), {i.Caixas.Count} caixa(s) e {i.Trechos.Count} trechos de eletroduto verificados.");
         }
         catch (Motor.Modelo.ErroDeModelo e)
         {
@@ -166,7 +176,10 @@ public class CalcularCommand : ExternalCommand
             var escolha = dialogo.Show();
             if (escolha == TaskDialogResult.CommandLink1) AbrirMemorialCommand.Abrir(saida.Memorial);
             else if (escolha == TaskDialogResult.CommandLink2)
-                VerificacaoJanela.Mostrar(ui, r.Problemas, saida.Lida.Elementos, saida.Avisos, $"{r.Circuitos.Count} circuitos calculados.");
+            {
+                var (problemas, mapa) = Contexto.VerificarTudo(doc, dados, saida.Lida, r.Problemas);
+                VerificacaoJanela.Mostrar(ui, problemas, mapa, saida.Avisos, $"{r.Circuitos.Count} circuitos calculados e o modelo verificado.");
+            }
         }
         catch (Exception e) when (e is Motor.Modelo.ErroDeModelo or InvalidOperationException or ArgumentException or IOException)
         {

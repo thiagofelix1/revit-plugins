@@ -2,7 +2,7 @@
 
 Add-in fino sobre o [motor](../motor-eletrica/README.md): lança quadros, pontos, comandos e circuitos pela NBR 5410 e pelo padrão do escritório; lê o modelo (quadros, circuitos, pontos, ambientes, eletrodutos, comandos), passa os circuitos pelos eletrodutos, verifica, calcula e grava o resultado em parâmetros compartilhados "AE" e num memorial. Mesma estrutura e as mesmas peças de infraestrutura do [SPK](../addin-spk/README.md) (Nice3point SDK, Revit 2025 a 2027, armazenamento no .rvt, transação segura, ícones desenhados).
 
-Estado em 06/11/2026: **compila para 2025, 2026 e 2027 com as entregas 0.2 (lançamento) e 0.3 (eletrodutos, fiação, fio, etiquetas e legenda) incluídas; ainda não foi aberto no Revit** (ver "Testar").
+Estado em 06/11/2026: **compila para 2025, 2026 e 2027 com as entregas 0.2 (lançamento), 0.3 (eletrodutos, fiação, fio, etiquetas e legenda) e 0.4 (Verificar completo) incluídas; ainda não foi aberto no Revit** (ver "Testar").
 
 ## A aba AutoEletrica
 
@@ -27,7 +27,7 @@ Estado em 06/11/2026: **compila para 2025, 2026 e 2027 com as entregas 0.2 (lan�
 | Fiação | Desenhar fiação | Na planta aberta, um `Wire` por trecho com circuitos, seguindo o percurso em planta (arcos de até 3 vértices para embutido; polilinha para aparente), com `AE Circuitos`, `AE Fiação` e `AE Condutores` para a etiqueta de fio; tenta ajustar as marcas de condutor. Rodar de novo apaga os fios AE da vista e redesenha. |
 | Fiação | Etiquetar | Cria etiquetas de eletroduto, fio, tomada, luminária, interruptor e quadro na planta aberta com as famílias de etiqueta carregadas (os rótulos devem apontar para os parâmetros AE; prefere tipos com "AE" no nome). |
 | Fiação | Legenda | Vista de desenho "AE — Legenda de fiação": tabela dos circuitos (número, descrição, quadro, n#S(PE), disjuntor, DR) e as cores dos condutores do padrão (6.1.5.3). Rodar de novo refaz. |
-| Cálculo | Verificar modelo | Roda o Verificar do motor e mostra a lista com código, gravidade e item da norma; "Mostrar" seleciona os elementos no modelo. |
+| Cálculo | Verificar modelo | Roda o Verificar do motor (códigos A-, B-, C-, DR-, L-, M-, Q-, T-) mais as verificações do modelo do Revit (R-: sistema de distribuição do quadro × Dados, família sem conector ou sem potência, interruptor nos volumes 0–2, chuveiro elétrico a mais de 1,5 m do boxe, interruptor sem comando) e mostra a lista com código, gravidade e item da norma; filtro por gravidade, "Mostrar" seleciona os elementos, "Salvar relatório" grava `Documentos\AutoEletrica\verificacao\<projeto>-verificacao.md`. Os volumes do banheiro (9.1.2.1) saem da geometria do boxe, banheira ou chuveiro da arquitetura (`Verificacao/VolumesDeBanheiro.cs`): volume 1 sobre a peça até 2,25 m, 2 a 0,60 m até 3,00 m, 3 a mais 2,40 m até 2,25 m; sem boxe, 0,60 m ao redor do chuveiro; paredes não descontadas. O IP vem de parâmetro da família com "IP" ou "grau de proteção" no nome. |
 | Cálculo | Calcular | Dimensiona tudo, grava `AE Seção`, `AE Disjuntor`, `AE IB`, `AE Queda`, `AE DR`, `AE Situação`, `AE Comprimento` nos circuitos, `AE Fiação`, `AE DN sugerido`, `AE Ocupação` nos eletrodutos, `AE Ambiente` nos pontos, e salva `Documentos\AutoEletrica\calculo\<projeto>-memorial.md`. |
 | Resultados | Memorial | Abre o último memorial. |
 | Ajuda | Guia | Passo a passo e a situação do projeto aberto. |
@@ -56,6 +56,9 @@ Estado em 06/11/2026: **compila para 2025, 2026 e 2027 com as entregas 0.2 (lan�
 3. Abrir o Revit 2027 num projeto elétrico com a arquitetura vinculada e famílias elétricas carregadas; seguir o Guia (Dados → Ambientes → Padrão → Famílias → Quadro → Pontos por ambiente → Criar circuitos → eletrodutos → Passar circuitos → Verificar → Calcular). Modelos de teste: os do SPK (Snowdon, MNEVVM) só para a arquitetura; falta um .rvt elétrico de referência dos engenheiros.
 4. Distribuição: `distribuicao\instalar.bat` copia a pasta `Revit 20xx` para a pasta de add-ins do usuário, como no SPK.
 
-## O que a 0.2 e a 0.3 ainda não cobrem
+## O que as entregas 0.2 a 0.4 ainda não cobrem
+
+No Verificar: piscina e sauna (9.2, 9.3), neutro compartilhado, PE ausente e interruptor no neutro (não há como ler do modelo), emendas, SELV junto, rota de fuga e corta-fogo (sem dado), caixa sem tampa; os volumes do banheiro não descontam paredes e divisórias. O critério de pronto da 0.4 ("rodado nos três projetos de referência, aponta problemas reais que os engenheiros confirmam") só fecha com os projetos.
+
 
 Vários pontos na mesma caixa e alinhamento vertical (item 2.2), esquemas de ligação além de F+N/F+F e retorno simples/paralelo/intermediário (1.5), influências externas além do uso do ambiente (1.8), um .rvt de referência; no traçado, desvio de obstáculos e caixa automática no fim de cada subida (4.1 completo, 4.8); nas tags, anti-sobreposição (6.4) e famílias de etiqueta de referência no repositório (as do escritório precisam de rótulos nos parâmetros AE); legenda de símbolos (a API não cria vista de legenda). O resto do plano (0.4 a 0.6): Verificar completo (volumes do banheiro pela geometria), quadro de cargas na prancha, memorial .docx, lista de material, teste automático no Revit, e a base comum extraída do SPK. Ver `autoeletrica/docs/plano-de-desenvolvimento.md`.

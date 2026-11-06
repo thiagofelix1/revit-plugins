@@ -15,7 +15,7 @@ namespace Eletrica.AddIn.Leitura;
 public static class LeitorInstalacao
 {
     public sealed record Lida(Instalacao Instalacao, IReadOnlyDictionary<string, ElementId> Elementos, IReadOnlyList<string> Avisos,
-        GrafoDeCondutos Grafo, IReadOnlyList<AmbienteLido> Ambientes);
+        GrafoDeCondutos Grafo, IReadOnlyList<AmbienteLido> Ambientes, Verificacao.VolumesDeBanheiro Volumes);
 
     public static Lida Ler(Document doc, DadosProjeto dados)
     {
@@ -25,6 +25,7 @@ public static class LeitorInstalacao
         var ambientesLidos = LeituraDeAmbientes.Ler(doc);
         var grafo = new GrafoDeCondutos(doc);
         avisos.AddRange(grafo.Avisos);
+        var volumes = Verificacao.VolumesDeBanheiro.Ler(doc, ambientesLidos);
 
         var ambientes = ambientesLidos.Select(a => new Ambiente(a.Id, a.Nome, a.Uso, a.Area, a.Perimetro)).ToList();
         foreach (var a in ambientesLidos.Where(a => a.Doc == doc)) mapa[a.Id] = a.Room.Id;
@@ -89,7 +90,7 @@ public static class LeitorInstalacao
                 if (e is not FamilyInstance fi || quadrosRevit.ContainsKey(fi.Id)) continue;
                 circuitoDoElemento[fi.Id] = s.UniqueId;
                 if (fi.Category?.BuiltInCategory == BuiltInCategory.OST_LightingDevices) continue; // interruptor não é ponto de utilização
-                var ponto = LerPonto(doc, fi, s.UniqueId, ambientesLidos, grafo, avisos);
+                var ponto = LerPonto(doc, fi, s.UniqueId, ambientesLidos, grafo, avisos, volumes);
                 if (ponto is null) continue;
                 pontosDoCircuito.Add(ponto);
                 mapa[fi.UniqueId] = fi.Id;
@@ -157,7 +158,7 @@ public static class LeitorInstalacao
         foreach (var k in grafo.Caixas) mapa[k.Elemento.UniqueId] = k.Elemento.Id;
 
         var instalacao = new Instalacao(doc.Title, alimentacao, ambientes, quadros, circuitos, pontos, trechos, caixas, comandos);
-        return new Lida(instalacao, mapa, avisos, grafo, ambientesLidos);
+        return new Lida(instalacao, mapa, avisos, grafo, ambientesLidos, volumes);
     }
 
     static IEnumerable<string> Separar(string? texto) => (texto ?? "").Split([';', ',', ' '], StringSplitOptions.RemoveEmptyEntries);
@@ -167,7 +168,8 @@ public static class LeitorInstalacao
     /// potência (AE Potência, carga aparente ou parâmetro da família), ambiente pelo Room no ponto (arquivo ou vínculo), altura
     /// pelo nível, nó no grafo de eletrodutos. Nulo (com aviso) quando está fora de qualquer ambiente.
     /// </summary>
-    public static Ponto? LerPonto(Document doc, FamilyInstance fi, string? circuito, IReadOnlyList<AmbienteLido> ambientes, GrafoDeCondutos? grafo, List<string> avisos)
+    public static Ponto? LerPonto(Document doc, FamilyInstance fi, string? circuito, IReadOnlyList<AmbienteLido> ambientes, GrafoDeCondutos? grafo, List<string> avisos,
+        Verificacao.VolumesDeBanheiro? volumes = null)
     {
         var categoria = fi.Category?.BuiltInCategory ?? BuiltInCategory.INVALID;
         var tipo = TipoDoPonto(fi, categoria);
@@ -187,7 +189,32 @@ public static class LeitorInstalacao
                                                       || ParametrosEletrica.LerTexto(fi, ParametrosEletrica.Posicao) == "Teto"),
             CorrenteDaTomada = tipo is TipoCarga.TomadaUsoGeral or TipoCarga.TomadaUsoEspecifico ? CorrenteDaTomada(fi) : null,
             No = grafo?.NoDe(fi) ?? fi.UniqueId,
+            VolumeDoBanheiro = local is not null && ambiente.Uso is UsoAmbiente.Banheiro or UsoAmbiente.Lavabo ? volumes?.Volume(ambiente.Id, local) : null,
+            IpAgua = IpAgua(fi),
         };
+    }
+
+    /// <summary>Segundo algarismo do IP da família ("IP44", "IPX4", "44"), em parâmetro de instância ou de tipo com "IP" ou "grau de proteção" no nome.</summary>
+    public static int? IpAgua(FamilyInstance fi)
+    {
+        foreach (var p in fi.Parameters.Cast<Parameter>().Concat(fi.Symbol?.Parameters.Cast<Parameter>() ?? []))
+        {
+            var nome = p.Definition?.Name ?? "";
+            var n = nome.ToLowerInvariant();
+            if (!(nome == "IP" || n.StartsWith("ip ") || n.StartsWith("ip_") || n.Contains("grau de prote") || n.Contains("índice de prote") || n.Contains("indice de prote") || n.Contains("ingress"))) continue;
+            var texto = p.StorageType switch
+            {
+                StorageType.String => p.AsString(),
+                StorageType.Integer => p.AsInteger().ToString(),
+                StorageType.Double => p.AsValueString(),
+                _ => null,
+            };
+            if (string.IsNullOrWhiteSpace(texto)) continue;
+            var digitos = new string(texto!.ToUpperInvariant().Replace("IP", "").Trim().TakeWhile(ch => char.IsDigit(ch) || ch == 'X').ToArray());
+            if (digitos.Length >= 2 && char.IsDigit(digitos[1])) return digitos[1] - '0';
+            if (digitos.Length == 1 && char.IsDigit(digitos[0]) && texto.ToUpperInvariant().Contains("X")) return digitos[0] - '0';
+        }
+        return null;
     }
 
     /// <summary>Pontos elétricos do modelo que ainda não estão em circuito algum (tomadas, luminárias, equipamentos; interruptores à parte).</summary>

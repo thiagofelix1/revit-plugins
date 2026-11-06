@@ -168,7 +168,9 @@ public class DimensionamentoTestes
         var longo = i.Trechos.Single(t => t.Id == "circ-d1") with { Comprimento = 12, Curvas90 = 4 };
         var sabotada = new Instalacao(i.Nome, i.Alimentacao, i.Ambientes, i.Quadros, i.Circuitos, i.Pontos, i.Trechos.Select(t => t.Id == "circ-d1" ? longo : t));
         var r = CalculoEletrica.Executar(sabotada);
-        Assert.Contains(r.Problemas, p => p.Codigo == "E-15M");
-        Assert.Contains(r.Problemas, p => p.Codigo == "E-CURV");
+        // 15 m e curvas saem do Verificar (T-01, T-02), antes do cálculo; o cálculo não repete.
+        Assert.Contains(r.Problemas, p => p.Codigo == "T-01" && p.Elementos.Contains("circ-d1"));
+        Assert.Contains(r.Problemas, p => p.Codigo == "T-02" && p.Elementos.Contains("circ-d1"));
+        Assert.DoesNotContain(r.Problemas, p => p.Codigo is "E-15M" or "E-CURV");
     }
 }

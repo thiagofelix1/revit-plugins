@@ -111,6 +111,24 @@ public static class Verificacao
                 problemas.Add(new Problema("B-01", Gravidade.Erro, $"{am.Nome}: {p.Tipo} ({p.Id}) dentro do volume {v} do banheiro.", "9.1.4.3.1, 9.1.4.4", [p.Id]));
             if (p.Tipo == TipoCarga.Chuveiro && p.CorrenteDaTomada is not null)
                 problemas.Add(new Problema("B-02", Gravidade.Erro, $"{am.Nome}: chuveiro ou aquecedor ({p.Id}) ligado por tomada; a ligação deve ser direta.", "9.5.2.3", [p.Id]));
+            if (p.VolumeDoBanheiro is { } vol and <= 3)
+            {
+                var minimo = Nbr5410.IpAguaMinimoNoBanheiro(vol);
+                if (p.IpAgua is { } ip && ip < minimo)
+                    problemas.Add(new Problema("B-04", Gravidade.Erro, $"{am.Nome}: {p.Tipo} ({p.Id}) no volume {vol} com IPX{ip}; o mínimo é IPX{minimo}.", "9.1.4.1", [p.Id]));
+                else if (p.IpAgua is null && vol <= 2)
+                    problemas.Add(new Problema("B-05", Gravidade.Nota, $"{am.Nome}: {p.Tipo} ({p.Id}) no volume {vol} sem grau IP informado na família; o mínimo é IPX{minimo}.", "9.1.4.1", [p.Id]));
+            }
+            if (p.Tipo == TipoCarga.Chuveiro && p.VolumeDoBanheiro is { } vc and >= 2)
+                problemas.Add(new Problema("B-06", Gravidade.Aviso, $"{am.Nome}: o ponto do chuveiro elétrico ({p.Id}) está no volume {vc}; o aquecedor fica no volume 1, sobre o boxe, e o ponto a até 1,5 m dele.", "9.1.4.4, 4.2.1.2.3", [p.Id]));
+        }
+        foreach (var am in i.Ambientes.Where(am => am.Banho))
+        {
+            var pontos = i.PontosDo(am).ToList();
+            if (pontos.Count == 0) continue;
+            problemas.Add(new Problema("A-08", Gravidade.Nota, $"{am.Nome}: prever a equipotencialização suplementar reunindo as massas e os elementos condutivos dos volumes 0 a 3 (barra no banheiro ou ligação ao PE do quadro).", "9.1.3.1.2", [am.Id]));
+            if (pontos.All(p => p.VolumeDoBanheiro is null))
+                problemas.Add(new Problema("A-09", Gravidade.Aviso, $"{am.Nome}: os volumes do banheiro não foram apurados (sem boxe, banheira ou chuveiro na arquitetura vinculada); as regras de volume não rodaram neste cômodo.", "9.1.2.1", [am.Id]));
         }
 
         // ----- DR (5.1.3.2.2) -----
@@ -120,6 +138,36 @@ public static class Verificacao
             if (motivos.Count > 0)
                 problemas.Add(new Problema("DR-01", Gravidade.Nota, $"Circuito {c.Numero} exige DR de 30 mA: {motivos[0].m} ({motivos.Count} ponto(s)).", "5.1.3.2.2",
                     [c.Id, .. motivos.Select(x => x.p.Id)]));
+            var tipo = i.PontosDo(c).Select(p => DispositivosDR.TipoSugerido(p.Tipo)).DefaultIfEmpty(DispositivosDR.TipoSugerido(c.Tipo)).Max();
+            if (tipo is TipoDr.F or TipoDr.B)
+                problemas.Add(new Problema("DR-02", Gravidade.Nota, $"Circuito {c.Numero}: pela carga ({c.Tipo}), o DR deve ser do tipo {tipo} (correntes com componente contínua ou de alta frequência); tipo AC não serve.", "6.3.3.2, IEC 62423", [c.Id]));
+        }
+
+        // ----- trechos de eletroduto (6.2.11.1), antes do cálculo -----
+        {
+            var grauDoNo = new Dictionary<string, int>();
+            int Grau(string no) => grauDoNo.TryGetValue(no, out var g) ? g : 0;
+            foreach (var t in i.Trechos)
+            {
+                grauDoNo[t.De] = Grau(t.De) + 1;
+                grauDoNo[t.Para] = Grau(t.Para) + 1;
+            }
+            var nosOcupados = new HashSet<string>(i.Pontos.Select(p => p.NoDoPonto).Concat(i.Quadros.Select(q => q.NoDoQuadro)).Concat(i.Caixas.Select(k => k.No))
+                .Concat(i.Comandos.SelectMany(k => Enumerable.Range(0, k.Interruptores.Count).Select(k.NoDoInterruptor))));
+            foreach (var t in i.Trechos)
+            {
+                var maximo = t.Externo ? Nbr5410.TrechoMaximoExterno : Nbr5410.TrechoMaximoInterno;
+                var equivalente = t.Comprimento + Nbr5410.DescontoPorCurva * t.Curvas90;
+                if (equivalente > maximo + 1e-9)
+                    problemas.Add(new Problema("T-01", Gravidade.Erro, $"Trecho de eletroduto com {t.Comprimento:0.0} m e {t.Curvas90} curva(s) ({equivalente:0.0} m equivalentes) sem caixa; o máximo é {maximo:0} m. Pôr caixa de passagem (Caixas por regra).", "6.2.11.1.6 b)", [t.Id]));
+                if (t.Curvas90 > Nbr5410.CurvasMaximasEntreCaixas)
+                    problemas.Add(new Problema("T-02", Gravidade.Erro, $"Trecho de eletroduto com {t.Curvas90} curvas de 90° entre caixas; o máximo é 3.", "6.2.11.1.7", [t.Id]));
+                if (t.Dn is { } dn && dn < Nbr5410.DnMinimo)
+                    problemas.Add(new Problema("T-04", Gravidade.Erro, $"Eletroduto DN {dn}; o mínimo em uso normal é DN {Nbr5410.DnMinimo}.", "6.2.11.1.5", [t.Id]));
+                foreach (var no in new[] { t.De, t.Para })
+                    if (Grau(no) == 1 && !nosOcupados.Contains(no))
+                        problemas.Add(new Problema("T-03", Gravidade.Aviso, $"Eletroduto com a ponta solta em {no}: não chega a ponto, caixa nem quadro (eletroduto desconectado ou ponto fora da tolerância).", "6.2.11.1", [t.Id]));
+            }
         }
 
         // ----- divisão de circuitos (4.2.5.5, 9.5.3) -----

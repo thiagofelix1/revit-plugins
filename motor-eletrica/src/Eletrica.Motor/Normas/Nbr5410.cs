@@ -268,6 +268,26 @@ public static class Nbr5410
     /// <summary>9.5.3.3: circuito comum de iluminação e tomadas só com IB até isto, em A.</summary>
     public const double CorrenteMaximaCircuitoComum = 16;
 
+    /// <summary>9.1.2.1: dimensões dos volumes do banheiro, em m: volume 1 até 2,25 m sobre o boxe/banheira; volume 2 a 0,60 m ao redor até 3,00 m; volume 3 a 2,40 m além do volume 2 até 2,25 m.</summary>
+    public const double AlturaVolume1 = 2.25;
+    public const double AlturaVolume2 = 3.00;
+    public const double LarguraVolume2 = 0.60;
+    public const double LarguraVolume3 = 2.40;
+    public const double AlturaVolume3 = 2.25;
+
+    /// <summary>9.1.2.1: sem boxe, o volume 1 vai até 0,60 m ao redor do ponto de saída da água do chuveiro.</summary>
+    public const double RaioDoChuveiroSemBoxe = 0.60;
+
+    /// <summary>9.1.4.1: segundo algarismo do IP mínimo por volume do banheiro (IPX7, IPX4, IPX3, IPX1); banheiro público pede IPX5 nos volumes 2 e 3.</summary>
+    public static int IpAguaMinimoNoBanheiro(int volume, bool publico = false) => volume switch
+    {
+        0 => 7,
+        1 => 4,
+        2 => publico ? 5 : 3,
+        3 => publico ? 5 : 1,
+        _ => 0,
+    };
+
     /// <summary>5.1.3.2.2 nota: em habitação, luminárias a esta altura ou mais podem ficar fora do DR, em m.</summary>
     public const double AlturaQueDispensaDR = 2.5;
 

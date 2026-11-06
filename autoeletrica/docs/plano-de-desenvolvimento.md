@@ -216,6 +216,8 @@ Itens 4.1, 4.2, 4.3, 5.1, 5.2, 5.3, 5.4, 5.7, 6.1, 6.2, 6.3, 6.5. **Pronto:** pl
 
 Itens 8.1 a 8.5 e 8.7 com relatório e destaque na vista. **Pronto:** rodado nos três projetos de referência, aponta problemas reais que os engenheiros confirmam.
 
+*Escrito em 06/11/2026 (compila, não testado no Revit):* 8.1 completo no motor mais chuveiro a 1,5 m do boxe (R-04); 8.2 volumes do banheiro gerados do boxe, banheira ou chuveiro da arquitetura vinculada (sem descontar paredes), ponto e interruptor nos volumes, IP mínimo por volume lido da família, equipotencialização como nota; piscina e sauna ficam de fora; 8.3 DR por uso e tipo pela carga (DR-02); 8.4 o que dá para ler do modelo (luz × tomada, TUE própria, cozinha exclusiva, IB ≤ 16 A); 8.5 15 m, curvas, DN mínimo e ponta solta antes do cálculo (T-01 a T-04), ocupação, mesma origem e seções no cálculo; 8.7 ponto sem circuito, sem caminho, quadro sem alimentador, sistema de distribuição divergente, família sem conector ou sem potência, interruptor sem comando. Relatório em Markdown e filtro por gravidade na janela. Falta o teste nos projetos de referência.
+
 ### 0.5 — Motor e Calcular (Fase 2)
 
 Itens 1.4, 1.6, 7.1 a 7.11, 7.16, 4.9, 4.10, 5.5, 5.6, 3.3, 3.6, 8.6, 8.8. **Pronto:** reproduz o dimensionamento dos três projetos de referência (ou explica a diferença pelo item da norma) e o exemplo do AltoQi; testes no motor para cada tabela e critério.

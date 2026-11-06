@@ -71,8 +71,11 @@ public sealed record Ponto(string Id, string Ambiente, string? Circuito, TipoCar
     /// <summary>Corrente nominal da tomada (10 ou 20 A pela NBR 14136), quando é tomada.</summary>
     public int? CorrenteDaTomada { get; init; }
 
-    /// <summary>Dentro dos volumes 0, 1 ou 2 do banheiro (9.1.2.1), apurado pelo add-in.</summary>
+    /// <summary>Volume do banheiro em que o ponto está (0 a 3; 4 = fora dos volumes), apurado pelo add-in pela geometria do boxe e da banheira (9.1.2.1).</summary>
     public int? VolumeDoBanheiro { get; init; }
+
+    /// <summary>Segundo algarismo do grau de proteção IP (proteção contra água) da família, quando informado (9.1.4.1).</summary>
+    public int? IpAgua { get; init; }
 
     /// <summary>Nó no ponto de luz (teto) ou na parede, para a regra 9.5.2.1.1.</summary>
     public bool NoTeto { get; init; }

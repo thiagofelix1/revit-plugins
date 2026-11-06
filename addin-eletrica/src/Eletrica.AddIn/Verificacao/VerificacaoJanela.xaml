@@ -9,6 +9,8 @@
                    Text="Cada linha cita o item da NBR 5410. Escolha uma e clique em Mostrar: a janela fecha, os elementos ficam selecionados e a vista vai até eles. Depois de corrigir, rode Verificar de novo."/>
         <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
             <Button DockPanel.Dock="Left" Content="Copiar relatório" Padding="12,4" Click="Copiar_Click"/>
+            <Button DockPanel.Dock="Left" Content="Salvar relatório" Padding="12,4" Margin="8,0,0,0" Click="Salvar_Click"/>
+            <ComboBox x:Name="Filtro" DockPanel.Dock="Left" Width="150" Margin="16,0,0,0" VerticalAlignment="Center" SelectionChanged="Filtro_SelectionChanged"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button x:Name="BotaoMostrar" Content="Mostrar" Width="100" Padding="12,4" Margin="0,0,8,0" FontWeight="Bold" Click="Mostrar_Click"/>
                 <Button Content="Fechar" Width="100" Padding="12,4" IsCancel="True"/>
