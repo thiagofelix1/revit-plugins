@@ -168,6 +168,22 @@ static class CenasEletrica
             }
             aceitou = TentarSistema(doc, quadro, novo, out var recusaNovo);
             linhas.Add(aceitou ? $"sistema novo aceito: {Descrever(novo)}" : $"sistema novo também recusado: {Descrever(novo)} ({recusaNovo})");
+
+            // Quadros que o template já traz (para comparar com a família de teste).
+            var doTemplate = new FilteredElementCollector(doc).OfClass(typeof(FamilySymbol)).OfCategory(BuiltInCategory.OST_ElectricalEquipment)
+                .Cast<FamilySymbol>().Where(s => s.Family.Id != quadro.Symbol.Family.Id).Select(s => $"{s.Family.Name}: {s.Name}").ToList();
+            linhas.Add("equipamentos elétricos do template: " + (doTemplate.Count == 0 ? "nenhum" : string.Join(" | ", doTemplate.Take(10))));
+
+            // Variante: conector do quadro com a tensão fase-neutro (127 V), mantendo 3 polos.
+            if (!aceitou)
+            {
+                var variante = MudarTensaoDoConector(doc, quadro, dados.TensaoFaseNeutro);
+                aceitou = variante is null && TentarSistema(doc, quadro, sistema, out _);
+                linhas.Add(variante is not null
+                    ? $"variante do conector não aplicada: {variante}"
+                    : aceitou ? $"com o conector em {dados.TensaoFaseNeutro:0} V e 3 polos o quadro aceitou {Descrever(sistema)}"
+                              : $"com o conector em {dados.TensaoFaseNeutro:0} V também recusou");
+            }
         }
         metricas["cena.sistemaNoQuadro"] = aceitou ? 1 : 0;
 
@@ -363,6 +379,43 @@ static class CenasEletrica
                    $"FF {Faixa(ds.VoltageLineToLine)} V, FN {Faixa(ds.VoltageLineToGround)} V";
         }
         catch (Autodesk.Revit.Exceptions.ApplicationException e) { return $"\"{ds.Name}\" ({e.Message})"; }
+    }
+
+    /// <summary>Muda a tensão do conector elétrico da família do quadro e recarrega a família no projeto. Nulo quando deu certo.</summary>
+    static string? MudarTensaoDoConector(Document doc, FamilyInstance quadro, double volts)
+    {
+        Document? familia = null;
+        try
+        {
+            familia = doc.EditFamily(quadro.Symbol.Family);
+            using (var t = new Transaction(familia, "AE — tensão do conector"))
+            {
+                t.Start();
+                foreach (var c in new FilteredElementCollector(familia).OfClass(typeof(ConnectorElement)).Cast<ConnectorElement>().Where(c => c.Domain == Domain.DomainElectrical))
+                    Definir(c, BuiltInParameter.RBS_ELEC_VOLTAGE, V(volts));
+                t.Commit();
+            }
+            familia.LoadFamily(doc, new SobrescreverFamilia());
+            return null;
+        }
+        catch (Exception e) when (e is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException) { return e.Message; }
+        finally { familia?.Close(false); }
+    }
+
+    sealed class SobrescreverFamilia : IFamilyLoadOptions
+    {
+        public bool OnFamilyFound(bool familyInUse, out bool overwriteParameterValues)
+        {
+            overwriteParameterValues = true;
+            return true;
+        }
+
+        public bool OnSharedFamilyFound(Family sharedFamily, bool familyInUse, out FamilySource source, out bool overwriteParameterValues)
+        {
+            source = FamilySource.Family;
+            overwriteParameterValues = true;
+            return true;
+        }
     }
 
     /// <summary>Diagnóstico: o conector elétrico da família do quadro como o editor de famílias o vê (tensão, polos, sistema).</summary>

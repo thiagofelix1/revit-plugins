@@ -47,7 +47,8 @@ static class LegendaDeFiacao
         void Texto(double xMm, double yMm, string texto, double larguraMm)
         {
             if (string.IsNullOrEmpty(texto)) return;
-            var nota = TextNote.Create(doc, vista.Id, new XYZ(Mm(xMm + MargemMm), Mm(yMm - MargemMm), 0), Mm(Math.Max(larguraMm - 2 * MargemMm, 4)), texto, opcoes);
+            var nota = TextNote.Create(doc, vista.Id, new XYZ(Mm(xMm + MargemMm), Mm(yMm - MargemMm), 0),
+                Folhas.Desenho.LarguraNoPapel(doc, opcoes.TypeId, larguraMm - 2 * MargemMm), texto, opcoes);
             _ = nota;
         }
 

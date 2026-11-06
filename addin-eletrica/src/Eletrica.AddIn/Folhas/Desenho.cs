@@ -32,13 +32,27 @@ static class Desenho
                ?? throw new InvalidOperationException("O projeto não tem tipo de texto.");
     }
 
+    /// <summary>
+    ///     Largura de um texto com quebra de linha: a API pede a largura no papel (como sai impressa), não no modelo, e dentro da
+    ///     faixa que o tipo de texto admite. Passar a medida do modelo (vezes a escala) estourava o máximo.
+    /// </summary>
+    public static double LarguraNoPapel(Document doc, ElementId tipoDeTexto, double larguraMm)
+    {
+        var largura = UnitUtils.ConvertToInternalUnits(larguraMm, UnitTypeId.Millimeters);
+        var minimo = TextElement.GetMinimumAllowedWidth(doc, tipoDeTexto);
+        var maximo = TextElement.GetMaximumAllowedWidth(doc, tipoDeTexto);
+        return Math.Min(Math.Max(largura, minimo), maximo);
+    }
+
     public static TextNote? Texto(Document doc, View vista, double xMm, double yMm, string texto, double? larguraMm = null, bool negrito = false)
     {
         if (string.IsNullOrWhiteSpace(texto)) return null;
         var opcoes = new TextNoteOptions(TipoDeTexto(doc)) { HorizontalAlignment = HorizontalTextAlignment.Left };
         var quebras = texto.Trim().Replace("\r\n", "\n").Replace("\n", "\r");
         var posicao = new XYZ(Mm(xMm), Mm(yMm), 0);
-        var nota = larguraMm is { } l ? TextNote.Create(doc, vista.Id, posicao, Mm(Math.Max(l, 4)), quebras, opcoes) : TextNote.Create(doc, vista.Id, posicao, quebras, opcoes);
+        var nota = larguraMm is { } l
+            ? TextNote.Create(doc, vista.Id, posicao, LarguraNoPapel(doc, opcoes.TypeId, l), quebras, opcoes)
+            : TextNote.Create(doc, vista.Id, posicao, quebras, opcoes);
         if (negrito)
         {
             var formato = nota.GetFormattedText();
