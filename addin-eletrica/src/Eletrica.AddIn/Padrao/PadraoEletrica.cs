@@ -23,6 +23,9 @@ public enum PapelFamilia
     CaixaDePassagem,
 }
 
+/// <summary>Por onde o eletroduto traçado passa entre dois pontos.</summary>
+public enum AlturaDePassagem { Teto, Piso, NivelDosPontos }
+
 /// <summary>
 ///     Padrão do escritório gravado no projeto: alturas, potências e limites do lançamento (do motor) e as famílias que
 ///     fazem cada papel ("Família : Tipo", por nome, porque o engenheiro pode recarregar a família sem perder a escolha).
@@ -38,6 +41,31 @@ public sealed class PadraoEletrica
 
     /// <summary>Afastamento do centro do ponto à face da parede quando a família não é hospedada, em m.</summary>
     public double AfastamentoDaParede { get; set; } = 0.03;
+
+    // ----- traçado de eletrodutos (0.3) -----
+
+    /// <summary>Nome do tipo de eletroduto (ConduitType) do escritório; nulo: o primeiro com conexões.</summary>
+    public string? TipoEletroduto { get; set; }
+
+    /// <summary>DN padrão dos eletrodutos traçados, em mm.</summary>
+    public int DnPadrao { get; set; } = 25;
+
+    public AlturaDePassagem Passagem { get; set; } = AlturaDePassagem.Teto;
+
+    /// <summary>Eixo do eletroduto embutido na laje ou sobre o forro, em m acima do nível.</summary>
+    public double CotaTeto { get; set; } = 2.65;
+
+    /// <summary>Eixo do eletroduto embutido no piso, em m acima do nível (negativo: dentro do contrapiso).</summary>
+    public double CotaPiso { get; set; } = -0.05;
+
+    /// <summary>Fio desenhado em arcos (embutido) ou em polilinha reta (aparente).</summary>
+    public bool FioCurvo { get; set; } = true;
+
+    /// <summary>Cores dos condutores na legenda (6.1.5.3: neutro azul-claro, PE verde-amarelo; fases e retorno pelo padrão).</summary>
+    public string CorFases { get; set; } = "vermelho, preto, branco";
+    public string CorNeutro { get; set; } = "azul-claro";
+    public string CorPE { get; set; } = "verde-amarelo";
+    public string CorRetorno { get; set; } = "amarelo";
 
     public static PadraoEletrica Carregar(Document doc) => ArmazenamentoEletrica.Ler<PadraoEletrica>(doc, Chave) ?? new PadraoEletrica();
 

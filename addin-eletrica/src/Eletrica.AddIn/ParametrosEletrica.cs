@@ -15,6 +15,8 @@ static class ParametrosEletrica
     public static readonly Guid DnSugerido = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A14");
     public static readonly Guid Ocupacao = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A15");
     public static readonly Guid Retornos = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A16");
+    public static readonly Guid Forcar = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A17");
+    public static readonly Guid Evitar = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A18");
 
     // Circuitos (ElectricalSystem)
     public static readonly Guid Secao = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A21");
@@ -35,7 +37,7 @@ static class ParametrosEletrica
     public static readonly Guid TipoDeComando = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A36");
     public static readonly Guid Posicao = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A37");
 
-    static readonly BuiltInCategory[] Condutos = [BuiltInCategory.OST_Conduit, BuiltInCategory.OST_ConduitFitting];
+    static readonly BuiltInCategory[] Condutos = [BuiltInCategory.OST_Conduit, BuiltInCategory.OST_ConduitFitting, BuiltInCategory.OST_Wire];
     static readonly BuiltInCategory[] Circuito = [BuiltInCategory.OST_ElectricalCircuit];
 
     static readonly BuiltInCategory[] Pontos =
@@ -54,6 +56,8 @@ static class ParametrosEletrica
         new(DnSugerido, "AE DN sugerido", SpecTypeId.Int.Integer, Condutos),
         new(Ocupacao, "AE Ocupação (%)", SpecTypeId.Number, Condutos),
         new(Retornos, "AE Retornos", SpecTypeId.String.Text, Condutos),
+        new(Forcar, "AE Forçar circuitos", SpecTypeId.String.Text, Condutos),
+        new(Evitar, "AE Evitar circuitos", SpecTypeId.String.Text, Condutos),
         new(Secao, "AE Seção (F/N/PE mm²)", SpecTypeId.String.Text, Circuito),
         new(Disjuntor, "AE Disjuntor", SpecTypeId.String.Text, Circuito),
         new(CorrenteDeProjeto, "AE IB (A)", SpecTypeId.Number, Circuito),

@@ -19,7 +19,7 @@ public class PadraoCommand : ExternalCommand
     public override void Execute()
     {
         if (Contexto.Projeto(Application, "AutoEletrica — Padrão") is not { } doc) return;
-        var janela = new PadraoJanela(PadraoEletrica.Carregar(doc));
+        var janela = new PadraoJanela(doc, PadraoEletrica.Carregar(doc));
         if (janela.ShowDialog() != true || janela.Resultado is not { } padrao) return;
         padrao.SalvarComTransacao(doc);
     }

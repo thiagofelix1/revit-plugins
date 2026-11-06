@@ -1,4 +1,5 @@
 using Autodesk.Revit.DB.Electrical;
+using Eletrica.AddIn.Padrao;
 using Eletrica.Motor.Modelo;
 
 namespace Eletrica.AddIn.Condutos;
@@ -6,7 +7,8 @@ namespace Eletrica.AddIn.Condutos;
 /// <summary>
 /// Os eletrodutos do modelo como grafo: nós nas pontas dos conectores (arredondadas ao milímetro), arestas são cadeias de
 /// eletrodutos ligados por curvas e luvas (uma cadeia = um trecho do motor, entre caixas, tês, pontas livres e pontos).
-/// Pontos e quadros são presos ao nó mais próximo dentro de uma tolerância.
+/// Caixas de passagem (família do papel Caixa, ou com "caixa", "box" ou "condulete" no nome) quebram a cadeia no nó em
+/// que estão, mesmo sem conector. Pontos e quadros são presos ao nó mais próximo dentro de uma tolerância.
 /// </summary>
 public sealed class GrafoDeCondutos
 {
@@ -23,13 +25,18 @@ public sealed class GrafoDeCondutos
         public int? Dn { get; init; }
     }
 
+    public sealed record CaixaLida(FamilyInstance Elemento, string No);
+
     const double ToleranciaNo = 0.002; // m: conectores encaixados ficam no mesmo nó
     const double ToleranciaPonto = 0.8; // m: um ponto "está" no eletroduto que chega a até isto dele
+    const double ToleranciaCaixa = 0.08; // m: a caixa "está" no nó que fica a até isto do centro dela
 
     readonly Dictionary<string, XYZ> _nos = new();
     readonly List<(string A, string B, Element Elemento, double Comprimento)> _arestas = [];
+    readonly HashSet<string> _nosDeCaixa = [];
 
     public IReadOnlyList<Cadeia> Cadeias { get; }
+    public IReadOnlyList<CaixaLida> Caixas { get; }
     public IReadOnlyList<string> Avisos { get; }
 
     public GrafoDeCondutos(Document doc)
@@ -65,9 +72,37 @@ public sealed class GrafoDeCondutos
             }
         }
 
+        // Caixas: quebram a cadeia no nó em que estão.
+        var padrao = PadraoEletrica.Carregar(doc);
+        var caixas = new List<CaixaLida>();
+        foreach (var fi in new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance)).Cast<FamilyInstance>().Where(fi => EhCaixa(fi, padrao)))
+        {
+            var nos = new List<string>();
+            if (fi.MEPModel?.ConnectorManager is { } cm)
+                foreach (var k in cm.Connectors.Cast<Connector>().Where(k => k.Domain == Domain.DomainCableTrayConduit))
+                    if (NoMaisProximo(k.Origin, 0.02) is { } no) nos.Add(no);
+            if (nos.Count == 0 && (fi.Location as LocationPoint)?.Point is { } p && NoMaisProximo(p, ToleranciaCaixa) is { } noCentro) nos.Add(noCentro);
+            foreach (var no in nos.Distinct())
+            {
+                _nosDeCaixa.Add(no);
+                caixas.Add(new CaixaLida(fi, no));
+            }
+        }
+        Caixas = caixas;
+
         Cadeias = MontarCadeias();
         if (conduites.Count == 0) avisos.Add("O modelo não tem eletrodutos (Conduit): o cálculo usa os comprimentos informados nos circuitos, sem agrupamento por trecho.");
         Avisos = avisos;
+    }
+
+    /// <summary>Caixa de passagem: o papel confirmado em Famílias, ou o nome da família.</summary>
+    public static bool EhCaixa(FamilyInstance fi, PadraoEletrica padrao)
+    {
+        var categoria = fi.Category?.BuiltInCategory;
+        if (categoria is not (BuiltInCategory.OST_ConduitFitting or BuiltInCategory.OST_ElectricalFixtures or BuiltInCategory.OST_ElectricalEquipment or BuiltInCategory.OST_GenericModel)) return false;
+        if (fi.Symbol is { } s && padrao.PapelDe(s) == PapelFamilia.CaixaDePassagem) return true;
+        var nome = (fi.Symbol?.FamilyName + " " + fi.Name).ToLowerInvariant();
+        return nome.Contains("caixa") || nome.Contains("condulete") || nome.Contains("junction box") || nome.Contains("pull box") || nome.Contains("passagem");
     }
 
     static IEnumerable<Connector> Conectores(ConnectorManager cm) => cm.Connectors.Cast<Connector>().Where(k => k.Domain != Domain.DomainUndefined);
@@ -106,16 +141,57 @@ public sealed class GrafoDeCondutos
         return p is null ? null : NoMaisProximo(p);
     }
 
+    /// <summary>Posição do nó em coordenadas internas (pés).</summary>
+    public XYZ? PosicaoDoNo(string no) =>
+        _nos.TryGetValue(no, out var m) ? new XYZ(Unidades.DeMetros(m.X), Unidades.DeMetros(m.Y), Unidades.DeMetros(m.Z)) : null;
+
+    /// <summary>
+    /// Os vértices da cadeia em ordem, do nó De ao nó Para, em coordenadas internas: as pontas dos eletrodutos, encadeadas.
+    /// Serve para desenhar o fio e para andar ao longo do trecho (caixas por regra).
+    /// </summary>
+    public List<XYZ> Percurso(Cadeia cadeia)
+    {
+        var inicio = PosicaoDoNo(cadeia.De) ?? (cadeia.Conduites[0].Location as LocationCurve)!.Curve.GetEndPoint(0);
+        var restantes = new List<Conduit>(cadeia.Conduites);
+        var pontos = new List<XYZ> { inicio };
+        var atual = inicio;
+        while (restantes.Count > 0)
+        {
+            Conduit? proximo = null;
+            XYZ? longe = null;
+            var menor = double.MaxValue;
+            foreach (var c in restantes)
+            {
+                if (c.Location is not LocationCurve lc) continue;
+                var a = lc.Curve.GetEndPoint(0);
+                var b = lc.Curve.GetEndPoint(1);
+                var da = a.DistanceTo(atual);
+                var db = b.DistanceTo(atual);
+                if (Math.Min(da, db) < menor)
+                {
+                    menor = Math.Min(da, db);
+                    proximo = c;
+                    longe = da <= db ? b : a;
+                }
+            }
+            if (proximo is null || longe is null) break;
+            restantes.Remove(proximo);
+            pontos.Add(longe);
+            atual = longe;
+        }
+        return pontos;
+    }
+
     List<Cadeia> MontarCadeias()
     {
-        // Grau de cada nó; nós de grau 2 ligados só por curvas/luvas/eletrodutos são internos à cadeia.
+        // Grau de cada nó; nós de grau 2 ligados só por curvas/luvas/eletrodutos são internos à cadeia, menos onde há caixa.
         var grau = new Dictionary<string, int>();
         foreach (var (a, b, _, _) in _arestas)
         {
             grau[a] = grau.GetValueOrDefault(a) + 1;
             grau[b] = grau.GetValueOrDefault(b) + 1;
         }
-        bool Interno(string no) => grau.GetValueOrDefault(no) == 2;
+        bool Interno(string no) => grau.GetValueOrDefault(no) == 2 && !_nosDeCaixa.Contains(no);
 
         var usadas = new HashSet<int>();
         var cadeias = new List<Cadeia>();
@@ -159,6 +235,8 @@ public sealed class GrafoDeCondutos
                 aresta = seguinte;
             }
             if (conduites.Count == 0) continue;
+            // Eletrodutos emendados sem conexão (ponta com ponta) também contam curva quando mudam de direção.
+            curvas += CurvasSemConexao(conduites, conexoes);
             var principal = conduites.OrderByDescending(c => Unidades.Metros(c.Diameter)).First();
             var cadeia = new Cadeia
             {
@@ -175,6 +253,19 @@ public sealed class GrafoDeCondutos
             cadeias.Add(cadeia);
         }
         return cadeias;
+    }
+
+    /// <summary>Mudanças de direção entre eletrodutos consecutivos que não passam por uma conexão (tipo sem conexões).</summary>
+    static int CurvasSemConexao(List<Conduit> conduites, List<FamilyInstance> conexoes)
+    {
+        if (conexoes.Count > 0 || conduites.Count < 2) return 0;
+        var curvas = 0;
+        for (var i = 1; i < conduites.Count; i++)
+        {
+            if (conduites[i - 1].Location is not LocationCurve { Curve: Line a } || conduites[i].Location is not LocationCurve { Curve: Line b }) continue;
+            if (Math.Abs(a.Direction.DotProduct(b.Direction)) < Math.Cos(30 * Math.PI / 180)) curvas++;
+        }
+        return curvas;
     }
 
     static void Add(Dictionary<string, List<int>> d, string k, int v)

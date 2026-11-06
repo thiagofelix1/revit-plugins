@@ -216,12 +216,15 @@ public class EtiquetarCommand : ExternalCommand
             return;
         }
         var tagEletroduto = TipoDeEtiqueta(doc, BuiltInCategory.OST_ConduitTags);
+        var tagFio = TipoDeEtiqueta(doc, BuiltInCategory.OST_WireTags);
         var tagTomada = TipoDeEtiqueta(doc, BuiltInCategory.OST_ElectricalFixtureTags);
         var tagLuminaria = TipoDeEtiqueta(doc, BuiltInCategory.OST_LightingFixtureTags);
-        if (tagEletroduto is null && tagTomada is null && tagLuminaria is null)
+        var tagInterruptor = TipoDeEtiqueta(doc, BuiltInCategory.OST_LightingDeviceTags);
+        var tagQuadro = TipoDeEtiqueta(doc, BuiltInCategory.OST_ElectricalEquipmentTags);
+        if (tagEletroduto is null && tagFio is null && tagTomada is null && tagLuminaria is null && tagInterruptor is null && tagQuadro is null)
         {
-            TaskDialog.Show("AutoEletrica — Etiquetar", "Nenhuma família de etiqueta de eletroduto, tomada ou luminária carregada. Carregue as etiquetas do escritório " +
-                                                        "(com os rótulos AE Fiação, AE Ambiente, Circuit Number) e rode de novo.");
+            TaskDialog.Show("AutoEletrica — Etiquetar", "Nenhuma família de etiqueta de eletroduto, fio, tomada, luminária, interruptor ou quadro carregada. Carregue as etiquetas do escritório " +
+                                                        "(com os rótulos AE Fiação, AE Ambiente, AE Potência, Circuit Number) e rode de novo.");
             return;
         }
         var jaEtiquetados = new FilteredElementCollector(doc, vista.Id).OfClass(typeof(IndependentTag)).Cast<IndependentTag>()
@@ -239,7 +242,19 @@ public class EtiquetarCommand : ExternalCommand
                 IndependentTag.Create(doc, tagEletroduto.Id, vista.Id, new Reference(c), false, TagOrientation.Horizontal, meio);
                 criadas++;
             }
-        foreach (var (categoria, tipo) in new[] { (BuiltInCategory.OST_ElectricalFixtures, tagTomada), (BuiltInCategory.OST_LightingFixtures, tagLuminaria) })
+        if (tagFio is not null)
+            foreach (var w in new FilteredElementCollector(doc, vista.Id).OfClass(typeof(Wire)).Cast<Wire>())
+            {
+                if (jaEtiquetados.Contains(w.Id) || string.IsNullOrEmpty(ParametrosEletrica.LerTexto(w, ParametrosEletrica.Fiacao)) || w.NumberOfVertices < 2) continue;
+                var meio = w.NumberOfVertices == 2 ? (w.GetVertex(0) + w.GetVertex(1)) / 2 : w.GetVertex(w.NumberOfVertices / 2);
+                IndependentTag.Create(doc, tagFio.Id, vista.Id, new Reference(w), false, TagOrientation.Horizontal, meio);
+                criadas++;
+            }
+        foreach (var (categoria, tipo) in new[]
+                 {
+                     (BuiltInCategory.OST_ElectricalFixtures, tagTomada), (BuiltInCategory.OST_LightingFixtures, tagLuminaria),
+                     (BuiltInCategory.OST_LightingDevices, tagInterruptor), (BuiltInCategory.OST_ElectricalEquipment, tagQuadro),
+                 })
         {
             if (tipo is null) continue;
             foreach (var fi in new FilteredElementCollector(doc, vista.Id).OfCategory(categoria).OfClass(typeof(FamilyInstance)).Cast<FamilyInstance>())
@@ -250,7 +265,8 @@ public class EtiquetarCommand : ExternalCommand
             }
         }
         transacao.Commit();
-        TaskDialog.Show("AutoEletrica — Etiquetar", $"{criadas} etiqueta(s) criada(s) na vista {vista.Name}. Os textos vêm dos parâmetros AE (rode Passar circuitos e Calcular para preenchê-los). Ctrl+Z desfaz.");
+        TaskDialog.Show("AutoEletrica — Etiquetar", $"{criadas} etiqueta(s) criada(s) na vista {vista.Name} (eletrodutos, fios, pontos, interruptores e quadros com etiqueta carregada). " +
+                                                    "Os textos vêm dos parâmetros AE (rode Passar circuitos e Calcular para preenchê-los). Ctrl+Z desfaz.");
     }
 
     static FamilySymbol? TipoDeEtiqueta(Document doc, BuiltInCategory categoria) =>

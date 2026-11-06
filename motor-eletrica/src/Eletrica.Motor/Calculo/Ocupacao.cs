@@ -65,6 +65,24 @@ public static class Ocupacao
                 }
             }
 
+            // 6.2.10.2: circuitos no mesmo conduto só com a mesma origem (quadro) e seções dentro de três valores sucessivos.
+            var ids = t.Circuitos.Distinct().ToList();
+            if (ids.Count > 1)
+            {
+                var quadros = ids.Select(id => i.Circuito(id)!.Quadro).Distinct().ToList();
+                pareceres.Add(new Parecer("mesma origem", quadros.Count == 1, quadros.Count == 1 ? $"{ids.Count} circuitos do quadro {quadros[0]}" : $"circuitos de {quadros.Count} quadros ({string.Join(", ", quadros)})",
+                    "um só quadro de origem", "6.2.10.2 b)", quadros.Count == 1 ? "todos os circuitos do trecho saem do mesmo quadro" : "circuitos de origens diferentes não podem dividir o mesmo eletroduto"));
+                var indices = ids.Where(circuitos.ContainsKey).Select(id => Array.IndexOf(Nbr5410Capacidades.Secoes, circuitos[id].SecaoFase)).Where(k => k >= 0).ToList();
+                if (indices.Count > 1)
+                {
+                    var faixa = indices.Max() - indices.Min();
+                    var menor = Nbr5410Capacidades.Secoes[indices.Min()];
+                    var maior = Nbr5410Capacidades.Secoes[indices.Max()];
+                    pareceres.Add(new Parecer("seções próximas", faixa <= 2, $"de {menor:0.#} a {maior:0.#} mm²", "até três valores sucessivos", "6.2.10.2 c), 6.2.5.5.5",
+                        faixa <= 2 ? "as seções cabem em três valores sucessivos" : "seções muito diferentes no mesmo eletroduto: separar os circuitos ou aplicar 1/√n no agrupamento"));
+                }
+            }
+
             var equivalente = t.Comprimento + Nbr5410.DescontoPorCurva * t.Curvas90;
             var maximo = t.Externo ? Nbr5410.TrechoMaximoExterno : Nbr5410.TrechoMaximoInterno;
             pareceres.Add(new Parecer("trecho entre caixas", equivalente <= maximo + 1e-9, $"{t.Comprimento:0.0} m + {t.Curvas90} curva(s) × 3 m = {equivalente:0.0} m",

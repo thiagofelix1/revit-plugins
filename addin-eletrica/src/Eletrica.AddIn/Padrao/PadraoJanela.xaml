@@ -45,7 +45,7 @@
                         <TextBlock Grid.Row="5" Text="Afastamento da parede (família livre)"/><TextBox x:Name="Afastamento" Grid.Row="5" Grid.Column="1"/>
                     </Grid>
                 </GroupBox>
-                <GroupBox Header="Prefixos" Padding="8">
+                <GroupBox Header="Prefixos" Padding="8" Margin="0,0,0,8">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -56,6 +56,23 @@
                         </Grid.RowDefinitions>
                         <TextBlock Text="Circuito (C1, C2...)"/><TextBox x:Name="PrefixoCircuito" Grid.Column="1"/>
                         <TextBlock Grid.Row="1" Text="Quadro (QD-1, QD-2...)"/><TextBox x:Name="PrefixoQuadro" Grid.Row="1" Grid.Column="1"/>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Traçado de eletrodutos e fio" Padding="8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Tipo de eletroduto"/><ComboBox x:Name="TipoEletroduto" Grid.Column="1" Width="150" Margin="0,3"/>
+                        <TextBlock Grid.Row="1" Text="DN padrão (mm)"/><TextBox x:Name="DnPadrao" Grid.Row="1" Grid.Column="1"/>
+                        <TextBlock Grid.Row="2" Text="Passagem entre pontos"/><ComboBox x:Name="Passagem" Grid.Row="2" Grid.Column="1" Width="150" Margin="0,3"/>
+                        <TextBlock Grid.Row="3" Text="Cota do eixo no teto (m)"/><TextBox x:Name="CotaTeto" Grid.Row="3" Grid.Column="1"/>
+                        <TextBlock Grid.Row="4" Text="Cota do eixo no piso (m)"/><TextBox x:Name="CotaPiso" Grid.Row="4" Grid.Column="1"/>
+                        <CheckBox x:Name="FioCurvo" Grid.Row="5" Grid.ColumnSpan="2" Content="Fio desenhado em arcos (embutido)" Margin="0,6,0,0"/>
                     </Grid>
                 </GroupBox>
             </StackPanel>
@@ -94,6 +111,21 @@
                         <CheckBox x:Name="SugerirChuveiro" Content="Sugerir chuveiro elétrico em todo banheiro" Margin="0,6,0,2"/>
                         <CheckBox x:Name="SugerirAr" Content="Sugerir ar-condicionado em dormitórios e salas" Margin="0,2"/>
                     </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Cores dos condutores (legenda, 6.1.5.3)" Padding="8" Margin="0,8,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Fases"/><TextBox x:Name="CorFases" Grid.Column="1" Width="150"/>
+                        <TextBlock Grid.Row="1" Text="Neutro"/><TextBox x:Name="CorNeutro" Grid.Row="1" Grid.Column="1" Width="150"/>
+                        <TextBlock Grid.Row="2" Text="Proteção (PE)"/><TextBox x:Name="CorPE" Grid.Row="2" Grid.Column="1" Width="150"/>
+                        <TextBlock Grid.Row="3" Text="Retorno"/><TextBox x:Name="CorRetorno" Grid.Row="3" Grid.Column="1" Width="150"/>
+                    </Grid>
                 </GroupBox>
             </StackPanel>
         </Grid>

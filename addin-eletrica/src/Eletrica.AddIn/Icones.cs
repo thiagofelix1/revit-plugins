@@ -238,6 +238,52 @@ static class Icones
         }
     }
 
+    public static void Eletroduto(DrawingContext dc)
+    {
+        // Eletroduto em L com a descida ao ponto.
+        dc.DrawGeometry(null, Caneta(Grafite, 3.2), Geometry.Parse("M 5,8 L 20,8 L 20,20 L 27,20"));
+        dc.DrawEllipse(Vermelho, null, new Point(5, 8), 3, 3);
+        dc.DrawEllipse(Vermelho, null, new Point(27, 20), 3, 3);
+        dc.DrawLine(Caneta(Vermelho, 2), new Point(12, 5), new Point(12, 11));
+    }
+
+    public static void Caixa(DrawingContext dc)
+    {
+        // Caixa de passagem no meio do eletroduto.
+        dc.DrawLine(Caneta(Grafite, 3), new Point(3, 16), new Point(29, 16));
+        dc.DrawRectangle(Brushes.White, Caneta(Vermelho, 2.4), new System.Windows.Rect(11, 11, 10, 10));
+        dc.DrawLine(Caneta(Vermelho, 1.6), new Point(11, 11), new Point(21, 21));
+        dc.DrawLine(Caneta(Vermelho, 1.6), new Point(21, 11), new Point(11, 21));
+    }
+
+    public static void FiacaoManual(DrawingContext dc)
+    {
+        // Dois caminhos; a mão escolhe o de baixo.
+        dc.DrawGeometry(null, Caneta(Grafite, 2.2), Geometry.Parse("M 4,9 L 28,9"));
+        dc.DrawGeometry(null, Caneta(Vermelho, 3), Geometry.Parse("M 4,9 L 4,22 L 28,22"));
+        dc.DrawEllipse(Brushes.White, Caneta(Grafite, 2), new Point(28, 9), 3, 3);
+        dc.DrawEllipse(Vermelho, null, new Point(28, 22), 3.2, 3.2);
+    }
+
+    public static void Fio(DrawingContext dc)
+    {
+        // Fio em arcos entre três pontos, com as marcas dos condutores.
+        dc.DrawGeometry(null, Caneta(Grafite, 2.4), Geometry.Parse("M 4,24 Q 10,6 16,16 Q 22,26 28,8"));
+        dc.DrawLine(Caneta(Vermelho, 2), new Point(8, 12), new Point(11, 17));
+        dc.DrawLine(Caneta(Vermelho, 2), new Point(10.5, 11), new Point(13.5, 16));
+        dc.DrawEllipse(Vermelho, null, new Point(4, 24), 2.4, 2.4);
+        dc.DrawEllipse(Vermelho, null, new Point(28, 8), 2.4, 2.4);
+    }
+
+    public static void Legenda(DrawingContext dc)
+    {
+        dc.DrawRectangle(Brushes.White, Caneta(Grafite, 2.2), new System.Windows.Rect(4, 5, 24, 22));
+        var linha = Caneta(Grafite, 1.6);
+        foreach (var y in new[] { 11.0, 16.5, 22.0 }) dc.DrawLine(linha, new Point(4, y), new Point(28, y));
+        dc.DrawLine(linha, new Point(12, 5), new Point(12, 27));
+        foreach (var y in new[] { 8.0, 13.7, 19.2, 24.7 }) dc.DrawRectangle(Vermelho, null, new System.Windows.Rect(6, y - 1.3, 4, 2.6));
+    }
+
     static Pen Caneta(Brush cor, double espessura) =>
         Congelado(new Pen(cor, espessura) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round, LineJoin = PenLineJoin.Round });
 

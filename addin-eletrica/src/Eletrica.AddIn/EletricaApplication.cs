@@ -65,15 +65,43 @@ public class EletricaApplication : IExternalApplication
             "equipamento acima de 10 A sozinho, o resto por ambiente até o limite do padrão), mostra a proposta e cria os circuitos no quadro.");
         Margem(lancamento);
 
+        var eletrodutos = application.CreateRibbonPanel(Aba, "Eletrodutos");
+        Botao<TracarEletrodutoCommand>(eletrodutos,
+            "Traçar\neletroduto", Icones.Eletroduto,
+            "Clique nos elementos em sequência (quadro, caixa, pontos): entre cada dois, o eletroduto sobe à cota de passagem do padrão (teto, " +
+            "piso ou altura dos pontos), anda em L na planta e desce ao destino, com tipo e DN do padrão. Chegando num eletroduto existente, " +
+            "parte-o e põe um tê. Ctrl+Z desfaz.");
+        Botao<LigarPontosCommand>(eletrodutos,
+            "Ligar\npontos", Icones.LigarBicos,
+            "Selecione pontos e clique no eletroduto, caixa ou quadro de destino: cada ponto ganha a sua descida e o seu ramal até lá, " +
+            "com tê no eletroduto. Ctrl+Z desfaz.");
+        Botao<CaixasPorRegraCommand>(eletrodutos,
+            "Caixas\npor regra", Icones.Caixa,
+            "Onde um trecho entre caixas passa de 15 m (menos 3 m por curva de 90°) ou de três curvas (NBR 5410 6.2.11.1.6 b e 6.2.11.1.7), " +
+            "parte o eletroduto e insere a caixa de passagem do escritório. Sem família de caixa confirmada, só aponta os lugares.");
+        Margem(eletrodutos);
+
         var fiacao = application.CreateRibbonPanel(Aba, "Fiação");
         Botao<PassarCircuitosCommand>(fiacao,
             "Passar\ncircuitos", Icones.TracarRamal,
-            "Leva cada circuito do quadro até os seus pontos pelo menor caminho nos eletrodutos e grava em cada eletroduto quais circuitos " +
-            "passam e quantos condutores leva. É a contagem trecho a trecho que o cálculo usa para o agrupamento e a ocupação. Ctrl+Z desfaz.");
+            "Leva cada circuito do quadro até os seus pontos (e até os interruptores dos comandos) pelo menor caminho nos eletrodutos e grava em " +
+            "cada eletroduto quais circuitos passam, os retornos e quantos condutores leva. É a contagem trecho a trecho que o cálculo usa. Ctrl+Z desfaz.");
+        Botao<FiacaoManualCommand>(fiacao,
+            "Fiação\nmanual", Icones.FiacaoManual,
+            "Selecione eletrodutos e diga, circuito a circuito, o que deve passar por eles (forçar) e o que não pode (evitar). Fica gravado nos " +
+            "eletrodutos e o Passar circuitos roda de novo respeitando isso.");
+        Botao<DesenharFiacaoCommand>(fiacao,
+            "Desenhar\nfiação", Icones.Fio,
+            "Desenha na planta aberta um fio do Revit por trecho de eletroduto com circuitos, seguindo o percurso (arcos para embutido, polilinha " +
+            "para aparente), com AE Fiação para a etiqueta de fio. É saída gráfica: o dado mestre continua nos eletrodutos.");
         Botao<EtiquetarCommand>(fiacao,
             "Etiquetar", Icones.Folha,
-            "Põe na vista aberta a etiqueta de fiação de cada eletroduto (circuitos, número de condutores e seções, quando já calculado) e a " +
-            "etiqueta dos pontos, com as famílias de etiqueta carregadas no projeto.");
+            "Põe na vista aberta a etiqueta de fiação de cada eletroduto e fio (circuitos, número de condutores e seções, quando já calculado), " +
+            "a etiqueta dos pontos, interruptores e quadros, com as famílias de etiqueta carregadas no projeto.");
+        Botao<LegendaCommand>(fiacao,
+            "Legenda", Icones.Legenda,
+            "Vista de desenho com a legenda de fiação: cada circuito com condutores e seções, disjuntor e DR, e as cores dos condutores do padrão " +
+            "(NBR 5410 6.1.5.3). Vai para a prancha como qualquer vista; rodar de novo refaz.");
         Margem(fiacao);
 
         var calculo = application.CreateRibbonPanel(Aba, "Cálculo");

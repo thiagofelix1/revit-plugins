@@ -210,6 +210,8 @@ Itens 1.1, 1.2, 1.3, 1.5, 1.8, 2.1, 2.2, 2.3, 2.6 (quadros e caixas), 2.9, 3.1, 
 
 Itens 4.1, 4.2, 4.3, 5.1, 5.2, 5.3, 5.4, 5.7, 6.1, 6.2, 6.3, 6.5. **Pronto:** planta de um apartamento com eletrodutos, fios, tags e legenda no padrão do escritório, sem edição manual de tag.
 
+*Escrito em 06/11/2026 (compila, não testado no Revit):* 4.1 Traçar eletroduto (ortogonal pela cota de passagem, tipo e DN do padrão, tê ao chegar num eletroduto; sem desvio de obstáculos nem caixa automática na subida); 4.2 Ligar pontos; 4.3 Caixas por regra (15 m − 3 m/curva, 3 curvas; caixas quebram o trecho no grafo); 5.1 Passar circuitos; 5.2 retornos pelos comandos; 5.3 Desenhar fiação (Wire em arcos ou polilinha, com AE Fiação); 5.4 Fiação manual (forçar/evitar por eletroduto); 5.7 mesma origem e seções em três valores sucessivos no motor (E-ORIG, E-SEC3); 6.1/6.2 Etiquetar (eletroduto, fio, ponto, interruptor, quadro, pelos parâmetros AE); 6.3/6.5 Legenda de fiação com cores (vista de desenho). Falta: famílias de etiqueta de referência, legenda de símbolos, 6.4 anti-sobreposição, e o teste real.
+
 ### 0.4 — Verificar modelo (Fase 1)
 
 Itens 8.1 a 8.5 e 8.7 com relatório e destaque na vista. **Pronto:** rodado nos três projetos de referência, aponta problemas reais que os engenheiros confirmam.

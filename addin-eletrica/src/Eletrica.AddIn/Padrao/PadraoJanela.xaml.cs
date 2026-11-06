@@ -1,15 +1,24 @@
 using System.Windows;
+using Autodesk.Revit.DB.Electrical;
 using Eletrica.Motor.Modelo;
 
 namespace Eletrica.AddIn.Padrao;
 
 public partial class PadraoJanela : Window
 {
+    static readonly (AlturaDePassagem Valor, string Texto)[] Passagens =
+    [
+        (AlturaDePassagem.Teto, "Pelo teto (laje ou forro)"),
+        (AlturaDePassagem.Piso, "Pelo piso"),
+        (AlturaDePassagem.NivelDosPontos, "Na altura dos pontos (parede)"),
+    ];
+
     readonly PadraoEletrica _padrao;
+    readonly List<string> _tiposDeEletroduto;
 
     public PadraoEletrica? Resultado { get; private set; }
 
-    public PadraoJanela(PadraoEletrica padrao)
+    public PadraoJanela(Document doc, PadraoEletrica padrao)
     {
         InitializeComponent();
         _padrao = padrao;
@@ -33,6 +42,21 @@ public partial class PadraoJanela : Window
         CorrenteFaseFase.Text = Entrada.F(l.CorrenteParaFaseFase);
         SugerirChuveiro.IsChecked = l.SugerirChuveiro;
         SugerirAr.IsChecked = l.SugerirArCondicionado;
+
+        _tiposDeEletroduto = new FilteredElementCollector(doc).OfClass(typeof(ConduitType)).Cast<ConduitType>()
+            .OrderByDescending(t => t.IsWithFitting).ThenBy(t => t.Name).Select(t => t.Name).ToList();
+        TipoEletroduto.ItemsSource = _tiposDeEletroduto;
+        TipoEletroduto.SelectedIndex = Math.Max(0, _tiposDeEletroduto.IndexOf(padrao.TipoEletroduto ?? ""));
+        DnPadrao.Text = padrao.DnPadrao.ToString();
+        Passagem.ItemsSource = Passagens.Select(p => p.Texto).ToList();
+        Passagem.SelectedIndex = Math.Max(0, Array.FindIndex(Passagens, p => p.Valor == padrao.Passagem));
+        CotaTeto.Text = Entrada.F(padrao.CotaTeto);
+        CotaPiso.Text = Entrada.F(padrao.CotaPiso);
+        FioCurvo.IsChecked = padrao.FioCurvo;
+        CorFases.Text = padrao.CorFases;
+        CorNeutro.Text = padrao.CorNeutro;
+        CorPE.Text = padrao.CorPE;
+        CorRetorno.Text = padrao.CorRetorno;
     }
 
     void Confirmar_Click(object sender, RoutedEventArgs e)
@@ -62,6 +86,16 @@ public partial class PadraoJanela : Window
             };
             _padrao.Lancamento = lancamento;
             _padrao.AfastamentoDaParede = Entrada.Numero(Afastamento.Text, "Afastamento da parede", 0, 0.5);
+            _padrao.TipoEletroduto = TipoEletroduto.SelectedIndex >= 0 ? _tiposDeEletroduto[TipoEletroduto.SelectedIndex] : null;
+            _padrao.DnPadrao = Entrada.Inteiro(DnPadrao.Text, "DN padrão", 16, 150);
+            _padrao.Passagem = Passagens[Math.Max(0, Passagem.SelectedIndex)].Valor;
+            _padrao.CotaTeto = Entrada.Numero(CotaTeto.Text, "Cota do eixo no teto", 1.5, 12);
+            _padrao.CotaPiso = Entrada.Numero(CotaPiso.Text, "Cota do eixo no piso", -0.5, 0.5);
+            _padrao.FioCurvo = FioCurvo.IsChecked == true;
+            _padrao.CorFases = CorFases.Text.Trim();
+            _padrao.CorNeutro = CorNeutro.Text.Trim();
+            _padrao.CorPE = CorPE.Text.Trim();
+            _padrao.CorRetorno = CorRetorno.Text.Trim();
             Resultado = _padrao;
             DialogResult = true;
         }

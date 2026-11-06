@@ -96,6 +96,8 @@ public static class CalculoEletrica
         "taxa de ocupação" => "OCUP",
         "trecho entre caixas" => "15M",
         "curvas" => "CURV",
+        "mesma origem" => "ORIG",
+        "seções próximas" => "SEC3",
         _ => "X",
     };
 }

@@ -153,7 +153,10 @@ public static class LeitorInstalacao
         if (trechos.Count > 0 && trechos.All(t => t.Circuitos.Count == 0))
             avisos.Add("Os eletrodutos ainda não têm circuitos: rode Passar circuitos para o agrupamento e a ocupação trecho a trecho.");
 
-        var instalacao = new Instalacao(doc.Title, alimentacao, ambientes, quadros, circuitos, pontos, trechos, comandos: comandos);
+        var caixas = grafo.Caixas.Select(k => new Caixa(k.Elemento.UniqueId, k.No)).GroupBy(k => k.Id).Select(g => g.First()).ToList();
+        foreach (var k in grafo.Caixas) mapa[k.Elemento.UniqueId] = k.Elemento.Id;
+
+        var instalacao = new Instalacao(doc.Title, alimentacao, ambientes, quadros, circuitos, pontos, trechos, caixas, comandos);
         return new Lida(instalacao, mapa, avisos, grafo, ambientesLidos);
     }
 

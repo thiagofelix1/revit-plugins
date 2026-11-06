@@ -22,10 +22,26 @@ public static class PassarCircuitos
         var porCadeia = new Dictionary<string, HashSet<string>>();
         var retornosPorCadeia = new Dictionary<string, List<string>>();
 
-        // Grafo só com a topologia (todos os trechos valem para todos os circuitos nesta fase).
-        var todos = i.Trechos.Select(t => t with { Circuitos = i.Circuitos.Select(c => c.Id).ToList() }).ToList();
+        // Grafo só com a topologia: todos os trechos valem para todos os circuitos, menos os que a fiação manual manda evitar.
+        var todosOsIds = i.Circuitos.Select(c => c.Id).ToList();
+        var forcados = new Dictionary<string, List<string>>();
+        var todos = new List<Trecho>();
+        foreach (var t in i.Trechos)
+        {
+            var cadeia = lida.Grafo.Cadeias.FirstOrDefault(k => k.Id == t.Id);
+            var evitar = Lista(cadeia, ParametrosEletrica.Evitar);
+            var forcar = Lista(cadeia, ParametrosEletrica.Forcar).Where(todosOsIds.Contains).ToList();
+            if (forcar.Count > 0) forcados[t.Id] = forcar;
+            var permitidos = evitar.Contains("*") ? forcar : todosOsIds.Where(id => !evitar.Contains(id) || forcar.Contains(id)).ToList();
+            todos.Add(t with { Circuitos = permitidos });
+        }
         var topologia = new Instalacao(i.Nome, i.Alimentacao, i.Ambientes, i.Quadros, i.Circuitos, i.Pontos, todos, comandos: i.Comandos);
         var grafo = new Grafo(topologia);
+        foreach (var (trecho, ids) in forcados)
+        {
+            if (!porCadeia.TryGetValue(trecho, out var set)) porCadeia[trecho] = set = [];
+            foreach (var id in ids) set.Add(id);
+        }
 
         var circuitosLevados = 0;
         foreach (var c in i.Circuitos)
@@ -92,6 +108,14 @@ public static class PassarCircuitos
         }
         transacao.Commit();
         return new Feito(circuitosLevados, eletrodutos, avisos);
+    }
+
+    /// <summary>Ids gravados num parâmetro AE de texto em qualquer eletroduto da cadeia ("*" = todos).</summary>
+    static List<string> Lista(GrafoDeCondutos.Cadeia? cadeia, Guid parametro)
+    {
+        if (cadeia is null) return [];
+        var texto = cadeia.Conduites.Select(c => ParametrosEletrica.LerTexto(c, parametro)).FirstOrDefault(t => !string.IsNullOrWhiteSpace(t));
+        return (texto ?? "").Split([';', ',', ' '], StringSplitOptions.RemoveEmptyEntries).ToList();
     }
 
     static void Retorno(Grafo grafo, string de, string para, Circuito c, int condutores, string descricao,
