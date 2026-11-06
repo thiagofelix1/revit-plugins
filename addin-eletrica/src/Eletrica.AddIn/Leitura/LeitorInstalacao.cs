@@ -96,7 +96,7 @@ public static class LeitorInstalacao
                 if (e is not FamilyInstance fi || quadrosRevit.ContainsKey(fi.Id)) continue;
                 circuitoDoElemento[fi.Id] = s.UniqueId;
                 if (fi.Category?.BuiltInCategory == BuiltInCategory.OST_LightingDevices) continue; // interruptor não é ponto de utilização
-                var ponto = LerPonto(doc, fi, s.UniqueId, ambientesLidos, grafo, avisos, volumes);
+                var ponto = LerPonto(doc, fi, s.UniqueId, ambientesLidos, grafo, avisos, volumes, manterForaDeAmbiente: true);
                 if (ponto is null) continue;
                 pontosDoCircuito.Add(ponto);
                 mapa[fi.UniqueId] = fi.Id;
@@ -127,7 +127,7 @@ public static class LeitorInstalacao
         foreach (var fi in PontosSemCircuito(doc))
         {
             if (mapa.ContainsKey(fi.UniqueId)) continue;
-            var ponto = LerPonto(doc, fi, null, ambientesLidos, grafo, avisos, volumes);
+            var ponto = LerPonto(doc, fi, null, ambientesLidos, grafo, avisos, volumes, manterForaDeAmbiente: true);
             if (ponto is null) continue;
             pontos.Add(ponto);
             mapa[fi.UniqueId] = fi.Id;
@@ -173,6 +173,8 @@ public static class LeitorInstalacao
         var caixas = grafo.Caixas.Select(k => new Caixa(k.Elemento.UniqueId, k.No)).GroupBy(k => k.Id).Select(g => g.First()).ToList();
         foreach (var k in grafo.Caixas) mapa[k.Elemento.UniqueId] = k.Elemento.Id;
 
+        if (pontos.Any(p => p.Ambiente == ForaDeAmbiente))
+            ambientes.Add(new Ambiente(ForaDeAmbiente, "Fora de ambiente", UsoAmbiente.Outro, 0, 0));
         var instalacao = new Instalacao(doc.Title, alimentacao, ambientes, quadros, circuitos, pontos, trechos, caixas, comandos);
         return new Lida(instalacao, mapa, avisos, grafo, ambientesLidos, volumes);
     }
@@ -184,8 +186,11 @@ public static class LeitorInstalacao
     /// potência (AE Potência, carga aparente ou parâmetro da família), ambiente pelo Room no ponto (arquivo ou vínculo), altura
     /// pelo nível, nó no grafo de eletrodutos. Nulo (com aviso) quando está fora de qualquer ambiente.
     /// </summary>
+    /// <summary>Ambiente dos pontos que não estão em Room nenhum (garagem sem Room, área técnica): entra só quando algum ponto o usa.</summary>
+    public const string ForaDeAmbiente = "fora-de-ambiente";
+
     public static Ponto? LerPonto(Document doc, FamilyInstance fi, string? circuito, IReadOnlyList<AmbienteLido> ambientes, GrafoDeCondutos? grafo, List<string> avisos,
-        Verificacao.VolumesDeBanheiro? volumes = null)
+        Verificacao.VolumesDeBanheiro? volumes = null, bool manterForaDeAmbiente = false)
     {
         var categoria = fi.Category?.BuiltInCategory ?? BuiltInCategory.INVALID;
         var tipo = TipoDoPonto(fi, categoria);
@@ -194,7 +199,16 @@ public static class LeitorInstalacao
         if (ambiente is null)
         {
             avisos.Add($"{fi.Name} ({fi.Id}) não está dentro de nenhum ambiente: fica fora das verificações por cômodo.");
-            return null;
+            // Na leitura da instalação o ponto continua: é carga do circuito e destino da fiação. Descartá-lo deixava o circuito
+            // sem pontos e a passagem sem destino (no Snowdon, quase todos os pontos da garagem e das áreas técnicas).
+            if (!manterForaDeAmbiente) return null;
+            return new Ponto(fi.UniqueId, ForaDeAmbiente, circuito, tipo, PotenciaDoPonto(fi))
+            {
+                Altura = local is not null ? Colocacao.AlturaDe(doc, fi, doc.GetElement(fi.LevelId) as Level) : 0,
+                CorrenteDaTomada = tipo is TipoCarga.TomadaUsoGeral or TipoCarga.TomadaUsoEspecifico ? CorrenteDaTomada(fi) : null,
+                No = grafo?.NoDe(fi) ?? fi.UniqueId,
+                IpAgua = IpAgua(fi),
+            };
         }
         var altura = local is not null ? Colocacao.AlturaDe(doc, fi, doc.GetElement(fi.LevelId) as Level) : 0;
         var potencia = PotenciaDoPonto(fi);

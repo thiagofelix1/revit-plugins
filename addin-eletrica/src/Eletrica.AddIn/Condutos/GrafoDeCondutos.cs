@@ -51,6 +51,9 @@ public sealed class GrafoDeCondutos
         if (ra != rb) _representante[rb] = ra;
     }
 
+    // Elemento (quadro, caixa, ponto) → nó: as pontas soltas de eletroduto que chegam dentro dele, unidas num nó só.
+    readonly Dictionary<ElementId, string> _noDoElemento = new();
+
     public IReadOnlyList<Cadeia> Cadeias { get; }
     public IReadOnlyList<CaixaLida> Caixas { get; }
     public IReadOnlyList<string> Avisos { get; }
@@ -88,12 +91,18 @@ public sealed class GrafoDeCondutos
             }
         }
 
+        // Pontas soltas dentro de cada quadro, caixa ou ponto: o eletroduto que chega na face de cima de um quadro de 1,80 m fica
+        // longe do ponto de inserção (no pé da família), e conector de superfície não tem posição. Todas as pontas soltas
+        // dentro da caixa envolvente do elemento (com 5 cm de folga) viram um nó só, que é o nó dele.
+        NosDosElementos(doc);
+
         // Caixas: quebram a cadeia no nó em que estão.
         var padrao = PadraoEletrica.Carregar(doc);
         var caixas = new List<CaixaLida>();
         foreach (var fi in new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance)).Cast<FamilyInstance>().Where(fi => EhCaixa(fi, padrao)))
         {
             var nos = new List<string>();
+            if (_noDoElemento.TryGetValue(fi.Id, out var doElemento)) nos.Add(doElemento);
             if (fi.MEPModel?.ConnectorManager is { } cm)
                 foreach (var k in cm.Connectors.Cast<Connector>().Where(k => k.Domain == Domain.DomainCableTrayConduit && TemPosicao(k)))
                     if (NoMaisProximo(k.Origin, 0.02) is { } no) nos.Add(no);
@@ -110,7 +119,7 @@ public sealed class GrafoDeCondutos
                      .Where(fi => fi.Category?.BuiltInCategory is BuiltInCategory.OST_ElectricalFixtures or BuiltInCategory.OST_LightingFixtures
                          or BuiltInCategory.OST_LightingDevices or BuiltInCategory.OST_ElectricalEquipment))
         {
-            string? no = null;
+            string? no = _noDoElemento.GetValueOrDefault(fi.Id);
             if (fi.MEPModel?.ConnectorManager is { } cm)
                 foreach (var k in cm.Connectors.Cast<Connector>().Where(k => k.Domain == Domain.DomainCableTrayConduit && TemPosicao(k)))
                     no ??= NoMaisProximo(k.Origin, 0.02);
@@ -189,6 +198,7 @@ public sealed class GrafoDeCondutos
     /// <summary>Nó mais próximo de um elemento: pelos conectores de eletroduto dele, senão pelo ponto de inserção.</summary>
     public string? NoDe(FamilyInstance fi)
     {
+        if (_noDoElemento.TryGetValue(fi.Id, out var doElemento)) return Representante(doElemento);
         if (fi.MEPModel?.ConnectorManager is { } cm)
             foreach (var k in cm.Connectors.Cast<Connector>().Where(k => k.Domain == Domain.DomainCableTrayConduit && TemPosicao(k)))
                 if (NoMaisProximo(k.Origin, 0.05) is { } no) return no;
@@ -369,6 +379,41 @@ public sealed class GrafoDeCondutos
     }
 
     public IReadOnlyDictionary<string, XYZ> Nos => _nos;
+
+    void NosDosElementos(Document doc)
+    {
+        var grau = new Dictionary<string, int>();
+        foreach (var (a, b, _, _) in _arestas)
+        {
+            grau[a] = grau.GetValueOrDefault(a) + 1;
+            grau[b] = grau.GetValueOrDefault(b) + 1;
+        }
+        var categorias = new[]
+        {
+            BuiltInCategory.OST_ElectricalEquipment, BuiltInCategory.OST_ElectricalFixtures, BuiltInCategory.OST_LightingFixtures,
+            BuiltInCategory.OST_LightingDevices, BuiltInCategory.OST_DataDevices, BuiltInCategory.OST_CommunicationDevices,
+            BuiltInCategory.OST_FireAlarmDevices, BuiltInCategory.OST_SecurityDevices, BuiltInCategory.OST_MechanicalEquipment,
+            BuiltInCategory.OST_GenericModel,
+        };
+        var filtro = new ElementMulticategoryFilter(categorias);
+        const double folga = 0.05;
+        foreach (var fi in new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance)).WherePasses(filtro).Cast<FamilyInstance>())
+        {
+            if (fi.get_BoundingBox(null) is not { } bb) continue;
+            var min = new XYZ(Unidades.Metros(bb.Min.X) - folga, Unidades.Metros(bb.Min.Y) - folga, Unidades.Metros(bb.Min.Z) - folga);
+            var max = new XYZ(Unidades.Metros(bb.Max.X) + folga, Unidades.Metros(bb.Max.Y) + folga, Unidades.Metros(bb.Max.Z) + folga);
+            var centro = (min + max) / 2;
+            var raio = (max - min).GetLength() / 2;
+            if (raio > 10) continue; // elemento enorme (transformador de pátio, por exemplo): não adivinhar
+            var dentro = Vizinhos(centro, raio).Distinct()
+                .Where(n => grau.GetValueOrDefault(n) == 1)
+                .Where(n => _nos[n] is var p && p.X >= min.X && p.X <= max.X && p.Y >= min.Y && p.Y <= max.Y && p.Z >= min.Z && p.Z <= max.Z)
+                .ToList();
+            if (dentro.Count == 0) continue;
+            foreach (var n in dentro.Skip(1)) Unir(dentro[0], n);
+            _noDoElemento[fi.Id] = dentro[0];
+        }
+    }
 
     /// <summary>Os pedaços do grafo que não se ligam entre si (diagnóstico do traçado): cada um é o conjunto dos seus nós.</summary>
     public List<HashSet<string>> Componentes()
