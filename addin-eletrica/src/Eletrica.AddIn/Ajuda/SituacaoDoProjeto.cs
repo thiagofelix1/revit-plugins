@@ -39,9 +39,16 @@ static class SituacaoDoProjeto
         var dados = DadosProjeto.Carregar(doc);
         LeitorInstalacao.Lida? lida = null;
         string? erroDeLeitura = null;
+        var semQuadro = false;
         try
         {
             lida = LeitorInstalacao.Ler(doc, dados ?? new DadosProjeto());
+        }
+        catch (Motor.Modelo.ErroDeModelo e)
+        {
+            // Projeto novo, sem quadro: o motor não monta a instalação, mas para o Guia é só a etapa 4 por fazer.
+            semQuadro = e.SoFaltaQuadro;
+            erroDeLeitura = string.Join("; ", e.Erros);
         }
         catch (Exception e) when (e is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException or ArgumentException)
         {
@@ -50,15 +57,31 @@ static class SituacaoDoProjeto
 
         return
         [
-            Dados(dados),
-            Ambientes(doc),
-            PadraoEFamilias(doc),
-            QuadrosEPontos(lida, erroDeLeitura),
-            Eletrodutos(lida),
-            Verificar(doc, dados, lida),
-            Calculo(doc, dados),
-            Entregaveis(doc),
+            Seguro("1. Dados do projeto", () => Dados(dados)),
+            Seguro("2. Ambientes", () => Ambientes(doc)),
+            Seguro("3. Padrão e famílias", () => PadraoEFamilias(doc)),
+            Seguro("4. Quadros, pontos e circuitos", () => QuadrosEPontos(lida, erroDeLeitura, semQuadro)),
+            Seguro("5. Eletrodutos e fiação", () => Eletrodutos(lida)),
+            Seguro("6. Verificar modelo", () => Verificar(doc, dados, lida)),
+            Seguro("7. Cálculo", () => Calculo(doc, dados)),
+            Seguro("8. Entregáveis", () => Entregaveis(doc)),
         ];
+    }
+
+    /// <summary>
+    ///     O Guia só lê, e tem de abrir em qualquer projeto: uma etapa que não consegue ler o modelo mostra o motivo em vez de
+    ///     derrubar a janela inteira.
+    /// </summary>
+    static Etapa Seguro(string titulo, Func<Etapa> ler)
+    {
+        try
+        {
+            return ler();
+        }
+        catch (Exception e) when (e is not (OutOfMemoryException or StackOverflowException))
+        {
+            return new Etapa(titulo, Etapa.Falta, $"Não foi possível ler esta etapa no modelo: {e.Message}", []);
+        }
     }
 
     static Etapa Dados(DadosProjeto? dados)
@@ -110,7 +133,7 @@ static class SituacaoDoProjeto
                 detalhe + $" Falta confirmar a família de: {string.Join(", ", faltam)}. Sem o papel, o lançamento não sabe o que inserir.", acoes);
     }
 
-    static Etapa QuadrosEPontos(LeitorInstalacao.Lida? lida, string? erro)
+    static Etapa QuadrosEPontos(LeitorInstalacao.Lida? lida, string? erro, bool semQuadro)
     {
         var acoes = new[]
         {
@@ -121,13 +144,13 @@ static class SituacaoDoProjeto
             new AcaoDaEtapa("Comando", "ComandoCommand"),
             new AcaoDaEtapa("Criar circuitos", "CriarCircuitosCommand"),
         };
+        if (semQuadro)
+            return new Etapa("4. Quadros, pontos e circuitos", Etapa.Falta,
+                "Nenhum quadro no modelo. Comece pelo Quadro; depois Pontos por ambiente lança o mínimo da NBR 5410 9.5.2 em cada cômodo.", acoes);
         if (lida is null)
             return new Etapa("4. Quadros, pontos e circuitos", Etapa.Falta, $"Não foi possível ler a instalação: {erro}", acoes);
 
         var i = lida.Instalacao;
-        if (i.Quadros.Count == 0)
-            return new Etapa("4. Quadros, pontos e circuitos", Etapa.Falta,
-                "Nenhum quadro no modelo. Comece pelo Quadro; depois Pontos por ambiente lança o mínimo da NBR 5410 9.5.2 em cada cômodo.", acoes);
         var semCircuito = i.Pontos.Count(p => p.Circuito is null);
         var detalhe = $"{i.Quadros.Count} quadro(s), {i.Circuitos.Count} circuito(s), {i.Pontos.Count} ponto(s), {i.Comandos.Count} comando(s) de iluminação.";
         if (i.Pontos.Count == 0)
@@ -147,7 +170,7 @@ static class SituacaoDoProjeto
             new AcaoDaEtapa("Passar circuitos", "PassarCircuitosCommand"),
             new AcaoDaEtapa("Fiação manual", "FiacaoManualCommand"),
         };
-        if (lida is null) return new Etapa("5. Eletrodutos e fiação", Etapa.Falta, "A instalação não foi lida (veja a etapa 4).", acoes);
+        if (lida is null) return new Etapa("5. Eletrodutos e fiação", Etapa.Falta, "Depende da etapa 4: os eletrodutos são lidos junto com os quadros e os pontos.", acoes);
         var i = lida.Instalacao;
         if (i.Trechos.Count == 0)
             return new Etapa("5. Eletrodutos e fiação", Etapa.Falta,
@@ -164,7 +187,7 @@ static class SituacaoDoProjeto
     {
         var acoes = new[] { new AcaoDaEtapa("Verificar modelo", "VerificarModeloCommand") };
         if (dados is null || lida is null)
-            return new Etapa("6. Verificar modelo", Etapa.Falta, "Depende dos Dados do projeto e da leitura da instalação.", acoes);
+            return new Etapa("6. Verificar modelo", Etapa.Falta, "Depende dos Dados do projeto (etapa 1) e de um quadro no modelo (etapa 4).", acoes);
         try
         {
             var (problemas, _) = Commands.Contexto.VerificarTudo(doc, dados, lida, null);

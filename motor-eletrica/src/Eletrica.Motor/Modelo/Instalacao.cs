@@ -191,7 +191,12 @@ public sealed record Caixa(string Id, string No);
 public sealed class ErroDeModelo(IReadOnlyList<string> erros)
     : Exception("Instalação inválida:\n- " + string.Join("\n- ", erros))
 {
+    /// <summary>O erro de uma instalação sem quadro: no começo do projeto é o estado normal, não um defeito.</summary>
+    public const string SemQuadro = "a instalação precisa de pelo menos um quadro";
+
     public IReadOnlyList<string> Erros { get; } = erros;
+
+    public bool SoFaltaQuadro => Erros.Count == 1 && Erros[0] == SemQuadro;
 }
 
 /// <summary>
@@ -237,7 +242,7 @@ public sealed class Instalacao
 
         if (alimentacao.TensaoFaseNeutro <= 0 || alimentacao.TensaoFaseFase <= 0) erros.Add("alimentação: tensões devem ser positivas");
         if (alimentacao.Fases is not (1 or 2 or 3)) erros.Add("alimentação: número de fases deve ser 1, 2 ou 3");
-        if (Quadros.Count == 0) erros.Add("a instalação precisa de pelo menos um quadro");
+        if (Quadros.Count == 0) erros.Add(ErroDeModelo.SemQuadro);
         if (Quadros.Count(q => q.QuadroPai is null) > 1) erros.Add("só um quadro pode ser o de entrada (sem quadro pai)");
 
         foreach (var q in Quadros)
