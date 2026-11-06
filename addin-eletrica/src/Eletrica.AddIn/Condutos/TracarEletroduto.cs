@@ -24,6 +24,9 @@ static class TracarEletroduto
     ///     disso o Revit recusa: "não há espaço suficiente para criar as conexões necessárias".
     /// </summary>
     static readonly double Minimo = Unidades.DeMetros(0.30);
+
+    /// <summary>Menor perna entre duas curvas: cada curva de um DN pequeno ocupa uns 15 a 20 cm de cada lado (06/11: 30 cm não bastou).</summary>
+    static readonly double MinimoEntreCurvas = Unidades.DeMetros(0.60);
     static readonly double MargemPonta = Unidades.DeMetros(0.15);
 
     public static Opcoes OpcoesDoPadrao(Document doc, PadraoEletrica padrao)
@@ -141,11 +144,17 @@ static class TracarEletroduto
         var dx = Math.Abs(b.X - a.X);
         var dy = Math.Abs(b.Y - a.Y);
         // Em L quando as duas pernas cabem uma curva; com uma perna curta demais, reto na diagonal em planta.
-        if (dx > Curto && dy > Curto && Math.Min(dx, dy) >= Minimo)
+        if (dx > Curto && dy > Curto && Math.Min(dx, dy) >= MinimoEntreCurvas)
             pontos.Add(dx >= dy ? new XYZ(b.X, a.Y, z) : new XYZ(a.X, b.Y, z));
         if (dx > Curto || dy > Curto) pontos.Add(new XYZ(b.X, b.Y, z));
         if (Math.Abs(b.Z - z) > Curto || pontos[pontos.Count - 1].DistanceTo(b) > Curto) pontos.Add(b);
-        return Limpar(pontos);
+        var limpos = Limpar(pontos);
+        // Na cota fixa, uma subida ou descida curta demais para a curva numa ponta (interruptor a 1,10 m e ponto a 1,20 m): o
+        // trecho vai direto ao ponto, com um leve desnível, em vez de uma curva que o Revit recusa.
+        bool Vertical(XYZ p, XYZ q) => Math.Abs(p.X - q.X) < Curto && Math.Abs(p.Y - q.Y) < Curto;
+        if (limpos.Count >= 3 && Vertical(limpos[0], limpos[1]) && limpos[0].DistanceTo(limpos[1]) < Minimo) limpos.RemoveAt(1);
+        if (limpos.Count >= 3 && Vertical(limpos[^2], limpos[^1]) && limpos[^2].DistanceTo(limpos[^1]) < Minimo) limpos.RemoveAt(limpos.Count - 2);
+        return limpos;
     }
 
     static List<XYZ> Limpar(List<XYZ> pontos)

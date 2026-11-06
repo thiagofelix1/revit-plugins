@@ -104,6 +104,20 @@ public sealed class GrafoDeCondutos
                 caixas.Add(new CaixaLida(fi, no));
             }
         }
+        // A caixa de cada ponto de utilização (4×2, octogonal) também quebra a cadeia: os 15 m e as três curvas contam entre
+        // caixas (6.2.11.1.6 e 6.2.11.1.7). Sem isso, eletrodutos encadeados de tomada em tomada somavam como um trecho só.
+        foreach (var fi in new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance)).Cast<FamilyInstance>()
+                     .Where(fi => fi.Category?.BuiltInCategory is BuiltInCategory.OST_ElectricalFixtures or BuiltInCategory.OST_LightingFixtures
+                         or BuiltInCategory.OST_LightingDevices or BuiltInCategory.OST_ElectricalEquipment))
+        {
+            string? no = null;
+            if (fi.MEPModel?.ConnectorManager is { } cm)
+                foreach (var k in cm.Connectors.Cast<Connector>().Where(k => k.Domain == Domain.DomainCableTrayConduit && TemPosicao(k)))
+                    no ??= NoMaisProximo(k.Origin, 0.02);
+            if (no is null && (fi.Location as LocationPoint)?.Point is { } p) no = NoMaisProximo(p, ToleranciaCaixa);
+            if (no is not null) _nosDeCaixa.Add(no);
+        }
+
         Cadeias = MontarCadeias();
         Caixas = caixas.Select(k => k with { No = Representante(k.No) }).ToList();
         if (conduites.Count == 0) avisos.Add("O modelo não tem eletrodutos (Conduit): o cálculo usa os comprimentos informados nos circuitos, sem agrupamento por trecho.");
