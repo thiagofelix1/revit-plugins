@@ -1,0 +1,30 @@
+<Project Sdk="Nice3point.Revit.Sdk/6.3.2">
+
+    <PropertyGroup>
+        <!-- Mesma estratégia do SPK: sem deploy automático; em desenvolvimento um manifesto em %AppData% aponta para bin\...\publish. -->
+        <DeployAddin>false</DeployAddin>
+        <PublishAddin>true</PublishAddin>
+        <LaunchRevit>true</LaunchRevit>
+        <IsRepackable>false</IsRepackable>
+        <EnableDynamicLoading>true</EnableDynamicLoading>
+        <UseWPF>true</UseWPF>
+        <Configurations>Debug.R25;Debug.R26;Debug.R27</Configurations>
+        <Configurations>$(Configurations);Release.R25;Release.R26;Release.R27</Configurations>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\motor-eletrica\src\Eletrica.Motor\Eletrica.Motor.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Nice3point.Revit.Toolkit" Version="$(RevitVersion).*"/>
+        <PackageReference Include="Nice3point.Revit.Extensions" Version="$(RevitVersion).*"/>
+        <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="$(RevitVersion).*"/>
+        <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="$(RevitVersion).*"/>
+        <PackageReference Include="Nice3point.Revit.Api.AdWindows" Version="$(RevitVersion).*"/>
+
+        <PackageReference Include="JetBrains.Annotations" Version="2026.2.0" PrivateAssets="all"/>
+        <PackageReference Include="Polyfill" Version="11.4.3" PrivateAssets="all"/>
+    </ItemGroup>
+
+</Project>

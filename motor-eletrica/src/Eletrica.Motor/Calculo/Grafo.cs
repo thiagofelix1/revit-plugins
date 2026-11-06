@@ -58,6 +58,27 @@ public sealed class Grafo
         return (maior, caminho);
     }
 
+    /// <summary>Caminho (trechos) do quadro até cada nó de destino do circuito. Destinos sem caminho ficam fora do dicionário.</summary>
+    public IReadOnlyDictionary<string, IReadOnlyList<Trecho>> CaminhosDe(Circuito circuito)
+    {
+        var resultado = new Dictionary<string, IReadOnlyList<Trecho>>();
+        var destinos = circuito.QuadroAlimentado is { } qa
+            ? [_instalacao.Quadro(qa)!.NoDoQuadro]
+            : _instalacao.PontosDo(circuito).Select(p => p.NoDoPonto).Distinct().ToList();
+        if (destinos.Count == 0) return resultado;
+        var (dist, anterior) = Dijkstra(_instalacao.QuadroDe(circuito).NoDoQuadro, circuito.Id);
+        foreach (var d in destinos)
+        {
+            if (!dist.ContainsKey(d)) continue;
+            var caminho = new List<Trecho>();
+            for (var no = d; anterior.TryGetValue(no, out var passo); no = passo.De == no ? passo.Para : passo.De)
+                caminho.Add(passo);
+            caminho.Reverse();
+            resultado[d] = caminho;
+        }
+        return resultado;
+    }
+
     /// <summary>Pontos do circuito sem caminho pelos eletrodutos até o quadro.</summary>
     public IEnumerable<Ponto> PontosSemCaminho(Circuito circuito)
     {

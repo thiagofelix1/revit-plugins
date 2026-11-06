@@ -2,7 +2,7 @@
 
 Pasta de trabalho do segundo produto do repositório: um add-in do Revit para projeto de instalações elétricas de baixa tensão segundo a ABNT NBR 5410, construído sobre a mesma base do [SPK](../docs/refinamentos/spk/README.md) (motor .NET puro + add-in fino, memorial auditável, folhas no padrão do escritório, licença por assinatura).
 
-Estado em 05/11/2026: **pesquisa e plano concluídos, nenhum código ainda.** A norma foi estudada inteira ([mapa em `nr/normas/nbr-5410-2004.md`](../nr/normas/nbr-5410-2004.md), fora do Git), o mercado foi mapeado e o roadmap está proposto. O próximo passo é validar com os dois engenheiros que estão ajudando ([perguntas](docs/perguntas-engenheiros.md)) e começar o motor.
+Estado em 06/11/2026: **motor e add-in existem e compilam; nada foi aberto no Revit ainda.** A NBR 5410 e mais dez normas satélites foram estudadas (mapas em `nr/normas/`, fora do Git), o mercado foi mapeado e o roadmap está proposto. O [motor](../motor-eletrica/README.md) (`Eletrica.Motor`, 150 testes) verifica e dimensiona pelos seis critérios de 6.2.6.1.2 com o agrupamento lido trecho a trecho; o [add-in](../addin-eletrica/README.md) lê o modelo, passa os circuitos pelos eletrodutos, verifica, calcula e grava nos parâmetros AE. Próximos passos: abrir no Revit 2027 com um projeto elétrico, validar com os dois engenheiros ([perguntas](docs/perguntas-engenheiros.md)) e seguir o [plano](docs/plano-de-desenvolvimento.md) (0.2 a 0.6).
 
 ## Documentos
 
@@ -15,6 +15,8 @@ Estado em 05/11/2026: **pesquisa e plano concluídos, nenhum código ainda.** A 
 | [docs/base-de-regras.md](docs/base-de-regras.md) | As regras da NBR 5410 que o plugin verifica e aplica, com o item citado, agrupadas por ferramenta |
 | [docs/revit-api-eletrica.md](docs/revit-api-eletrica.md) | O que a Revit API dá para elétrica (circuitos, fiação, eletrodutos, quadros, condutores no 2026+) e as armadilhas |
 | [docs/perguntas-engenheiros.md](docs/perguntas-engenheiros.md) | O que perguntar aos dois engenheiros antes de escrever código, e quais projetos pedir como caso de referência |
+| [../motor-eletrica](../motor-eletrica/README.md) | O motor de cálculo (.NET puro) com as tabelas das normas, o dimensionamento, o Verificar modelo e o memorial |
+| [../addin-eletrica](../addin-eletrica/README.md) | O add-in do Revit: aba AutoEletrica, leitura do modelo, passar circuitos, verificar, calcular, etiquetar |
 
 ## Resumo em dez linhas
 

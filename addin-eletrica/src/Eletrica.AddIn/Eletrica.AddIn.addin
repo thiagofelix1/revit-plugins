@@ -1,0 +1,14 @@
+<RevitAddIns>
+    <AddIn Type="Application">
+        <Name>Eletrica.AddIn</Name>
+        <Assembly>Eletrica.AddIn\Eletrica.AddIn.dll</Assembly>
+        <AddInId>7A3E2C41-5B8D-4F6A-9C1E-2D4B8E7F0A15</AddInId>
+        <FullClassName>Eletrica.AddIn.EletricaApplication</FullClassName>
+        <VendorId>Development</VendorId>
+        <VendorDescription></VendorDescription>
+    </AddIn>
+    <ManifestSettings>
+        <UseRevitContext>False</UseRevitContext>
+        <ContextName>Eletrica.AddIn</ContextName>
+    </ManifestSettings>
+</RevitAddIns>
