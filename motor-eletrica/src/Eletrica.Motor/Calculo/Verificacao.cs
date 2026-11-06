@@ -88,6 +88,21 @@ public static class Verificacao
                 problemas.Add(new Problema("A-07", Gravidade.Erro, $"{am.Nome}: casa de máquinas sem tomada de uso geral (circuito de pelo menos 1 000 VA).", "4.2.1.2.3", [am.Id]));
         }
 
+        // ----- comandos de iluminação (9.5.2.1.1, 5.6.6) -----
+        if (i.Comandos.Count > 0)
+        {
+            foreach (var p in i.Pontos.Where(p => p.Tipo == TipoCarga.Iluminacao && !i.ComandosDe(p).Any()))
+                problemas.Add(new Problema("L-01", Gravidade.Aviso, $"{i.AmbienteDe(p).Nome}: luminária {p.Id} sem interruptor que a comande.", "9.5.2.1.1", [p.Id]));
+            foreach (var k in i.Comandos)
+            {
+                var circuitos = k.Luminarias.Select(l => i.Ponto(l)?.Circuito).Distinct().ToList();
+                if (circuitos.Count > 1)
+                    problemas.Add(new Problema("L-02", Gravidade.Erro, $"Comando {k.Id}: as luminárias estão em circuitos diferentes; um interruptor comanda luminárias de um só circuito.", "5.6.6.1", [.. k.Interruptores, .. k.Luminarias]));
+                else if (k.Circuito is not null && circuitos[0] is not null && circuitos[0] != k.Circuito)
+                    problemas.Add(new Problema("L-03", Gravidade.Erro, $"Comando {k.Id}: o interruptor está no circuito {k.Circuito} e as luminárias no {circuitos[0]}.", "5.6.6.1", [.. k.Interruptores, .. k.Luminarias]));
+            }
+        }
+
         // ----- banheiro (9.1) e chuveiro -----
         foreach (var p in i.Pontos)
         {

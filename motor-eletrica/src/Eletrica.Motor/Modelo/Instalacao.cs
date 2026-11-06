@@ -151,6 +151,12 @@ public sealed record Trecho(string Id, string De, string Para, double Compriment
 
     /// <summary>Trecho externo à edificação (30 m entre caixas em vez de 15 m).</summary>
     public bool Externo { get; init; }
+
+    /// <summary>
+    /// Condutores de retorno dos comandos de iluminação que passam por este trecho: o id do circuito, repetido uma vez por
+    /// condutor. Entram na ocupação do eletroduto com a seção da fase do circuito (5.6.6.1.2).
+    /// </summary>
+    public IReadOnlyList<string> Retornos { get; init; } = [];
 }
 
 /// <summary>Caixa de passagem ou de derivação num nó.</summary>
@@ -176,6 +182,7 @@ public sealed class Instalacao
     public IReadOnlyList<Ponto> Pontos { get; }
     public IReadOnlyList<Trecho> Trechos { get; }
     public IReadOnlyList<Caixa> Caixas { get; }
+    public IReadOnlyList<Comando> Comandos { get; }
 
     readonly Dictionary<string, Ambiente> _ambientes;
     readonly Dictionary<string, Quadro> _quadros;
@@ -183,7 +190,7 @@ public sealed class Instalacao
     readonly Dictionary<string, Ponto> _pontos;
 
     public Instalacao(string nome, Alimentacao alimentacao, IEnumerable<Ambiente> ambientes, IEnumerable<Quadro> quadros,
-        IEnumerable<Circuito> circuitos, IEnumerable<Ponto> pontos, IEnumerable<Trecho>? trechos = null, IEnumerable<Caixa>? caixas = null)
+        IEnumerable<Circuito> circuitos, IEnumerable<Ponto> pontos, IEnumerable<Trecho>? trechos = null, IEnumerable<Caixa>? caixas = null, IEnumerable<Comando>? comandos = null)
     {
         Nome = nome;
         Alimentacao = alimentacao;
@@ -193,6 +200,7 @@ public sealed class Instalacao
         Pontos = pontos.ToList();
         Trechos = (trechos ?? []).ToList();
         Caixas = (caixas ?? []).ToList();
+        Comandos = (comandos ?? []).ToList();
 
         var erros = new List<string>();
         _ambientes = IndexarUnicos(Ambientes, a => a.Id, "ambiente", erros);
@@ -238,6 +246,15 @@ public sealed class Instalacao
                 if (!_circuitos.ContainsKey(ci)) erros.Add($"trecho {t.Id}: circuito '{ci}' não existe");
         }
 
+        foreach (var k in Comandos)
+        {
+            if (k.Interruptores.Count == 0) erros.Add($"comando {k.Id}: sem interruptor");
+            if (k.Luminarias.Count == 0) erros.Add($"comando {k.Id}: sem luminária");
+            if (k.Circuito is { } ci && !_circuitos.ContainsKey(ci)) erros.Add($"comando {k.Id}: circuito '{ci}' não existe");
+            foreach (var l in k.Luminarias)
+                if (!_pontos.ContainsKey(l)) erros.Add($"comando {k.Id}: luminária '{l}' não existe");
+        }
+
         if (erros.Count > 0) throw new ErroDeModelo(erros);
     }
 
@@ -254,6 +271,9 @@ public sealed class Instalacao
     public IEnumerable<Ponto> PontosDo(Ambiente a) => Pontos.Where(p => p.Ambiente == a.Id);
     public IEnumerable<Circuito> CircuitosDo(Quadro q) => Circuitos.Where(c => c.Quadro == q.Id);
     public IEnumerable<Trecho> TrechosDo(Circuito c) => Trechos.Where(t => t.Circuitos.Contains(c.Id));
+
+    /// <summary>Comandos que acendem esta luminária.</summary>
+    public IEnumerable<Comando> ComandosDe(Ponto luminaria) => Comandos.Where(k => k.Luminarias.Contains(luminaria.Id));
 
     /// <summary>O circuito que alimenta o quadro (Tipo Alimentador com QuadroAlimentado = q), se houver.</summary>
     public Circuito? AlimentadorDo(Quadro q) => Circuitos.FirstOrDefault(c => c.QuadroAlimentado == q.Id);

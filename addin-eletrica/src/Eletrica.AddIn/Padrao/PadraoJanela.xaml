@@ -1,0 +1,101 @@
+<Window x:Class="Eletrica.AddIn.Padrao.PadraoJanela"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AutoEletrica — Padrão do escritório" Width="640" SizeToContent="Height"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize" FontSize="13">
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="0,3"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Width" Value="90"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,3,12,3"/>
+        </Style>
+    </Window.Resources>
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Cancelar" Width="100" Height="30" Margin="0,0,8,0" IsCancel="True"/>
+            <Button Content="Confirmar" Width="100" Height="30" IsDefault="True" FontWeight="Bold" Click="Confirmar_Click"/>
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap" Margin="0,0,0,12" Foreground="#37474F"
+                   Text="Alturas, potências, limites por circuito e prefixos que o lançamento usa. Os mínimos da NBR 5410 (pontos por cômodo, 600 VA nas tomadas de área molhada, circuitos exclusivos) continuam valendo por cima do que estiver aqui. Gravado no projeto."/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Margin="0,0,8,0">
+                <GroupBox Header="Alturas (m, do piso ao centro do ponto)" Padding="8" Margin="0,0,0,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Baixa (tomadas)"/><TextBox x:Name="AlturaBaixa" Grid.Column="1"/>
+                        <TextBlock Grid.Row="1" Text="Média (bancada, lavatório)"/><TextBox x:Name="AlturaMedia" Grid.Row="1" Grid.Column="1"/>
+                        <TextBlock Grid.Row="2" Text="Alta (ar, chuveiro, arandela)"/><TextBox x:Name="AlturaAlta" Grid.Row="2" Grid.Column="1"/>
+                        <TextBlock Grid.Row="3" Text="Interruptor"/><TextBox x:Name="AlturaInterruptor" Grid.Row="3" Grid.Column="1"/>
+                        <TextBlock Grid.Row="4" Text="Pé-direito (ponto de luz sem teto lido)"/><TextBox x:Name="PeDireito" Grid.Row="4" Grid.Column="1"/>
+                        <TextBlock Grid.Row="5" Text="Afastamento da parede (família livre)"/><TextBox x:Name="Afastamento" Grid.Row="5" Grid.Column="1"/>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Prefixos" Padding="8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/><RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Circuito (C1, C2...)"/><TextBox x:Name="PrefixoCircuito" Grid.Column="1"/>
+                        <TextBlock Grid.Row="1" Text="Quadro (QD-1, QD-2...)"/><TextBox x:Name="PrefixoQuadro" Grid.Row="1" Grid.Column="1"/>
+                    </Grid>
+                </GroupBox>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                <GroupBox Header="Potências padrão (VA)" Padding="8" Margin="0,0,0,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Tomada de uso geral"/><TextBox x:Name="PotenciaTug" Grid.Column="1"/>
+                        <TextBlock Grid.Row="1" Text="Tomada em área molhada"/><TextBox x:Name="PotenciaTugMolhada" Grid.Row="1" Grid.Column="1"/>
+                        <TextBlock Grid.Row="2" Text="Tomada de 20 A / ponto de força"/><TextBox x:Name="PotenciaTue" Grid.Row="2" Grid.Column="1"/>
+                        <TextBlock Grid.Row="3" Text="Chuveiro elétrico"/><TextBox x:Name="PotenciaChuveiro" Grid.Row="3" Grid.Column="1"/>
+                        <TextBlock Grid.Row="4" Text="Ar-condicionado"/><TextBox x:Name="PotenciaAr" Grid.Row="4" Grid.Column="1"/>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Divisão de circuitos" Padding="8">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Corrente máxima por circuito de TUG (A)"/><TextBox x:Name="CorrenteTug" Grid.Column="1"/>
+                            <TextBlock Grid.Row="1" Text="Corrente máxima por circuito de luz (A)"/><TextBox x:Name="CorrenteLuz" Grid.Row="1" Grid.Column="1"/>
+                            <TextBlock Grid.Row="2" Text="Pontos máximos por circuito"/><TextBox x:Name="PontosMaximos" Grid.Row="2" Grid.Column="1"/>
+                            <TextBlock Grid.Row="3" Text="Fase-fase acima de (A em fase-neutro)"/><TextBox x:Name="CorrenteFaseFase" Grid.Row="3" Grid.Column="1"/>
+                        </Grid>
+                        <CheckBox x:Name="SugerirChuveiro" Content="Sugerir chuveiro elétrico em todo banheiro" Margin="0,6,0,2"/>
+                        <CheckBox x:Name="SugerirAr" Content="Sugerir ar-condicionado em dormitórios e salas" Margin="0,2"/>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </Grid>
+    </DockPanel>
+</Window>

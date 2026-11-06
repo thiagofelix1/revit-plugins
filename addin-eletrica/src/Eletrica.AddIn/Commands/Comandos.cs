@@ -276,11 +276,14 @@ public class GuiaCommand : ExternalCommand
             MainContent =
                 "1. Dados do projeto: tensões, fases, esquema de aterramento, Icc presumida, alimentação aérea, dias de trovoada, SPDA, uso.\n" +
                 "2. Ambientes: confirme o uso de cada cômodo (define pontos mínimos, potências e DR).\n" +
-                "3. No Revit: insira tomadas, luminárias e equipamentos (famílias com carga aparente), crie os circuitos ligados ao quadro, trace os eletrodutos do quadro aos pontos.\n" +
-                "4. Passar circuitos: grava em cada eletroduto os circuitos que passam e a contagem de condutores.\n" +
-                "5. Verificar modelo: o que a NBR 5410 cobra por cômodo, por circuito, no quadro e nos eletrodutos, com destaque no modelo.\n" +
-                "6. Calcular: seções, disjuntores, DR, DPS, queda, curto, eletrodutos; grava nos parâmetros AE e gera o memorial.\n" +
-                "7. Etiquetar: etiquetas de fiação nos eletrodutos e dos pontos na planta, com as famílias do escritório.\n\n" + situacao,
+                "3. Padrão e Famílias: alturas, potências e limites do escritório; o papel de cada família carregada (tomada, luminária, interruptor, quadro).\n" +
+                "4. Quadro: insira o quadro (e Alimentar quadro, se houver geral e terminais).\n" +
+                "5. Pontos: Pontos por ambiente lança o mínimo da 9.5.2 em cada cômodo; Inserir ponto acrescenta o que faltar; Comando liga interruptor e luminária.\n" +
+                "6. Criar circuitos: divide os pontos pela norma e cria os circuitos no quadro. Depois trace os eletrodutos do quadro aos pontos.\n" +
+                "7. Passar circuitos: grava em cada eletroduto os circuitos que passam, os retornos e a contagem de condutores.\n" +
+                "8. Verificar modelo: o que a NBR 5410 cobra por cômodo, por circuito, no quadro e nos eletrodutos, com destaque no modelo.\n" +
+                "9. Calcular: seções, disjuntores, DR, DPS, queda, curto, eletrodutos; grava nos parâmetros AE e gera o memorial.\n" +
+                "10. Etiquetar: etiquetas de fiação nos eletrodutos e dos pontos na planta, com as famílias do escritório.\n\n" + situacao,
             CommonButtons = TaskDialogCommonButtons.Close,
         };
         dialogo.Show();

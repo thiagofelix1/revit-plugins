@@ -1,0 +1,35 @@
+<Window x:Class="Eletrica.AddIn.Circuitos.CriarCircuitosJanela"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AutoEletrica — Criar circuitos" Width="1000" Height="640" MinWidth="800" MinHeight="420"
+        WindowStartupLocation="CenterScreen" FontSize="13" Background="White">
+    <DockPanel Margin="16">
+        <TextBlock x:Name="Cabecalho" DockPanel.Dock="Top" TextWrapping="Wrap" Foreground="#37474F" Margin="0,0,0,12"/>
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <TextBlock x:Name="Rodape" VerticalAlignment="Center" Foreground="#6B6B6B" Margin="0,0,16,0"/>
+            <Button Content="Cancelar" Width="100" Height="30" Margin="0,0,8,0" IsCancel="True"/>
+            <Button Content="Criar" Width="100" Height="30" IsDefault="True" FontWeight="Bold" Click="Criar_Click"/>
+        </StackPanel>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <DataGrid x:Name="Grade" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal" RowHeight="28" SelectionMode="Single" SelectionChanged="Grade_SelectionChanged">
+                <DataGrid.Columns>
+                    <DataGridCheckBoxColumn Header="Criar" Binding="{Binding Criar, UpdateSourceTrigger=PropertyChanged}" Width="50"/>
+                    <DataGridTextColumn Header="Nº" Binding="{Binding Numero}" IsReadOnly="True" Width="50"/>
+                    <DataGridTextColumn Header="Descrição" Binding="{Binding Descricao, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                    <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" IsReadOnly="True" Width="120"/>
+                    <DataGridTextColumn Header="Ligação" Binding="{Binding Ligacao}" IsReadOnly="True" Width="60"/>
+                    <DataGridTextColumn Header="Pontos" Binding="{Binding Pontos}" IsReadOnly="True" Width="60"/>
+                    <DataGridTextColumn Header="VA" Binding="{Binding PotenciaVA, StringFormat=N0}" IsReadOnly="True" Width="70"/>
+                    <DataGridTextColumn Header="IB (A)" Binding="{Binding Ib, StringFormat=N1}" IsReadOnly="True" Width="60"/>
+                    <DataGridTextColumn Header="Por quê" Binding="{Binding Motivo}" IsReadOnly="True" Width="300"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <TextBlock x:Name="Detalhe" Grid.Row="1" TextWrapping="Wrap" Foreground="#37474F" Margin="0,8,0,0" MinHeight="40"/>
+        </Grid>
+    </DockPanel>
+</Window>

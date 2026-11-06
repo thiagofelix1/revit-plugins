@@ -27,6 +27,13 @@ public static class Ocupacao
                 area += Condutores.AreaExterna(r.SecaoPE, c.Isolacao, flexivel);
                 condutores += n + 1;
             }
+            foreach (var id in t.Retornos)
+            {
+                var c = i.Circuito(id);
+                if (c is null || !circuitos.TryGetValue(id, out var r)) continue;
+                area += Condutores.AreaExterna(r.SecaoFase, c.Isolacao, true);
+                condutores++;
+            }
 
             int? dnSugerido = null;
             double? taxa = null;

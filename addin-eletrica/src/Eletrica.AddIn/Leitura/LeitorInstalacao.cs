@@ -1,14 +1,16 @@
 using Autodesk.Revit.DB.Electrical;
 using Eletrica.AddIn.Ambientes;
 using Eletrica.AddIn.Condutos;
+using Eletrica.AddIn.Lancamento;
 using Eletrica.Motor.Modelo;
 
 namespace Eletrica.AddIn.Leitura;
 
 /// <summary>
 /// Monta a <see cref="Instalacao" /> do motor a partir do modelo: quadros (ElectricalEquipment), circuitos (ElectricalSystem),
-/// pontos (os elementos de cada circuito), ambientes (Room do arquivo e dos vínculos) e trechos (cadeias de eletrodutos com os
-/// circuitos gravados por Passar circuitos). Guarda o mapa id do motor → ElementId para destacar no modelo.
+/// pontos (os elementos de cada circuito), ambientes (Room do arquivo e dos vínculos), trechos (cadeias de eletrodutos com os
+/// circuitos gravados por Passar circuitos) e comandos de iluminação (AE Comando). Guarda o mapa id do motor → ElementId
+/// para destacar no modelo.
 /// </summary>
 public static class LeitorInstalacao
 {
@@ -54,18 +56,17 @@ public static class LeitorInstalacao
             mapa[fi.UniqueId] = fi.Id;
         }
         if (quadros.Count == 0)
-            avisos.Add("Nenhum quadro com circuitos: crie os circuitos no Revit (Sistemas → Energia) ligados a um quadro (Electrical Equipment).");
-        if (quadros.Count(q => q.QuadroPai is null) > 1)
-            avisos.Add("Mais de um quadro sem alimentador: o cálculo trata o primeiro como o de entrada e ignora a hierarquia dos outros.");
-        // Só um quadro de entrada para o motor: os demais sem pai recebem o primeiro como pai lógico (aviso acima).
+            avisos.Add("Nenhum quadro com circuitos: insira o quadro (Lançamento → Quadro) e crie os circuitos (Criar circuitos).");
         if (quadros.Count(q => q.QuadroPai is null) > 1)
         {
+            avisos.Add("Mais de um quadro sem alimentador: o cálculo trata o primeiro como o de entrada; use Alimentar quadro para ligar os outros a ele.");
             var entrada = quadros.First(q => q.QuadroPai is null);
             quadros = quadros.Select(q => q.QuadroPai is null && q.Id != entrada.Id ? q with { QuadroPai = entrada.Id } : q).ToList();
         }
 
         var circuitos = new List<Circuito>();
         var pontos = new List<Ponto>();
+        var circuitoDoElemento = new Dictionary<ElementId, string>();
         foreach (var s in sistemas)
         {
             if (s.BaseEquipment is not { } quadro) continue;
@@ -86,25 +87,10 @@ public static class LeitorInstalacao
             foreach (var e in elementos)
             {
                 if (e is not FamilyInstance fi || quadrosRevit.ContainsKey(fi.Id)) continue;
-                var categoria = fi.Category?.BuiltInCategory ?? BuiltInCategory.INVALID;
-                if (categoria == BuiltInCategory.OST_LightingDevices) continue; // interruptor não é ponto de utilização
-                var tipo = TipoDoPonto(fi, categoria);
-                var local = (fi.Location as LocationPoint)?.Point;
-                var ambiente = local is not null ? LeituraDeAmbientes.Em(ambientesLidos, local) : null;
-                if (ambiente is null)
-                {
-                    avisos.Add($"{fi.Name} ({fi.Id}) não está dentro de nenhum ambiente: fica fora das verificações por cômodo.");
-                    continue;
-                }
-                var altura = local is not null && doc.GetElement(fi.LevelId) is Level nivel ? Unidades.Metros(local.Z - nivel.Elevation) : 0;
-                var potencia = PotenciaDoPonto(fi);
-                var ponto = new Ponto(fi.UniqueId, ambiente.Id, s.UniqueId, tipo, potencia)
-                {
-                    Altura = ParametrosEletrica.LerNumero(fi, ParametrosEletrica.Altura) is { } h and > 0 ? h : altura,
-                    NoTeto = tipo == TipoCarga.Iluminacao && (altura > 2.2 || fi.Host?.Category?.BuiltInCategory is BuiltInCategory.OST_Ceilings or BuiltInCategory.OST_Floors),
-                    CorrenteDaTomada = tipo is TipoCarga.TomadaUsoGeral or TipoCarga.TomadaUsoEspecifico ? CorrenteDaTomada(fi) : null,
-                    No = grafo.NoDe(fi) ?? fi.UniqueId,
-                };
+                circuitoDoElemento[fi.Id] = s.UniqueId;
+                if (fi.Category?.BuiltInCategory == BuiltInCategory.OST_LightingDevices) continue; // interruptor não é ponto de utilização
+                var ponto = LerPonto(doc, fi, s.UniqueId, ambientesLidos, grafo, avisos);
+                if (ponto is null) continue;
                 pontosDoCircuito.Add(ponto);
                 mapa[fi.UniqueId] = fi.Id;
             }
@@ -130,29 +116,83 @@ public static class LeitorInstalacao
             mapa[s.UniqueId] = s.Id;
         }
 
-        // Trechos: cadeias de eletrodutos com os circuitos gravados por Passar circuitos.
+        // Comandos de iluminação: interruptores (nó no grafo) e luminárias que já são pontos.
+        var idsDePontos = pontos.Select(p => p.Id).ToHashSet();
+        var comandos = new List<Comando>();
+        foreach (var k in Comandos.Ler(doc))
+        {
+            var luminarias = k.Luminarias.Where(l => idsDePontos.Contains(l.UniqueId)).Select(l => l.UniqueId).ToList();
+            if (luminarias.Count == 0) continue;
+            var circuito = k.Luminarias.Select(l => circuitoDoElemento.TryGetValue(l.Id, out var c) ? c : null).FirstOrDefault(c => c is not null);
+            comandos.Add(new Comando(k.Id, circuito, k.Interruptores.Select(s => s.UniqueId).ToList(), luminarias, k.Tipo)
+            {
+                NosDosInterruptores = k.Interruptores.Select(s => grafo.NoDe(s) ?? s.UniqueId).ToList(),
+            });
+            foreach (var s in k.Interruptores) mapa[s.UniqueId] = s.Id;
+        }
+
+        // Trechos: cadeias de eletrodutos com os circuitos e retornos gravados por Passar circuitos.
         var porUniqueId = circuitos.ToDictionary(c => c.Id, c => c);
         var trechos = new List<Trecho>();
         foreach (var cadeia in grafo.Cadeias)
         {
             var ids = cadeia.Conduites.Select(c => ParametrosEletrica.LerTexto(c, ParametrosEletrica.Circuitos)).FirstOrDefault(t => !string.IsNullOrWhiteSpace(t));
-            var circuitosDoTrecho = (ids ?? "").Split([';', ',', ' '], StringSplitOptions.RemoveEmptyEntries)
-                .Where(porUniqueId.ContainsKey).Distinct().ToList();
+            var circuitosDoTrecho = Separar(ids).Where(porUniqueId.ContainsKey).Distinct().ToList();
+            var retornos = cadeia.Conduites.Select(c => ParametrosEletrica.LerTexto(c, ParametrosEletrica.Retornos)).FirstOrDefault(t => !string.IsNullOrWhiteSpace(t));
             trechos.Add(new Trecho(cadeia.Id, cadeia.De, cadeia.Para, Math.Max(cadeia.Comprimento, 0.01), circuitosDoTrecho)
             {
                 TipoEletroduto = cadeia.Tipo,
                 Dn = cadeia.Dn,
                 Curvas90 = cadeia.Curvas,
                 Metodo = MetodoReferencia.B1,
+                Retornos = Separar(retornos).Where(porUniqueId.ContainsKey).ToList(),
             });
-            foreach (var c in cadeia.Conduites) mapa.TryAdd(cadeia.Id, c.Id);
+            foreach (var c in cadeia.Conduites)
+                if (!mapa.ContainsKey(cadeia.Id)) mapa[cadeia.Id] = c.Id;
         }
         if (trechos.Count > 0 && trechos.All(t => t.Circuitos.Count == 0))
             avisos.Add("Os eletrodutos ainda não têm circuitos: rode Passar circuitos para o agrupamento e a ocupação trecho a trecho.");
 
-        var instalacao = new Instalacao(doc.Title, alimentacao, ambientes, quadros, circuitos, pontos, trechos);
+        var instalacao = new Instalacao(doc.Title, alimentacao, ambientes, quadros, circuitos, pontos, trechos, comandos: comandos);
         return new Lida(instalacao, mapa, avisos, grafo, ambientesLidos);
     }
+
+    static IEnumerable<string> Separar(string? texto) => (texto ?? "").Split([';', ',', ' '], StringSplitOptions.RemoveEmptyEntries);
+
+    /// <summary>
+    /// Um ponto de utilização a partir do elemento do Revit: tipo (AE Tipo do ponto, senão o nome da família e a categoria),
+    /// potência (AE Potência, carga aparente ou parâmetro da família), ambiente pelo Room no ponto (arquivo ou vínculo), altura
+    /// pelo nível, nó no grafo de eletrodutos. Nulo (com aviso) quando está fora de qualquer ambiente.
+    /// </summary>
+    public static Ponto? LerPonto(Document doc, FamilyInstance fi, string? circuito, IReadOnlyList<AmbienteLido> ambientes, GrafoDeCondutos? grafo, List<string> avisos)
+    {
+        var categoria = fi.Category?.BuiltInCategory ?? BuiltInCategory.INVALID;
+        var tipo = TipoDoPonto(fi, categoria);
+        var local = (fi.Location as LocationPoint)?.Point;
+        var ambiente = local is not null ? LeituraDeAmbientes.Em(ambientes, local) : null;
+        if (ambiente is null)
+        {
+            avisos.Add($"{fi.Name} ({fi.Id}) não está dentro de nenhum ambiente: fica fora das verificações por cômodo.");
+            return null;
+        }
+        var altura = local is not null ? Colocacao.AlturaDe(doc, fi, doc.GetElement(fi.LevelId) as Level) : 0;
+        var potencia = PotenciaDoPonto(fi);
+        return new Ponto(fi.UniqueId, ambiente.Id, circuito, tipo, potencia)
+        {
+            Altura = ParametrosEletrica.LerNumero(fi, ParametrosEletrica.Altura) is { } h and > 0 ? h : altura,
+            NoTeto = tipo == TipoCarga.Iluminacao && (altura > 2.2 || fi.Host?.Category?.BuiltInCategory is BuiltInCategory.OST_Ceilings or BuiltInCategory.OST_Floors
+                                                      || ParametrosEletrica.LerTexto(fi, ParametrosEletrica.Posicao) == "Teto"),
+            CorrenteDaTomada = tipo is TipoCarga.TomadaUsoGeral or TipoCarga.TomadaUsoEspecifico ? CorrenteDaTomada(fi) : null,
+            No = grafo?.NoDe(fi) ?? fi.UniqueId,
+        };
+    }
+
+    /// <summary>Pontos elétricos do modelo que ainda não estão em circuito algum (tomadas, luminárias, equipamentos; interruptores à parte).</summary>
+    public static List<FamilyInstance> PontosSemCircuito(Document doc) =>
+        new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance)).Cast<FamilyInstance>()
+            .Where(fi => fi.Category?.BuiltInCategory is BuiltInCategory.OST_ElectricalFixtures or BuiltInCategory.OST_LightingFixtures or BuiltInCategory.OST_MechanicalEquipment)
+            .Where(InserirPontos.SemCircuito)
+            .ToList();
 
     static int FasesDoQuadro(FamilyInstance fi, int padrao)
     {
@@ -171,7 +211,7 @@ public static class LeitorInstalacao
     static string NomeDoQuadro(FamilyInstance fi) =>
         fi.get_Parameter(BuiltInParameter.RBS_ELEC_PANEL_NAME)?.AsString() is { Length: > 0 } nome ? nome : fi.Name;
 
-    static TipoCarga TipoDoPonto(FamilyInstance fi, BuiltInCategory categoria)
+    public static TipoCarga TipoDoPonto(FamilyInstance fi, BuiltInCategory categoria)
     {
         if (TipoDeCarga(ParametrosEletrica.LerTexto(fi, ParametrosEletrica.TipoDoPonto)) is { } informado) return informado;
         var nome = (fi.Symbol?.FamilyName + " " + fi.Name).ToLowerInvariant();
@@ -195,7 +235,7 @@ public static class LeitorInstalacao
         return Enum.TryParse<TipoCarga>(texto!.Trim(), true, out var t) ? t : null;
     }
 
-    static double PotenciaDoPonto(FamilyInstance fi)
+    public static double PotenciaDoPonto(FamilyInstance fi)
     {
         if (ParametrosEletrica.LerNumero(fi, ParametrosEletrica.Potencia) is { } ae and > 0) return ae;
         if (fi.get_Parameter(BuiltInParameter.RBS_ELEC_APPARENT_LOAD) is { HasValue: true } p && p.AsDouble() > 0) return Unidades.VoltAmperes(p.AsDouble());

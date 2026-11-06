@@ -1,0 +1,47 @@
+<Window x:Class="Eletrica.AddIn.Lancamento.InserirPontoJanela"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AutoEletrica — Inserir ponto" Width="560" SizeToContent="Height"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize" FontSize="13">
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Cancelar" Width="100" Height="30" Margin="0,0,8,0" IsCancel="True"/>
+            <Button Content="Inserir" Width="100" Height="30" IsDefault="True" FontWeight="Bold" Click="Inserir_Click"/>
+        </StackPanel>
+        <TextBlock DockPanel.Dock="Top" TextWrapping="Wrap" Margin="0,0,0,12" Foreground="#37474F"
+                   Text="Escolha o que vai inserir; o Revit abre a colocação normal da família (clique quantas vezes quiser, Esc termina). Cada ponto colocado recebe a altura, a potência, o tipo de carga, o ambiente e, se escolhido, entra no circuito."/>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="170"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Papel" VerticalAlignment="Center" Margin="0,4"/>
+            <ComboBox x:Name="Papel" Grid.Column="1" Margin="0,4" SelectionChanged="Papel_SelectionChanged"/>
+            <TextBlock Grid.Row="1" Text="Família : tipo" VerticalAlignment="Center" Margin="0,4"/>
+            <ComboBox x:Name="Familia" Grid.Row="1" Grid.Column="1" Margin="0,4"/>
+            <TextBlock Grid.Row="2" Text="Posição" VerticalAlignment="Center" Margin="0,4"/>
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
+                <ComboBox x:Name="Posicao" Width="150" SelectionChanged="Posicao_SelectionChanged"/>
+                <TextBlock Text="altura (m)" VerticalAlignment="Center" Margin="12,0,6,0"/>
+                <TextBox x:Name="Altura" Width="70" Padding="4,2"/>
+            </StackPanel>
+            <TextBlock Grid.Row="3" Text="Potência (VA)" VerticalAlignment="Center" Margin="0,4"/>
+            <TextBox x:Name="Potencia" Grid.Row="3" Grid.Column="1" Margin="0,4" Padding="4,2" Width="100" HorizontalAlignment="Left"/>
+            <TextBlock Grid.Row="4" Text="Tipo de carga" VerticalAlignment="Center" Margin="0,4"/>
+            <ComboBox x:Name="Tipo" Grid.Row="4" Grid.Column="1" Margin="0,4" Width="220" HorizontalAlignment="Left"/>
+            <TextBlock Grid.Row="5" Text="Circuito" VerticalAlignment="Center" Margin="0,4"/>
+            <ComboBox x:Name="Circuito" Grid.Row="5" Grid.Column="1" Margin="0,4"/>
+            <TextBlock Grid.Row="6" Grid.ColumnSpan="2" TextWrapping="Wrap" Foreground="#6B6B6B" FontSize="12" Margin="0,8,0,0"
+                       Text="A família de face se encaixa na parede ou no teto que você clicar (inclusive do vínculo); a família livre fica no nível e o plugin a sobe até a altura. Sem circuito, use Criar circuitos depois para dividir tudo pela norma."/>
+        </Grid>
+    </DockPanel>
+</Window>

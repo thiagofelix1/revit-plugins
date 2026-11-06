@@ -23,11 +23,47 @@ public class EletricaApplication : IExternalApplication
             "Ambientes", Icones.Edificio,
             "Lê os ambientes do arquivo e dos vínculos e sugere o uso de cada um pelo nome (sala, cozinha, banheiro, área de serviço...). " +
             "O uso define os pontos mínimos, a potência das tomadas e onde o DR é obrigatório. Confirme ou corrija antes de verificar.");
+        Botao<PadraoCommand>(projeto,
+            "Padrão", Icones.Regua,
+            "Padrão do escritório: alturas (baixa, média, alta, interruptor, pé-direito), potências padrão das tomadas, chuveiro e ar, corrente e " +
+            "número de pontos por circuito, prefixos de circuito e quadro. O lançamento usa isto; os mínimos da norma valem por cima.");
+        Botao<FamiliasCommand>(projeto,
+            "Famílias", Icones.Familias,
+            "Lista as famílias elétricas carregadas e confirma o papel de cada uma (tomada 10 A, 20 A, luminária, arandela, interruptor simples, " +
+            "paralelo, intermediário, chuveiro, ar-condicionado, quadro, caixa). O plugin lança e lê pelo papel, não pelo nome.");
         Botao<ParametrosCommand>(projeto,
             "Parâmetros", Icones.Lupa,
             "Cria no projeto os parâmetros compartilhados AE (circuitos e fiação dos eletrodutos, seção, disjuntor, queda, DR e situação dos " +
-            "circuitos, ambiente e potência dos pontos). As etiquetas e tabelas do escritório podem usá-los.");
+            "circuitos, ambiente, potência, posição e comando dos pontos). As etiquetas e tabelas do escritório podem usá-los.");
         Margem(projeto);
+
+        var lancamento = application.CreateRibbonPanel(Aba, "Lançamento");
+        Botao<QuadroCommand>(lancamento,
+            "Quadro", Icones.Quadro,
+            "Insere o quadro de distribuição com a família do escritório, já com nome (QD-1, QD-2...) e o sistema de distribuição das tensões e " +
+            "fases dos Dados do projeto.");
+        Botao<AlimentarQuadroCommand>(lancamento,
+            "Alimentar\nquadro", Icones.Alimentador,
+            "Liga um quadro terminal ao quadro que o alimenta: cria o circuito alimentador no quadro geral com o terminal como carga. É a hierarquia " +
+            "medição → geral → terminais que o cálculo dimensiona.");
+        Botao<InserirPontoCommand>(lancamento,
+            "Inserir\nponto", Icones.Tomada,
+            "Tomada, luminária, interruptor, chuveiro, ar-condicionado ou ponto de força com altura, potência, tipo de carga e circuito já definidos; " +
+            "o Revit faz a colocação normal (clique onde quiser, Esc termina) e o plugin completa os dados de cada ponto colocado.");
+        Botao<PontosPorAmbienteCommand>(lancamento,
+            "Pontos por\nambiente", Icones.BicosAmbiente,
+            "Para cada ambiente, o que a NBR 5410 9.5.2 pede (tomadas pelo perímetro e uso, 600 VA nas áreas molhadas, luz no teto com a carga " +
+            "mínima) mais o padrão (chuveiro, ar): revise as quantidades e lance; tomadas pelas paredes, luz no centro, interruptor junto da porta já " +
+            "comandando a luz. Ctrl+Z desfaz.");
+        Botao<ComandoCommand>(lancamento,
+            "Comando", Icones.Interruptor,
+            "Liga interruptores às luminárias que eles acendem (simples, paralelo ou intermediário). Passar circuitos conta os retornos por trecho e o " +
+            "Verificar acusa luminária sem interruptor.");
+        Botao<CriarCircuitosCommand>(lancamento,
+            "Criar\ncircuitos", Icones.Circuito,
+            "Divide os pontos sem circuito pela NBR 5410 (luz separada das tomadas, cozinha e área de serviço exclusivas, banheiro à parte, cada " +
+            "equipamento acima de 10 A sozinho, o resto por ambiente até o limite do padrão), mostra a proposta e cria os circuitos no quadro.");
+        Margem(lancamento);
 
         var fiacao = application.CreateRibbonPanel(Aba, "Fiação");
         Botao<PassarCircuitosCommand>(fiacao,
@@ -60,7 +96,7 @@ public class EletricaApplication : IExternalApplication
         var ajuda = application.CreateRibbonPanel(Aba, "Ajuda");
         Botao<GuiaCommand>(ajuda,
             "Guia", Icones.Livro,
-            "Passo a passo: dados do projeto, ambientes, circuitos no Revit, eletrodutos, passar circuitos, verificar, calcular, etiquetar.");
+            "Passo a passo: dados do projeto, ambientes, padrão e famílias, quadro, pontos, comandos, circuitos, eletrodutos, passar circuitos, verificar, calcular, etiquetar.");
         Margem(ajuda);
 
         return Result.Succeeded;

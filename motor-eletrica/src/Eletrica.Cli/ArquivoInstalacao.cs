@@ -24,6 +24,7 @@ public sealed class ArquivoInstalacao
     public List<Ponto> Pontos { get; set; } = [];
     public List<Trecho> Trechos { get; set; } = [];
     public List<Caixa> Caixas { get; set; } = [];
+    public List<Comando> Comandos { get; set; } = [];
 
     public static ArquivoInstalacao De(Instalacao i) => new()
     {
@@ -35,7 +36,8 @@ public sealed class ArquivoInstalacao
         Pontos = [.. i.Pontos],
         Trechos = [.. i.Trechos],
         Caixas = [.. i.Caixas],
+        Comandos = [.. i.Comandos],
     };
 
-    public Instalacao ParaInstalacao() => new(Nome, Alimentacao, Ambientes, Quadros, Circuitos, Pontos, Trechos, Caixas);
+    public Instalacao ParaInstalacao() => new(Nome, Alimentacao, Ambientes, Quadros, Circuitos, Pontos, Trechos, Caixas, Comandos);
 }

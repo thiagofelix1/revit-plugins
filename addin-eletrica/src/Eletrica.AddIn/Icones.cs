@@ -164,6 +164,80 @@ static class Icones
         }
     }
 
+    public static void Regua(DrawingContext dc)
+    {
+        // Régua inclinada: o padrão de alturas e medidas do escritório.
+        dc.PushTransform(new RotateTransform(-35, 16, 16));
+        dc.DrawRectangle(Brushes.White, Caneta(Grafite, 2.2), new System.Windows.Rect(4, 11, 24, 10));
+        var traco = Caneta(Vermelho, 1.6);
+        foreach (var x in new[] { 8.0, 12.0, 16.0, 20.0, 24.0 })
+            dc.DrawLine(traco, new Point(x, 11), new Point(x, x % 8 == 0 ? 17 : 14.5));
+        dc.Pop();
+    }
+
+    public static void Familias(DrawingContext dc)
+    {
+        // Três símbolos de planta: tomada, luminária e interruptor.
+        dc.DrawEllipse(Brushes.White, Caneta(Grafite, 2.2), new Point(9, 10), 5, 5);
+        dc.DrawLine(Caneta(Vermelho, 2), new Point(9, 5), new Point(9, 15));
+        dc.DrawEllipse(Brushes.White, Caneta(Grafite, 2.2), new Point(23, 10), 5, 5);
+        dc.DrawLine(Caneta(Vermelho, 2), new Point(19.5, 6.5), new Point(26.5, 13.5));
+        dc.DrawLine(Caneta(Vermelho, 2), new Point(26.5, 6.5), new Point(19.5, 13.5));
+        dc.DrawEllipse(Vermelho, null, new Point(16, 24), 2.5, 2.5);
+        dc.DrawLine(Caneta(Grafite, 2.2), new Point(16, 24), new Point(23, 19));
+    }
+
+    public static void Quadro(DrawingContext dc)
+    {
+        dc.DrawRectangle(Brushes.White, Caneta(Grafite, 2.4), new System.Windows.Rect(6, 4, 20, 24));
+        var disjuntor = Caneta(Vermelho, 2.4);
+        foreach (var y in new[] { 10.0, 16.0, 22.0 })
+        {
+            dc.DrawLine(disjuntor, new Point(10, y), new Point(15, y));
+            dc.DrawLine(disjuntor, new Point(17, y), new Point(22, y));
+        }
+    }
+
+    public static void Alimentador(DrawingContext dc)
+    {
+        dc.DrawRectangle(Brushes.White, Caneta(Grafite, 2.2), new System.Windows.Rect(3, 4, 10, 12));
+        dc.DrawRectangle(Brushes.White, Caneta(Grafite, 2.2), new System.Windows.Rect(19, 16, 10, 12));
+        dc.DrawGeometry(null, Caneta(Vermelho, 2.6), Geometry.Parse("M 13,10 L 16,10 L 16,22 L 19,22"));
+        dc.DrawGeometry(Vermelho, null, Geometry.Parse("M 17,19 L 21,22 L 17,25 Z"));
+    }
+
+    public static void Tomada(DrawingContext dc)
+    {
+        dc.DrawEllipse(Brushes.White, Caneta(Grafite, 2.6), new Point(16, 16), 11, 11);
+        dc.DrawEllipse(Vermelho, null, new Point(11.5, 14), 2.2, 2.2);
+        dc.DrawEllipse(Vermelho, null, new Point(20.5, 14), 2.2, 2.2);
+        dc.DrawEllipse(Vermelho, null, new Point(16, 21), 2.2, 2.2);
+    }
+
+    public static void Interruptor(DrawingContext dc)
+    {
+        // Interruptor com o fio até a lâmpada.
+        dc.DrawEllipse(Brushes.White, Caneta(Grafite, 2.4), new Point(8, 24), 4, 4);
+        dc.DrawLine(Caneta(Vermelho, 2.6), new Point(8, 20), new Point(14, 10));
+        dc.DrawLine(Caneta(Grafite, 2), new Point(14, 10), new Point(24, 10));
+        dc.DrawEllipse(Brushes.White, Caneta(Grafite, 2.4), new Point(24, 7), 4, 4);
+        dc.DrawLine(Caneta(Vermelho, 1.8), new Point(21.5, 4.5), new Point(26.5, 9.5));
+        dc.DrawLine(Caneta(Vermelho, 1.8), new Point(26.5, 4.5), new Point(21.5, 9.5));
+    }
+
+    public static void Circuito(DrawingContext dc)
+    {
+        // Barramento do quadro com três circuitos saindo.
+        dc.DrawLine(Caneta(Grafite, 3.2), new Point(6, 6), new Point(6, 26));
+        var saida = Caneta(Vermelho, 2.4);
+        foreach (var y in new[] { 9.0, 16.0, 23.0 })
+        {
+            dc.DrawLine(saida, new Point(6, y), new Point(22, y));
+            dc.DrawLine(Caneta(Grafite, 2), new Point(13, y - 3), new Point(17, y));
+            dc.DrawEllipse(Vermelho, null, new Point(25, y), 2.2, 2.2);
+        }
+    }
+
     static Pen Caneta(Brush cor, double espessura) =>
         Congelado(new Pen(cor, espessura) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round, LineJoin = PenLineJoin.Round });
 

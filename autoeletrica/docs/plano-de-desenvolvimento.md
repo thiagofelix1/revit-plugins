@@ -204,6 +204,8 @@ Extrair de `addin-spk` para um projeto compartilhado: armazenamento no .rvt, pad
 
 Itens 1.1, 1.2, 1.3, 1.5, 1.8, 2.1, 2.2, 2.3, 2.6 (quadros e caixas), 2.9, 3.1, 3.4. **Pronto:** um engenheiro lança um apartamento com as ferramentas e os circuitos ficam corretos no Revit.
 
+*Escrito em 06/11/2026 (compila, não testado no Revit):* 1.1 Dados do projeto; 1.2 Padrão (alturas, potências, limites, prefixos); 1.3 Famílias (papel por tipo de família, hospedagem, conector); 1.5 em parte (F+N ou F+F pela corrente; retorno simples, paralelo e intermediário pelos comandos); 1.8 só o uso do ambiente; 2.1 Inserir ponto (colocação nativa + dados); 2.3 Comando; 2.6 Quadro e Alimentar quadro (caixas ficam para 4.3); 2.9 posições baixa/média/alta/interruptor/teto; 3.1 Criar circuitos com a divisão por norma (adianta o 3.2); 3.4 hierarquia por alimentador. Também adiantou do 2.4 (fase 3) o **Pontos por ambiente**: lança o mínimo da 9.5.2 pelas paredes, luz no centro, interruptor junto da porta. Falta 2.2 (mesma caixa, alinhamento vertical) e o teste real: o critério de pronto só fecha no Revit.
+
 ### 0.3 — Passagem de fiação e tags (Fase 1, o pedido dos engenheiros)
 
 Itens 4.1, 4.2, 4.3, 5.1, 5.2, 5.3, 5.4, 5.7, 6.1, 6.2, 6.3, 6.5. **Pronto:** planta de um apartamento com eletrodutos, fios, tags e legenda no padrão do escritório, sem edição manual de tag.

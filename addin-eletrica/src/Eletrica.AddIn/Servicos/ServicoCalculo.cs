@@ -64,7 +64,7 @@ public static class ServicoCalculo
             if (cadeia is null) continue;
             var trecho = lida.Instalacao.Trechos.First(x => x.Id == t.Id);
             var circuitos = trecho.Circuitos.Select(id => porId[id]).OrderBy(c => c.Numero, StringComparer.OrdinalIgnoreCase).ToList();
-            var fiacao = PassarCircuitos.Etiqueta(circuitos, resultados);
+            var fiacao = PassarCircuitos.Etiqueta(circuitos, resultados, trecho.Retornos.Count);
             foreach (Element el in cadeia.Conduites.Cast<Element>().Concat(cadeia.Conexoes))
             {
                 ParametrosEletrica.Gravar(el, ParametrosEletrica.Fiacao, fiacao);

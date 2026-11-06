@@ -14,6 +14,7 @@ static class ParametrosEletrica
     public static readonly Guid Fiacao = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A13");
     public static readonly Guid DnSugerido = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A14");
     public static readonly Guid Ocupacao = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A15");
+    public static readonly Guid Retornos = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A16");
 
     // Circuitos (ElectricalSystem)
     public static readonly Guid Secao = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A21");
@@ -30,6 +31,9 @@ static class ParametrosEletrica
     public static readonly Guid Potencia = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A32");
     public static readonly Guid TipoDoPonto = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A33");
     public static readonly Guid Altura = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A34");
+    public static readonly Guid Comando = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A35");
+    public static readonly Guid TipoDeComando = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A36");
+    public static readonly Guid Posicao = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A37");
 
     static readonly BuiltInCategory[] Condutos = [BuiltInCategory.OST_Conduit, BuiltInCategory.OST_ConduitFitting];
     static readonly BuiltInCategory[] Circuito = [BuiltInCategory.OST_ElectricalCircuit];
@@ -49,6 +53,7 @@ static class ParametrosEletrica
         new(Fiacao, "AE Fiação", SpecTypeId.String.Text, Condutos),
         new(DnSugerido, "AE DN sugerido", SpecTypeId.Int.Integer, Condutos),
         new(Ocupacao, "AE Ocupação (%)", SpecTypeId.Number, Condutos),
+        new(Retornos, "AE Retornos", SpecTypeId.String.Text, Condutos),
         new(Secao, "AE Seção (F/N/PE mm²)", SpecTypeId.String.Text, Circuito),
         new(Disjuntor, "AE Disjuntor", SpecTypeId.String.Text, Circuito),
         new(CorrenteDeProjeto, "AE IB (A)", SpecTypeId.Number, Circuito),
@@ -61,6 +66,9 @@ static class ParametrosEletrica
         new(Potencia, "AE Potência (VA)", SpecTypeId.Number, Pontos),
         new(TipoDoPonto, "AE Tipo do ponto", SpecTypeId.String.Text, Pontos),
         new(Altura, "AE Altura (m)", SpecTypeId.Number, Pontos),
+        new(Comando, "AE Comando", SpecTypeId.String.Text, Pontos),
+        new(TipoDeComando, "AE Tipo de comando", SpecTypeId.String.Text, Pontos),
+        new(Posicao, "AE Posição", SpecTypeId.String.Text, Pontos),
     ];
 
     /// <summary>Cria e vincula os que faltam. Precisa de transação aberta. Devolve o motivo se não conseguiu.</summary>

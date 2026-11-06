@@ -59,10 +59,10 @@ public sealed class Grafo
     }
 
     /// <summary>Caminho (trechos) do quadro até cada nó de destino do circuito. Destinos sem caminho ficam fora do dicionário.</summary>
-    public IReadOnlyDictionary<string, IReadOnlyList<Trecho>> CaminhosDe(Circuito circuito)
+    public IReadOnlyDictionary<string, IReadOnlyList<Trecho>> CaminhosDe(Circuito circuito, IReadOnlyList<string>? destinos = null)
     {
         var resultado = new Dictionary<string, IReadOnlyList<Trecho>>();
-        var destinos = circuito.QuadroAlimentado is { } qa
+        destinos ??= circuito.QuadroAlimentado is { } qa
             ? [_instalacao.Quadro(qa)!.NoDoQuadro]
             : _instalacao.PontosDo(circuito).Select(p => p.NoDoPonto).Distinct().ToList();
         if (destinos.Count == 0) return resultado;
@@ -77,6 +77,19 @@ public sealed class Grafo
             resultado[d] = caminho;
         }
         return resultado;
+    }
+
+    /// <summary>Menor caminho (trechos) entre dois nós pelos trechos em que o circuito passa; nulo se não há.</summary>
+    public IReadOnlyList<Trecho>? CaminhoEntre(string de, string para, string circuito)
+    {
+        if (de == para) return [];
+        var (dist, anterior) = Dijkstra(de, circuito);
+        if (!dist.ContainsKey(para)) return null;
+        var caminho = new List<Trecho>();
+        for (var no = para; anterior.TryGetValue(no, out var passo); no = passo.De == no ? passo.Para : passo.De)
+            caminho.Add(passo);
+        caminho.Reverse();
+        return caminho;
     }
 
     /// <summary>Pontos do circuito sem caminho pelos eletrodutos até o quadro.</summary>
