@@ -561,8 +561,17 @@ static class CenasEletrica
                 else recusas.Add($"{rotulo}: {motivo}");
             }
             Ligar(origemQuadro, extremoCentro, $"quadro → {centro.Name} ({centro.Id})");
-            foreach (var p in lista.Where(p => p.Id != centro.Id))
-                Ligar(extremoCentro, TracarEletroduto.ExtremoDe(p)!, $"{centro.Name} → {p.Name} ({p.Id})");
+            // De cima para baixo; um ponto sob outro já ligado (tomada sob o interruptor) sai dele, reto, e não da luminária:
+            // dois eletrodutos pela mesma vertical o Revit recusa.
+            var ligados = new List<TracarEletroduto.Extremo>();
+            foreach (var p in lista.Where(p => p.Id != centro.Id).OrderByDescending(p => ((LocationPoint)p.Location).Point.Z))
+            {
+                var extremo = TracarEletroduto.ExtremoDe(p)!;
+                var acima = ligados.FirstOrDefault(e => new XYZ(e.Ponto.X - extremo.Ponto.X, e.Ponto.Y - extremo.Ponto.Y, 0).GetLength() < M(0.30));
+                if (acima is not null) Ligar(acima, extremo, $"{acima.Elemento.Name} → {p.Name} ({p.Id})");
+                else Ligar(extremoCentro, extremo, $"{centro.Name} → {p.Name} ({p.Id})");
+                ligados.Add(extremo);
+            }
             ambientes++;
         }
         grupo.Assimilate();

@@ -125,6 +125,10 @@ static class TracarEletroduto
             AlturaDePassagem.Piso => nivel.ProjectElevation + Unidades.DeMetros(o.CotaPiso),
             _ => Math.Max(a.Z, b.Z),
         };
+        // Pontos na mesma vertical (tomada sob o interruptor): reto, sem subir à passagem e descer de novo por cima do
+        // eletroduto que já chega ao de cima.
+        if (cotaFixa is null && new XYZ(b.X - a.X, b.Y - a.Y, 0).GetLength() < Minimo && Math.Abs(b.Z - a.Z) > Curto)
+            return [a, b];
         // Ponto quase na cota de passagem (luminária no teto com passagem a 10 cm dela): a descida seria curta demais para a
         // curva. O eletroduto corre na cota do próprio ponto, como na laje sobre a luminária.
         if (cotaFixa is null)
