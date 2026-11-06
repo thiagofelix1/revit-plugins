@@ -47,7 +47,7 @@ static class ListaDeMaterialRevit
                 var existente = new FilteredElementCollector(doc).OfClass(typeof(ViewSchedule)).Cast<ViewSchedule>().FirstOrDefault(v => v.Name == nomeTabela);
                 if (existente is not null) { tabelas.Add(existente); return; }
                 var tabela = ViewSchedule.CreateSchedule(doc, new ElementId(categoria));
-                tabela.Name = nomeTabela;
+                tabela.Name = Desenho.NomeValido(nomeTabela);
                 var definicao = tabela.Definition;
                 var disponiveis = definicao.GetSchedulableFields();
                 foreach (var (parametro, titulo, agrupar, somar) in campos)

@@ -68,9 +68,9 @@ static class PranchasAE
         foreach (var q in r.Quadros)
         {
             var nome = nomes[q.Id];
-            var cargas = quadros.Vistas.FirstOrDefault(v => v.Name == $"{Desenho.Prefixo}Quadro de cargas — {nome}");
-            var unifilar = quadros.Vistas.FirstOrDefault(v => v.Name == $"{Desenho.Prefixo}Unifilar — {nome}");
-            var folha = Recriar(doc, carimbo, $"{PrefixoNumero}QD-{k:00}", $"Elétrica — {nome}: quadro de cargas e unifilar");
+            var cargas = quadros.Vistas.FirstOrDefault(v => v.Name == Desenho.NomeValido($"{Desenho.Prefixo}Quadro de cargas — {nome}"));
+            var unifilar = quadros.Vistas.FirstOrDefault(v => v.Name == Desenho.NomeValido($"{Desenho.Prefixo}Unifilar — {nome}"));
+            var folha = Recriar(doc, carimbo, $"{PrefixoNumero}QD-{k:00}", $"Elétrica — {nome} - quadro de cargas e unifilar");
             doc.Regenerate();
             var util = Util(folha);
             if (cargas is not null) Colocar(doc, folha, cargas, util.Parte(0, 0, 0.5, 1).Centro, avisos);
@@ -114,7 +114,7 @@ static class PranchasAE
         if (ids.Count > 0) doc.Delete(ids.Distinct().ToList());
         var folha = ViewSheet.Create(doc, carimbo);
         folha.SheetNumber = numero;
-        folha.Name = nome;
+        folha.Name = Desenho.NomeValido(nome);
         registro[numero] = folha.UniqueId;
         ArmazenamentoEletrica.Gravar(doc, ChaveRegistro, registro);
         return folha;
@@ -213,12 +213,12 @@ static class PranchasAE
 
     static ViewPlan Planta(Document doc, Level nivel, BoundingBoxXYZ caixa, List<string> avisos)
     {
-        var nome = $"{Desenho.Prefixo}Planta — {nivel.Name}";
+        var nome = Desenho.NomeValido($"{Desenho.Prefixo}Planta — {nivel.Name}");
         var antiga = new FilteredElementCollector(doc).OfClass(typeof(ViewPlan)).Cast<ViewPlan>().FirstOrDefault(v => v.Name == nome && !v.IsTemplate);
         if (antiga is not null) doc.Delete(antiga.Id);
         var tipo = new FilteredElementCollector(doc).OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>().First(t => t.ViewFamily == ViewFamily.FloorPlan);
         var planta = ViewPlan.Create(doc, tipo.Id, nivel.Id);
-        planta.Name = nome;
+        planta.Name = Desenho.NomeValido(nome);
         var template = new FilteredElementCollector(doc).OfClass(typeof(View)).Cast<View>().FirstOrDefault(v => v.IsTemplate && v.Name == TemplatePlanta && v.ViewType == ViewType.FloorPlan);
         if (template is not null)
         {

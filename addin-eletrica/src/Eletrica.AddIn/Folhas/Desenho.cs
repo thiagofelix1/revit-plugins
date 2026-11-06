@@ -13,8 +13,20 @@ static class Desenho
     /// <summary>mm no papel → pés no modelo da vista de desenho, na escala fixa.</summary>
     public static double Mm(double mm) => UnitUtils.ConvertToInternalUnits(mm * Escala, UnitTypeId.Millimeters);
 
+    /// <summary>
+    ///     Nome aceito pelo Revit em vistas, folhas e tabelas: sem \ : { } [ ] | ; &lt; &gt; ? ` ~. Nomes de quadro de outros escritórios
+    ///     e textos do plugin ("quadro: unifilar") traziam esses caracteres e o Revit recusava.
+    /// </summary>
+    public static string NomeValido(string nome)
+    {
+        const string proibidos = "\\:{}[]|;<>?`~";
+        var limpo = new string(nome.Select(c => proibidos.Contains(c) ? '-' : c).ToArray());
+        return string.IsNullOrWhiteSpace(limpo) ? "AE" : limpo.Trim();
+    }
+
     public static ViewDrafting NovaVista(Document doc, string nome)
     {
+        nome = NomeValido(nome);
         var antiga = new FilteredElementCollector(doc).OfClass(typeof(ViewDrafting)).Cast<ViewDrafting>().FirstOrDefault(v => v.Name == nome);
         if (antiga is not null) doc.Delete(antiga.Id);
         var tipo = new FilteredElementCollector(doc).OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>().First(t => t.ViewFamily == ViewFamily.Drafting);

@@ -72,7 +72,7 @@ static class CenasEletrica
             new Molde(PapelFamilia.Luminaria, "AE teste - Luminaria", "Luminárias métricas.rft", BuiltInCategory.OST_LightingFixtures, ElectricalSystemType.PowerCircuit, 127, 1, 100),
             new Molde(PapelFamilia.Interruptor1, "AE teste - Interruptor", "Instalação elétrica métrica.rft", BuiltInCategory.OST_LightingDevices, ElectricalSystemType.PowerCircuit, 127, 1, 0),
             new Molde(PapelFamilia.Chuveiro, "AE teste - Chuveiro", "Instalação elétrica métrica.rft", BuiltInCategory.OST_ElectricalFixtures, ElectricalSystemType.PowerCircuit, 220, 2, 5500),
-            new Molde(PapelFamilia.Quadro, "AE teste - Quadro", "Equipamento elétrico métrico.rft", BuiltInCategory.OST_ElectricalEquipment, ElectricalSystemType.PowerBalanced, 220, 3, 0) { Parte = PartType.PanelBoard },
+            new Molde(PapelFamilia.Quadro, "AE teste - Quadro", "Equipamento elétrico métrico.rft", BuiltInCategory.OST_ElectricalEquipment, ElectricalSystemType.PowerUnBalanced, 220, 3, 0) { Parte = PartType.PanelBoard },
             new Molde(PapelFamilia.CaixaDePassagem, "AE teste - Caixa de passagem", "Equipamento elétrico métrico.rft", BuiltInCategory.OST_GenericModel, null, 0, 0, 0),
         };
         var arquivos = moldes.Select(m => (m, Arquivo: CriarFamilia(app, pasta, m))).ToList();
