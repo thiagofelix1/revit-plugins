@@ -420,10 +420,11 @@ static class TesteAutomatico
                     var no = g.NoDe(fi);
                     if (no is not null && doQuadro.Contains(no)) continue;
                     fora++;
-                    var perto = doQuadro.Select(n => (n, d: g.Nos[n].DistanceTo(p))).OrderBy(x => x.d).FirstOrDefault();
+                    var pm = new XYZ(Unidades.Metros(p.X), Unidades.Metros(p.Y), Unidades.Metros(p.Z)); // os nós do grafo ficam em metros
+                    var perto = doQuadro.Select(n => (n, d: g.Nos[n].DistanceTo(pm))).OrderBy(x => x.d).FirstOrDefault();
                     var componente = no is null ? "-" : componentes.FindIndex(c => c.Contains(no)).ToString();
                     if (fora <= 25)
-                        linhas.Add($"{fi.Category?.Name} {fi.Symbol.Family.Name} em {P(p)}: nó {no ?? "nenhum"} (pedaço {componente}, a {(no is null ? 0 : Unidades.Metros(g.Nos[no].DistanceTo(p))):0.00} m); nó do quadro mais perto {perto.n} a {Unidades.Metros(perto.d):0.00} m");
+                        linhas.Add($"{fi.Category?.Name} {fi.Symbol.Family.Name} em {P(p)}: nó {no ?? "nenhum"} (pedaço {componente}, a {(no is null ? 0 : g.Nos[no].DistanceTo(pm)):0.00} m); nó do quadro mais perto {perto.n} a {perto.d:0.00} m");
                 }
                 M("pontosForaDoQuadro", fora);
 

@@ -15,8 +15,8 @@ public sealed class GrafoDeCondutos
     public sealed class Cadeia
     {
         public string Id { get; init; } = "";
-        public string De { get; init; } = "";
-        public string Para { get; init; } = "";
+        public string De { get; set; } = "";
+        public string Para { get; set; } = "";
         public double Comprimento { get; init; }
         public int Curvas { get; init; }
         public List<Conduit> Conduites { get; } = [];
@@ -34,6 +34,22 @@ public sealed class GrafoDeCondutos
     readonly Dictionary<string, XYZ> _nos = new();
     readonly List<(string A, string B, Element Elemento, double Comprimento)> _arestas = [];
     readonly HashSet<string> _nosDeCaixa = [];
+
+    // Nós unidos: as pontas de uma conexão (tê, cruzeta, curvas sobrepostas) que formam uma cadeia sem eletroduto viram um nó só.
+    readonly Dictionary<string, string> _representante = new();
+
+    string Representante(string no)
+    {
+        while (_representante.TryGetValue(no, out var r) && r != no) no = r;
+        return no;
+    }
+
+    void Unir(string a, string b)
+    {
+        var ra = Representante(a);
+        var rb = Representante(b);
+        if (ra != rb) _representante[rb] = ra;
+    }
 
     public IReadOnlyList<Cadeia> Cadeias { get; }
     public IReadOnlyList<CaixaLida> Caixas { get; }
@@ -88,9 +104,8 @@ public sealed class GrafoDeCondutos
                 caixas.Add(new CaixaLida(fi, no));
             }
         }
-        Caixas = caixas;
-
         Cadeias = MontarCadeias();
+        Caixas = caixas.Select(k => k with { No = Representante(k.No) }).ToList();
         if (conduites.Count == 0) avisos.Add("O modelo não tem eletrodutos (Conduit): o cálculo usa os comprimentos informados nos circuitos, sem agrupamento por trecho.");
         Avisos = avisos;
     }
@@ -154,7 +169,7 @@ public sealed class GrafoDeCondutos
             var d = _nos[chave].DistanceTo(m);
             if (d <= menor) { menor = d; melhor = chave; }
         }
-        return melhor;
+        return melhor is null ? null : Representante(melhor);
     }
 
     /// <summary>Nó mais próximo de um elemento: pelos conectores de eletroduto dele, senão pelo ponto de inserção.</summary>
@@ -260,7 +275,13 @@ public sealed class GrafoDeCondutos
                 atual = proximo;
                 aresta = seguinte;
             }
-            if (conduites.Count == 0) continue;
+            // Cadeia só de conexões (as pontas de um tê ou de curvas sobrepostas): não é trecho, é o mesmo ponto. Descartá-la
+            // partia o caminho em todo tê; as pontas viram um nó só e as outras cadeias se ligam por ele.
+            if (conduites.Count == 0)
+            {
+                Unir(inicio, fim);
+                continue;
+            }
             // Eletrodutos emendados sem conexão (ponta com ponta) também contam curva quando mudam de direção.
             curvas += CurvasSemConexao(conduites, conexoes);
             var principal = conduites.OrderByDescending(c => Unidades.Metros(c.Diameter)).First();
@@ -278,7 +299,13 @@ public sealed class GrafoDeCondutos
             cadeia.Conexoes.AddRange(conexoes);
             cadeias.Add(cadeia);
         }
-        return cadeias;
+        foreach (var k in cadeias)
+        {
+            k.De = Representante(k.De);
+            k.Para = Representante(k.Para);
+        }
+        // Uma cadeia cujas pontas viraram o mesmo nó (anel curto por uma conexão) não liga nada.
+        return cadeias.Where(k => k.De != k.Para).ToList();
     }
 
     /// <summary>Mudanças de direção entre eletrodutos consecutivos que não passam por uma conexão (tipo sem conexões).</summary>
