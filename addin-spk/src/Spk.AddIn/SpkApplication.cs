@@ -17,33 +17,33 @@ public class SpkApplication : IExternalApplication
         // Na ordem do fluxo: preparar o projeto, desenhar a rede, conferir e calcular, tirar os resultados.
         var projeto = application.CreateRibbonPanel(Aba, "Projeto");
         Botao<ImportarPadraoCommand>(projeto,
-            "Padrão do\nescritório", Icones.Folha,
+            "Padrão do\nescritório", Icones.Padrao,
             "Copia de outro projeto aberto o carimbo, a etiqueta de tubo, os templates de vista e as legendas, e define o " +
             "número e o código das folhas. As folhas passam a usar esse padrão.");
         Botao<DadosProjetoCommand>(projeto,
-            "Dados do\nprojeto", Icones.Formulario,
+            "Dados do\nprojeto", Icones.DadosDoProjeto,
             "Classe de risco, base de cálculo, hidrantes, reserva, fator C e abastecimento. Escolhidos pelo engenheiro.");
         Botao<DescobrirFamiliasCommand>(projeto,
-            "Famílias", Icones.Lupa,
+            "Famílias", Icones.Familias,
             "Para um modelo que já veio desenhado: confirma quais famílias são bicos (fator K e área) e qual válvula é a VGA de cada setor.");
         Botao<ArquiteturaCommand>(projeto,
-            "Arquitetura", Icones.Edificio,
+            "Arquitetura", Icones.Arquitetura,
             "Lê a arquitetura e a estrutura, do arquivo e dos vínculos (Revit ou IFC): ambientes com pé-direito e o que forma o " +
             "teto de cada um (forro, laje ou telhado), e as vigas. Mostra o que o SPK enxerga; não muda nada no modelo.");
         Margem(projeto);
 
         var rede = application.CreateRibbonPanel(Aba, "Rede");
         Botao<GerarRedeCommand>(rede,
-            "Gerar\nrede", Icones.Malha,
+            "Gerar\nrede", Icones.GerarRede,
             "Gera a rede nos ambientes da arquitetura: bicos pela norma, subgeral com a descida, ramais, ligação dos bicos e " +
             "diâmetros da tabela, em espinha de peixe ou lateral. Usa as mesmas ferramentas dos botões ao lado. Ctrl+Z desfaz cada ambiente.");
         Botao<BicosPorAmbienteCommand>(rede,
-            "Bicos por\nambiente", Icones.BicosAmbiente,
+            "Bicos por\nambiente", Icones.BicosPorAmbiente,
             "Posiciona bicos nos ambientes da arquitetura (vínculos ou o próprio arquivo) pela regra da norma: área por bico, " +
             "distância entre bicos e até a parede (Tabela 2), defletor na altura do forro, da laje ou abaixo da viga. Também " +
             "confere os bicos que já existem. Ctrl+Z desfaz tudo.");
         Botao<TracarRamalCommand>(rede,
-            "Traçar\nramais", Icones.TracarRamal,
+            "Traçar\nramais", Icones.TracarRamais,
             "Traça os ramais de várias fileiras de bicos até a subgeral e liga os bicos: o SPK separa as fileiras, e o ramal fica na " +
             "altura da subgeral (tê ou cruzeta), acima ou abaixo dela (com subida) ou a uma altura fixa. Bico pendente ou em pé. " +
             "Selecione os bicos (pode arrastar uma janela) e a subgeral. Ctrl+Z desfaz tudo.");
@@ -52,42 +52,42 @@ public class SpkApplication : IExternalApplication
             "Liga bicos soltos ao ramal que passa sobre eles: parte o ramal, põe o tê e faz a descida (ou o braço, o cotovelo e a " +
             "descida, se o bico está de lado). Selecione os bicos e o ramal antes, ou clique e selecione depois. Ctrl+Z desfaz tudo.");
         Botao<LigarAGeralCommand>(rede,
-            "Ligar à\ngeral", Icones.TracarRamal,
+            "Ligar à\ngeral", Icones.LigarAGeral,
             "Junta as redes das salas num setor: desenhe a geral com a ferramenta Tubo (da VGA pelo corredor), selecione-a e clique " +
             "aqui. Cada rede solta perde a descida até o piso e ganha um tubo até a geral, com tê. Ctrl+Z desfaz tudo.");
         Pequenos(rede,
-            (typeof(InserirBicoCommand), "Inserir bico", Icones.LigarBicos,
+            (typeof(InserirBicoCommand), "Inserir bico", Icones.InserirBico,
                 "Clique no ramal onde vai o bico novo: ele sai igual ao bico mais perto da mesma rede (tipo e altura), já com tê e " +
                 "descida. Vários cliques seguidos; Esc termina. Avisa se ficou a menos de 1,8 m de outro bico."),
-            (typeof(ApagarBicoCommand), "Apagar bico", Icones.LigarBicos,
+            (typeof(ApagarBicoCommand), "Apagar bico", Icones.ApagarBico,
                 "Apaga os bicos selecionados com a descida e o braço deles e emenda a rede: o tê vira tubo, a cruzeta vira tê, e a " +
                 "ponta do ramal que só servia ao bico sai."),
-            (typeof(MoverBicoCommand), "Mover bico", Icones.LigarBicos,
+            (typeof(MoverBicoCommand), "Mover bico", Icones.MoverBico,
                 "Leva o bico para o ponto que você clicar na planta, religado ao ramal mais perto da mesma rede (com braço, se ficar " +
                 "de lado), e emenda a rede no lugar antigo."));
         Pequenos(rede,
-            (typeof(LigarTubosCommand), "Ligar tubos", Icones.TracarRamal,
+            (typeof(LigarTubosCommand), "Ligar tubos", Icones.LigarTubos,
                 "Clique no tubo que chega (o da ponta solta) e no tubo onde ele liga: no meio do segundo, o SPK parte e põe o tê " +
                 "(com subida se as alturas são diferentes); na ponta dele, estica os dois até o canto e põe o cotovelo. Vários pares " +
                 "seguidos; Esc termina."),
-            (typeof(ConferirNaPlantaCommand), "Conferir na planta", Icones.Verificar,
+            (typeof(ConferirNaPlantaCommand), "Conferir na planta", Icones.ConferirNaPlanta,
                 "Desenha a conferência da norma na planta aberta: bico fora da regra em vermelho com a nota do que falta, o alcance de " +
                 "cada bico em cinza e os trechos sem cobertura com um círculo vermelho. Só anotação da vista."),
-            (typeof(LimparConferenciaCommand), "Limpar conferência", Icones.Verificar,
+            (typeof(LimparConferenciaCommand), "Limpar conferência", Icones.LimparConferencia,
                 "Apaga as marcas da conferência desta vista e tira o vermelho dos bicos."));
         Pequenos(rede,
-            (typeof(GerarMalhaCommand), "Malha retangular", Icones.Malha,
+            (typeof(GerarMalhaCommand), "Malha retangular", Icones.MalhaRetangular,
                 "Cria uma malha retangular de bicos e tubos já conectados, no ponto que você clicar, com a geometria de Dados do " +
                 "esboço. Para testar sem arquitetura."),
-            (typeof(DadosEsbocoCommand), "Dados do esboço", Icones.Formulario,
+            (typeof(DadosEsbocoCommand), "Dados do esboço", Icones.DadosDoEsboco,
                 "Geometria da malha gerada: arranjo, ramais, espaçamentos, altura, bico (K em L/min/bar½ e área) e diâmetros."),
-            (typeof(RedeExemploCommand), "Rede de exemplo", Icones.Malha,
+            (typeof(RedeExemploCommand), "Rede de exemplo", Icones.RedeDeExemplo,
                 "Cria um cenário de teste pronto (simples, espinha de peixe, grelha, 2 pavimentos, risco leve), com planta e 3D enquadrados."));
         Margem(rede);
 
         var calculo = application.CreateRibbonPanel(Aba, "Cálculo");
         Botao<MarcarSetorCommand>(calculo,
-            "Marcar\nsetor", Icones.Setor,
+            "Marcar\nsetor", Icones.MarcarSetor,
             "Para rede sem a VGA desenhada: clique no tubo por onde a água chega (a descida da VGA) e dê o nome do setor. " +
             "Calcular, Diâmetros, o memorial e as folhas usam essa entrada e esse nome, em vez da ponta solta do tubo mais grosso e de \"Setor 1\". " +
             "Clique de novo na mesma rede para trocar o nome ou tirar a marca.");
@@ -100,32 +100,32 @@ public class SpkApplication : IExternalApplication
             "Põe nos tubos do setor o DN da tabela da norma (IT-23 / NBR 10897), pelo número de bicos que cada trecho alimenta. " +
             "Mostra antes o que vai mudar e oferece calcular no fim para conferir. Risco leve e ordinário. Ctrl+Z desfaz tudo.");
         Botao<CalcularRedeCommand>(calculo,
-            "Calcular", Icones.Executar,
+            "Calcular", Icones.Calcular,
             "Calcula o setor: lê a rede pelas conexões, acha a área mais desfavorável e grava o resultado no modelo.");
         Margem(calculo);
 
         var resultados = application.CreateRibbonPanel(Aba, "Resultados");
         Botao<AbrirMemorialCommand>(resultados,
-            "Memorial", Icones.Documento,
+            "Memorial", Icones.Memorial,
             "Abre o último memorial de cálculo (.docx) gerado.");
         Botao<FolhasCommand>(resultados,
-            "Folhas", Icones.Folha,
+            "Folhas", Icones.Folhas,
             "Monta a setorização das VGAs, o isométrico geral com os quadros e as folhas do último setor calculado (planta " +
             "com a área de cálculo, 3D e corte), preenche o carimbo e exporta o PDF.");
         Pequenos(resultados,
-            (typeof(CoresDaRedeCommand), "Cores da rede", Icones.Diametros,
+            (typeof(CoresDaRedeCommand), "Cores da rede", Icones.CoresDaRede,
                 "Pinta a rede da vista aberta por diâmetro, setor, velocidade nos tubos ou pressão nos bicos, com legenda na planta. " +
                 "Só nesta vista; não muda o modelo."),
-            (typeof(TirarCoresCommand), "Tirar cores", Icones.Diametros,
+            (typeof(TirarCoresCommand), "Tirar cores", Icones.TirarCores,
                 "Volta a cor normal do que Cores da rede pintou nesta vista e apaga a legenda."),
-            (typeof(ListaDeMaterialCommand), "Lista de material", Icones.Documento,
+            (typeof(ListaDeMaterialCommand), "Lista de material", Icones.ListaDeMaterial,
                 "Metros de tubo por diâmetro, conexões, bicos e válvulas: o resumo na hora e tabelas do Revit (SPK — ...) que se " +
                 "atualizam sozinhas e vão para a folha."));
         Margem(resultados);
 
         var ajuda = application.CreateRibbonPanel(Aba, "Ajuda");
         Botao<GuiaCommand>(ajuda,
-            "Guia", Icones.Livro,
+            "Guia", Icones.Guia,
             "O que já foi feito no projeto aberto e o que falta, com atalho para cada etapa; passo a passo, como preparar e " +
             "verificar o modelo, em que o cálculo se baseia e o que as folhas trazem.");
         Avancado(ajuda);
@@ -168,12 +168,12 @@ public class SpkApplication : IExternalApplication
         var menu = (PulldownButton)painel.AddItem(new PulldownButtonData("SpkAvancado", "Avançado")
         {
             ToolTip = "Ferramentas de desenvolvimento.",
-            Image = Icones.Gerar(Icones.Executar, 16),
+            Image = Icones.Gerar(Icones.Avancado, 16),
         });
         menu.AddPushButton(new PushButtonData(tipo.Name, "Exemplo", tipo.Assembly.Location, tipo.FullName)
         {
             ToolTip = "Calcula o galpão fictício do motor, sem ler o arquivo aberto.",
-            Image = Icones.Gerar(Icones.Executar, 16),
+            Image = Icones.Gerar(Icones.Exemplo, 16),
         });
     }
 
