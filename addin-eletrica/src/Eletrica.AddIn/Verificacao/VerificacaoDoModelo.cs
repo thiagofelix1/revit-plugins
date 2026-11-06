@@ -35,8 +35,8 @@ static class VerificacaoDoModelo
             }
             try
             {
-                var fn = ds.VoltageLineToGround is { } vlg ? Unidades.Volts(vlg.ActualValue) : 0;
-                var ff = ds.VoltageLineToLine is { } vll ? Unidades.Volts(vll.ActualValue) : 0;
+                var fn = ds.VoltageLineToGround is { } vlg ? Unidades.Volts(vlg) : 0;
+                var ff = ds.VoltageLineToLine is { } vll ? Unidades.Volts(vll) : 0;
                 var fases = ds.ElectricalPhase == ElectricalPhase.ThreePhase ? 3 : ds.NumWires >= 3 ? 2 : 1;
                 var diverge = Math.Abs(fn - dados.TensaoFaseNeutro) > 10 || fases > 1 && ff > 0 && Math.Abs(ff - dados.TensaoFaseFase) > 15 || fases > dados.Fases;
                 if (diverge)

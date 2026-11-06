@@ -82,6 +82,13 @@ static class Unidades
     public static double MetrosQuadrados(double interno) => UnitUtils.ConvertFromInternalUnits(interno, UnitTypeId.SquareMeters);
     public static double VoltAmperes(double interno) => UnitUtils.ConvertFromInternalUnits(interno, UnitTypeId.VoltAmperes);
     public static double Volts(double interno) => UnitUtils.ConvertFromInternalUnits(interno, UnitTypeId.Volts);
+
+    /// <summary>
+    ///     Tensão de um tipo de tensão (VoltageType) do projeto, em volts. Ao contrário dos parâmetros (a tensão do conector, por
+    ///     exemplo, vem em unidade interna), o VoltageType guarda volts: converter lia o 120/208 do Snowdon como 11/19 V, e o
+    ///     sistema "220 V" criado com a conversão tinha 2 368 V, que nenhum quadro aceitava (06/11/2026).
+    /// </summary>
+    public static double Volts(Autodesk.Revit.DB.Electrical.VoltageType tipo) => tipo.ActualValue;
     public static double Amperes(double interno) => UnitUtils.ConvertFromInternalUnits(interno, UnitTypeId.Amperes);
     public static double DeMetros(double metros) => UnitUtils.ConvertToInternalUnits(metros, UnitTypeId.Meters);
 }

@@ -161,8 +161,8 @@ static class CenasEletrica
             {
                 t.Start();
                 var config = ElectricalSetting.GetElectricalSettings(doc);
-                var ff = config.AddVoltageType($"{dados.TensaoFaseFase:0} V AE", V(dados.TensaoFaseFase), V(dados.TensaoFaseFase * 0.9), V(dados.TensaoFaseFase * 1.1));
-                var fn = config.AddVoltageType($"{dados.TensaoFaseNeutro:0} V AE", V(dados.TensaoFaseNeutro), V(dados.TensaoFaseNeutro * 0.9), V(dados.TensaoFaseNeutro * 1.1));
+                var ff = config.AddVoltageType($"{dados.TensaoFaseFase:0} V AE", dados.TensaoFaseFase, dados.TensaoFaseFase * 0.9, dados.TensaoFaseFase * 1.1);
+                var fn = config.AddVoltageType($"{dados.TensaoFaseNeutro:0} V AE", dados.TensaoFaseNeutro, dados.TensaoFaseNeutro * 0.9, dados.TensaoFaseNeutro * 1.1);
                 novo = config.AddDistributionSysType($"{dados.TensaoFaseNeutro:0}/{dados.TensaoFaseFase:0} V AE 2", ElectricalPhase.ThreePhase, ElectricalPhaseConfiguration.Wye, 4, ff, fn);
                 t.Commit();
             }
@@ -335,20 +335,93 @@ static class CenasEletrica
         VoltageType Tensao(double v)
         {
             foreach (var objeto in config.VoltageTypes)
-                if (objeto is VoltageType vt && Math.Abs(Unidades.Volts(vt.ActualValue) - v) < 0.5) return vt;
-            return config.AddVoltageType($"{v:0} V (AE)", V(v), V(v * 0.9), V(v * 1.1));
+                if (objeto is VoltageType vt && Math.Abs(Unidades.Volts(vt) - v) < 0.5) return vt;
+            // VoltageType em volts, sem converter para a unidade interna (ver Unidades.Volts(VoltageType)).
+            return config.AddVoltageType($"{v:0} V (AE)", v, v * 0.9, v * 1.1);
         }
         var fn = Tensao(uo);
         var ff = Tensao(u);
         foreach (var objeto in config.DistributionSysTypes)
             if (objeto is DistributionSysType ds && ds.ElectricalPhase == ElectricalPhase.ThreePhase && ds.NumWires >= 4
-                && ds.VoltageLineToGround is { } lg && Math.Abs(Unidades.Volts(lg.ActualValue) - uo) < 0.5
-                && ds.VoltageLineToLine is { } ll && Math.Abs(Unidades.Volts(ll.ActualValue) - u) < 0.5)
+                && ds.VoltageLineToGround is { } lg && Math.Abs(Unidades.Volts(lg) - uo) < 0.5
+                && ds.VoltageLineToLine is { } ll && Math.Abs(Unidades.Volts(ll) - u) < 0.5)
                 return ds;
         return config.AddDistributionSysType($"{uo:0}/{u:0} V trifásico (AE)", ElectricalPhase.ThreePhase, ElectricalPhaseConfiguration.Wye, 4, ff, fn);
     }
 
     static double V(double volts) => UnitUtils.ConvertToInternalUnits(volts, UnitTypeId.Volts);
+
+    /// <summary>
+    ///     Sonda, num modelo em que quadros aceitam sistema (o Snowdon), por que o quadro da cena é recusado: testa os sistemas do
+    ///     modelo numa instância nova da família de quadro dele e numa da família de teste, e um sistema criado pela API com os
+    ///     mesmos tipos de tensão de um que funciona. Só para diagnóstico: o modelo é uma cópia.
+    /// </summary>
+    internal static string SondarSistemas(Document doc)
+    {
+        var linhas = new List<string>();
+        var sistemas = new FilteredElementCollector(doc).OfClass(typeof(DistributionSysType)).Cast<DistributionSysType>().ToList();
+        linhas.Add($"{sistemas.Count} sistema(s) no modelo: " + string.Join(" | ", sistemas.Select(Descrever)));
+        var nivel = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().OrderBy(l => l.ProjectElevation).First();
+        var modelo = Quadros.Todos(doc).FirstOrDefault(q => q.get_Parameter(BuiltInParameter.RBS_FAMILY_CONTENT_DISTRIBUTION_SYSTEM)?.AsElementId() is { } id && id != ElementId.InvalidElementId)
+                     ?? throw new InvalidOperationException("Nenhum quadro com sistema no modelo.");
+        var sistemaDoModelo = (DistributionSysType)doc.GetElement(modelo.get_Parameter(BuiltInParameter.RBS_FAMILY_CONTENT_DISTRIBUTION_SYSTEM).AsElementId());
+        linhas.Add($"quadro de referência {Quadros.Nome(modelo)}, família {modelo.Symbol.Family.Name}, sistema {Descrever(sistemaDoModelo)}");
+
+        FamilyInstance Colocar(FamilySymbol simbolo, double x)
+        {
+            using var t = new Transaction(doc, "AE — sonda: colocar quadro");
+            t.Start();
+            EngolirAvisos.Aplicar(t);
+            if (!simbolo.IsActive) simbolo.Activate();
+            var fi = doc.Create.NewFamilyInstance(new XYZ(M(x), M(-200), nivel.ProjectElevation), simbolo, nivel, StructuralType.NonStructural);
+            t.Commit();
+            return fi;
+        }
+
+        string Aceitos(FamilyInstance quadro)
+        {
+            var aceitos = new List<string>();
+            foreach (var ds in sistemas)
+            {
+                using var grupo = new TransactionGroup(doc, "AE — sonda");
+                grupo.Start();
+                if (TentarSistema(doc, quadro, ds, out _)) aceitos.Add(ds.Name);
+                grupo.RollBack();
+            }
+            return aceitos.Count == 0 ? "nenhum" : string.Join(", ", aceitos);
+        }
+
+        var novoDoModelo = Colocar(modelo.Symbol, 0);
+        linhas.Add($"instância nova da família do modelo aceita: {Aceitos(novoDoModelo)}");
+
+        using (var grupo = new TransactionGroup(doc, "AE — sonda: sistema pela API"))
+        {
+            grupo.Start();
+            DistributionSysType copia;
+            using (var t = new Transaction(doc, "AE — sonda: sistema pela API"))
+            {
+                t.Start();
+                copia = ElectricalSetting.GetElectricalSettings(doc).AddDistributionSysType("AE sonda", sistemaDoModelo.ElectricalPhase,
+                    sistemaDoModelo.ElectricalPhaseConfiguration, sistemaDoModelo.NumWires, sistemaDoModelo.VoltageLineToLine, sistemaDoModelo.VoltageLineToGround);
+                t.Commit();
+            }
+            linhas.Add($"sistema criado pela API igual ao do quadro de referência: {(TentarSistema(doc, novoDoModelo, copia, out var recusa) ? "aceito" : "recusado (" + recusa + ")")}");
+            grupo.RollBack();
+        }
+
+        var rfa = Path.Combine(TesteAutomatico.PastaSaida, "apartamento", "AE teste - Quadro.rfa");
+        if (File.Exists(rfa) && doc.LoadFamily(rfa, out var familiaTeste))
+        {
+            var simbolo = (FamilySymbol)doc.GetElement(familiaTeste.GetFamilySymbolIds().First());
+            var deTeste = Colocar(simbolo, 5);
+            linhas.Add($"família de teste (220 V) aceita: {Aceitos(deTeste)}; conector: {ConectorDaFamilia(doc, deTeste)}");
+            var tensao = sistemaDoModelo.VoltageLineToLine is { } ll ? Unidades.Volts(ll) : 208;
+            var erro = MudarTensaoDoConector(doc, deTeste, tensao);
+            linhas.Add(erro is null ? $"família de teste com o conector em {tensao:0} V aceita: {Aceitos(deTeste)}" : $"tensão do conector não mudou: {erro}");
+        }
+        else linhas.Add($"família de teste não carregada ({rfa})");
+        return string.Join("\n", linhas);
+    }
 
     /// <summary>Põe o sistema no quadro numa transação só dele; se o Revit recusar, só ela volta e a mensagem sai em <paramref name="recusa" />.</summary>
     static bool TentarSistema(Document doc, FamilyInstance quadro, DistributionSysType sistema, out string recusa)
@@ -372,7 +445,7 @@ static class CenasEletrica
     static string Descrever(DistributionSysType ds)
     {
         static string Faixa(VoltageType? v) => v is null ? "-" :
-            $"{Unidades.Volts(v.ActualValue):0} ({Unidades.Volts(v.MinValue):0}–{Unidades.Volts(v.MaxValue):0})";
+            $"{v.ActualValue:0} ({v.MinValue:0}–{v.MaxValue:0})";
         try
         {
             return $"\"{ds.Name}\" {ds.ElectricalPhase} {ds.ElectricalPhaseConfiguration} {ds.NumWires} fios, " +

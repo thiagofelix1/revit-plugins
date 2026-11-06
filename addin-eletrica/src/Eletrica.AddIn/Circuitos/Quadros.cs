@@ -72,8 +72,8 @@ static class Quadros
             {
                 var fases = s.ElectricalPhase == ElectricalPhase.ThreePhase ? 3 : s.NumWires >= 3 ? 2 : 1;
                 if (fases != dados.Fases && !(dados.Fases == 1 && fases == 2)) continue;
-                var ff = s.VoltageLineToLine is { } vll ? Unidades.Volts(vll.ActualValue) : 0;
-                var fn = s.VoltageLineToGround is { } vlg ? Unidades.Volts(vlg.ActualValue) : 0;
+                var ff = s.VoltageLineToLine is { } vll ? Unidades.Volts(vll) : 0;
+                var fn = s.VoltageLineToGround is { } vlg ? Unidades.Volts(vlg) : 0;
                 var erro = Math.Abs(fn - dados.TensaoFaseNeutro) + (dados.Fases > 1 ? Math.Abs(ff - dados.TensaoFaseFase) : 0);
                 if (erro < menor) { menor = erro; melhor = s; }
             }

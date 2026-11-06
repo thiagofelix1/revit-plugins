@@ -395,6 +395,8 @@ static class TesteAutomatico
                 var vista = LegendaDeFiacao.Gerar(doc, CalculoEletrica.Executar(lida.Instalacao), lida.Instalacao, padrao);
                 return vista.Name;
             }
+            case "sondarSistemas":
+                return CenasEletrica.SondarSistemas(doc);
             case "diagnosticoQuadros":
             {
                 // Os conectores das famílias de quadro do modelo (uma por família), para comparar com a família de teste.
