@@ -8,7 +8,7 @@ using Eletrica.Motor.Relatorios;
 const string Uso = """
     Uso:
       eletrica exemplo <arquivo.json>            grava a instalação de exemplo (apartamento de 2 dormitórios)
-      eletrica calcular <arquivo.json> [pasta]   verifica, dimensiona e grava memorial.md e resultado.json
+      eletrica calcular <arquivo.json> [pasta]   verifica, dimensiona e grava memorial (.md e .docx), manual do usuário, lista de material, unifilar e resultado.json
       eletrica verificar <arquivo.json>          só o Verificar modelo, no console
     """;
 
@@ -46,6 +46,13 @@ static int Calcular(string origem, string pasta)
     var resultado = CalculoEletrica.Executar(instalacao);
     Directory.CreateDirectory(pasta);
     File.WriteAllText(Path.Combine(pasta, "memorial.md"), Memorial.Gerar(resultado));
+    File.WriteAllBytes(Path.Combine(pasta, "memorial.docx"), MemorialDocx.Gerar(resultado));
+    File.WriteAllText(Path.Combine(pasta, "manual-do-usuario.md"), ManualDoUsuario.GerarMarkdown(resultado));
+    File.WriteAllBytes(Path.Combine(pasta, "manual-do-usuario.docx"), ManualDoUsuario.GerarDocx(resultado));
+    var lista = ListaDeMaterial.Gerar(instalacao, resultado);
+    File.WriteAllText(Path.Combine(pasta, "lista-de-material.md"), ListaDeMaterial.Markdown(lista, resultado.Nome));
+    File.WriteAllText(Path.Combine(pasta, "lista-de-material.csv"), ListaDeMaterial.Csv(lista));
+    File.WriteAllText(Path.Combine(pasta, "unifilar.txt"), Unifilar.Texto(Unifilar.Montar(instalacao, resultado)));
     File.WriteAllText(Path.Combine(pasta, "resultado.json"), JsonSerializer.Serialize(resultado, ArquivoInstalacao.Json));
     Console.WriteLine($"{resultado.Nome}: {(resultado.Atende ? "ATENDE" : "NÃO ATENDE")}; {resultado.Circuitos.Count} circuitos, " +
                       $"{resultado.Problemas.Count(p => p.Gravidade == Gravidade.Erro)} erro(s), {resultado.Problemas.Count(p => p.Gravidade == Gravidade.Aviso)} aviso(s), em {resultado.Duracao.TotalMilliseconds:0} ms.");

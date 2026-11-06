@@ -13,7 +13,7 @@ dotnet run --project src/Eletrica.Cli -- calcular exemplos/apartamento.json exem
 dotnet run --project src/Eletrica.Cli -- verificar exemplos/apartamento.json
 ```
 
-O resultado do exemplo está em [`exemplos/apartamento-saida/memorial.md`](exemplos/apartamento-saida/memorial.md).
+O resultado do exemplo está em [`exemplos/apartamento-saida/memorial.md`](exemplos/apartamento-saida/memorial.md), com o [manual do usuário](exemplos/apartamento-saida/manual-do-usuario.md), a [lista de material](exemplos/apartamento-saida/lista-de-material.md) e o [unifilar em texto](exemplos/apartamento-saida/unifilar.txt) ao lado (os .docx não ficam no Git; a CLI os gera).
 
 ## Estrutura
 
@@ -24,7 +24,7 @@ O resultado do exemplo está em [`exemplos/apartamento-saida/memorial.md`](exemp
 | `src/Eletrica.Motor/Lancamento` | `PropostaDePontos` (o que cada ambiente precisa pela 9.5.2: tomadas por perímetro e uso, 600 VA, luz no teto com a carga mínima, chuveiro e ar pelo padrão) e `DivisaoDeCircuitos` (luz separada, cozinha/copa e área de serviço exclusivas, banheiro à parte, acima de 10 A sozinho, o resto por ambiente até o limite do padrão; F+N ou F+F). |
 | `src/Eletrica.Motor/Normas` | Tabelas e regras como dados, cada valor com o item: `Nbr5410` (fatores, mínimos, Tabela 59, 9.5…), `Nbr5410Capacidades` (Tabelas 36 a 39 completas), `Nbr60898` (In, Icn, curvas, Tabela 15, classes de I²t do Anexo ZA), `Condutores` (NM 247-3, temperaturas, resistividade), `Eletrodutos` (NBR 15465 + diâmetros internos de catálogo), `DispositivosDR`, `DispositivosDPS`. |
 | `src/Eletrica.Motor/Calculo` | `Grafo` (comprimento real pelos eletrodutos), `Eletrotecnica` (IB, queda, impedâncias, curto pelo método das impedâncias), `Dimensionamento` (os seis critérios de 6.2.6.1.2, circuito a circuito, com o agrupamento lido trecho a trecho), `Ocupacao` (eletrodutos), `Verificacao` (Verificar modelo), `CalculoEletrica` (orquestra). |
-| `src/Eletrica.Motor/Relatorios` | Memorial em Markdown e quadro de cargas. |
+| `src/Eletrica.Motor/Relatorios` | `Memorial` (Markdown) e `MemorialDocx` (.docx por OpenXML, sem Word), `QuadroDeCargas`, `ManualDoUsuario` (6.1.8.3, Markdown e .docx), `ListaDeMaterial` (condutores por seção e função pelos trechos, eletrodutos, proteções, pontos; Markdown e CSV), `Unifilar` (o diagrama como dados: entrada, geral, DPS, DRs, ramos, quadros filhos), `Docx` (peças OpenXML). |
 | `src/Eletrica.Motor/Exemplos` | Apartamento de dois dormitórios com traçado de eletrodutos. |
 | `src/Eletrica.Cli` | Linha de comando com entrada em JSON (o formato que o add-in exporta). |
 | `testes/Eletrica.Motor.Testes` | xUnit: um valor por coluna das tabelas, casos-limite de cada critério, o exemplo inteiro e sabotagens do exemplo para o Verificar modelo. |

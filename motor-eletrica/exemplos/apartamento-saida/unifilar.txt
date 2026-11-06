@@ -1,0 +1,12 @@
+QD — Quadro de distribuição
+  entrada: Ponto de entrega 127/220 V, 2F, TN-C-S, Icc 6 kA
+  geral: C50 A, 2P, 7,5 kA | DPS classe I, 3 un., Uc 175 V, In ≥ 10 kA
+  DR1 100 A / 30 mA tipo A 4P
+    ├ 1 Iluminação: C10 A, 1P, 7,5 kA, 1×1,5 + N 1,5 + PE 1,5 mm², fase A
+    ├ 3 TUG cozinha: C16 A, 1P, 7,5 kA, 1×4,0 + N 4,0 + PE 4,0 mm², fase A
+    ├ 4 TUG área de serviço: C16 A, 1P, 7,5 kA, 1×4,0 + N 4,0 + PE 4,0 mm², fase B
+    ├ 5 Chuveiro elétrico: B25 A, 2P, 7,5 kA, 2×4,0 + PE 4,0 mm², fase AB
+    ├ 7 Micro-ondas (TUE cozinha): C8 A, 2P, 7,5 kA, 2×2,5 + PE 2,5 mm², fase AB
+    ├ 8 TUG banheiro: C10 A, 1P, 7,5 kA, 1×2,5 + N 2,5 + PE 2,5 mm², fase A
+  ├ 2 TUG sala, dormitórios, circulação e varanda: C10 A, 1P, 7,5 kA, 1×2,5 + N 2,5 + PE 2,5 mm², fase B
+  ├ 6 Ar-condicionado dormitório 1: C8 A, 2P, 7,5 kA, 2×2,5 + PE 2,5 mm², fase AB

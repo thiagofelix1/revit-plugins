@@ -118,7 +118,23 @@ public class EletricaApplication : IExternalApplication
         var resultados = application.CreateRibbonPanel(Aba, "Resultados");
         Botao<AbrirMemorialCommand>(resultados,
             "Memorial", Icones.Documento,
-            "Abre o último memorial de cálculo gerado (Markdown).");
+            "Abre o último memorial de cálculo (.docx; o .md fica ao lado). Avisa se o modelo mudou depois do cálculo.");
+        Botao<ManualCommand>(resultados,
+            "Manual do\nusuário", Icones.Livro,
+            "Abre o manual do usuário da instalação (NBR 5410 6.1.8.3), gerado pelo Calcular: o que cada disjuntor desliga, o DR e o teste mensal, " +
+            "o DPS, a advertência do quadro, cuidados e manutenção, em linguagem para o morador.");
+        Botao<QuadrosCommand>(resultados,
+            "Quadros", Icones.Quadro,
+            "Refaz as vistas de desenho de cada quadro (quadro de cargas com demanda, fases e proteções; diagrama unifilar com geral, DPS, DRs e circuitos) " +
+            "e a prumada elétrica. Cria também o quadro de cargas nativo do Revit quando o projeto tem o modelo.");
+        Botao<ListaDeMaterialCommand>(resultados,
+            "Lista de\nmaterial", Icones.Legenda,
+            "Lista de material pelo cálculo (condutores por seção e função com folga, eletrodutos por DN, disjuntores, DRs, DPS, pontos, quadros) em vista " +
+            "de desenho, Markdown e CSV, mais as tabelas nativas do Revit do que está modelado.");
+        Botao<PranchasCommand>(resultados,
+            "Pranchas", Icones.Folha,
+            "Gera as pranchas AE- no carimbo do projeto: planta por nível com legenda de fiação (template \"AE — Planta\" se existir), uma folha por quadro " +
+            "com quadro de cargas e unifilar, e a folha de documentos (prumada, lista de material e tabelas). Rodar de novo refaz só as folhas AE-.");
         Margem(resultados);
 
         var ajuda = application.CreateRibbonPanel(Aba, "Ajuda");

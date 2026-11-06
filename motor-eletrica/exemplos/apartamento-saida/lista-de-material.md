@@ -1,0 +1,31 @@
+# Lista de material — Apartamento tipo — 2 dormitórios
+
+| Grupo | Item | Un. | Quantidade | Origem |
+|---|---|---|---|---|
+| Condutores | Cabo 1,5 mm² PVC 70 °C — fase | m | 35 | comprimento dos trechos × condutores, com 10 % de folga (NBR NM 247-3 / 7286) |
+| Condutores | Cabo 1,5 mm² PVC 70 °C — neutro | m | 35 | comprimento dos trechos × condutores, com 10 % de folga (NBR NM 247-3 / 7286) |
+| Condutores | Cabo 1,5 mm² PVC 70 °C — proteção (PE) | m | 35 | comprimento dos trechos × condutores, com 10 % de folga (NBR NM 247-3 / 7286) |
+| Condutores | Cabo 2,5 mm² PVC 70 °C — fase | m | 109 | comprimento dos trechos × condutores, com 10 % de folga (NBR NM 247-3 / 7286) |
+| Condutores | Cabo 2,5 mm² PVC 70 °C — neutro | m | 71 | comprimento dos trechos × condutores, com 10 % de folga (NBR NM 247-3 / 7286) |
+| Condutores | Cabo 2,5 mm² PVC 70 °C — proteção (PE) | m | 90 | comprimento dos trechos × condutores, com 10 % de folga (NBR NM 247-3 / 7286) |
+| Condutores | Cabo 4,0 mm² PVC 70 °C — fase | m | 52 | comprimento dos trechos × condutores, com 10 % de folga (NBR NM 247-3 / 7286) |
+| Condutores | Cabo 4,0 mm² PVC 70 °C — neutro | m | 38 | comprimento dos trechos × condutores, com 10 % de folga (NBR NM 247-3 / 7286) |
+| Condutores | Cabo 4,0 mm² PVC 70 °C — proteção (PE) | m | 45 | comprimento dos trechos × condutores, com 10 % de folga (NBR NM 247-3 / 7286) |
+| Eletrodutos | Eletroduto flexível corrugado DN 20 | m | 94 | trechos com circuitos, 5 % de folga (NBR 15465) |
+| Eletrodutos | Eletroduto flexível corrugado DN 25 | m | 9 | trechos com circuitos, 5 % de folga (NBR 15465) |
+| Eletrodutos | Eletroduto flexível corrugado DN 40 | m | 6 | trechos com circuitos, 5 % de folga (NBR 15465) |
+| Proteções | Disjuntor C10 A, 1P, 7,5 kA | un | 3 | NBR NM 60898; circuitos 1, 2, 8 |
+| Proteções | Disjuntor C16 A, 1P, 7,5 kA | un | 2 | NBR NM 60898; circuitos 3, 4 |
+| Proteções | Disjuntor C8 A, 2P, 7,5 kA | un | 2 | NBR NM 60898; circuitos 6, 7 |
+| Proteções | Disjuntor B25 A, 2P, 7,5 kA | un | 1 | NBR NM 60898; circuitos 5 |
+| Proteções | Disjuntor geral C50 A, 2P, 7,5 kA — QD — Quadro de distribuição | un | 1 | disjuntor geral do quadro |
+| Proteções | DR 100 A / 30 mA tipo A 4P — QD — Quadro de distribuição | un | 1 | circuitos 1, 3, 4, 5, 7, 8 (IEC 61008-1) |
+| Proteções | DPS classe I, Uc ≥ 175 V, Up ≤ 1,5 kV, In ≥ 10 kA, Iimp ≥ 12,5 kA — QD — Quadro de distribuição | un | 3 | 5.4.2.1.1, 6.3.5.2 |
+| Quadros | Quadro de distribuição QD — Quadro de distribuição: 11 posições, barramento 50 A | un | 1 | Tabela 59 (reserva incluída); NBR IEC 61439 |
+| Pontos | Ponto de luz | un | 8 | pontos do modelo |
+| Pontos | Tomada de uso geral 10 A (NBR 14136) | un | 20 | pontos do modelo |
+| Pontos | Tomada de uso específico 20 A (NBR 14136) | un | 1 | pontos do modelo |
+| Pontos | Ponto de chuveiro / aquecedor | un | 1 | pontos do modelo |
+| Pontos | Ponto de ar-condicionado | un | 1 | pontos do modelo |
+
+Condutores com 10 % de folga de corte; eletrodutos com 5 %. Quantidades do modelo e do cálculo; conferir com o levantamento em obra. Gerada pelo AutoEletrica em 06/11/2026.

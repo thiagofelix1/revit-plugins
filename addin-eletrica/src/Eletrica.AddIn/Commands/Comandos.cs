@@ -221,7 +221,13 @@ public class AbrirMemorialCommand : ExternalCommand
         try { Process.Start(new ProcessStartInfo(caminho) { UseShellExecute = true }); }
         catch (Exception e) when (e is System.ComponentModel.Win32Exception or InvalidOperationException)
         {
-            TaskDialog.Show("AutoEletrica — Memorial", $"O memorial está em {caminho}, mas não há programa associado a .md. Abra com um editor de texto.");
+            var md = Path.ChangeExtension(caminho, ".md");
+            if (File.Exists(md) && md != caminho)
+            {
+                try { Process.Start(new ProcessStartInfo(md) { UseShellExecute = true }); return; }
+                catch (Exception e2) when (e2 is System.ComponentModel.Win32Exception or InvalidOperationException) { }
+            }
+            TaskDialog.Show("AutoEletrica — Memorial", $"O memorial está em {caminho}, mas não há programa associado. Abra com o Word ou um editor de texto.");
         }
     }
 }

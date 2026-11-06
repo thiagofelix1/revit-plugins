@@ -240,4 +240,4 @@ DR obrigatório: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro; IΔn 
 - Demanda dos quadros: fatores por tipo de carga (prática de projeto e normas de distribuidoras (padrão do motor; conferir com a distribuidora)); fases balanceadas por potência decrescente, respeitando as fases impostas.
 - Em eletroduto com seções fora de três valores sucessivos, o agrupamento usa 1/√n (6.2.5.5.5) numa segunda passada; sem seção única que atenda, dois condutores em paralelo por fase (6.2.5.7).
 - Diâmetros externos dos condutores isolados pela NBR NM 247-3 (Tabelas 1 e 3); diâmetros internos dos eletrodutos de catálogo (a NBR 15465 só fixa o externo).
-- Gerado em 06/11/2026 09:54 em 87 ms.
+- Gerado em 06/11/2026 10:19 em 87 ms.

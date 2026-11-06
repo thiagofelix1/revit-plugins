@@ -13,7 +13,7 @@ Ainda não há add-in do Revit neste repositório. O que existe hoje é document
 | [motor-spk/](motor-spk/README.md) | Motor hidráulico (NBR 10897 / IT-24): biblioteca, testes e CLI |
 | [autoeletrica/](autoeletrica/README.md) | Segundo produto: projeto elétrico predial (NBR 5410). Pesquisa de mercado, base de regras, API, plano de desenvolvimento e normas |
 | [motor-eletrica/](motor-eletrica/README.md) | Motor do AutoEletrica em .NET puro: tabelas da NBR 5410 e satélites como dados, dimensionamento pelos seis critérios, Verificar modelo, memorial, CLI e testes |
-| [addin-eletrica/](addin-eletrica/README.md) | Add-in do AutoEletrica (Revit 2025–2027): dados do projeto, ambientes, padrão e famílias, quadro, pontos por ambiente, comandos, criar circuitos, traçar eletrodutos e caixas por regra, passar circuitos, fiação manual, fio desenhado, etiquetas, legenda, verificar, calcular |
+| [addin-eletrica/](addin-eletrica/README.md) | Add-in do AutoEletrica (Revit 2025–2027): dados do projeto, ambientes, padrão e famílias, quadro, pontos por ambiente, comandos, criar circuitos, traçar eletrodutos e caixas por regra, passar circuitos, fiação manual, fio desenhado, etiquetas, legenda, verificar, calcular, memorial e manual .docx, quadros de cargas, unifilar, prumada, lista de material, pranchas |
 | `plugin-inicial-arquivos/` | Material de referência. A NBR ABNT e memoriais de cliente não entram no Git |
 
 ## Motor SPK

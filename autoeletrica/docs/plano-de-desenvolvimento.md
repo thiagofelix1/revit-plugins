@@ -228,6 +228,8 @@ Itens 1.4, 1.6, 7.1 a 7.11, 7.16, 4.9, 4.10, 5.5, 5.6, 3.3, 3.6, 8.6, 8.8. **Pro
 
 Itens 9.1, 9.2, 9.3, 9.5, 9.6, 9.7, 9.8, 9.9, 9.10, 2.7, 4.4, 4.5, 4.6. **Pronto:** jogo de pranchas, memorial, lista e manual de um projeto real aceitos pelo engenheiro sem retrabalho fora do plugin. Esta é a versão vendável.
 
+*Escrito em 06/11/2026 (183 testes; nada aberto no Revit):* 9.1/9.2 quadro de cargas com demanda e cargas por fase em vista de desenho (mais o PanelScheduleView nativo); 9.3 unifilar como dados no motor e desenho no add-in (geral, DPS, DRs, ramos, quadros filhos); 9.5 prumada (quadros por nível e alimentadores); 9.6/9.7 pranchas AE-PL por nível, AE-QD por quadro e AE-DOC, no primeiro carimbo do projeto, com registro para refazer; 9.8 memorial .docx (OpenXML) com tudo do Markdown; 9.9 lista de material pelos trechos em Markdown, CSV e vista, mais tabelas nativas; 9.10 manual do usuário (6.1.8.3) em Markdown e .docx. Não entraram: 2.7 aterramento, 4.4 prumada modelada, 4.5 eletrocalhas, 4.6 repetições, escolha de carimbo e numeração do escritório (vêm com a base comum do SPK), símbolos de anotação do escritório. O critério de pronto depende de um projeto real.
+
 ### 1.0 — Gerar projeto (Fase 3)
 
 Itens 2.4, 2.8, 3.2, 3.5, 4.7, 4.8, 4.11, 6.4 e a sequência 3.10. **Pronto:** apartamento tipo gerado a partir da arquitetura vinculada em minutos, verificado e calculado, com ajustes manuais possíveis em qualquer etapa.

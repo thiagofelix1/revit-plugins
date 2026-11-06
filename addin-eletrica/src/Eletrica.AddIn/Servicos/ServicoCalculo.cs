@@ -22,7 +22,7 @@ public static class ServicoCalculo
 
     public sealed record Saida(ResultadoInstalacao Resultado, LeitorInstalacao.Lida Lida, string Memorial, IReadOnlyList<string> Avisos);
 
-    public sealed record ResumoGravado(DateTime Quando, string Memorial, bool Atende, int Circuitos, string? Assinatura = null);
+    public sealed record ResumoGravado(DateTime Quando, string Memorial, bool Atende, int Circuitos, string? Assinatura = null, string? Manual = null, string? MemorialMd = null);
 
     public static Saida Executar(Document doc, DadosProjeto dados)
     {
@@ -32,8 +32,16 @@ public static class ServicoCalculo
 
         Directory.CreateDirectory(PastasEletrica.Calculo);
         var nome = string.Concat(doc.Title.Split(Path.GetInvalidFileNameChars()));
-        var memorial = Path.Combine(PastasEletrica.Calculo, $"{nome}-memorial.md");
-        File.WriteAllText(memorial, Memorial.Gerar(resultado));
+        var memorialMd = Path.Combine(PastasEletrica.Calculo, $"{nome}-memorial.md");
+        var memorial = Path.Combine(PastasEletrica.Calculo, $"{nome}-memorial.docx");
+        var manual = Path.Combine(PastasEletrica.Calculo, $"{nome}-manual-do-usuario.docx");
+        File.WriteAllText(memorialMd, Memorial.Gerar(resultado));
+        File.WriteAllBytes(memorial, MemorialDocx.Gerar(resultado));
+        File.WriteAllBytes(manual, ManualDoUsuario.GerarDocx(resultado));
+        File.WriteAllText(Path.Combine(PastasEletrica.Calculo, $"{nome}-manual-do-usuario.md"), ManualDoUsuario.GerarMarkdown(resultado));
+        var lista = ListaDeMaterial.Gerar(lida.Instalacao, resultado);
+        File.WriteAllText(Path.Combine(PastasEletrica.Calculo, $"{nome}-lista-de-material.md"), ListaDeMaterial.Markdown(lista, resultado.Nome));
+        File.WriteAllText(Path.Combine(PastasEletrica.Calculo, $"{nome}-lista-de-material.csv"), ListaDeMaterial.Csv(lista));
         File.WriteAllText(Path.Combine(PastasEletrica.Calculo, $"{nome}-resultado.json"),
             JsonSerializer.Serialize(resultado, new JsonSerializerOptions(ArmazenamentoEletrica.Json) { WriteIndented = true }));
 
@@ -45,7 +53,7 @@ public static class ServicoCalculo
             Gravar(doc, lida, resultado);
             var alinhados = AlinharCaminhos(doc, lida, avisos);
             if (alinhados > 0) avisos.Add($"{alinhados} circuito(s) com o caminho do Revit alinhado ao traçado dos eletrodutos (comprimento do Revit = comprimento real).");
-            ArmazenamentoEletrica.Gravar(doc, ChaveResultado, new ResumoGravado(DateTime.Now, memorial, resultado.Atende, resultado.Circuitos.Count, Assinatura(lida.Instalacao)));
+            ArmazenamentoEletrica.Gravar(doc, ChaveResultado, new ResumoGravado(DateTime.Now, memorial, resultado.Atende, resultado.Circuitos.Count, Assinatura(lida.Instalacao), manual, memorialMd));
             transacao.Commit();
         }
         return new Saida(resultado, lida, memorial, avisos);
