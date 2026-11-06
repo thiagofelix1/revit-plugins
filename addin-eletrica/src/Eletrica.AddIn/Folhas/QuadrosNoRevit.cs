@@ -21,6 +21,22 @@ static class QuadrosNoRevit
         new("Disjuntor", 26), new("DR", 20), new("Queda (%)", 14), new("Situação", 22),
     ];
 
+    /// <summary>
+    ///     Nome de cada quadro nas vistas e folhas, sem repetição: modelos de terceiros (o Snowdon) têm quadros com o mesmo nome, e
+    ///     a vista do segundo apagava a do primeiro. O segundo em diante leva "(2)", "(3)"...
+    /// </summary>
+    public static Dictionary<string, string> NomesUnicos(IEnumerable<ResultadoQuadro> quadros)
+    {
+        var nomes = new Dictionary<string, string>();
+        var vezes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var q in quadros)
+        {
+            vezes[q.Nome] = vezes.TryGetValue(q.Nome, out var k) ? k + 1 : 1;
+            nomes[q.Id] = vezes[q.Nome] == 1 ? q.Nome : $"{q.Nome} ({vezes[q.Nome]})";
+        }
+        return nomes;
+    }
+
     public static Feito Gerar(Document doc, LeitorInstalacao.Lida lida, ResultadoInstalacao r)
     {
         var avisos = new List<string>();
@@ -29,10 +45,11 @@ static class QuadrosNoRevit
         using var transacao = new Transaction(doc, "AutoEletrica — Quadros");
         transacao.Start();
         EngolirAvisos.Aplicar(transacao);
+        var nomes = NomesUnicos(r.Quadros);
         foreach (var q in r.Quadros)
         {
-            vistas.Add(QuadroDeCargas(doc, i, r, q));
-            vistas.Add(UnifilarDoQuadro(doc, i, r, q, avisos));
+            vistas.Add(QuadroDeCargas(doc, i, r, q, nomes[q.Id]));
+            vistas.Add(UnifilarDoQuadro(doc, i, r, q, nomes[q.Id], avisos));
             PainelNativo(doc, lida, q, avisos);
         }
         vistas.Add(Prumada(doc, lida, r, avisos));
@@ -40,9 +57,9 @@ static class QuadrosNoRevit
         return new Feito(vistas, avisos);
     }
 
-    static View QuadroDeCargas(Document doc, Instalacao i, ResultadoInstalacao r, ResultadoQuadro q)
+    static View QuadroDeCargas(Document doc, Instalacao i, ResultadoInstalacao r, ResultadoQuadro q, string nome)
     {
-        var vista = Desenho.NovaVista(doc, $"{Desenho.Prefixo}Quadro de cargas — {q.Nome}");
+        var vista = Desenho.NovaVista(doc, $"{Desenho.Prefixo}Quadro de cargas — {nome}");
         var y = 0.0;
         Desenho.Texto(doc, vista, 0, y, $"QUADRO DE CARGAS — {q.Nome}", 200, negrito: true);
         y -= 8;
@@ -83,9 +100,9 @@ static class QuadrosNoRevit
         return vista;
     }
 
-    static View UnifilarDoQuadro(Document doc, Instalacao i, ResultadoInstalacao r, ResultadoQuadro q, List<string> avisos)
+    static View UnifilarDoQuadro(Document doc, Instalacao i, ResultadoInstalacao r, ResultadoQuadro q, string nome, List<string> avisos)
     {
-        var vista = Desenho.NovaVista(doc, $"{Desenho.Prefixo}Unifilar — {q.Nome}");
+        var vista = Desenho.NovaVista(doc, $"{Desenho.Prefixo}Unifilar — {nome}");
         var diagrama = Procurar(Unifilar.Montar(i, r), q.Nome);
         if (diagrama is null)
         {

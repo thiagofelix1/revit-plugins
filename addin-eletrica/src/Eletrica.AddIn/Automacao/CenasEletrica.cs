@@ -419,18 +419,24 @@ static class CenasEletrica
     }
 
     /// <summary>Diagnóstico: o conector elétrico da família do quadro como o editor de famílias o vê (tensão, polos, sistema).</summary>
-    static string ConectorDaFamilia(Document doc, FamilyInstance quadro)
+    internal static string ConectorDaFamilia(Document doc, FamilyInstance quadro)
     {
         Document? familia = null;
         try
         {
             familia = doc.EditFamily(quadro.Symbol.Family);
             var partes = new List<string>();
+            var dono = familia.OwnerFamily;
+            partes.Add($"família {dono.Name}, parte {dono.get_Parameter(BuiltInParameter.FAMILY_CONTENT_PART_TYPE)?.AsValueString()}");
             foreach (var c in new FilteredElementCollector(familia).OfClass(typeof(ConnectorElement)).Cast<ConnectorElement>().Where(c => c.Domain == Domain.DomainElectrical))
             {
                 var volts = c.get_Parameter(BuiltInParameter.RBS_ELEC_VOLTAGE) is { } pv ? Unidades.Volts(pv.AsDouble()).ToString("0") : "?";
                 var polos = c.get_Parameter(BuiltInParameter.RBS_ELEC_NUMBER_OF_POLES)?.AsInteger().ToString() ?? "?";
-                partes.Add($"{c.SystemClassification}, {volts} V, {polos} polo(s)");
+                // Todos os parâmetros do conector, para comparar uma família que funciona com a de teste.
+                var todos = c.Parameters.Cast<Parameter>().Where(p => p.HasValue)
+                    .Select(p => $"{p.Definition.Name}={p.AsValueString() ?? p.AsString() ?? p.AsInteger().ToString()}{(familia.FamilyManager.GetAssociatedFamilyParameter(p) is { } fp ? $"<-{fp.Definition.Name}" : "")}")
+                    .OrderBy(t => t);
+                partes.Add($"{c.SystemClassification}, {volts} V, {polos} polo(s) [{string.Join("; ", todos)}]");
             }
             return partes.Count == 0 ? "nenhum conector elétrico" : string.Join(" | ", partes);
         }

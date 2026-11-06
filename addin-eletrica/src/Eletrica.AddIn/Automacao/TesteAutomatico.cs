@@ -395,6 +395,17 @@ static class TesteAutomatico
                 var vista = LegendaDeFiacao.Gerar(doc, CalculoEletrica.Executar(lida.Instalacao), lida.Instalacao, padrao);
                 return vista.Name;
             }
+            case "diagnosticoQuadros":
+            {
+                // Os conectores das famílias de quadro do modelo (uma por família), para comparar com a família de teste.
+                var linhas = Quadros.Todos(doc).GroupBy(q => q.Symbol.Family.Id).Take(3).Select(g =>
+                {
+                    var q = g.First();
+                    var ds = doc.GetElement(q.get_Parameter(BuiltInParameter.RBS_FAMILY_CONTENT_DISTRIBUTION_SYSTEM)?.AsElementId() ?? ElementId.InvalidElementId)?.Name ?? "-";
+                    return $"{Quadros.Nome(q)} (sistema {ds}): {CenasEletrica.ConectorDaFamilia(doc, q)}";
+                }).ToList();
+                return string.Join("\n", linhas);
+            }
             case "quadros":
             {
                 var lida = LeitorInstalacao.Ler(doc, dados);

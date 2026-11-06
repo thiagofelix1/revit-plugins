@@ -64,11 +64,13 @@ static class PranchasAE
 
         // Uma folha por quadro: quadro de cargas à esquerda, unifilar à direita
         var k = 1;
+        var nomes = QuadrosNoRevit.NomesUnicos(r.Quadros);
         foreach (var q in r.Quadros)
         {
-            var cargas = quadros.Vistas.FirstOrDefault(v => v.Name == $"{Desenho.Prefixo}Quadro de cargas — {q.Nome}");
-            var unifilar = quadros.Vistas.FirstOrDefault(v => v.Name == $"{Desenho.Prefixo}Unifilar — {q.Nome}");
-            var folha = Recriar(doc, carimbo, $"{PrefixoNumero}QD-{k:00}", $"Elétrica — {q.Nome}: quadro de cargas e unifilar");
+            var nome = nomes[q.Id];
+            var cargas = quadros.Vistas.FirstOrDefault(v => v.Name == $"{Desenho.Prefixo}Quadro de cargas — {nome}");
+            var unifilar = quadros.Vistas.FirstOrDefault(v => v.Name == $"{Desenho.Prefixo}Unifilar — {nome}");
+            var folha = Recriar(doc, carimbo, $"{PrefixoNumero}QD-{k:00}", $"Elétrica — {nome}: quadro de cargas e unifilar");
             doc.Regenerate();
             var util = Util(folha);
             if (cargas is not null) Colocar(doc, folha, cargas, util.Parte(0, 0, 0.5, 1).Centro, avisos);
@@ -222,6 +224,11 @@ static class PranchasAE
         {
             try { planta.ViewTemplateId = template.Id; }
             catch (Autodesk.Revit.Exceptions.ApplicationException e) { avisos.Add($"Template {TemplatePlanta}: {e.Message}"); }
+        }
+        else if (planta.ViewTemplateId != ElementId.InvalidElementId)
+        {
+            // O tipo de vista do escritório já aplica um template padrão: ele manda na escala, no detalhe e na visibilidade.
+            avisos.Add($"{nome}: usa o template padrão do tipo de vista ({doc.GetElement(planta.ViewTemplateId)?.Name}); crie um template \"{TemplatePlanta}\" para o padrão do AutoEletrica.");
         }
         else
         {

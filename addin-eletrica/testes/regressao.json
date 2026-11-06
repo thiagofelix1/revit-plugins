@@ -67,7 +67,7 @@
    },
    "usosSugeridos": true,
    "passos": [
-    "ambientes", "parametros", "verificar", "passarCircuitos", "verificar", "calcular", "desenharFiacao", "etiquetar",
+    "diagnosticoQuadros", "ambientes", "parametros", "verificar", "passarCircuitos", "verificar", "calcular", "desenharFiacao", "etiquetar",
     "legenda", "quadros", "lista", "pranchas"
    ],
    "esperado": {
