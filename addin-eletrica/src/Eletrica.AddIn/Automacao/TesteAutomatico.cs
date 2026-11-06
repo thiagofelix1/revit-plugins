@@ -426,6 +426,30 @@ static class TesteAutomatico
                         linhas.Add($"{fi.Category?.Name} {fi.Symbol.Family.Name} em {P(p)}: nó {no ?? "nenhum"} (pedaço {componente}, a {(no is null ? 0 : Unidades.Metros(g.Nos[no].DistanceTo(p))):0.00} m); nó do quadro mais perto {perto.n} a {Unidades.Metros(perto.d):0.00} m");
                 }
                 M("pontosForaDoQuadro", fora);
+
+                // Cadeias (trechos) e o caminho como o motor o vê: o quadro e os pontos precisam ser pontas de cadeia.
+                var pontas = g.Cadeias.SelectMany(k => new[] { k.De, k.Para }).ToHashSet();
+                linhas.Add($"{g.Cadeias.Count} cadeia(s); nó do quadro é ponta de cadeia: {(noQuadro is not null && pontas.Contains(noQuadro) ? "sim" : "não")}; " +
+                           $"pontos cujo nó não é ponta de cadeia: {pontos.Count(fi => g.NoDe(fi) is { } n && !pontas.Contains(n))}");
+                try
+                {
+                    var lidaG = LeitorInstalacao.Ler(doc, dados);
+                    var inst = lidaG.Instalacao;
+                    var grafoMotor = new Motor.Calculo.Grafo(inst);
+                    linhas.Add($"motor: {inst.Quadros.Count} quadro(s) (nó {string.Join(", ", inst.Quadros.Select(q => q.NoDoQuadro))}), {inst.Trechos.Count} trecho(s), " +
+                               $"trechos com circuitos {inst.Trechos.Count(t => t.Circuitos.Count > 0)}; exemplos: " +
+                               string.Join(" | ", inst.Trechos.Take(4).Select(t => $"{t.Id} {t.De}→{t.Para} [{string.Join(",", t.Circuitos.Take(3))}]")));
+                    foreach (var c in inst.Circuitos.Take(3))
+                    {
+                        var destinos = inst.PontosDo(c).Select(p => p.NoDoPonto).Distinct().ToList();
+                        // Com todos os circuitos liberados em todos os trechos, como a passagem faz.
+                        var aberta = new Instalacao(inst.Nome, inst.Alimentacao, inst.Ambientes, inst.Quadros, inst.Circuitos, inst.Pontos,
+                            inst.Trechos.Select(t => t with { Circuitos = inst.Circuitos.Select(x => x.Id).ToList() }), comandos: inst.Comandos);
+                        var achados = new Motor.Calculo.Grafo(aberta).CaminhosDe(c, destinos);
+                        linhas.Add($"circuito {c.Numero}: destinos {string.Join(", ", destinos.Take(6))}; com caminho {achados.Count}");
+                    }
+                }
+                catch (Exception e) when (e is Motor.Modelo.ErroDeModelo or InvalidOperationException) { linhas.Add("motor: " + e.Message); }
                 return string.Join("\n", linhas);
             }
             case "sondarSistemas":
