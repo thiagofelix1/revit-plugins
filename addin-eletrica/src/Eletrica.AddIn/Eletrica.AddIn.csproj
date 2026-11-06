@@ -13,6 +13,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <!-- Capítulos do Guia, lidos por Ajuda\TextoDoGuia.cs. -->
+        <EmbeddedResource Include="Ajuda\*.md"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\..\motor-eletrica\src\Eletrica.Motor\Eletrica.Motor.csproj"/>
     </ItemGroup>
 

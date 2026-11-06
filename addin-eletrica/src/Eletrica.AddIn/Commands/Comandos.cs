@@ -246,37 +246,3 @@ public class EtiquetarCommand : ExternalCommand
                                                                   "Os textos vêm dos parâmetros AE (rode Passar circuitos e Calcular para preenchê-los). Ctrl+Z desfaz.");
     }
 }
-
-[UsedImplicitly]
-[Transaction(TransactionMode.ReadOnly)]
-public class GuiaCommand : ExternalCommand
-{
-    public override void Execute()
-    {
-        var doc = Application.ActiveUIDocument?.Document;
-        var dados = doc is null ? null : DadosProjeto.Carregar(doc);
-        var resumo = doc is null ? null : ArmazenamentoEletrica.Ler<ServicoCalculo.ResumoGravado>(doc, ServicoCalculo.ChaveResultado);
-        var atual = doc is null ? null : ServicoCalculo.CalculoAtual(doc, dados);
-        var situacao = doc is null ? "Nenhum projeto aberto." :
-            $"Projeto: {doc.Title}\nDados do projeto: {(dados is null ? "ainda não confirmados" : dados.Resumo())}\n" +
-            $"Último cálculo: {(resumo is null ? "nenhum" : $"{resumo.Quando:dd/MM/yyyy HH:mm}, {resumo.Circuitos} circuitos, {(resumo.Atende ? "atende" : "não atende")}")}" +
-            (atual is false ? "\nATENÇÃO: o modelo mudou depois do último cálculo (pontos, circuitos, eletrodutos ou dados). Rode Calcular de novo antes de usar o memorial e as etiquetas." : atual is true ? "\nO cálculo está atualizado com o modelo." : "");
-        var dialogo = new TaskDialog("AutoEletrica — Guia")
-        {
-            MainInstruction = "Passo a passo",
-            MainContent =
-                "1. Dados do projeto: tensões, fases, esquema de aterramento, Icc presumida, alimentação aérea, dias de trovoada, SPDA, uso.\n" +
-                "2. Ambientes: confirme o uso de cada cômodo (define pontos mínimos, potências e DR).\n" +
-                "3. Padrão e Famílias: alturas, potências e limites do escritório; o papel de cada família carregada (tomada, luminária, interruptor, quadro).\n" +
-                "4. Quadro: insira o quadro (e Alimentar quadro, se houver geral e terminais).\n" +
-                "5. Pontos: Pontos por ambiente lança o mínimo da 9.5.2 em cada cômodo; Inserir ponto acrescenta o que faltar; Comando liga interruptor e luminária.\n" +
-                "6. Criar circuitos: divide os pontos pela norma e cria os circuitos no quadro. Depois trace os eletrodutos do quadro aos pontos.\n" +
-                "7. Passar circuitos: grava em cada eletroduto os circuitos que passam, os retornos e a contagem de condutores.\n" +
-                "8. Verificar modelo: o que a NBR 5410 cobra por cômodo, por circuito, no quadro e nos eletrodutos, com destaque no modelo.\n" +
-                "9. Calcular: seções, disjuntores, DR, DPS, queda, curto, eletrodutos; grava nos parâmetros AE e gera o memorial.\n" +
-                "10. Etiquetar: etiquetas de fiação nos eletrodutos e dos pontos na planta, com as famílias do escritório.\n\n" + situacao,
-            CommonButtons = TaskDialogCommonButtons.Close,
-        };
-        dialogo.Show();
-    }
-}

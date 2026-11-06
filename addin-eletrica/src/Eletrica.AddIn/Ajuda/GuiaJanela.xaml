@@ -1,0 +1,66 @@
+<Window x:Class="Eletrica.AddIn.Ajuda.GuiaJanela"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AutoEletrica — Guia" Width="980" Height="700" MinWidth="720" MinHeight="480"
+        WindowStartupLocation="CenterScreen" FontSize="13" Background="White">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <DockPanel Background="#F5F7F8">
+            <TextBlock DockPanel.Dock="Top" Text="Guia do AutoEletrica" FontSize="18" FontWeight="SemiBold" Foreground="#C62828" Margin="16,16,16,4"/>
+            <TextBlock DockPanel.Dock="Top" Text="Instalações elétricas pela NBR 5410" Foreground="#607D8B" Margin="16,0,16,12"/>
+            <Button DockPanel.Dock="Bottom" Content="Fechar" Height="30" Margin="16" IsCancel="True" Click="Fechar_Click"/>
+            <ListBox x:Name="Navegacao" BorderThickness="0" Background="Transparent" SelectionChanged="Navegacao_SelectionChanged"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Titulo}" TextWrapping="Wrap" Margin="8,7"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+
+        <ScrollViewer x:Name="PainelSituacao" Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="24,16,24,24">
+                <TextBlock Text="Seu projeto agora" FontSize="22" FontWeight="SemiBold" Foreground="#C62828" Margin="0,0,0,6"/>
+                <TextBlock x:Name="Arquivo" Foreground="#607D8B" TextWrapping="Wrap" Margin="0,0,0,14"/>
+                <ItemsControl x:Name="Etapas">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="#CFD8DC" BorderThickness="1" CornerRadius="4" Padding="14,10" Margin="0,0,0,10">
+                                <StackPanel>
+                                    <DockPanel>
+                                        <Border DockPanel.Dock="Right" Background="{Binding Cor}" CornerRadius="3" Padding="8,2" VerticalAlignment="Top">
+                                            <TextBlock Text="{Binding Estado}" Foreground="White" FontWeight="SemiBold" FontSize="12"/>
+                                        </Border>
+                                        <TextBlock Text="{Binding Titulo}" FontSize="15" FontWeight="SemiBold" Foreground="#263238"/>
+                                    </DockPanel>
+                                    <TextBlock Text="{Binding Detalhe}" TextWrapping="Wrap" Foreground="#455A64" Margin="0,6,0,8"/>
+                                    <ItemsControl ItemsSource="{Binding Acoes}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Content="{Binding Texto}" Padding="12,3" Margin="0,0,8,0" Click="Acao_Click"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock TextWrapping="Wrap" Foreground="#607D8B" Margin="0,6,0,0"
+                           Text="Cada botão fecha o guia e abre o comando daquela etapa. Os capítulos ao lado explicam cada passo, em que o cálculo se baseia e o que os entregáveis trazem."/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <FlowDocumentScrollViewer x:Name="Leitura" Grid.Column="1" Visibility="Collapsed" VerticalScrollBarVisibility="Auto"/>
+    </Grid>
+</Window>
