@@ -21,6 +21,23 @@ public sealed record Alimentacao(double TensaoFaseNeutro, double TensaoFaseFase,
     /// <summary>Edificação de uso residencial (seção 9.5) ou não (regras de tomadas e DR mudam).</summary>
     public bool Habitacao { get; init; } = true;
 
+    // ----- opções de cálculo do projeto (entrega 0.5) -----
+
+    /// <summary>Aplica os fatores de demanda por tipo de carga (<see cref="Normas.FatoresDeDemanda" />) na potência de demanda dos quadros (4.2.1.1).</summary>
+    public bool AplicarFatoresDeDemanda { get; init; } = true;
+
+    /// <summary>Resistência do eletrodo de aterramento RA, em Ω, para o esquema TT (RA · IΔn ≤ UL, 5.1.2.2.4.3). Nula: não avaliada.</summary>
+    public double? ResistenciaDeAterramentoOhm { get; init; }
+
+    /// <summary>Folga aplicada ao comprimento dos circuitos lido dos eletrodutos (subidas, sobras, emendas), em %.</summary>
+    public double FolgaDeComprimentoPercentual { get; init; }
+
+    /// <summary>Folga de ampliação na taxa de ocupação dos eletrodutos (4.2.5.4), em % da área dos condutores.</summary>
+    public double FolgaDeOcupacaoPercentual { get; init; }
+
+    /// <summary>Um só condutor de proteção por eletroduto, com a maior seção dos circuitos que passam (6.4.3.1.5), em vez de um PE por circuito.</summary>
+    public bool PEComumNoConduto { get; init; }
+
     public bool EhTrifasica => Fases == 3;
 }
 
@@ -125,6 +142,12 @@ public sealed record Circuito(string Id, string Numero, string Quadro, TipoCarga
 
     /// <summary>Quadro alimentado por este circuito, quando é um alimentador.</summary>
     public string? QuadroAlimentado { get; init; }
+
+    /// <summary>Fase(s) impostas pelo projetista ("A", "B", "C", "AB", "ABC"); nulo: o balanceamento escolhe.</summary>
+    public string? FaseImposta { get; init; }
+
+    /// <summary>Condutores em paralelo por fase impostos (6.2.5.7); nulo: um, ou dois quando nenhuma seção única atende.</summary>
+    public int? CondutoresPorFaseImpostos { get; init; }
 
     public int Fases => Ligacao switch
     {

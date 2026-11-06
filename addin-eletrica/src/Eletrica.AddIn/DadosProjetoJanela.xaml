@@ -55,6 +55,29 @@
                     <CheckBox x:Name="Habitacao" Grid.Row="4" Grid.ColumnSpan="2" Content="Edificação residencial (valem as regras da seção 9.5)" Margin="0,4"/>
                 </Grid>
             </GroupBox>
+            <GroupBox Header="Opções de cálculo" Padding="8" Margin="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="240"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <CheckBox x:Name="Demanda" Grid.ColumnSpan="2" Content="Aplicar fatores de demanda por tipo de carga nos quadros (padrão do motor; conferir com a distribuidora)" Margin="0,4"/>
+                    <TextBlock Grid.Row="1" Text="Resistência do eletrodo RA, em Ω (esquema TT)" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox x:Name="ResistenciaRa" Grid.Row="1" Grid.Column="1" Margin="0,4" Padding="4"/>
+                    <TextBlock Grid.Row="2" Text="Folga no comprimento lido dos eletrodutos (%)" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox x:Name="FolgaComprimento" Grid.Row="2" Grid.Column="1" Margin="0,4" Padding="4"/>
+                    <TextBlock Grid.Row="3" Text="Folga de ampliação na ocupação dos eletrodutos (%)" VerticalAlignment="Center" Margin="0,4"/>
+                    <TextBox x:Name="FolgaOcupacao" Grid.Row="3" Grid.Column="1" Margin="0,4" Padding="4"/>
+                    <CheckBox x:Name="PeComum" Grid.Row="4" Grid.ColumnSpan="2" Content="Um só condutor de proteção por eletroduto, com a maior seção (6.4.3.1.5)" Margin="0,4"/>
+                </Grid>
+            </GroupBox>
             <TextBlock TextWrapping="Wrap" Foreground="#6B6B6B" FontSize="12"
                        Text="Sem a Icc presumida os critérios de curto-circuito (capacidade de interrupção, I²t e Zs·Ia) ficam como não avaliados no memorial. Peça o valor à distribuidora ou calcule pelo transformador."/>
         </StackPanel>

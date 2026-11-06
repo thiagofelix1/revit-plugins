@@ -2,13 +2,13 @@
 
 Add-in fino sobre o [motor](../motor-eletrica/README.md): lança quadros, pontos, comandos e circuitos pela NBR 5410 e pelo padrão do escritório; lê o modelo (quadros, circuitos, pontos, ambientes, eletrodutos, comandos), passa os circuitos pelos eletrodutos, verifica, calcula e grava o resultado em parâmetros compartilhados "AE" e num memorial. Mesma estrutura e as mesmas peças de infraestrutura do [SPK](../addin-spk/README.md) (Nice3point SDK, Revit 2025 a 2027, armazenamento no .rvt, transação segura, ícones desenhados).
 
-Estado em 06/11/2026: **compila para 2025, 2026 e 2027 com as entregas 0.2 (lançamento), 0.3 (eletrodutos, fiação, fio, etiquetas e legenda) e 0.4 (Verificar completo) incluídas; ainda não foi aberto no Revit** (ver "Testar").
+Estado em 06/11/2026: **compila para 2025, 2026 e 2027 com as entregas 0.2 (lançamento), 0.3 (eletrodutos, fiação, fio, etiquetas e legenda), 0.4 (Verificar completo) e 0.5 (motor: demanda, fases, DRs por grupo, TT, paralelo, sugestões) incluídas; ainda não foi aberto no Revit** (ver "Testar").
 
 ## A aba AutoEletrica
 
 | Painel | Botão | O que faz |
 |---|---|---|
-| Projeto | Dados do projeto | Tensões, fases, esquema de aterramento, Icc presumida, linha aérea, dias de trovoada, SPDA, temperatura, habitação. Gravado no .rvt. |
+| Projeto | Dados do projeto | Tensões, fases, esquema de aterramento, Icc presumida, linha aérea, dias de trovoada, SPDA, temperatura, habitação; opções de cálculo: fatores de demanda, resistência do eletrodo (TT), folga de comprimento, folga de ocupação, PE comum por eletroduto. Gravado no .rvt. |
 | Projeto | Ambientes | Lista os Rooms do arquivo e dos vínculos com o uso sugerido pelo nome; o engenheiro confirma. O uso define pontos mínimos, potências e DR. |
 | Projeto | Padrão | Padrão do escritório (`Padrao/PadraoEletrica.cs`): alturas baixa/média/alta/interruptor/pé-direito, potências padrão (TUG, TUG molhada, TUE 20 A, chuveiro, ar), corrente e pontos máximos por circuito, limite para fase-fase, prefixos de circuito e quadro, afastamento da parede. Os mínimos da norma valem por cima. |
 | Projeto | Famílias | Lista os tipos de família das categorias elétricas e confirma o **papel** de cada um (tomada 10 A, 20 A, dupla, luminária, arandela, interruptor 1/2/3 teclas, paralelo, intermediário, chuveiro, ar, ponto de força, quadro, caixa). Mostra hospedagem e se há conector elétrico. O plugin lança e lê pelo papel. |
@@ -28,9 +28,9 @@ Estado em 06/11/2026: **compila para 2025, 2026 e 2027 com as entregas 0.2 (lan�
 | Fiação | Etiquetar | Cria etiquetas de eletroduto, fio, tomada, luminária, interruptor e quadro na planta aberta com as famílias de etiqueta carregadas (os rótulos devem apontar para os parâmetros AE; prefere tipos com "AE" no nome). |
 | Fiação | Legenda | Vista de desenho "AE — Legenda de fiação": tabela dos circuitos (número, descrição, quadro, n#S(PE), disjuntor, DR) e as cores dos condutores do padrão (6.1.5.3). Rodar de novo refaz. |
 | Cálculo | Verificar modelo | Roda o Verificar do motor (códigos A-, B-, C-, DR-, L-, M-, Q-, T-) mais as verificações do modelo do Revit (R-: sistema de distribuição do quadro × Dados, família sem conector ou sem potência, interruptor nos volumes 0–2, chuveiro elétrico a mais de 1,5 m do boxe, interruptor sem comando) e mostra a lista com código, gravidade e item da norma; filtro por gravidade, "Mostrar" seleciona os elementos, "Salvar relatório" grava `Documentos\AutoEletrica\verificacao\<projeto>-verificacao.md`. Os volumes do banheiro (9.1.2.1) saem da geometria do boxe, banheira ou chuveiro da arquitetura (`Verificacao/VolumesDeBanheiro.cs`): volume 1 sobre a peça até 2,25 m, 2 a 0,60 m até 3,00 m, 3 a mais 2,40 m até 2,25 m; sem boxe, 0,60 m ao redor do chuveiro; paredes não descontadas. O IP vem de parâmetro da família com "IP" ou "grau de proteção" no nome. |
-| Cálculo | Calcular | Dimensiona tudo, grava `AE Seção`, `AE Disjuntor`, `AE IB`, `AE Queda`, `AE DR`, `AE Situação`, `AE Comprimento` nos circuitos, `AE Fiação`, `AE DN sugerido`, `AE Ocupação` nos eletrodutos, `AE Ambiente` nos pontos, e salva `Documentos\AutoEletrica\calculo\<projeto>-memorial.md`. |
-| Resultados | Memorial | Abre o último memorial. |
-| Ajuda | Guia | Passo a passo e a situação do projeto aberto. |
+| Cálculo | Calcular | Dimensiona tudo (duas passadas quando há seções dessemelhantes num eletroduto; condutores em paralelo quando nenhuma seção única atende), balanceia as fases, monta os quadros (demanda por categoria, geral, DRs por grupo, DPS), grava `AE Seção`, `AE Disjuntor`, `AE IB`, `AE Queda`, `AE DR`, `AE Situação`, `AE Comprimento`, `AE Fase` nos circuitos, `AE Fiação`, `AE DN sugerido` (negativo = repetir n eletrodutos), `AE Ocupação` nos eletrodutos, `AE Ambiente` nos pontos, alinha o caminho do circuito do Revit ao traçado (`SetCircuitPath`, para o comprimento do Revit bater), guarda a assinatura da instalação e salva `Documentos\AutoEletrica\calculo\<projeto>-memorial.md`. |
+| Resultados | Memorial | Abre o último memorial; avisa se o modelo mudou depois do cálculo. |
+| Ajuda | Guia | Passo a passo, a situação do projeto aberto e se o cálculo está atualizado com o modelo (assinatura da instalação lida; item 7.16 do plano sem IUpdater). |
 
 ## Como o modelo é lido (`Leitura/LeitorInstalacao.cs`)
 

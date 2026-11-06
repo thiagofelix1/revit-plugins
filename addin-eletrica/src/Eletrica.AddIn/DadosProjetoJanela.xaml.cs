@@ -40,6 +40,11 @@ public partial class DadosProjetoJanela : Window
         Spda.IsChecked = dados.TemSpda;
         Temperatura.Text = Entrada.F(dados.TemperaturaAmbiente);
         Habitacao.IsChecked = dados.Habitacao;
+        Demanda.IsChecked = dados.AplicarFatoresDeDemanda;
+        ResistenciaRa.Text = Entrada.F(dados.ResistenciaDeAterramentoOhm);
+        FolgaComprimento.Text = Entrada.F(dados.FolgaDeComprimentoPercentual);
+        FolgaOcupacao.Text = Entrada.F(dados.FolgaDeOcupacaoPercentual);
+        PeComum.IsChecked = dados.PEComumNoConduto;
     }
 
     void Confirmar_Click(object sender, RoutedEventArgs e)
@@ -59,6 +64,11 @@ public partial class DadosProjetoJanela : Window
                 TemSpda = Spda.IsChecked == true,
                 TemperaturaAmbiente = Entrada.Numero(Temperatura.Text, "Temperatura ambiente", 5, 80),
                 Habitacao = Habitacao.IsChecked == true,
+                AplicarFatoresDeDemanda = Demanda.IsChecked == true,
+                ResistenciaDeAterramentoOhm = Entrada.Opcional(ResistenciaRa.Text, "Resistência do eletrodo", 0.1, 10000),
+                FolgaDeComprimentoPercentual = Entrada.Opcional(FolgaComprimento.Text, "Folga de comprimento", 0, 100) ?? 0,
+                FolgaDeOcupacaoPercentual = Entrada.Opcional(FolgaOcupacao.Text, "Folga de ocupação", 0, 100) ?? 0,
+                PEComumNoConduto = PeComum.IsChecked == true,
             };
             DialogResult = true;
         }

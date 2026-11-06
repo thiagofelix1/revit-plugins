@@ -11,6 +11,10 @@
     "TemSpda": false,
     "TemperaturaAmbiente": 30,
     "Habitacao": true,
+    "AplicarFatoresDeDemanda": true,
+    "FolgaDeComprimentoPercentual": 0,
+    "FolgaDeOcupacaoPercentual": 0,
+    "PEComumNoConduto": false,
     "EhTrifasica": false
   },
   "Circuitos": [
@@ -135,7 +139,9 @@
       "CriterioQueMandou": "seção mínima",
       "Avisos": [],
       "Atende": true,
-      "Reprovados": []
+      "Reprovados": [],
+      "Fases": "A",
+      "CondutoresPorFase": 1
     },
     {
       "Id": "C2",
@@ -257,7 +263,9 @@
       "CriterioQueMandou": "seção mínima",
       "Avisos": [],
       "Atende": true,
-      "Reprovados": []
+      "Reprovados": [],
+      "Fases": "B",
+      "CondutoresPorFase": 1
     },
     {
       "Id": "C3",
@@ -381,7 +389,9 @@
       "CriterioQueMandou": "capacidade de corrente",
       "Avisos": [],
       "Atende": true,
-      "Reprovados": []
+      "Reprovados": [],
+      "Fases": "A",
+      "CondutoresPorFase": 1
     },
     {
       "Id": "C4",
@@ -505,7 +515,9 @@
       "CriterioQueMandou": "sobrecarga",
       "Avisos": [],
       "Atende": true,
-      "Reprovados": []
+      "Reprovados": [],
+      "Fases": "B",
+      "CondutoresPorFase": 1
     },
     {
       "Id": "C5",
@@ -629,7 +641,9 @@
       "CriterioQueMandou": "capacidade de corrente",
       "Avisos": [],
       "Atende": true,
-      "Reprovados": []
+      "Reprovados": [],
+      "Fases": "AB",
+      "CondutoresPorFase": 1
     },
     {
       "Id": "C6",
@@ -751,7 +765,9 @@
       "CriterioQueMandou": "seção mínima",
       "Avisos": [],
       "Atende": true,
-      "Reprovados": []
+      "Reprovados": [],
+      "Fases": "AB",
+      "CondutoresPorFase": 1
     },
     {
       "Id": "C7",
@@ -874,7 +890,9 @@
       "CriterioQueMandou": "seção mínima",
       "Avisos": [],
       "Atende": true,
-      "Reprovados": []
+      "Reprovados": [],
+      "Fases": "AB",
+      "CondutoresPorFase": 1
     },
     {
       "Id": "C8",
@@ -997,7 +1015,9 @@
       "CriterioQueMandou": "seção mínima",
       "Avisos": [],
       "Atende": true,
-      "Reprovados": []
+      "Reprovados": [],
+      "Fases": "A",
+      "CondutoresPorFase": 1
     }
   ],
   "Quadros": [
@@ -1008,8 +1028,8 @@
       "NumeroDeCircuitos": 8,
       "Reserva": 3,
       "PotenciaInstaladaVA": 14940,
-      "PotenciaDeDemandaVA": 14940,
-      "CorrenteDeDemanda": 58.818897637795274,
+      "PotenciaDeDemandaVA": 12446,
+      "CorrenteDeDemanda": 49,
       "CargasPorFase": [
         {
           "Fase": "A",
@@ -1025,12 +1045,12 @@
       "DesequilibrioPercentual": 7.228915662650603,
       "IccNoBarramentoKA": 6.3,
       "DisjuntorGeral": {
-        "In": 63,
+        "In": 50,
         "Curva": "C",
         "IcnKA": 7.5,
         "Polos": 2,
-        "I2": 91.35,
-        "Ia": 630
+        "I2": 72.5,
+        "Ia": 500
       },
       "Dps": {
         "Classe": "I",
@@ -1053,7 +1073,64 @@
         "7",
         "8"
       ],
-      "Avisos": []
+      "Avisos": [],
+      "Demanda": {
+        "Parcelas": [
+          {
+            "Categoria": "IluminacaoETug",
+            "InstaladaVA": 6540,
+            "Aparelhos": 28,
+            "Fator": 0.6186544342507646,
+            "DemandaVA": 4046.0000000000005,
+            "Fonte": "prática de projeto e normas de distribuidoras (padrão do motor; conferir com a distribuidora)"
+          },
+          {
+            "Categoria": "Aquecimento",
+            "InstaladaVA": 5500,
+            "Aparelhos": 1,
+            "Fator": 1,
+            "DemandaVA": 5500,
+            "Fonte": "prática de projeto e normas de distribuidoras (padrão do motor; conferir com a distribuidora)"
+          },
+          {
+            "Categoria": "ArCondicionado",
+            "InstaladaVA": 1400,
+            "Aparelhos": 1,
+            "Fator": 1,
+            "DemandaVA": 1400,
+            "Fonte": "prática de projeto e normas de distribuidoras (padrão do motor; conferir com a distribuidora)"
+          },
+          {
+            "Categoria": "UsoEspecifico",
+            "InstaladaVA": 1500,
+            "Aparelhos": 1,
+            "Fator": 1,
+            "DemandaVA": 1500,
+            "Fonte": "prática de projeto e normas de distribuidoras (padrão do motor; conferir com a distribuidora)"
+          }
+        ],
+        "DosQuadrosFilhosVA": 0,
+        "FatorDoQuadro": 1,
+        "InstaladaVA": 14940,
+        "DemandaVA": 12446
+      },
+      "GruposDR": [
+        {
+          "Numero": 1,
+          "Tipo": "A",
+          "CorrenteResidualMA": 30,
+          "In": 100,
+          "Polos": 4,
+          "Circuitos": [
+            "1",
+            "3",
+            "4",
+            "5",
+            "7",
+            "8"
+          ]
+        }
+      ]
     }
   ],
   "Trechos": [
@@ -1080,6 +1157,26 @@
           "Limite": "≤ 40 %",
           "Item": "6.2.11.1.6 a)",
           "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "mesma origem",
+          "Atende": true,
+          "Valor": "3 circuitos do quadro QD",
+          "Limite": "um só quadro de origem",
+          "Item": "6.2.10.2 b)",
+          "Explicacao": "todos os circuitos do trecho saem do mesmo quadro",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seções próximas",
+          "Atende": true,
+          "Valor": "de 1,5 a 2,5 mm²",
+          "Limite": "até três valores sucessivos",
+          "Item": "6.2.10.2 c), 6.2.5.5.5",
+          "Explicacao": "as seções cabem em três valores sucessivos",
           "Reprovado": false,
           "NaoAvaliado": false
         },
@@ -1129,6 +1226,26 @@
           "Limite": "≤ 40 %",
           "Item": "6.2.11.1.6 a)",
           "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "mesma origem",
+          "Atende": true,
+          "Valor": "5 circuitos do quadro QD",
+          "Limite": "um só quadro de origem",
+          "Item": "6.2.10.2 b)",
+          "Explicacao": "todos os circuitos do trecho saem do mesmo quadro",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seções próximas",
+          "Atende": true,
+          "Valor": "de 1,5 a 4 mm²",
+          "Limite": "até três valores sucessivos",
+          "Item": "6.2.10.2 c), 6.2.5.5.5",
+          "Explicacao": "as seções cabem em três valores sucessivos",
           "Reprovado": false,
           "NaoAvaliado": false
         },
@@ -1231,6 +1348,26 @@
           "NaoAvaliado": false
         },
         {
+          "Criterio": "mesma origem",
+          "Atende": true,
+          "Valor": "2 circuitos do quadro QD",
+          "Limite": "um só quadro de origem",
+          "Item": "6.2.10.2 b)",
+          "Explicacao": "todos os circuitos do trecho saem do mesmo quadro",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seções próximas",
+          "Atende": true,
+          "Valor": "de 1,5 a 2,5 mm²",
+          "Limite": "até três valores sucessivos",
+          "Item": "6.2.10.2 c), 6.2.5.5.5",
+          "Explicacao": "as seções cabem em três valores sucessivos",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
           "Criterio": "trecho entre caixas",
           "Atende": true,
           "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
@@ -1276,6 +1413,26 @@
           "Limite": "≤ 40 %",
           "Item": "6.2.11.1.6 a)",
           "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "mesma origem",
+          "Atende": true,
+          "Valor": "3 circuitos do quadro QD",
+          "Limite": "um só quadro de origem",
+          "Item": "6.2.10.2 b)",
+          "Explicacao": "todos os circuitos do trecho saem do mesmo quadro",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seções próximas",
+          "Atende": true,
+          "Valor": "de 1,5 a 2,5 mm²",
+          "Limite": "até três valores sucessivos",
+          "Item": "6.2.10.2 c), 6.2.5.5.5",
+          "Explicacao": "as seções cabem em três valores sucessivos",
           "Reprovado": false,
           "NaoAvaliado": false
         },
@@ -1329,6 +1486,26 @@
           "NaoAvaliado": false
         },
         {
+          "Criterio": "mesma origem",
+          "Atende": true,
+          "Valor": "2 circuitos do quadro QD",
+          "Limite": "um só quadro de origem",
+          "Item": "6.2.10.2 b)",
+          "Explicacao": "todos os circuitos do trecho saem do mesmo quadro",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seções próximas",
+          "Atende": true,
+          "Valor": "de 1,5 a 2,5 mm²",
+          "Limite": "até três valores sucessivos",
+          "Item": "6.2.10.2 c), 6.2.5.5.5",
+          "Explicacao": "as seções cabem em três valores sucessivos",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
           "Criterio": "trecho entre caixas",
           "Atende": true,
           "Valor": "3,5 m + 1 curva(s) × 3 m = 6,5 m",
@@ -1374,6 +1551,26 @@
           "Limite": "≤ 40 %",
           "Item": "6.2.11.1.6 a)",
           "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "mesma origem",
+          "Atende": true,
+          "Valor": "2 circuitos do quadro QD",
+          "Limite": "um só quadro de origem",
+          "Item": "6.2.10.2 b)",
+          "Explicacao": "todos os circuitos do trecho saem do mesmo quadro",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seções próximas",
+          "Atende": true,
+          "Valor": "de 1,5 a 2,5 mm²",
+          "Limite": "até três valores sucessivos",
+          "Item": "6.2.10.2 c), 6.2.5.5.5",
+          "Explicacao": "as seções cabem em três valores sucessivos",
           "Reprovado": false,
           "NaoAvaliado": false
         },
@@ -1427,6 +1624,26 @@
           "NaoAvaliado": false
         },
         {
+          "Criterio": "mesma origem",
+          "Atende": true,
+          "Valor": "5 circuitos do quadro QD",
+          "Limite": "um só quadro de origem",
+          "Item": "6.2.10.2 b)",
+          "Explicacao": "todos os circuitos do trecho saem do mesmo quadro",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seções próximas",
+          "Atende": true,
+          "Valor": "de 1,5 a 4 mm²",
+          "Limite": "até três valores sucessivos",
+          "Item": "6.2.10.2 c), 6.2.5.5.5",
+          "Explicacao": "as seções cabem em três valores sucessivos",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
           "Criterio": "trecho entre caixas",
           "Atende": true,
           "Valor": "3,5 m + 1 curva(s) × 3 m = 6,5 m",
@@ -1472,6 +1689,26 @@
           "Limite": "≤ 40 %",
           "Item": "6.2.11.1.6 a)",
           "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "mesma origem",
+          "Atende": true,
+          "Valor": "2 circuitos do quadro QD",
+          "Limite": "um só quadro de origem",
+          "Item": "6.2.10.2 b)",
+          "Explicacao": "todos os circuitos do trecho saem do mesmo quadro",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seções próximas",
+          "Atende": true,
+          "Valor": "de 1,5 a 4 mm²",
+          "Limite": "até três valores sucessivos",
+          "Item": "6.2.10.2 c), 6.2.5.5.5",
+          "Explicacao": "as seções cabem em três valores sucessivos",
           "Reprovado": false,
           "NaoAvaliado": false
         },
@@ -1525,6 +1762,26 @@
           "NaoAvaliado": false
         },
         {
+          "Criterio": "mesma origem",
+          "Atende": true,
+          "Valor": "2 circuitos do quadro QD",
+          "Limite": "um só quadro de origem",
+          "Item": "6.2.10.2 b)",
+          "Explicacao": "todos os circuitos do trecho saem do mesmo quadro",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seções próximas",
+          "Atende": true,
+          "Valor": "de 1,5 a 2,5 mm²",
+          "Limite": "até três valores sucessivos",
+          "Item": "6.2.10.2 c), 6.2.5.5.5",
+          "Explicacao": "as seções cabem em três valores sucessivos",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
           "Criterio": "trecho entre caixas",
           "Atende": true,
           "Valor": "2,0 m + 0 curva(s) × 3 m = 2,0 m",
@@ -1570,6 +1827,26 @@
           "Limite": "≤ 40 %",
           "Item": "6.2.11.1.6 a)",
           "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "mesma origem",
+          "Atende": true,
+          "Valor": "2 circuitos do quadro QD",
+          "Limite": "um só quadro de origem",
+          "Item": "6.2.10.2 b)",
+          "Explicacao": "todos os circuitos do trecho saem do mesmo quadro",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seções próximas",
+          "Atende": true,
+          "Valor": "de 1,5 a 2,5 mm²",
+          "Limite": "até três valores sucessivos",
+          "Item": "6.2.10.2 c), 6.2.5.5.5",
+          "Explicacao": "as seções cabem em três valores sucessivos",
           "Reprovado": false,
           "NaoAvaliado": false
         },
@@ -3069,6 +3346,24 @@
   ],
   "Problemas": [
     {
+      "Codigo": "B-05",
+      "Gravidade": "Nota",
+      "Mensagem": "Banheiro: Chuveiro (CH) no volume 1 sem grau IP informado na família; o mínimo é IPX4.",
+      "Item": "9.1.4.1",
+      "Elementos": [
+        "CH"
+      ]
+    },
+    {
+      "Codigo": "A-08",
+      "Gravidade": "Nota",
+      "Mensagem": "Banheiro: prever a equipotencialização suplementar reunindo as massas e os elementos condutivos dos volumes 0 a 3 (barra no banheiro ou ligação ao PE do quadro).",
+      "Item": "9.1.3.1.2",
+      "Elementos": [
+        "bwc"
+      ]
+    },
+    {
       "Codigo": "DR-01",
       "Gravidade": "Nota",
       "Mensagem": "Circuito 1 exige DR de 30 mA: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro (1 ponto(s)).",
@@ -3111,6 +3406,15 @@
       "Elementos": [
         "C5",
         "CH"
+      ]
+    },
+    {
+      "Codigo": "DR-02",
+      "Gravidade": "Nota",
+      "Mensagem": "Circuito 6: pela carga (ArCondicionado), o DR deve ser do tipo F (correntes com componente contínua ou de alta frequência); tipo AC não serve.",
+      "Item": "6.3.3.2, IEC 62423",
+      "Elementos": [
+        "C6"
       ]
     },
     {
@@ -3161,6 +3465,6 @@
       ]
     }
   ],
-  "Duracao": "00:00:00.0597655",
+  "Duracao": "00:00:00.0873113",
   "Atende": true
 }

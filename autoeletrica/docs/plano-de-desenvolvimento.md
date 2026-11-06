@@ -222,6 +222,8 @@ Itens 8.1 a 8.5 e 8.7 com relatório e destaque na vista. **Pronto:** rodado nos
 
 Itens 1.4, 1.6, 7.1 a 7.11, 7.16, 4.9, 4.10, 5.5, 5.6, 3.3, 3.6, 8.6, 8.8. **Pronto:** reproduz o dimensionamento dos três projetos de referência (ou explica a diferença pelo item da norma) e o exemplo do AltoQi; testes no motor para cada tabela e critério.
 
+*Escrito em 06/11/2026 (179 testes; não comparado com projetos reais):* 1.4 `Catalogo` (disjuntores, DRs, condutores, eletrodutos, tomadas; sem dados de fabricante); 1.6 `FatoresDeDemanda` (iluminação + TUG por faixa, chuveiros e ar por número de aparelhos; padrões do motor, a trocar pela distribuidora); 7.1 a 7.11 completos, com 7.3 ganhando o 1/√n para seções dessemelhantes (segunda passada) e 7.8 o TT (DR em todo circuito, RA · IΔn ≤ UL); 7.16 pela assinatura da instalação (Guia e Memorial avisam "desatualizado"; sem IUpdater); 4.9 folga de ampliação e sugestão de repetição; 4.10 folga de comprimento e `SetCircuitPath`; 5.5 PE comum por eletroduto como opção; 5.6 dois condutores em paralelo por fase (cabos multipolares e bandeja só pelo método de referência do trecho); 3.3 `Fases` com fase imposta e `AE Fase`; 3.6/8.6 geral, DRs por grupo (tipo, até seis), DPS, seccionador e identificação como notas; 8.8 `Sugestoes` em cada problema D-/E-. Falta: comparar com os projetos de referência e o exemplo do AltoQi, seletividade (7.12), motores (7.14).
+
 ### 0.6 — Entregáveis (Fase 2)
 
 Itens 9.1, 9.2, 9.3, 9.5, 9.6, 9.7, 9.8, 9.9, 9.10, 2.7, 4.4, 4.5, 4.6. **Pronto:** jogo de pranchas, memorial, lista e manual de um projeto real aceitos pelo engenheiro sem retrabalho fora do plugin. Esta é a versão vendável.

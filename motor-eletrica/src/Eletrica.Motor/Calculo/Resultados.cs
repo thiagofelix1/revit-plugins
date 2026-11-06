@@ -62,9 +62,21 @@ public sealed record ResultadoCircuito(
 {
     public bool Atende => Pareceres.All(p => !p.Reprovado);
     public IEnumerable<Parecer> Reprovados => Pareceres.Where(p => p.Reprovado);
+
+    /// <summary>Fase(s) do circuito no quadro ("A", "B", "AB", "ABC"), pelo balanceamento ou pela fase imposta.</summary>
+    public string Fases { get; init; } = "";
+
+    /// <summary>Condutores em paralelo por fase (6.2.5.7); 1 no caso comum.</summary>
+    public int CondutoresPorFase { get; init; } = 1;
 }
 
 public sealed record CargaPorFase(string Fase, double PotenciaVA, double Corrente);
+
+/// <summary>Um DR do quadro e os circuitos que ele protege (6.3.3.2; no máximo seis por DR para a fuga acumulada não desarmar).</summary>
+public sealed record GrupoDR(int Numero, TipoDr Tipo, double CorrenteResidualMA, double In, int Polos, IReadOnlyList<string> Circuitos)
+{
+    public override string ToString() => $"DR{Numero} {In:0} A / {CorrenteResidualMA:0} mA tipo {Tipo} {Polos}P: {string.Join(", ", Circuitos)}";
+}
 
 public sealed record ResultadoQuadro(
     string Id,
@@ -82,7 +94,9 @@ public sealed record ResultadoQuadro(
     DispositivosDPS.Especificacao? Dps,
     string? MotivoDoDps,
     IReadOnlyList<string> CircuitosComDR,
-    IReadOnlyList<string> Avisos);
+    IReadOnlyList<string> Avisos,
+    ResultadoDemanda? Demanda = null,
+    IReadOnlyList<GrupoDR>? GruposDR = null);
 
 public sealed record ResultadoTrecho(
     string Id,
@@ -99,7 +113,8 @@ public sealed record ResultadoTrecho(
     double TaxaMaxima,
     double ComprimentoEquivalente,
     double ComprimentoMaximo,
-    IReadOnlyList<Parecer> Pareceres)
+    IReadOnlyList<Parecer> Pareceres,
+    int? RepeticoesSugeridas = null)
 {
     public bool Atende => Pareceres.All(p => !p.Reprovado);
 }

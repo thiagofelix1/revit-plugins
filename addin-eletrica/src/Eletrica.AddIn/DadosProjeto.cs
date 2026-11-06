@@ -24,6 +24,16 @@ public sealed class DadosProjeto
     public double TemperaturaAmbiente { get; set; } = 30;
     public bool Habitacao { get; set; } = true;
 
+    // Opções de cálculo (entrega 0.5)
+    public bool AplicarFatoresDeDemanda { get; set; } = true;
+
+    /// <summary>Resistência do eletrodo de aterramento, em Ω (só TT). Nula: não avaliada.</summary>
+    public double? ResistenciaDeAterramentoOhm { get; set; }
+
+    public double FolgaDeComprimentoPercentual { get; set; }
+    public double FolgaDeOcupacaoPercentual { get; set; }
+    public bool PEComumNoConduto { get; set; }
+
     public static DadosProjeto? Carregar(Document doc) => ArmazenamentoEletrica.Ler<DadosProjeto>(doc, Chave);
 
     public Alimentacao CriarAlimentacao() => new(TensaoFaseNeutro, TensaoFaseFase, Fases, Esquema)
@@ -34,6 +44,11 @@ public sealed class DadosProjeto
         TemSpda = TemSpda,
         TemperaturaAmbiente = TemperaturaAmbiente,
         Habitacao = Habitacao,
+        AplicarFatoresDeDemanda = AplicarFatoresDeDemanda,
+        ResistenciaDeAterramentoOhm = ResistenciaDeAterramentoOhm,
+        FolgaDeComprimentoPercentual = FolgaDeComprimentoPercentual,
+        FolgaDeOcupacaoPercentual = FolgaDeOcupacaoPercentual,
+        PEComumNoConduto = PEComumNoConduto,
     };
 
     public string Resumo() =>

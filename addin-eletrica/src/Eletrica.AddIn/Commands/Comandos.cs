@@ -201,6 +201,18 @@ public class AbrirMemorialCommand : ExternalCommand
             TaskDialog.Show("AutoEletrica — Memorial", "Ainda não há memorial deste projeto. Rode Calcular.");
             return;
         }
+        if (ServicoCalculo.CalculoAtual(doc, DadosProjeto.Carregar(doc)) is false)
+        {
+            var dialogo = new TaskDialog("AutoEletrica — Memorial")
+            {
+                MainInstruction = "O modelo mudou depois do último cálculo.",
+                MainContent = $"O memorial é de {resumo.Quando:dd/MM/yyyy HH:mm}; pontos, circuitos, eletrodutos ou dados mudaram depois. Abrir assim mesmo ou calcular de novo?",
+                CommonButtons = TaskDialogCommonButtons.Cancel,
+            };
+            dialogo.AddCommandLink(TaskDialogCommandLinkId.CommandLink1, "Abrir o memorial desatualizado");
+            dialogo.AddCommandLink(TaskDialogCommandLinkId.CommandLink2, "Cancelar e rodar Calcular");
+            if (dialogo.Show() != TaskDialogResult.CommandLink1) return;
+        }
         Abrir(resumo.Memorial);
     }
 
@@ -296,9 +308,11 @@ public class GuiaCommand : ExternalCommand
         var doc = Application.ActiveUIDocument?.Document;
         var dados = doc is null ? null : DadosProjeto.Carregar(doc);
         var resumo = doc is null ? null : ArmazenamentoEletrica.Ler<ServicoCalculo.ResumoGravado>(doc, ServicoCalculo.ChaveResultado);
+        var atual = doc is null ? null : ServicoCalculo.CalculoAtual(doc, dados);
         var situacao = doc is null ? "Nenhum projeto aberto." :
             $"Projeto: {doc.Title}\nDados do projeto: {(dados is null ? "ainda não confirmados" : dados.Resumo())}\n" +
-            $"Último cálculo: {(resumo is null ? "nenhum" : $"{resumo.Quando:dd/MM/yyyy HH:mm}, {resumo.Circuitos} circuitos, {(resumo.Atende ? "atende" : "não atende")}")}";
+            $"Último cálculo: {(resumo is null ? "nenhum" : $"{resumo.Quando:dd/MM/yyyy HH:mm}, {resumo.Circuitos} circuitos, {(resumo.Atende ? "atende" : "não atende")}")}" +
+            (atual is false ? "\nATENÇÃO: o modelo mudou depois do último cálculo (pontos, circuitos, eletrodutos ou dados). Rode Calcular de novo antes de usar o memorial e as etiquetas." : atual is true ? "\nO cálculo está atualizado com o modelo." : "");
         var dialogo = new TaskDialog("AutoEletrica — Guia")
         {
             MainInstruction = "Passo a passo",

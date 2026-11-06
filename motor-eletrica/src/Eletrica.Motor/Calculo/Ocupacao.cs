@@ -17,15 +17,31 @@ public static class Ocupacao
             var pareceres = new List<Parecer>();
             double area = 0;
             var condutores = 0;
+            var peComum = i.Alimentacao.PEComumNoConduto;
+            double maiorPE = 0;
+            Isolacao isolacaoDoPE = Isolacao.Pvc70;
             foreach (var id in t.Circuitos.Distinct())
             {
                 var c = i.Circuito(id)!;
                 if (!circuitos.TryGetValue(id, out var r)) continue;
                 var flexivel = true;
-                var n = c.Fases + (c.TemNeutro ? 1 : 0);
+                var n = (c.Fases * r.CondutoresPorFase) + (c.TemNeutro ? r.CondutoresPorFase : 0);
                 area += n * Condutores.AreaExterna(r.SecaoFase, c.Isolacao, flexivel);
-                area += Condutores.AreaExterna(r.SecaoPE, c.Isolacao, flexivel);
-                condutores += n + 1;
+                condutores += n;
+                if (peComum)
+                {
+                    if (r.SecaoPE > maiorPE) { maiorPE = r.SecaoPE; isolacaoDoPE = c.Isolacao; }
+                }
+                else
+                {
+                    area += Condutores.AreaExterna(r.SecaoPE, c.Isolacao, flexivel);
+                    condutores++;
+                }
+            }
+            if (peComum && maiorPE > 0)
+            {
+                area += Condutores.AreaExterna(maiorPE, isolacaoDoPE, true);
+                condutores++;
             }
             foreach (var id in t.Retornos)
             {
@@ -34,13 +50,18 @@ public static class Ocupacao
                 area += Condutores.AreaExterna(r.SecaoFase, c.Isolacao, true);
                 condutores++;
             }
+            // Folga de ampliação (4.2.5.4): área dos condutores majorada.
+            area *= 1 + i.Alimentacao.FolgaDeOcupacaoPercentual / 100;
 
             int? dnSugerido = null;
+            int? repeticoes = null;
             double? taxa = null;
             var taxaMaxima = Nbr5410.TaxaDeOcupacaoMaxima(Math.Max(1, condutores));
             if (t.TipoEletroduto != TipoEletroduto.Eletrocalha && condutores > 0)
             {
                 dnSugerido = Eletrodutos.MenorQueComporta(t.TipoEletroduto, area, condutores)?.Dn;
+                if (dnSugerido is null && Eletrodutos.Tamanhos(t.TipoEletroduto).LastOrDefault() is { } maior)
+                    repeticoes = (int)Math.Ceiling(area / (maior.AreaInterna * taxaMaxima));
                 if (t.Dn is { } dn)
                 {
                     var tamanho = Eletrodutos.PorDn(t.TipoEletroduto, dn);
@@ -61,7 +82,7 @@ public static class Ocupacao
                 {
                     pareceres.Add(new Parecer("taxa de ocupação", dnSugerido is not null, $"{condutores} condutores, {area:0} mm²",
                         dnSugerido is { } s ? $"DN {s} ({t.TipoEletroduto})" : "nenhum DN tabelado basta", "6.2.11.1.6 a)",
-                        dnSugerido is not null ? "DN sugerido pela taxa de ocupação" : "repetir o eletroduto ou trocar por eletrocalha"));
+                        dnSugerido is not null ? "DN sugerido pela taxa de ocupação" : $"repetir o eletroduto: {repeticoes} × DN {Eletrodutos.Tamanhos(t.TipoEletroduto).Last().Dn}, ou trocar por eletrocalha"));
                 }
             }
 
@@ -91,7 +112,7 @@ public static class Ocupacao
                 t.Curvas90 > 3 ? "pôr caixa de passagem" : "dentro do limite"));
 
             lista.Add(new ResultadoTrecho(t.Id, t.De, t.Para, t.Comprimento, t.Curvas90, t.TipoEletroduto, t.Dn, dnSugerido, condutores, area, taxa, taxaMaxima,
-                equivalente, maximo, pareceres));
+                equivalente, maximo, pareceres, repeticoes));
         }
         return lista;
     }

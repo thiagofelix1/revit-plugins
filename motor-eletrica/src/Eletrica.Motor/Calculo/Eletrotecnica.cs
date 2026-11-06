@@ -45,6 +45,7 @@ public static class Eletrotecnica
         public double Modulo => Math.Sqrt(R * R + X * X);
         public static Impedancia operator +(Impedancia a, Impedancia b) => new(a.R + b.R, a.X + b.X);
         public static Impedancia operator *(Impedancia a, double k) => new(a.R * k, a.X * k);
+        public static Impedancia operator /(Impedancia a, double k) => new(a.R / k, a.X / k);
         public static readonly Impedancia Zero = new(0, 0);
     }
 

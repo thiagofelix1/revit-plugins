@@ -1,19 +1,28 @@
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using Autodesk.Revit.DB.Electrical;
 using Eletrica.AddIn.Condutos;
 using Eletrica.AddIn.Leitura;
 using Eletrica.Motor.Calculo;
+using Eletrica.Motor.Modelo;
 using Eletrica.Motor.Relatorios;
 
 namespace Eletrica.AddIn.Servicos;
 
-/// <summary>Lê o modelo, roda o motor, grava os resultados nos parâmetros AE e salva o memorial.</summary>
+/// <summary>
+///     Lê o modelo, roda o motor, grava os resultados nos parâmetros AE, alinha o caminho dos circuitos do Revit ao traçado
+///     e salva o memorial. Guarda a assinatura da instalação lida para o Guia dizer quando o cálculo ficou desatualizado
+///     (item 7.16 do plano, sem IUpdater: a conferência é ao abrir o Guia ou o Memorial).
+/// </summary>
 public static class ServicoCalculo
 {
     public const string ChaveResultado = "UltimoResultado";
 
     public sealed record Saida(ResultadoInstalacao Resultado, LeitorInstalacao.Lida Lida, string Memorial, IReadOnlyList<string> Avisos);
+
+    public sealed record ResumoGravado(DateTime Quando, string Memorial, bool Atende, int Circuitos, string? Assinatura = null);
 
     public static Saida Executar(Document doc, DadosProjeto dados)
     {
@@ -34,13 +43,31 @@ public static class ServicoCalculo
             EngolirAvisos.Aplicar(transacao);
             if (ParametrosEletrica.Garantir(doc) is { } aviso) avisos.Add(aviso);
             Gravar(doc, lida, resultado);
-            ArmazenamentoEletrica.Gravar(doc, ChaveResultado, new ResumoGravado(DateTime.Now, memorial, resultado.Atende, resultado.Circuitos.Count));
+            var alinhados = AlinharCaminhos(doc, lida, avisos);
+            if (alinhados > 0) avisos.Add($"{alinhados} circuito(s) com o caminho do Revit alinhado ao traçado dos eletrodutos (comprimento do Revit = comprimento real).");
+            ArmazenamentoEletrica.Gravar(doc, ChaveResultado, new ResumoGravado(DateTime.Now, memorial, resultado.Atende, resultado.Circuitos.Count, Assinatura(lida.Instalacao)));
             transacao.Commit();
         }
         return new Saida(resultado, lida, memorial, avisos);
     }
 
-    public sealed record ResumoGravado(DateTime Quando, string Memorial, bool Atende, int Circuitos);
+    /// <summary>Assinatura da instalação lida (SHA-256 do JSON): muda quando qualquer dado que entra no cálculo muda.</summary>
+    public static string Assinatura(Instalacao i)
+    {
+        var json = JsonSerializer.Serialize(new { i.Alimentacao, i.Ambientes, i.Quadros, i.Circuitos, i.Pontos, i.Trechos, i.Comandos, i.Caixas }, ArmazenamentoEletrica.Json);
+        using var sha = SHA256.Create();
+        var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(json));
+        return BitConverter.ToString(bytes).Replace("-", "").Substring(0, 16);
+    }
+
+    /// <summary>O último cálculo ainda vale para o modelo como está? Nulo quando não há cálculo.</summary>
+    public static bool? CalculoAtual(Document doc, DadosProjeto? dados)
+    {
+        var resumo = ArmazenamentoEletrica.Ler<ResumoGravado>(doc, ChaveResultado);
+        if (resumo?.Assinatura is null || dados is null) return null;
+        try { return Assinatura(LeitorInstalacao.Ler(doc, dados).Instalacao) == resumo.Assinatura; }
+        catch (ErroDeModelo) { return false; }
+    }
 
     static void Gravar(Document doc, LeitorInstalacao.Lida lida, ResultadoInstalacao r)
     {
@@ -48,13 +75,15 @@ public static class ServicoCalculo
         foreach (var c in r.Circuitos)
         {
             if (!lida.Elementos.TryGetValue(c.Id, out var id) || doc.GetElement(id) is not { } el) continue;
-            ParametrosEletrica.Gravar(el, ParametrosEletrica.Secao, $"{c.SecaoFase.ToString("0.#", pt)} / {c.SecaoNeutro.ToString("0.#", pt)} / {c.SecaoPE.ToString("0.#", pt)}");
+            var fase = c.CondutoresPorFase > 1 ? $"{c.CondutoresPorFase}×" : "";
+            ParametrosEletrica.Gravar(el, ParametrosEletrica.Secao, $"{fase}{c.SecaoFase.ToString("0.#", pt)} / {c.SecaoNeutro.ToString("0.#", pt)} / {c.SecaoPE.ToString("0.#", pt)}");
             ParametrosEletrica.Gravar(el, ParametrosEletrica.Disjuntor, c.Disjuntor.ToString());
             ParametrosEletrica.Gravar(el, ParametrosEletrica.CorrenteDeProjeto, c.CorrenteDeProjeto);
             ParametrosEletrica.Gravar(el, ParametrosEletrica.Queda, c.QuedaTotal);
             ParametrosEletrica.Gravar(el, ParametrosEletrica.DR, c.DR.Obrigatorio ? $"{c.DR.CorrenteResidualMA:0} mA tipo {c.DR.Tipo}" : "—");
             ParametrosEletrica.Gravar(el, ParametrosEletrica.Situacao, c.Atende ? "atende" : "NÃO ATENDE: " + string.Join("; ", c.Reprovados.Select(p => p.Criterio)));
             ParametrosEletrica.Gravar(el, ParametrosEletrica.Comprimento, c.Comprimento);
+            ParametrosEletrica.Gravar(el, ParametrosEletrica.Fase, c.Fases);
         }
         var resultados = r.Circuitos.ToDictionary(c => c.Id, c => c);
         var porId = lida.Instalacao.Circuitos.ToDictionary(c => c.Id, c => c);
@@ -69,6 +98,7 @@ public static class ServicoCalculo
             {
                 ParametrosEletrica.Gravar(el, ParametrosEletrica.Fiacao, fiacao);
                 if (t.DnSugerido is { } dn) ParametrosEletrica.Gravar(el, ParametrosEletrica.DnSugerido, dn);
+                else if (t.RepeticoesSugeridas is { } n) ParametrosEletrica.Gravar(el, ParametrosEletrica.DnSugerido, -n); // negativo: repetir n eletrodutos do maior DN
                 if (t.TaxaDeOcupacao is { } taxa) ParametrosEletrica.Gravar(el, ParametrosEletrica.Ocupacao, taxa * 100);
             }
         }
@@ -77,5 +107,45 @@ public static class ServicoCalculo
             if (!lida.Elementos.TryGetValue(p.Id, out var id) || doc.GetElement(id) is not { } el) continue;
             ParametrosEletrica.Gravar(el, ParametrosEletrica.Ambiente, lida.Instalacao.Ambiente(p.Ambiente)?.Nome ?? "");
         }
+    }
+
+    /// <summary>
+    ///     Caminho do circuito no Revit (item 4.10 do plano): os vértices do traçado pelos eletrodutos até o ponto mais
+    ///     distante, para o comprimento do Revit bater com o real. Precisa de transação aberta; o Revit recusa caminhos que
+    ///     não começam no quadro ou têm vértices inválidos, e aí o circuito fica como estava.
+    /// </summary>
+    static int AlinharCaminhos(Document doc, LeitorInstalacao.Lida lida, List<string> avisos)
+    {
+        var grafo = new Grafo(lida.Instalacao);
+        var cadeias = lida.Grafo.Cadeias.ToDictionary(k => k.Id, k => k);
+        var alinhados = 0;
+        foreach (var c in lida.Instalacao.Circuitos)
+        {
+            if (grafo.ComprimentoDe(c) is not { } caminho || caminho.Caminho.Count == 0) continue;
+            if (!lida.Elementos.TryGetValue(c.Id, out var id) || doc.GetElement(id) is not ElectricalSystem sistema) continue;
+            var vertices = new List<XYZ>();
+            foreach (var t in caminho.Caminho)
+            {
+                if (!cadeias.TryGetValue(t.Id, out var cadeia)) continue;
+                var percurso = lida.Grafo.Percurso(cadeia);
+                if (vertices.Count > 0 && percurso.Count > 1 && percurso[0].DistanceTo(vertices[vertices.Count - 1]) > percurso[percurso.Count - 1].DistanceTo(vertices[vertices.Count - 1]))
+                    percurso.Reverse();
+                foreach (var p in percurso)
+                    if (vertices.Count == 0 || vertices[vertices.Count - 1].DistanceTo(p) > Unidades.DeMetros(0.01)) vertices.Add(p);
+            }
+            if (vertices.Count < 2) continue;
+            try
+            {
+                if (!sistema.IsCircuitPathValid(vertices)) continue;
+                sistema.CircuitPathMode = ElectricalCircuitPathMode.Custom;
+                sistema.SetCircuitPath(vertices);
+                alinhados++;
+            }
+            catch (Autodesk.Revit.Exceptions.ApplicationException e)
+            {
+                avisos.Add($"Circuito {c.Numero}: caminho do Revit não alinhado ({e.Message}).");
+            }
+        }
+        return alinhados;
     }
 }

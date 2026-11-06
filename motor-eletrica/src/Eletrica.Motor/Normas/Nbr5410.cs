@@ -189,7 +189,15 @@ public static class Nbr5410
     }
 
     /// <summary>Tabela 58: seção mínima do condutor de proteção (mesmo metal da fase).</summary>
-    public static double SecaoDoPE(double fase) => fase <= 16 ? fase : fase <= 35 ? 16 : fase / 2;
+    public static double SecaoDoPE(double fase)
+    {
+        if (fase <= 16) return fase;
+        if (fase <= 35) return 16;
+        var metade = fase / 2;
+        foreach (var s in Nbr5410Capacidades.Secoes)
+            if (s >= metade - 1e-9) return s; // S/2 arredondado à seção padronizada seguinte (120 → 70, 500 → 300)
+        return metade;
+    }
 
     /// <summary>6.4.3.1.4: PE fora do conduto das fases: 2,5 mm² com proteção mecânica, 4 mm² sem.</summary>
     public const double PEForaDoCondutoProtegido = 2.5;

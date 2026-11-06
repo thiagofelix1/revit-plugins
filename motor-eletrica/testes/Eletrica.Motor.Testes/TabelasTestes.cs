@@ -114,7 +114,7 @@ public class TabelasTestes
     [InlineData(25, 16)]
     [InlineData(35, 16)]
     [InlineData(50, 25)]
-    [InlineData(120, 60)]
+    [InlineData(120, 70)] // S/2 = 60 arredondado à seção padronizada seguinte
     public void Tabela_58_PE(double fase, double pe) => Assert.Equal(pe, Nbr5410.SecaoDoPE(fase));
 
     [Theory]

@@ -20,32 +20,38 @@
 | Grandeza | Valor | Referência |
 |---|---|---|
 | Circuitos | 8 + 3 de reserva | Tabela 59 |
-| Potência instalada / de demanda | 14.940 / 14.940 VA | 4.2.1 |
-| Corrente de demanda | 58,8 A | 4.2.1 |
+| Potência instalada / de demanda | 14.940 / 12.446 VA | 4.2.1 |
+| Demanda: iluminação e tomadas de uso geral | 6.540 VA × 0,62 = 4.046 VA (28 un.) | prática de projeto e normas de distribuidoras (padrão do motor; conferir com a distribuidora) |
+| Demanda: chuveiros e aquecedores | 5.500 VA × 1,00 = 5.500 VA (1 un.) | prática de projeto e normas de distribuidoras (padrão do motor; conferir com a distribuidora) |
+| Demanda: ar-condicionado | 1.400 VA × 1,00 = 1.400 VA (1 un.) | prática de projeto e normas de distribuidoras (padrão do motor; conferir com a distribuidora) |
+| Demanda: uso específico (TUE, motores, VE, alimentadores) | 1.500 VA × 1,00 = 1.500 VA (1 un.) | prática de projeto e normas de distribuidoras (padrão do motor; conferir com a distribuidora) |
+| Corrente de demanda | 49,0 A | 4.2.1 |
 | Carga por fase | A: 7.740 VA (60,9 A), B: 7.200 VA (56,7 A); desequilíbrio 7 % | 4.2.5.6 |
 | Icc no barramento | 6,30 kA | 5.3.5.1 |
-| Disjuntor geral | C63 A, 2P, 7,5 kA | 5.3.4, 6.3.4 |
+| Disjuntor geral | C50 A, 2P, 7,5 kA | 5.3.4, 6.3.4 |
 | DPS | classe I, 3 un., esquema 2+1 (cada fase e o neutro ao PE), Uc ≥ 140 V (comercial 175 V), Up ≤ 1,5 kV, In ≥ 10 kA, Iimp ≥ 12,5 kA, ligações 4 mm² — 5.4.2.1.1 a) — alimentação por linha aérea em região AQ2 (40 dias de trovoada por ano) | 5.4.2.1.1, 6.3.5.2, Tabela 49 |
-| Circuitos com DR 30 mA | 1, 3, 4, 5, 7, 8 | 5.1.3.2.2 |
+| Circuitos com DR | 1, 3, 4, 5, 7, 8 | 5.1.3.2.2 |
+| DR1 100 A / 30 mA tipo A 4P: 1, 3, 4, 5, 7, 8 | até 6 circuitos por DR; In ≥ soma dos In do grupo | 6.3.3.2, IEC 61008-1 |
+| Seccionador geral, barramentos e identificação | disjuntor geral como seccionador; barramento para o In do geral; circuitos identificados e advertência fixada | 5.6.3, 6.5.4.9, 6.5.4.10 |
 
 Quadro de cargas:
 
-| Circ. | Descrição | Ligação | Potência (VA) | IB (A) | Fase / N / PE (mm²) | Disjuntor | DR | Queda (%) | Situação |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | Iluminação | F+N+PE | 1.040 | 8,2 | 1,5 / 1,5 / 1,5 | C10 A, 1P, 7,5 kA | 30 mA A | 1,68 | atende |
-| 2 | TUG sala, dormitórios, circulação e varanda | F+N+PE | 1.200 | 9,4 | 2,5 / 2,5 / 2,5 | C10 A, 1P, 7,5 kA | — | 1,40 | atende |
-| 3 | TUG cozinha | F+N+PE | 1.900 | 15,0 | 4,0 / 4,0 / 4,0 | C16 A, 1P, 7,5 kA | 30 mA A | 0,98 | atende |
-| 4 | TUG área de serviço | F+N+PE | 1.800 | 14,2 | 4,0 / 4,0 / 4,0 | C16 A, 1P, 7,5 kA | 30 mA A | 1,19 | atende |
-| 5 | Chuveiro elétrico | 2F+PE | 5.500 | 25,0 | 4,0 / 4,0 / 4,0 | B25 A, 2P, 7,5 kA | 30 mA A | 0,67 | atende |
-| 6 | Ar-condicionado dormitório 1 | 2F+PE | 1.400 | 6,4 | 2,5 / 2,5 / 2,5 | C8 A, 2P, 7,5 kA | — | 0,33 | atende |
-| 7 | Micro-ondas (TUE cozinha) | 2F+PE | 1.500 | 6,8 | 2,5 / 2,5 / 2,5 | C8 A, 2P, 7,5 kA | 30 mA A | 0,39 | atende |
-| 8 | TUG banheiro | F+N+PE | 600 | 4,7 | 2,5 / 2,5 / 2,5 | C10 A, 1P, 7,5 kA | 30 mA A | 0,57 | atende |
+| Circ. | Descrição | Ligação | Fase | Potência (VA) | IB (A) | Fase / N / PE (mm²) | Disjuntor | DR | Queda (%) | Situação |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Iluminação | F+N+PE | A | 1.040 | 8,2 | 1,5 / 1,5 / 1,5 | C10 A, 1P, 7,5 kA | 30 mA A | 1,68 | atende |
+| 2 | TUG sala, dormitórios, circulação e varanda | F+N+PE | B | 1.200 | 9,4 | 2,5 / 2,5 / 2,5 | C10 A, 1P, 7,5 kA | — | 1,40 | atende |
+| 3 | TUG cozinha | F+N+PE | A | 1.900 | 15,0 | 4,0 / 4,0 / 4,0 | C16 A, 1P, 7,5 kA | 30 mA A | 0,98 | atende |
+| 4 | TUG área de serviço | F+N+PE | B | 1.800 | 14,2 | 4,0 / 4,0 / 4,0 | C16 A, 1P, 7,5 kA | 30 mA A | 1,19 | atende |
+| 5 | Chuveiro elétrico | 2F+PE | AB | 5.500 | 25,0 | 4,0 / 4,0 / 4,0 | B25 A, 2P, 7,5 kA | 30 mA A | 0,67 | atende |
+| 6 | Ar-condicionado dormitório 1 | 2F+PE | AB | 1.400 | 6,4 | 2,5 / 2,5 / 2,5 | C8 A, 2P, 7,5 kA | — | 0,33 | atende |
+| 7 | Micro-ondas (TUE cozinha) | 2F+PE | AB | 1.500 | 6,8 | 2,5 / 2,5 / 2,5 | C8 A, 2P, 7,5 kA | 30 mA A | 0,39 | atende |
+| 8 | TUG banheiro | F+N+PE | A | 600 | 4,7 | 2,5 / 2,5 / 2,5 | C10 A, 1P, 7,5 kA | 30 mA A | 0,57 | atende |
 
 ## 3. Circuitos: os seis critérios de 6.2.6.1.2
 
 ### Circuito 1 — Iluminação (QD)
 
-1.040 VA, F+N+PE, IB = **8,2 A**; L = 10,0 m (pelos eletrodutos); PVC 70 °C Cobre, método B1 (trecho crítico QD-circB), 5 circuito(s) agrupado(s). **Fase 1,5 mm², neutro 1,5 mm², PE 1,5 mm², disjuntor C10 A, 1P, 7,5 kA.** Critério que definiu a seção: seção mínima.
+1.040 VA, F+N+PE (fase A), IB = **8,2 A**; L = 10,0 m (pelos eletrodutos); PVC 70 °C Cobre, método B1 (trecho crítico QD-circB), 5 circuito(s) agrupado(s). **Fase 1,5 mm², neutro 1,5 mm², PE 1,5 mm², disjuntor C10 A, 1P, 7,5 kA.** Critério que definiu a seção: seção mínima.
 DR obrigatório: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro; IΔn 30 mA, tipo A, In ≥ 16 A.
 
 | Critério | Resultado | Valor | Limite | Item | Como foi calculado |
@@ -60,7 +66,7 @@ DR obrigatório: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro; IΔn 
 
 ### Circuito 2 — TUG sala, dormitórios, circulação e varanda (QD)
 
-1.200 VA, F+N+PE, IB = **9,4 A**; L = 12,5 m (pelos eletrodutos); PVC 70 °C Cobre, método B1 (trecho crítico QD-circA), 3 circuito(s) agrupado(s). **Fase 2,5 mm², neutro 2,5 mm², PE 2,5 mm², disjuntor C10 A, 1P, 7,5 kA.** Critério que definiu a seção: seção mínima.
+1.200 VA, F+N+PE (fase B), IB = **9,4 A**; L = 12,5 m (pelos eletrodutos); PVC 70 °C Cobre, método B1 (trecho crítico QD-circA), 3 circuito(s) agrupado(s). **Fase 2,5 mm², neutro 2,5 mm², PE 2,5 mm², disjuntor C10 A, 1P, 7,5 kA.** Critério que definiu a seção: seção mínima.
 
 | Critério | Resultado | Valor | Limite | Item | Como foi calculado |
 |---|---|---|---|---|---|
@@ -74,7 +80,7 @@ DR obrigatório: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro; IΔn 
 
 ### Circuito 3 — TUG cozinha (QD)
 
-1.900 VA, F+N+PE, IB = **15,0 A**; L = 8,5 m (pelos eletrodutos); PVC 70 °C Cobre, método B1 (trecho crítico QD-circB), 5 circuito(s) agrupado(s). **Fase 4,0 mm², neutro 4,0 mm², PE 4,0 mm², disjuntor C16 A, 1P, 7,5 kA.** Critério que definiu a seção: capacidade de corrente.
+1.900 VA, F+N+PE (fase A), IB = **15,0 A**; L = 8,5 m (pelos eletrodutos); PVC 70 °C Cobre, método B1 (trecho crítico QD-circB), 5 circuito(s) agrupado(s). **Fase 4,0 mm², neutro 4,0 mm², PE 4,0 mm², disjuntor C16 A, 1P, 7,5 kA.** Critério que definiu a seção: capacidade de corrente.
 DR obrigatório: 5.1.3.2.2 d) — ponto em cozinha, copa, área de serviço, lavanderia, garagem ou local molhado de habitação; IΔn 30 mA, tipo A, In ≥ 16 A.
 
 | Critério | Resultado | Valor | Limite | Item | Como foi calculado |
@@ -89,7 +95,7 @@ DR obrigatório: 5.1.3.2.2 d) — ponto em cozinha, copa, área de serviço, lav
 
 ### Circuito 4 — TUG área de serviço (QD)
 
-1.800 VA, F+N+PE, IB = **14,2 A**; L = 11,0 m (pelos eletrodutos); PVC 70 °C Cobre, método B1 (trecho crítico QD-circB), 5 circuito(s) agrupado(s). **Fase 4,0 mm², neutro 4,0 mm², PE 4,0 mm², disjuntor C16 A, 1P, 7,5 kA.** Critério que definiu a seção: sobrecarga.
+1.800 VA, F+N+PE (fase B), IB = **14,2 A**; L = 11,0 m (pelos eletrodutos); PVC 70 °C Cobre, método B1 (trecho crítico QD-circB), 5 circuito(s) agrupado(s). **Fase 4,0 mm², neutro 4,0 mm², PE 4,0 mm², disjuntor C16 A, 1P, 7,5 kA.** Critério que definiu a seção: sobrecarga.
 DR obrigatório: 5.1.3.2.2 d) — ponto em cozinha, copa, área de serviço, lavanderia, garagem ou local molhado de habitação; IΔn 30 mA, tipo A, In ≥ 16 A.
 
 | Critério | Resultado | Valor | Limite | Item | Como foi calculado |
@@ -104,7 +110,7 @@ DR obrigatório: 5.1.3.2.2 d) — ponto em cozinha, copa, área de serviço, lav
 
 ### Circuito 5 — Chuveiro elétrico (QD)
 
-5.500 VA, 2F+PE, IB = **25,0 A**; L = 6,0 m (pelos eletrodutos); PVC 70 °C Cobre, método B1 (trecho crítico QD-bwc), 1 circuito(s) agrupado(s). **Fase 4,0 mm², neutro 4,0 mm², PE 4,0 mm², disjuntor B25 A, 2P, 7,5 kA.** Critério que definiu a seção: capacidade de corrente.
+5.500 VA, 2F+PE (fase AB), IB = **25,0 A**; L = 6,0 m (pelos eletrodutos); PVC 70 °C Cobre, método B1 (trecho crítico QD-bwc), 1 circuito(s) agrupado(s). **Fase 4,0 mm², neutro 4,0 mm², PE 4,0 mm², disjuntor B25 A, 2P, 7,5 kA.** Critério que definiu a seção: capacidade de corrente.
 DR obrigatório: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro; IΔn 30 mA, tipo A, In ≥ 25 A.
 
 | Critério | Resultado | Valor | Limite | Item | Como foi calculado |
@@ -119,7 +125,7 @@ DR obrigatório: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro; IΔn 
 
 ### Circuito 6 — Ar-condicionado dormitório 1 (QD)
 
-1.400 VA, 2F+PE, IB = **6,4 A**; L = 9,0 m (pelos eletrodutos); PVC 70 °C Cobre, método B1 (trecho crítico QD-circA), 3 circuito(s) agrupado(s). **Fase 2,5 mm², neutro 2,5 mm², PE 2,5 mm², disjuntor C8 A, 2P, 7,5 kA.** Critério que definiu a seção: seção mínima.
+1.400 VA, 2F+PE (fase AB), IB = **6,4 A**; L = 9,0 m (pelos eletrodutos); PVC 70 °C Cobre, método B1 (trecho crítico QD-circA), 3 circuito(s) agrupado(s). **Fase 2,5 mm², neutro 2,5 mm², PE 2,5 mm², disjuntor C8 A, 2P, 7,5 kA.** Critério que definiu a seção: seção mínima.
 
 | Critério | Resultado | Valor | Limite | Item | Como foi calculado |
 |---|---|---|---|---|---|
@@ -133,7 +139,7 @@ DR obrigatório: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro; IΔn 
 
 ### Circuito 7 — Micro-ondas (TUE cozinha) (QD)
 
-1.500 VA, 2F+PE, IB = **6,8 A**; L = 8,5 m (pelos eletrodutos); PVC 70 °C Cobre, método B1 (trecho crítico QD-circB), 5 circuito(s) agrupado(s). **Fase 2,5 mm², neutro 2,5 mm², PE 2,5 mm², disjuntor C8 A, 2P, 7,5 kA.** Critério que definiu a seção: seção mínima.
+1.500 VA, 2F+PE (fase AB), IB = **6,8 A**; L = 8,5 m (pelos eletrodutos); PVC 70 °C Cobre, método B1 (trecho crítico QD-circB), 5 circuito(s) agrupado(s). **Fase 2,5 mm², neutro 2,5 mm², PE 2,5 mm², disjuntor C8 A, 2P, 7,5 kA.** Critério que definiu a seção: seção mínima.
 DR obrigatório: 5.1.3.2.2 d) — ponto em cozinha, copa, área de serviço, lavanderia, garagem ou local molhado de habitação; IΔn 30 mA, tipo A, In ≥ 16 A.
 
 | Critério | Resultado | Valor | Limite | Item | Como foi calculado |
@@ -148,7 +154,7 @@ DR obrigatório: 5.1.3.2.2 d) — ponto em cozinha, copa, área de serviço, lav
 
 ### Circuito 8 — TUG banheiro (QD)
 
-600 VA, F+N+PE, IB = **4,7 A**; L = 10,5 m (pelos eletrodutos); PVC 70 °C Cobre, método B1 (trecho crítico QD-circB), 5 circuito(s) agrupado(s). **Fase 2,5 mm², neutro 2,5 mm², PE 2,5 mm², disjuntor C10 A, 1P, 7,5 kA.** Critério que definiu a seção: seção mínima.
+600 VA, F+N+PE (fase A), IB = **4,7 A**; L = 10,5 m (pelos eletrodutos); PVC 70 °C Cobre, método B1 (trecho crítico QD-circB), 5 circuito(s) agrupado(s). **Fase 2,5 mm², neutro 2,5 mm², PE 2,5 mm², disjuntor C10 A, 1P, 7,5 kA.** Critério que definiu a seção: seção mínima.
 DR obrigatório: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro; IΔn 30 mA, tipo A, In ≥ 16 A.
 
 | Critério | Resultado | Valor | Limite | Item | Como foi calculado |
@@ -211,12 +217,15 @@ DR obrigatório: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro; IΔn 
 
 | Código | Gravidade | Mensagem | Item | Elementos |
 |---|---|---|---|---|
+| A-08 | Nota | Banheiro: prever a equipotencialização suplementar reunindo as massas e os elementos condutivos dos volumes 0 a 3 (barra no banheiro ou ligação ao PE do quadro). | 9.1.3.1.2 | bwc |
+| B-05 | Nota | Banheiro: Chuveiro (CH) no volume 1 sem grau IP informado na família; o mínimo é IPX4. | 9.1.4.1 | CH |
 | DR-01 | Nota | Circuito 1 exige DR de 30 mA: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro (1 ponto(s)). | 5.1.3.2.2 | C1, L-bwc |
 | DR-01 | Nota | Circuito 3 exige DR de 30 mA: 5.1.3.2.2 d) — ponto em cozinha, copa, área de serviço, lavanderia, garagem ou local molhado de habitação (4 ponto(s)). | 5.1.3.2.2 | C3, T-coz-1, T-coz-2, T-coz-3, T-coz-4 |
 | DR-01 | Nota | Circuito 4 exige DR de 30 mA: 5.1.3.2.2 d) — ponto em cozinha, copa, área de serviço, lavanderia, garagem ou local molhado de habitação (3 ponto(s)). | 5.1.3.2.2 | C4, T-as-1, T-as-2, T-as-3 |
 | DR-01 | Nota | Circuito 5 exige DR de 30 mA: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro (1 ponto(s)). | 5.1.3.2.2 | C5, CH |
 | DR-01 | Nota | Circuito 7 exige DR de 30 mA: 5.1.3.2.2 d) — ponto em cozinha, copa, área de serviço, lavanderia, garagem ou local molhado de habitação (1 ponto(s)). | 5.1.3.2.2 | C7, MO |
 | DR-01 | Nota | Circuito 8 exige DR de 30 mA: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro (1 ponto(s)). | 5.1.3.2.2 | C8, T-bwc |
+| DR-02 | Nota | Circuito 6: pela carga (ArCondicionado), o DR deve ser do tipo F (correntes com componente contínua ou de alta frequência); tipo AC não serve. | 6.3.3.2, IEC 62423 | C6 |
 | Q-01 | Nota | Quadro QD — Quadro de distribuição: 8 circuito(s); prever 3 espaço(s) de reserva e considerar a reserva no alimentador. | 6.5.4.7, Tabela 59 | QD |
 | Q-02 | Nota | DPS obrigatório no quadro de entrada: 5.4.2.1.1 a) — alimentação por linha aérea em região AQ2 (40 dias de trovoada por ano). | 5.4.2.1.1, 6.3.5.2 | QD |
 | Q-04 | Nota | Quadros residenciais saem com a advertência padrão (não trocar disjuntor por maior; não desativar o DR). | 6.5.4.10 | QD |
@@ -227,6 +236,8 @@ DR obrigatório: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro; IΔn 
 - Disjuntores pela ABNT NBR NM 60898: In preferenciais, I2 = 1,45 In, atuação instantânea garantida no limite superior da faixa da curva (B 5 In, C 10 In, D 20 In).
 - Queda de tensão com a resistência do condutor na temperatura de operação estimada (IEC 60364-5-52, Anexo G) e reatância de 0,08 Ω/km.
 - Curto-circuito pelo método das impedâncias: rede a montante pela Icc presumida com X/R = 3, fator de tensão 1,05 (máximo) e 0,95 (mínimo), resistências a quente ×1,5 no curto mínimo.
-- Energia passante do disjuntor: classe 3 de limitação (NBR NM 60898, Anexo ZA) quando a combinação existe; senão Icc² × 0,01 s. Substituir pela curva I²t do fabricante quando houver.
+- Energia passante do disjuntor: classe 3 de limitação (NBR NM 60898, Anexo ZA) quando a combinação existe; quando o limite da classe passa de k²S², o critério fica "não comprovado" até o I²t de catálogo ser informado.
+- Demanda dos quadros: fatores por tipo de carga (prática de projeto e normas de distribuidoras (padrão do motor; conferir com a distribuidora)); fases balanceadas por potência decrescente, respeitando as fases impostas.
+- Em eletroduto com seções fora de três valores sucessivos, o agrupamento usa 1/√n (6.2.5.5.5) numa segunda passada; sem seção única que atenda, dois condutores em paralelo por fase (6.2.5.7).
 - Diâmetros externos dos condutores isolados pela NBR NM 247-3 (Tabelas 1 e 3); diâmetros internos dos eletrodutos de catálogo (a NBR 15465 só fixa o externo).
-- Gerado em 06/11/2026 01:53 em 60 ms.
+- Gerado em 06/11/2026 09:54 em 87 ms.

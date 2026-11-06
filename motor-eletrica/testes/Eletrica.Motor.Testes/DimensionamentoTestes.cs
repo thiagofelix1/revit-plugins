@@ -93,7 +93,7 @@ public class DimensionamentoTestes
     [Fact]
     public void Icc_no_barramento_decresce_pelo_alimentador()
     {
-        var i = new Instalacao("dois quadros", new Alimentacao(127, 220, 2, EsquemaAterramento.TNCS) { IccPresumidaKA = 10 },
+        var i = new Instalacao("dois quadros", new Alimentacao(127, 220, 2, EsquemaAterramento.TNCS) { IccPresumidaKA = 10, AplicarFatoresDeDemanda = false },
             [new Ambiente("a", "Sala", UsoAmbiente.Sala, 12, 14)],
             [new Quadro("QGBT", "QGBT", 2), new Quadro("QD", "QD", 2) { QuadroPai = "QGBT" }],
             [

@@ -27,6 +27,7 @@ static class ParametrosEletrica
     public static readonly Guid Situacao = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A26");
     public static readonly Guid Comprimento = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A27");
     public static readonly Guid TipoDeCarga = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A28");
+    public static readonly Guid Fase = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A29");
 
     // Pontos (tomadas, luminárias, equipamentos)
     public static readonly Guid Ambiente = new("5E2A9C1B-7D34-4F68-A0B2-1C3D5E7F9A31");
@@ -66,6 +67,7 @@ static class ParametrosEletrica
         new(Situacao, "AE Situação", SpecTypeId.String.Text, Circuito),
         new(Comprimento, "AE Comprimento (m)", SpecTypeId.Number, Circuito),
         new(TipoDeCarga, "AE Tipo de carga", SpecTypeId.String.Text, Circuito),
+        new(Fase, "AE Fase", SpecTypeId.String.Text, Circuito),
         new(Ambiente, "AE Ambiente", SpecTypeId.String.Text, Pontos),
         new(Potencia, "AE Potência (VA)", SpecTypeId.Number, Pontos),
         new(TipoDoPonto, "AE Tipo do ponto", SpecTypeId.String.Text, Pontos),

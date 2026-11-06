@@ -11,6 +11,10 @@
     "TemSpda": false,
     "TemperaturaAmbiente": 30,
     "Habitacao": true,
+    "AplicarFatoresDeDemanda": true,
+    "FolgaDeComprimentoPercentual": 0,
+    "FolgaDeOcupacaoPercentual": 0,
+    "PEComumNoConduto": false,
     "EhTrifasica": false
   },
   "Ambientes": [
@@ -611,7 +615,8 @@
       "Dn": 25,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "QD-circB",
@@ -629,7 +634,8 @@
       "Dn": 40,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "QD-bwc",
@@ -643,7 +649,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 2,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "circ-sala",
@@ -658,7 +665,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "circ-d1",
@@ -674,7 +682,8 @@
       "Dn": 25,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "d1-d2",
@@ -689,7 +698,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "sala-var",
@@ -704,7 +714,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "circ-coz",
@@ -722,7 +733,8 @@
       "Dn": 40,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "coz-as",
@@ -737,7 +749,8 @@
       "Dn": 25,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "coz-bwc",
@@ -752,7 +765,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 0,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "circA-circ",
@@ -767,7 +781,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 0,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-L-sala",
@@ -781,7 +796,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 0,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-L-coz",
@@ -795,7 +811,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 0,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-L-as",
@@ -809,7 +826,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 0,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-L-bwc",
@@ -823,7 +841,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 0,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-L-d1",
@@ -837,7 +856,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 0,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-L-d2",
@@ -851,7 +871,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 0,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-L-circ",
@@ -865,7 +886,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 0,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-L-var",
@@ -879,7 +901,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 0,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-sala-1",
@@ -893,7 +916,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-sala-2",
@@ -907,7 +931,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-sala-3",
@@ -921,7 +946,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-sala-4",
@@ -935,7 +961,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-d1-1",
@@ -949,7 +976,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-d1-2",
@@ -963,7 +991,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-d1-3",
@@ -977,7 +1006,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-d2-1",
@@ -991,7 +1021,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-d2-2",
@@ -1005,7 +1036,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-d2-3",
@@ -1019,7 +1051,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-circ",
@@ -1033,7 +1066,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-var",
@@ -1047,7 +1081,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-coz-1",
@@ -1061,7 +1096,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-coz-2",
@@ -1075,7 +1111,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-coz-3",
@@ -1089,7 +1126,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-coz-4",
@@ -1103,7 +1141,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-as-1",
@@ -1117,7 +1156,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-as-2",
@@ -1131,7 +1171,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-as-3",
@@ -1145,7 +1186,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-T-bwc",
@@ -1159,7 +1201,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-AC-d1",
@@ -1173,7 +1216,8 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     },
     {
       "Id": "desc-MO",
@@ -1187,8 +1231,10 @@
       "Dn": 20,
       "Metodo": "B1",
       "Curvas90": 1,
-      "Externo": false
+      "Externo": false,
+      "Retornos": []
     }
   ],
-  "Caixas": []
+  "Caixas": [],
+  "Comandos": []
 }
