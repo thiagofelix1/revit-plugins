@@ -59,6 +59,7 @@ Estado em 06/11/2026: **compila para 2025, 2026 e 2027 com as entregas 0.2 (lan�
 2. O manifesto de desenvolvimento em `%AppData%\Autodesk\Revit\Addins\2027\Eletrica.AddIn.addin` aponta para essa pasta (já criado nesta máquina).
 3. Abrir o Revit 2027 num projeto elétrico com a arquitetura vinculada e famílias elétricas carregadas; seguir o Guia (Dados → Ambientes → Padrão → Famílias → Quadro → Pontos por ambiente → Criar circuitos → eletrodutos → Passar circuitos → Verificar → Calcular). Modelos de teste: os do SPK (Snowdon, MNEVVM) só para a arquitetura; falta um .rvt elétrico de referência dos engenheiros.
 4. Distribuição: `distribuicao\instalar.bat` copia a pasta `Revit 20xx` para a pasta de add-ins do usuário, como no SPK.
+5. **Teste automático** (sem cliques, como no SPK): `py -3 -I addin-eletrica/testes/fila.py tudo` e abrir o Revit. O plugin roda os cenários de [`testes/regressao.json`](testes/regressao.json) (um apartamento gerado do zero pelos templates do Revit, com o fluxo inteiro até as pranchas; o mesmo em TT; e a mecânica sobre o Snowdon Towers Sample Electrical), grava `Documentos\AutoEletrica\testes\relatorio.json` e fecha o Revit. Com a fila na pasta, abrir o Revit dispara o teste: para usar o Revit à mão, não deixe `fila.json` lá. Detalhes em [`testes/README.md`](testes/README.md).
 
 ## O que as entregas 0.2 a 0.6 ainda não cobrem
 

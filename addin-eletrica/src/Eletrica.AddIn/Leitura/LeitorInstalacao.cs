@@ -117,6 +117,16 @@ public static class LeitorInstalacao
             mapa[s.UniqueId] = s.Id;
         }
 
+        // Pontos que ainda não estão em circuito: entram sem circuito, para o Verificar acusar (M-01) e contar as tomadas do cômodo.
+        foreach (var fi in PontosSemCircuito(doc))
+        {
+            if (mapa.ContainsKey(fi.UniqueId)) continue;
+            var ponto = LerPonto(doc, fi, null, ambientesLidos, grafo, avisos, volumes);
+            if (ponto is null) continue;
+            pontos.Add(ponto);
+            mapa[fi.UniqueId] = fi.Id;
+        }
+
         // Comandos de iluminação: interruptores (nó no grafo) e luminárias que já são pontos.
         var idsDePontos = pontos.Select(p => p.Id).ToHashSet();
         var comandos = new List<Comando>();

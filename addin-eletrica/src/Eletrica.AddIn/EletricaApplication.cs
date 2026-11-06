@@ -143,6 +143,8 @@ public class EletricaApplication : IExternalApplication
             "Passo a passo: dados do projeto, ambientes, padrão e famílias, quadro, pontos, comandos, circuitos, eletrodutos, passar circuitos, verificar, calcular, etiquetar.");
         Margem(ajuda);
 
+        // Teste automático: só liga se houver Documentos\AutoEletrica\testes\fila.json.
+        Automacao.TesteAutomatico.Registrar(application);
         return Result.Succeeded;
     }
 

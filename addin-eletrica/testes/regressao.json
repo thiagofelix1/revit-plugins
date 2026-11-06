@@ -1,0 +1,83 @@
+{
+ "fecharRevit": true,
+ "cenarios": [
+  {
+   "nome": "apto-completo",
+   "novo": "Electrical-DefaultBRAPTB.rte",
+   "dados": {
+    "TensaoFaseNeutro": 127, "TensaoFaseFase": 220, "Fases": 3, "Esquema": "TNCS", "IccPresumidaKA": 6,
+    "LinhaAerea": true, "DiasDeTrovoada": 40, "TemSpda": false, "TemperaturaAmbiente": 30, "Habitacao": true
+   },
+   "cena": "apartamento",
+   "passos": [
+    "ambientes", "parametros", "pontosPorAmbiente", "verificar", "criarCircuitos", "tracarEstrela", "passarCircuitos",
+    "verificar", "caixasPorRegra", "passarCircuitos", "verificar", "calcular", "desenharFiacao", "etiquetar",
+    "legenda", "quadros", "lista", "pranchas"
+   ],
+   "esperado": {
+    "cena.ambientesLidos": "7",
+    "ambientes.ambientes": "7",
+    "pontosPorAmbiente.pontos": ">=30",
+    "pontosPorAmbiente.recusados": "0",
+    "verificar.A-01": "0",
+    "verificar.A-02": "0",
+    "verificar.M-01": ">=1",
+    "criarCircuitos.criados": ">=7",
+    "tracarEstrela.recusas": "0",
+    "passarCircuitos.circuitos": ">=7",
+    "verificar#2.M-01": "0",
+    "verificar#2.M-03": "0",
+    "verificar#2.C-01": "0",
+    "verificar#2.C-03": "0",
+    "verificar#2.C-04": "0",
+    "verificar#2.L-01": "0",
+    "verificar#3.T-01": "0",
+    "verificar#3.T-02": "0",
+    "calcular.circuitos": ">=7",
+    "desenharFiacao.fios": ">=1",
+    "quadros.vistas": ">=3",
+    "pranchas.folhas": ">=3",
+    "etapasComErro": "0",
+    "dialogos": "0"
+   }
+  },
+  {
+   "nome": "apto-tt",
+   "novo": "Electrical-DefaultBRAPTB.rte",
+   "dados": {
+    "TensaoFaseNeutro": 127, "TensaoFaseFase": 220, "Fases": 3, "Esquema": "TT", "IccPresumidaKA": 6,
+    "LinhaAerea": true, "DiasDeTrovoada": 40, "Habitacao": true, "ResistenciaDeAterramentoOhm": 80
+   },
+   "cena": "apartamento",
+   "passos": ["pontosPorAmbiente", "criarCircuitos", "tracarEstrela", "passarCircuitos", "calcular"],
+   "esperado": {
+    "criarCircuitos.criados": ">=7",
+    "calcular.circuitos": ">=7",
+    "etapasComErro": "0",
+    "dialogos": "0"
+   }
+  },
+  {
+   "nome": "snowdon-mecanica",
+   "abrir": "{Samples}\\Snowdon Towers Sample Electrical.rvt",
+   "copiarJunto": ["{Samples}\\Snowdon Towers Sample *.rvt"],
+   "dados": {
+    "TensaoFaseNeutro": 120, "TensaoFaseFase": 208, "Fases": 3, "Esquema": "TNS", "IccPresumidaKA": 10,
+    "LinhaAerea": false, "DiasDeTrovoada": 20, "Habitacao": false
+   },
+   "usosSugeridos": true,
+   "passos": [
+    "ambientes", "parametros", "verificar", "passarCircuitos", "verificar", "calcular", "desenharFiacao", "etiquetar",
+    "legenda", "quadros", "lista", "pranchas"
+   ],
+   "esperado": {
+    "ambientes.ambientes": ">=10",
+    "verificar.quadros": ">=1",
+    "verificar.circuitos": ">=10",
+    "calcular.circuitos": ">=10",
+    "pranchas.folhas": ">=3",
+    "etapasComErro": "0"
+   }
+  }
+ ]
+}

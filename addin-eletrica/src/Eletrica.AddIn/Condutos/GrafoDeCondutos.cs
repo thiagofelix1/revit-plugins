@@ -107,13 +107,33 @@ public sealed class GrafoDeCondutos
 
     static IEnumerable<Connector> Conectores(ConnectorManager cm) => cm.Connectors.Cast<Connector>().Where(k => k.Domain != Domain.DomainUndefined);
 
+    // Grade espacial dos nós (células de 1 m): num prédio com milhares de eletrodutos, procurar nó a nó ficava quadrático.
+    const double Celula = 1.0;
+    readonly Dictionary<(long, long, long), List<string>> _grade = new();
+
+    static (long, long, long) CelulaDe(XYZ m) => ((long)Math.Floor(m.X / Celula), (long)Math.Floor(m.Y / Celula), (long)Math.Floor(m.Z / Celula));
+
+    IEnumerable<string> Vizinhos(XYZ m, double raio)
+    {
+        var (i, j, k) = CelulaDe(m);
+        var n = (long)Math.Ceiling(raio / Celula);
+        for (var di = -n; di <= n; di++)
+        for (var dj = -n; dj <= n; dj++)
+        for (var dk = -n; dk <= n; dk++)
+            if (_grade.TryGetValue((i + di, j + dj, k + dk), out var lista))
+                foreach (var no in lista) yield return no;
+    }
+
     string No(XYZ p)
     {
         var m = new XYZ(Unidades.Metros(p.X), Unidades.Metros(p.Y), Unidades.Metros(p.Z));
-        foreach (var (chave, existente) in _nos)
-            if (existente.DistanceTo(m) <= ToleranciaNo) return chave;
+        foreach (var chave in Vizinhos(m, ToleranciaNo))
+            if (_nos[chave].DistanceTo(m) <= ToleranciaNo) return chave;
         var nova = $"n{_nos.Count + 1}";
         _nos[nova] = m;
+        var celula = CelulaDe(m);
+        if (!_grade.TryGetValue(celula, out var daCelula)) _grade[celula] = daCelula = [];
+        daCelula.Add(nova);
         return nova;
     }
 
@@ -123,9 +143,9 @@ public sealed class GrafoDeCondutos
         var m = new XYZ(Unidades.Metros(p.X), Unidades.Metros(p.Y), Unidades.Metros(p.Z));
         string? melhor = null;
         var menor = tolerancia;
-        foreach (var (chave, existente) in _nos)
+        foreach (var chave in Vizinhos(m, tolerancia))
         {
-            var d = existente.DistanceTo(m);
+            var d = _nos[chave].DistanceTo(m);
             if (d <= menor) { menor = d; melhor = chave; }
         }
         return melhor;

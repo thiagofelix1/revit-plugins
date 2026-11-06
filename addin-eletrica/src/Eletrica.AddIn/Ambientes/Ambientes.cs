@@ -99,19 +99,30 @@ public static class LeituraDeAmbientes
     }
 
     /// <summary>O ambiente que contém o ponto (coordenadas do projeto elétrico), ou nulo.</summary>
+    /// <remarks>
+    ///     O ponto de luz fica no limite de cima do Room e o ponto de piso no de baixo, onde o Revit pode responder que não há
+    ///     ambiente: tenta o próprio ponto e depois o mesmo XY um pouco acima e abaixo (o Room é um prisma vertical; 1 m abaixo
+    ///     do teto ainda é o mesmo pavimento).
+    /// </remarks>
     public static AmbienteLido? Em(IReadOnlyList<AmbienteLido> ambientes, XYZ ponto)
     {
-        foreach (var grupo in ambientes.GroupBy(a => a.Doc))
+        foreach (var dz in Deslocamentos)
         {
-            var primeiro = grupo.First();
-            var local = primeiro.Transformacao.Inverse.OfPoint(ponto);
-            Room? room;
-            try { room = primeiro.Doc.GetRoomAtPoint(local); }
-            catch (Autodesk.Revit.Exceptions.ApplicationException) { room = null; }
-            if (room is null) continue;
-            var achado = grupo.FirstOrDefault(a => a.Room.Id == room.Id);
-            if (achado is not null) return achado;
+            var tentativa = new XYZ(ponto.X, ponto.Y, ponto.Z + Unidades.DeMetros(dz));
+            foreach (var grupo in ambientes.GroupBy(a => a.Doc))
+            {
+                var primeiro = grupo.First();
+                var local = primeiro.Transformacao.Inverse.OfPoint(tentativa);
+                Room? room;
+                try { room = primeiro.Doc.GetRoomAtPoint(local); }
+                catch (Autodesk.Revit.Exceptions.ApplicationException) { room = null; }
+                if (room is null) continue;
+                var achado = grupo.FirstOrDefault(a => a.Room.Id == room.Id);
+                if (achado is not null) return achado;
+            }
         }
         return null;
     }
+
+    static readonly double[] Deslocamentos = [0, 0.2, -0.3, -1.0];
 }
