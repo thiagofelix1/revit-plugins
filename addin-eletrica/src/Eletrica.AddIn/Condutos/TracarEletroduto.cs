@@ -50,9 +50,9 @@ static class TracarEletroduto
     }
 
     /// <summary>Eletrodutos entre dois extremos; devolve os criados. Lança se o Revit recusar.</summary>
-    public static List<Conduit> Entre(Document doc, Opcoes o, Level nivel, Extremo de, Extremo para)
+    public static List<Conduit> Entre(Document doc, Opcoes o, Level nivel, Extremo de, Extremo para, double? cotaFixa = null)
     {
-        var vertices = Vertices(o, nivel, de.Ponto, para.Ponto);
+        var vertices = Vertices(o, nivel, de.Ponto, para.Ponto, cotaFixa);
         return Criar(doc, o, nivel, vertices, de.Conector, para.Conector);
     }
 

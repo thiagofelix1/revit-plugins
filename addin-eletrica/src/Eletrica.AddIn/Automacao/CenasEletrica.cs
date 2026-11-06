@@ -548,29 +548,39 @@ static class CenasEletrica
             var lista = porAmbiente.ToList();
             var centro = lista.FirstOrDefault(p => p.Category?.BuiltInCategory == BuiltInCategory.OST_LightingFixtures) ?? lista[0];
             var extremoCentro = TracarEletroduto.ExtremoDe(centro)!;
-            void Ligar(TracarEletroduto.Extremo de, TracarEletroduto.Extremo para, string rotulo)
+            void Ligar(TracarEletroduto.Extremo de, TracarEletroduto.Extremo para, string rotulo, double? cota = null)
             {
                 List<Autodesk.Revit.DB.Electrical.Conduit> novos = [];
                 var nivel = Colocacao.NivelAbaixo(doc, de.Ponto.Z) ?? throw new InvalidOperationException("sem nível");
                 var motivo = TransacaoSegura.Executar(doc, "AutoEletrica — trecho (teste)", () =>
                 {
-                    novos = TracarEletroduto.Entre(doc, opcoes, nivel, de, para);
+                    novos = TracarEletroduto.Entre(doc, opcoes, nivel, de, para, cota);
                     return null;
                 });
                 if (motivo is null) eletrodutos += novos.Count;
-                else recusas.Add($"{rotulo}: {motivo}");
+                else
+                {
+                    static string P(XYZ p) => $"({Unidades.Metros(p.X):0.00}; {Unidades.Metros(p.Y):0.00}; {Unidades.Metros(p.Z):0.00})";
+                    var caminho = TracarEletroduto.Vertices(opcoes, nivel, de.Ponto, para.Ponto, cota);
+                    recusas.Add($"{rotulo}: {motivo} Vértices: {string.Join(" → ", caminho.Select(P))}; conector na origem: {de.Conector is not null}, no destino: {para.Conector is not null}");
+                }
             }
             Ligar(origemQuadro, extremoCentro, $"quadro → {centro.Name} ({centro.Id})");
-            // De cima para baixo; um ponto sob outro já ligado (tomada sob o interruptor) sai dele, reto, e não da luminária:
-            // dois eletrodutos pela mesma vertical o Revit recusa.
-            var ligados = new List<TracarEletroduto.Extremo>();
-            foreach (var p in lista.Where(p => p.Id != centro.Id).OrderByDescending(p => ((LocationPoint)p.Location).Point.Z))
+            // Cada ponto sai do ponto já ligado mais perto em planta (como o projetista encadeia pela parede), não todos da
+            // luminária: trechos que saem do mesmo ponto pela mesma direção se sobrepõem e o Revit recusa as curvas. Entre dois
+            // pontos baixos o eletroduto corre na altura deles, pela parede, sem subir ao teto por cima da descida que já existe.
+            var nivelDoAmbiente = Colocacao.NivelAbaixo(doc, extremoCentro.Ponto.Z);
+            bool Baixo(TracarEletroduto.Extremo e) => nivelDoAmbiente is not null && e.Ponto.Z - nivelDoAmbiente.ProjectElevation < M(1.50);
+            static double Plano(TracarEletroduto.Extremo a, TracarEletroduto.Extremo b) => new XYZ(a.Ponto.X - b.Ponto.X, a.Ponto.Y - b.Ponto.Y, 0).GetLength();
+            var ligados = new List<TracarEletroduto.Extremo> { extremoCentro };
+            var faltam = lista.Where(p => p.Id != centro.Id).Select(p => TracarEletroduto.ExtremoDe(p)!).ToList();
+            while (faltam.Count > 0)
             {
-                var extremo = TracarEletroduto.ExtremoDe(p)!;
-                var acima = ligados.FirstOrDefault(e => new XYZ(e.Ponto.X - extremo.Ponto.X, e.Ponto.Y - extremo.Ponto.Y, 0).GetLength() < M(0.30));
-                if (acima is not null) Ligar(acima, extremo, $"{acima.Elemento.Name} → {p.Name} ({p.Id})");
-                else Ligar(extremoCentro, extremo, $"{centro.Name} → {p.Name} ({p.Id})");
-                ligados.Add(extremo);
+                var (de, para) = faltam.SelectMany(f => ligados.Select(l => (de: l, para: f))).OrderBy(x => Plano(x.de, x.para)).First();
+                double? cota = Baixo(de) && Baixo(para) && Plano(de, para) >= M(0.30) ? de.Ponto.Z : null;
+                Ligar(de, para, $"{de.Elemento.Name} → {para.Elemento.Name} ({para.Elemento.Id})", cota);
+                ligados.Add(para);
+                faltam.Remove(para);
             }
             ambientes++;
         }
