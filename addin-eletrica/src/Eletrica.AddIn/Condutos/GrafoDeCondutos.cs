@@ -328,4 +328,32 @@ public sealed class GrafoDeCondutos
     }
 
     public IReadOnlyDictionary<string, XYZ> Nos => _nos;
+
+    /// <summary>Os pedaços do grafo que não se ligam entre si (diagnóstico do traçado): cada um é o conjunto dos seus nós.</summary>
+    public List<HashSet<string>> Componentes()
+    {
+        var vizinhos = _nos.Keys.ToDictionary(n => n, _ => new List<string>());
+        foreach (var (a, b, _, _) in _arestas)
+        {
+            vizinhos[a].Add(b);
+            vizinhos[b].Add(a);
+        }
+        var vistos = new HashSet<string>();
+        var componentes = new List<HashSet<string>>();
+        foreach (var inicio in _nos.Keys)
+        {
+            if (!vistos.Add(inicio)) continue;
+            var componente = new HashSet<string> { inicio };
+            var fila = new Queue<string>([inicio]);
+            while (fila.Count > 0)
+                foreach (var v in vizinhos[fila.Dequeue()])
+                    if (vistos.Add(v))
+                    {
+                        componente.Add(v);
+                        fila.Enqueue(v);
+                    }
+            componentes.Add(componente);
+        }
+        return componentes.OrderByDescending(c => c.Count).ToList();
+    }
 }

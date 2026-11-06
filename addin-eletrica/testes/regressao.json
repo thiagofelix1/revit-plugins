@@ -10,7 +10,7 @@
    },
    "cena": "apartamento",
    "passos": [
-    "ambientes", "parametros", "pontosPorAmbiente", "verificar", "criarCircuitos", "tracarEstrela", "passarCircuitos",
+    "ambientes", "parametros", "pontosPorAmbiente", "verificar", "criarCircuitos", "tracarEstrela", "diagnosticoGrafo", "passarCircuitos",
     "verificar", "caixasPorRegra", "passarCircuitos", "verificar", "calcular", "desenharFiacao", "etiquetar",
     "legenda", "quadros", "lista", "pranchas"
    ],

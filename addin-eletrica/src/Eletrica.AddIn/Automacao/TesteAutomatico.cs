@@ -395,6 +395,39 @@ static class TesteAutomatico
                 var vista = LegendaDeFiacao.Gerar(doc, CalculoEletrica.Executar(lida.Instalacao), lida.Instalacao, padrao);
                 return vista.Name;
             }
+            case "diagnosticoGrafo":
+            {
+                // Pedaços desconectados do traçado e, para cada ponto fora do pedaço do quadro, onde ele está e o nó mais perto.
+                var g = new GrafoDeCondutos(doc);
+                var componentes = g.Componentes();
+                var quadro = Quadros.Todos(doc).FirstOrDefault();
+                var noQuadro = quadro is null ? null : g.NoDe(quadro);
+                var doQuadro = componentes.FirstOrDefault(c => noQuadro is not null && c.Contains(noQuadro)) ?? [];
+                M("componentes", componentes.Count);
+                string P(XYZ p) => $"({Unidades.Metros(p.X):0.00}; {Unidades.Metros(p.Y):0.00}; {Unidades.Metros(p.Z):0.00})";
+                var linhas = new List<string>
+                {
+                    $"{g.Nos.Count} nó(s), {componentes.Count} pedaço(s): " + string.Join(", ", componentes.Take(12).Select(c => c.Count + (c == doQuadro ? " (quadro)" : ""))),
+                    $"quadro em {((quadro?.Location as LocationPoint)?.Point is { } pq ? P(pq) : "?")}, nó {noQuadro}",
+                };
+                var pontos = new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance)).Cast<FamilyInstance>()
+                    .Where(fi => fi.Category?.BuiltInCategory is BuiltInCategory.OST_ElectricalFixtures or BuiltInCategory.OST_LightingFixtures or BuiltInCategory.OST_LightingDevices)
+                    .Where(fi => fi.Location is LocationPoint).ToList();
+                var fora = 0;
+                foreach (var fi in pontos)
+                {
+                    var p = ((LocationPoint)fi.Location).Point;
+                    var no = g.NoDe(fi);
+                    if (no is not null && doQuadro.Contains(no)) continue;
+                    fora++;
+                    var perto = doQuadro.Select(n => (n, d: g.Nos[n].DistanceTo(p))).OrderBy(x => x.d).FirstOrDefault();
+                    var componente = no is null ? "-" : componentes.FindIndex(c => c.Contains(no)).ToString();
+                    if (fora <= 25)
+                        linhas.Add($"{fi.Category?.Name} {fi.Symbol.Family.Name} em {P(p)}: nó {no ?? "nenhum"} (pedaço {componente}, a {(no is null ? 0 : Unidades.Metros(g.Nos[no].DistanceTo(p))):0.00} m); nó do quadro mais perto {perto.n} a {Unidades.Metros(perto.d):0.00} m");
+                }
+                M("pontosForaDoQuadro", fora);
+                return string.Join("\n", linhas);
+            }
             case "sondarSistemas":
                 return CenasEletrica.SondarSistemas(doc);
             case "diagnosticoQuadros":

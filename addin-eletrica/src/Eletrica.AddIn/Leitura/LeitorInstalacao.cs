@@ -43,6 +43,12 @@ public static class LeitorInstalacao
             if (e is FamilyInstance { MEPModel: ElectricalEquipment } fi && fi.Category?.BuiltInCategory == BuiltInCategory.OST_ElectricalEquipment)
                 quadrosRevit[fi.Id] = fi;
 
+        // Quadro recém-inserido, ainda sem circuitos: entra também, pelo sistema de distribuição. Sem isso o Verificar e o Guia
+        // diziam "nenhum quadro" logo depois do botão Quadro, e o M-01 (ponto sem circuito) nunca aparecia antes do Criar circuitos.
+        foreach (var fi in Circuitos.Quadros.Todos(doc))
+            if (fi.MEPModel is ElectricalEquipment { DistributionSystem: not null } && !quadrosRevit.ContainsKey(fi.Id))
+                quadrosRevit[fi.Id] = fi;
+
         var alimentadorDe = new Dictionary<ElementId, ElectricalSystem>();
         foreach (var s in sistemas)
         foreach (var e in s.Elements.Cast<Element>())
