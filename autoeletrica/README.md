@@ -2,13 +2,15 @@
 
 Pasta de trabalho do segundo produto do repositório: um add-in do Revit para projeto de instalações elétricas de baixa tensão segundo a ABNT NBR 5410, construído sobre a mesma base do [SPK](../docs/refinamentos/spk/README.md) (motor .NET puro + add-in fino, memorial auditável, folhas no padrão do escritório, licença por assinatura).
 
-Estado em 05/11/2026: **pesquisa concluída, nenhum código ainda.** A norma foi estudada inteira ([mapa em `nr/normas/nbr-5410-2004.md`](../nr/normas/nbr-5410-2004.md), fora do Git), o mercado foi mapeado e o roadmap está proposto. O próximo passo é validar com os dois engenheiros que estão ajudando ([perguntas](docs/perguntas-engenheiros.md)) e começar o motor.
+Estado em 05/11/2026: **pesquisa e plano concluídos, nenhum código ainda.** A norma foi estudada inteira ([mapa em `nr/normas/nbr-5410-2004.md`](../nr/normas/nbr-5410-2004.md), fora do Git), o mercado foi mapeado e o roadmap está proposto. O próximo passo é validar com os dois engenheiros que estão ajudando ([perguntas](docs/perguntas-engenheiros.md)) e começar o motor.
 
 ## Documentos
 
 | Arquivo | Conteúdo |
 |---|---|
 | [docs/oportunidades.md](docs/oportunidades.md) | **Comece aqui.** Leitura honesta do mercado, onde está a lacuna de verdade, tese do produto e fases de desenvolvimento |
+| [docs/plano-de-desenvolvimento.md](docs/plano-de-desenvolvimento.md) | **O plano completo.** Inventário do QiElétrico como régua, inventário de funcionalidades do AutoEletrica (básico, assistido, automático, cálculo, documentação, verificação) com norma e fase, roadmap por entrega, aba do Revit, modelo de dados e testes |
+| [docs/normas-necessarias.md](docs/normas-necessarias.md) | Normas que faltam baixar, com edição vigente, prioridade e onde cada uma entra |
 | [docs/concorrencia.md](docs/concorrencia.md) | Os plugins de elétrica para Revit no Brasil e fora, com preço, recursos e o que falta em cada um |
 | [docs/base-de-regras.md](docs/base-de-regras.md) | As regras da NBR 5410 que o plugin verifica e aplica, com o item citado, agrupadas por ferramenta |
 | [docs/revit-api-eletrica.md](docs/revit-api-eletrica.md) | O que a Revit API dá para elétrica (circuitos, fiação, eletrodutos, quadros, condutores no 2026+) e as armadilhas |
