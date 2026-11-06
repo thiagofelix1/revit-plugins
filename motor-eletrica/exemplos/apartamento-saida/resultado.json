@@ -1,0 +1,3166 @@
+{
+  "Nome": "Apartamento tipo — 2 dormitórios",
+  "Alimentacao": {
+    "TensaoFaseNeutro": 127,
+    "TensaoFaseFase": 220,
+    "Fases": 2,
+    "Esquema": "TNCS",
+    "IccPresumidaKA": 6,
+    "LinhaAerea": true,
+    "DiasDeTrovoada": 40,
+    "TemSpda": false,
+    "TemperaturaAmbiente": 30,
+    "Habitacao": true,
+    "EhTrifasica": false
+  },
+  "Circuitos": [
+    {
+      "Id": "C1",
+      "Numero": "1",
+      "Descricao": "Iluminação",
+      "Quadro": "QD",
+      "Tipo": "Iluminacao",
+      "Ligacao": "FN",
+      "PotenciaVA": 1040,
+      "CorrenteDeProjeto": 8.188976377952756,
+      "Comprimento": 10,
+      "ComprimentoEstimado": false,
+      "Isolacao": "Pvc70",
+      "Material": "Cobre",
+      "MetodoCritico": "B1",
+      "TrechoCritico": "QD-circB",
+      "CondutoresCarregados": 2,
+      "FatorDeTemperatura": 1,
+      "FatorDeAgrupamento": 0.6,
+      "CircuitosAgrupados": 5,
+      "SecaoFase": 1.5,
+      "SecaoNeutro": 1.5,
+      "SecaoPE": 1.5,
+      "CapacidadeDeReferencia": 17.5,
+      "CapacidadeCorrigida": 10.5,
+      "Disjuntor": {
+        "In": 10,
+        "Curva": "C",
+        "IcnKA": 7.5,
+        "Polos": 1,
+        "I2": 14.5,
+        "Ia": 100
+      },
+      "QuedaTerminal": 1.6822518878976114,
+      "QuedaTotal": 1.6822518878976114,
+      "QuedasAMontante": [],
+      "IccMaximaNaOrigemKA": 6.3,
+      "IccMinimaNoFimA": 342.5790870289459,
+      "ImpedanciaDeFalta": 0.35218145113979415,
+      "EnergiaPassanteA2s": 84000,
+      "EnergiaSuportadaA2s": 29756.25,
+      "DR": {
+        "Obrigatorio": true,
+        "Motivo": "5.1.3.2.2 a) — ponto em local com banheira ou chuveiro",
+        "CorrenteResidualMA": 30,
+        "Tipo": "A",
+        "In": 16
+      },
+      "Pareceres": [
+        {
+          "Criterio": "capacidade de corrente",
+          "Atende": true,
+          "Valor": "IB = 8,2 A",
+          "Limite": "IZ = 10,5 A",
+          "Item": "6.2.6.1.2 a), 6.2.5, Tabela 36",
+          "Explicacao": "Tabela 36, método B1, 2 condutores carregados: 17,5 A × FCT 1,00 × FCA 0,60 (5 circuito(s) no trecho QD-circB)",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seção mínima",
+          "Atende": true,
+          "Valor": "1,5 mm²",
+          "Limite": "≥ 1,5 mm²",
+          "Item": "6.2.6.1.2 f), Tabela 47",
+          "Explicacao": "circuito de iluminação: 1,5 mm² em cobre",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "sobrecarga",
+          "Atende": true,
+          "Valor": "IB 8,2 ≤ In 10 ≤ IZ 10,5 A",
+          "Limite": "I2 = 14,5 ≤ 1,45 IZ = 15,2 A",
+          "Item": "5.3.4.1, 6.3.4.2, NBR NM 60898 8.6.2.3",
+          "Explicacao": "disjuntor C10 A, 1P, 7,5 kA; I2 = 1,45 In atende automaticamente quando In ≤ IZ",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "queda de tensão",
+          "Atende": true,
+          "Valor": "1,68 % no circuito, 1,68 % acumulada",
+          "Limite": "≤ 4 % no circuito e ≤ 5 % do ponto de entrega",
+          "Item": "6.2.6.1.2 e), 6.2.7.1 c), 6.2.7.2",
+          "Explicacao": "L = 10,0 m (pelos eletrodutos), R = 13,045 Ω/km a 54 °C, cos φ = 1,00",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "capacidade de interrupção",
+          "Atende": true,
+          "Valor": "Icc presumida no quadro = 6,30 kA",
+          "Limite": "Icn = 7,5 kA",
+          "Item": "5.3.5.5 a), 6.3.4.3, NBR NM 60898 5.3.4",
+          "Explicacao": "corrente de curto trifásica máxima no barramento do quadro pelo método das impedâncias",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "solicitação térmica no curto",
+          "Valor": "I²t ≤ 84000 A²s (classe 3)",
+          "Limite": "k²S² = 29756 A²s (k = 115)",
+          "Item": "5.3.5.5 b), Tabela 30, NBR NM 60898 Anexo ZA",
+          "Explicacao": "não comprovado: o limite da classe 3 (84000 A²s) passa de k²S²; a curva I²t real do fabricante costuma ficar abaixo. Informe o I²t de catálogo na Icc presumida para comprovar, ou use disjuntor limitador",
+          "Reprovado": false,
+          "NaoAvaliado": true
+        },
+        {
+          "Criterio": "seccionamento automático",
+          "Atende": true,
+          "Valor": "Zs = 0,352 Ω, Ikmín = 343 A",
+          "Limite": "Ia = 100 A (curva C, 10 × In); Zs · Ia = 35 ≤ Uo = 127 V",
+          "Item": "5.1.2.2.4.2, Tabela 25",
+          "Explicacao": "esquema TNCS: o disjuntor deve atuar em até 0,8 s na falta fase-PE no fim do circuito; aqui pela atuação instantânea (< 0,1 s)",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "CriterioQueMandou": "seção mínima",
+      "Avisos": [],
+      "Atende": true,
+      "Reprovados": []
+    },
+    {
+      "Id": "C2",
+      "Numero": "2",
+      "Descricao": "TUG sala, dormitórios, circulação e varanda",
+      "Quadro": "QD",
+      "Tipo": "TomadaUsoGeral",
+      "Ligacao": "FN",
+      "PotenciaVA": 1200,
+      "CorrenteDeProjeto": 9.448818897637794,
+      "Comprimento": 12.5,
+      "ComprimentoEstimado": false,
+      "Isolacao": "Pvc70",
+      "Material": "Cobre",
+      "MetodoCritico": "B1",
+      "TrechoCritico": "QD-circA",
+      "CondutoresCarregados": 2,
+      "FatorDeTemperatura": 1,
+      "FatorDeAgrupamento": 0.7,
+      "CircuitosAgrupados": 3,
+      "SecaoFase": 2.5,
+      "SecaoNeutro": 2.5,
+      "SecaoPE": 2.5,
+      "CapacidadeDeReferencia": 24,
+      "CapacidadeCorrigida": 16.799999999999997,
+      "Disjuntor": {
+        "In": 10,
+        "Curva": "C",
+        "IcnKA": 7.5,
+        "Polos": 1,
+        "I2": 14.5,
+        "Ia": 100
+      },
+      "QuedaTerminal": 1.3969303586552946,
+      "QuedaTotal": 1.3969303586552946,
+      "QuedasAMontante": [],
+      "IccMaximaNaOrigemKA": 6.3,
+      "IccMinimaNoFimA": 453.1868463118067,
+      "ImpedanciaDeFalta": 0.2662257322380205,
+      "EnergiaPassanteA2s": 84000,
+      "EnergiaSuportadaA2s": 82656.25,
+      "DR": {
+        "Obrigatorio": false,
+        "CorrenteResidualMA": 30,
+        "Tipo": "AC",
+        "In": 16
+      },
+      "Pareceres": [
+        {
+          "Criterio": "capacidade de corrente",
+          "Atende": true,
+          "Valor": "IB = 9,4 A",
+          "Limite": "IZ = 16,8 A",
+          "Item": "6.2.6.1.2 a), 6.2.5, Tabela 36",
+          "Explicacao": "Tabela 36, método B1, 2 condutores carregados: 24,0 A × FCT 1,00 × FCA 0,70 (3 circuito(s) no trecho QD-circA)",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seção mínima",
+          "Atende": true,
+          "Valor": "2,5 mm²",
+          "Limite": "≥ 2,5 mm²",
+          "Item": "6.2.6.1.2 f), Tabela 47",
+          "Explicacao": "circuito de força (tomadas inclusive): 2,5 mm² em cobre",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "sobrecarga",
+          "Atende": true,
+          "Valor": "IB 9,4 ≤ In 10 ≤ IZ 16,8 A",
+          "Limite": "I2 = 14,5 ≤ 1,45 IZ = 24,4 A",
+          "Item": "5.3.4.1, 6.3.4.2, NBR NM 60898 8.6.2.3",
+          "Explicacao": "disjuntor C10 A, 1P, 7,5 kA; I2 = 1,45 In atende automaticamente quando In ≤ IZ",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "queda de tensão",
+          "Atende": true,
+          "Valor": "1,40 % no circuito, 1,40 % acumulada",
+          "Limite": "≤ 4 % no circuito e ≤ 5 % do ponto de entrega",
+          "Item": "6.2.6.1.2 e), 6.2.7.1 c), 6.2.7.2",
+          "Explicacao": "L = 12,5 m (pelos eletrodutos), R = 7,510 Ω/km a 43 °C, cos φ = 1,00",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "capacidade de interrupção",
+          "Atende": true,
+          "Valor": "Icc presumida no quadro = 6,30 kA",
+          "Limite": "Icn = 7,5 kA",
+          "Item": "5.3.5.5 a), 6.3.4.3, NBR NM 60898 5.3.4",
+          "Explicacao": "corrente de curto trifásica máxima no barramento do quadro pelo método das impedâncias",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "solicitação térmica no curto",
+          "Valor": "I²t ≤ 84000 A²s (classe 3)",
+          "Limite": "k²S² = 82656 A²s (k = 115)",
+          "Item": "5.3.5.5 b), Tabela 30, NBR NM 60898 Anexo ZA",
+          "Explicacao": "não comprovado: o limite da classe 3 (84000 A²s) passa de k²S²; a curva I²t real do fabricante costuma ficar abaixo. Informe o I²t de catálogo na Icc presumida para comprovar, ou use disjuntor limitador",
+          "Reprovado": false,
+          "NaoAvaliado": true
+        },
+        {
+          "Criterio": "seccionamento automático",
+          "Atende": true,
+          "Valor": "Zs = 0,266 Ω, Ikmín = 453 A",
+          "Limite": "Ia = 100 A (curva C, 10 × In); Zs · Ia = 27 ≤ Uo = 127 V",
+          "Item": "5.1.2.2.4.2, Tabela 25",
+          "Explicacao": "esquema TNCS: o disjuntor deve atuar em até 0,8 s na falta fase-PE no fim do circuito; aqui pela atuação instantânea (< 0,1 s)",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "CriterioQueMandou": "seção mínima",
+      "Avisos": [],
+      "Atende": true,
+      "Reprovados": []
+    },
+    {
+      "Id": "C3",
+      "Numero": "3",
+      "Descricao": "TUG cozinha",
+      "Quadro": "QD",
+      "Tipo": "TomadaUsoGeral",
+      "Ligacao": "FN",
+      "PotenciaVA": 1900,
+      "CorrenteDeProjeto": 14.960629921259843,
+      "Comprimento": 8.5,
+      "ComprimentoEstimado": false,
+      "Isolacao": "Pvc70",
+      "Material": "Cobre",
+      "MetodoCritico": "B1",
+      "TrechoCritico": "QD-circB",
+      "CondutoresCarregados": 2,
+      "FatorDeTemperatura": 1,
+      "FatorDeAgrupamento": 0.6,
+      "CircuitosAgrupados": 5,
+      "SecaoFase": 4,
+      "SecaoNeutro": 4,
+      "SecaoPE": 4,
+      "CapacidadeDeReferencia": 32,
+      "CapacidadeCorrigida": 19.2,
+      "Disjuntor": {
+        "In": 16,
+        "Curva": "C",
+        "IcnKA": 7.5,
+        "Polos": 1,
+        "I2": 23.2,
+        "Ia": 160
+      },
+      "QuedaTerminal": 0.9794799220013537,
+      "QuedaTotal": 0.9794799220013537,
+      "QuedasAMontante": [],
+      "IccMaximaNaOrigemKA": 6.3,
+      "IccMinimaNoFimA": 1017.6313229246715,
+      "ImpedanciaDeFalta": 0.11855963675847948,
+      "EnergiaPassanteA2s": 84000,
+      "EnergiaSuportadaA2s": 211600,
+      "DR": {
+        "Obrigatorio": true,
+        "Motivo": "5.1.3.2.2 d) — ponto em cozinha, copa, área de serviço, lavanderia, garagem ou local molhado de habitação",
+        "CorrenteResidualMA": 30,
+        "Tipo": "A",
+        "In": 16
+      },
+      "Pareceres": [
+        {
+          "Criterio": "capacidade de corrente",
+          "Atende": true,
+          "Valor": "IB = 15,0 A",
+          "Limite": "IZ = 19,2 A",
+          "Item": "6.2.6.1.2 a), 6.2.5, Tabela 36",
+          "Explicacao": "Tabela 36, método B1, 2 condutores carregados: 32,0 A × FCT 1,00 × FCA 0,60 (5 circuito(s) no trecho QD-circB)",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seção mínima",
+          "Atende": true,
+          "Valor": "4 mm²",
+          "Limite": "≥ 2,5 mm²",
+          "Item": "6.2.6.1.2 f), Tabela 47",
+          "Explicacao": "circuito de força (tomadas inclusive): 2,5 mm² em cobre",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "sobrecarga",
+          "Atende": true,
+          "Valor": "IB 15,0 ≤ In 16 ≤ IZ 19,2 A",
+          "Limite": "I2 = 23,2 ≤ 1,45 IZ = 27,8 A",
+          "Item": "5.3.4.1, 6.3.4.2, NBR NM 60898 8.6.2.3",
+          "Explicacao": "disjuntor C16 A, 1P, 7,5 kA; I2 = 1,45 In atende automaticamente quando In ≤ IZ",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "queda de tensão",
+          "Atende": true,
+          "Valor": "0,98 % no circuito, 0,98 % acumulada",
+          "Limite": "≤ 4 % no circuito e ≤ 5 % do ponto de entrega",
+          "Item": "6.2.6.1.2 e), 6.2.7.1 c), 6.2.7.2",
+          "Explicacao": "L = 8,5 m (pelos eletrodutos), R = 4,891 Ω/km a 54 °C, cos φ = 1,00",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "capacidade de interrupção",
+          "Atende": true,
+          "Valor": "Icc presumida no quadro = 6,30 kA",
+          "Limite": "Icn = 7,5 kA",
+          "Item": "5.3.5.5 a), 6.3.4.3, NBR NM 60898 5.3.4",
+          "Explicacao": "corrente de curto trifásica máxima no barramento do quadro pelo método das impedâncias",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "solicitação térmica no curto",
+          "Atende": true,
+          "Valor": "I²t ≤ 84000 A²s (classe 3)",
+          "Limite": "k²S² = 211600 A²s (k = 115)",
+          "Item": "5.3.5.5 b), Tabela 30, NBR NM 60898 Anexo ZA",
+          "Explicacao": "limite da classe 3 de limitação de energia, curva C, In 16 A, Icn 10 kA (Tabela ZA): qualquer disjuntor classe 3 protege o condutor",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seccionamento automático",
+          "Atende": true,
+          "Valor": "Zs = 0,119 Ω, Ikmín = 1018 A",
+          "Limite": "Ia = 160 A (curva C, 10 × In); Zs · Ia = 19 ≤ Uo = 127 V",
+          "Item": "5.1.2.2.4.2, Tabela 25",
+          "Explicacao": "esquema TNCS: o disjuntor deve atuar em até 0,8 s na falta fase-PE no fim do circuito; aqui pela atuação instantânea (< 0,1 s)",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "CriterioQueMandou": "capacidade de corrente",
+      "Avisos": [],
+      "Atende": true,
+      "Reprovados": []
+    },
+    {
+      "Id": "C4",
+      "Numero": "4",
+      "Descricao": "TUG área de serviço",
+      "Quadro": "QD",
+      "Tipo": "TomadaUsoGeral",
+      "Ligacao": "FN",
+      "PotenciaVA": 1800,
+      "CorrenteDeProjeto": 14.173228346456693,
+      "Comprimento": 11,
+      "ComprimentoEstimado": false,
+      "Isolacao": "Pvc70",
+      "Material": "Cobre",
+      "MetodoCritico": "B1",
+      "TrechoCritico": "QD-circB",
+      "CondutoresCarregados": 2,
+      "FatorDeTemperatura": 1,
+      "FatorDeAgrupamento": 0.6,
+      "CircuitosAgrupados": 5,
+      "SecaoFase": 4,
+      "SecaoNeutro": 4,
+      "SecaoPE": 4,
+      "CapacidadeDeReferencia": 32,
+      "CapacidadeCorrigida": 19.2,
+      "Disjuntor": {
+        "In": 16,
+        "Curva": "C",
+        "IcnKA": 7.5,
+        "Polos": 1,
+        "I2": 23.2,
+        "Ia": 160
+      },
+      "QuedaTerminal": 1.1904962035646613,
+      "QuedaTotal": 1.1904962035646613,
+      "QuedasAMontante": [],
+      "IccMaximaNaOrigemKA": 6.3,
+      "IccMinimaNoFimA": 801.529883214862,
+      "ImpedanciaDeFalta": 0.1505246435929301,
+      "EnergiaPassanteA2s": 84000,
+      "EnergiaSuportadaA2s": 211600,
+      "DR": {
+        "Obrigatorio": true,
+        "Motivo": "5.1.3.2.2 d) — ponto em cozinha, copa, área de serviço, lavanderia, garagem ou local molhado de habitação",
+        "CorrenteResidualMA": 30,
+        "Tipo": "A",
+        "In": 16
+      },
+      "Pareceres": [
+        {
+          "Criterio": "capacidade de corrente",
+          "Atende": true,
+          "Valor": "IB = 14,2 A",
+          "Limite": "IZ = 19,2 A",
+          "Item": "6.2.6.1.2 a), 6.2.5, Tabela 36",
+          "Explicacao": "Tabela 36, método B1, 2 condutores carregados: 32,0 A × FCT 1,00 × FCA 0,60 (5 circuito(s) no trecho QD-circB)",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seção mínima",
+          "Atende": true,
+          "Valor": "4 mm²",
+          "Limite": "≥ 2,5 mm²",
+          "Item": "6.2.6.1.2 f), Tabela 47",
+          "Explicacao": "circuito de força (tomadas inclusive): 2,5 mm² em cobre",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "sobrecarga",
+          "Atende": true,
+          "Valor": "IB 14,2 ≤ In 16 ≤ IZ 19,2 A",
+          "Limite": "I2 = 23,2 ≤ 1,45 IZ = 27,8 A",
+          "Item": "5.3.4.1, 6.3.4.2, NBR NM 60898 8.6.2.3",
+          "Explicacao": "disjuntor C16 A, 1P, 7,5 kA; I2 = 1,45 In atende automaticamente quando In ≤ IZ",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "queda de tensão",
+          "Atende": true,
+          "Valor": "1,19 % no circuito, 1,19 % acumulada",
+          "Limite": "≤ 4 % no circuito e ≤ 5 % do ponto de entrega",
+          "Item": "6.2.6.1.2 e), 6.2.7.1 c), 6.2.7.2",
+          "Explicacao": "L = 11,0 m (pelos eletrodutos), R = 4,849 Ω/km a 52 °C, cos φ = 1,00",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "capacidade de interrupção",
+          "Atende": true,
+          "Valor": "Icc presumida no quadro = 6,30 kA",
+          "Limite": "Icn = 7,5 kA",
+          "Item": "5.3.5.5 a), 6.3.4.3, NBR NM 60898 5.3.4",
+          "Explicacao": "corrente de curto trifásica máxima no barramento do quadro pelo método das impedâncias",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "solicitação térmica no curto",
+          "Atende": true,
+          "Valor": "I²t ≤ 84000 A²s (classe 3)",
+          "Limite": "k²S² = 211600 A²s (k = 115)",
+          "Item": "5.3.5.5 b), Tabela 30, NBR NM 60898 Anexo ZA",
+          "Explicacao": "limite da classe 3 de limitação de energia, curva C, In 16 A, Icn 10 kA (Tabela ZA): qualquer disjuntor classe 3 protege o condutor",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seccionamento automático",
+          "Atende": true,
+          "Valor": "Zs = 0,151 Ω, Ikmín = 802 A",
+          "Limite": "Ia = 160 A (curva C, 10 × In); Zs · Ia = 24 ≤ Uo = 127 V",
+          "Item": "5.1.2.2.4.2, Tabela 25",
+          "Explicacao": "esquema TNCS: o disjuntor deve atuar em até 0,8 s na falta fase-PE no fim do circuito; aqui pela atuação instantânea (< 0,1 s)",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "CriterioQueMandou": "sobrecarga",
+      "Avisos": [],
+      "Atende": true,
+      "Reprovados": []
+    },
+    {
+      "Id": "C5",
+      "Numero": "5",
+      "Descricao": "Chuveiro elétrico",
+      "Quadro": "QD",
+      "Tipo": "Chuveiro",
+      "Ligacao": "FF",
+      "PotenciaVA": 5500,
+      "CorrenteDeProjeto": 25,
+      "Comprimento": 6,
+      "ComprimentoEstimado": false,
+      "Isolacao": "Pvc70",
+      "Material": "Cobre",
+      "MetodoCritico": "B1",
+      "TrechoCritico": "QD-bwc",
+      "CondutoresCarregados": 2,
+      "FatorDeTemperatura": 1,
+      "FatorDeAgrupamento": 1,
+      "CircuitosAgrupados": 1,
+      "SecaoFase": 4,
+      "SecaoNeutro": 4,
+      "SecaoPE": 4,
+      "CapacidadeDeReferencia": 32,
+      "CapacidadeCorrigida": 32,
+      "Disjuntor": {
+        "In": 25,
+        "Curva": "B",
+        "IcnKA": 7.5,
+        "Polos": 2,
+        "I2": 36.25,
+        "Ia": 125
+      },
+      "QuedaTerminal": 0.667254480908203,
+      "QuedaTotal": 0.667254480908203,
+      "QuedasAMontante": [],
+      "IccMaximaNaOrigemKA": 6.3,
+      "IccMinimaNoFimA": 1388.9412667223207,
+      "ImpedanciaDeFalta": 0.08686472415404195,
+      "EnergiaPassanteA2s": 90000,
+      "EnergiaSuportadaA2s": 211600,
+      "DR": {
+        "Obrigatorio": true,
+        "Motivo": "5.1.3.2.2 a) — ponto em local com banheira ou chuveiro",
+        "CorrenteResidualMA": 30,
+        "Tipo": "A",
+        "In": 25
+      },
+      "Pareceres": [
+        {
+          "Criterio": "capacidade de corrente",
+          "Atende": true,
+          "Valor": "IB = 25,0 A",
+          "Limite": "IZ = 32,0 A",
+          "Item": "6.2.6.1.2 a), 6.2.5, Tabela 36",
+          "Explicacao": "Tabela 36, método B1, 2 condutores carregados: 32,0 A × FCT 1,00 × FCA 1,00 (1 circuito(s) no trecho QD-bwc)",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seção mínima",
+          "Atende": true,
+          "Valor": "4 mm²",
+          "Limite": "≥ 2,5 mm²",
+          "Item": "6.2.6.1.2 f), Tabela 47",
+          "Explicacao": "circuito de força (tomadas inclusive): 2,5 mm² em cobre",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "sobrecarga",
+          "Atende": true,
+          "Valor": "IB 25,0 ≤ In 25 ≤ IZ 32,0 A",
+          "Limite": "I2 = 36,3 ≤ 1,45 IZ = 46,4 A",
+          "Item": "5.3.4.1, 6.3.4.2, NBR NM 60898 8.6.2.3",
+          "Explicacao": "disjuntor B25 A, 2P, 7,5 kA; I2 = 1,45 In atende automaticamente quando In ≤ IZ",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "queda de tensão",
+          "Atende": true,
+          "Valor": "0,67 % no circuito, 0,67 % acumulada",
+          "Limite": "≤ 4 % no circuito e ≤ 5 % do ponto de entrega",
+          "Item": "6.2.6.1.2 e), 6.2.7.1 c), 6.2.7.2",
+          "Explicacao": "L = 6,0 m (pelos eletrodutos), R = 4,893 Ω/km a 54 °C, cos φ = 1,00",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "capacidade de interrupção",
+          "Atende": true,
+          "Valor": "Icc presumida no quadro = 6,30 kA",
+          "Limite": "Icn = 7,5 kA",
+          "Item": "5.3.5.5 a), 6.3.4.3, NBR NM 60898 5.3.4",
+          "Explicacao": "corrente de curto trifásica máxima no barramento do quadro pelo método das impedâncias",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "solicitação térmica no curto",
+          "Atende": true,
+          "Valor": "I²t ≤ 90000 A²s (classe 3)",
+          "Limite": "k²S² = 211600 A²s (k = 115)",
+          "Item": "5.3.5.5 b), Tabela 30, NBR NM 60898 Anexo ZA",
+          "Explicacao": "limite da classe 3 de limitação de energia, curva B, In 25 A, Icn 10 kA (Tabela ZA): qualquer disjuntor classe 3 protege o condutor",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seccionamento automático",
+          "Atende": true,
+          "Valor": "Zs = 0,087 Ω, Ikmín = 1389 A",
+          "Limite": "Ia = 125 A (curva B, 5 × In); Zs · Ia = 11 ≤ Uo = 127 V",
+          "Item": "5.1.2.2.4.2, Tabela 25",
+          "Explicacao": "esquema TNCS: o disjuntor deve atuar em até 0,8 s na falta fase-PE no fim do circuito; aqui pela atuação instantânea (< 0,1 s)",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "CriterioQueMandou": "capacidade de corrente",
+      "Avisos": [],
+      "Atende": true,
+      "Reprovados": []
+    },
+    {
+      "Id": "C6",
+      "Numero": "6",
+      "Descricao": "Ar-condicionado dormitório 1",
+      "Quadro": "QD",
+      "Tipo": "ArCondicionado",
+      "Ligacao": "FF",
+      "PotenciaVA": 1400,
+      "CorrenteDeProjeto": 6.363636363636363,
+      "Comprimento": 9,
+      "ComprimentoEstimado": false,
+      "Isolacao": "Pvc70",
+      "Material": "Cobre",
+      "MetodoCritico": "B1",
+      "TrechoCritico": "QD-circA",
+      "CondutoresCarregados": 2,
+      "FatorDeTemperatura": 1,
+      "FatorDeAgrupamento": 0.7,
+      "CircuitosAgrupados": 3,
+      "SecaoFase": 2.5,
+      "SecaoNeutro": 2.5,
+      "SecaoPE": 2.5,
+      "CapacidadeDeReferencia": 24,
+      "CapacidadeCorrigida": 16.799999999999997,
+      "Disjuntor": {
+        "In": 8,
+        "Curva": "C",
+        "IcnKA": 7.5,
+        "Polos": 2,
+        "I2": 11.6,
+        "Ia": 80
+      },
+      "QuedaTerminal": 0.32628134642270323,
+      "QuedaTotal": 0.32628134642270323,
+      "QuedasAMontante": [],
+      "IccMaximaNaOrigemKA": 6.3,
+      "IccMinimaNoFimA": 621.6091006973969,
+      "ImpedanciaDeFalta": 0.19409303992596005,
+      "EnergiaPassanteA2s": 84000,
+      "EnergiaSuportadaA2s": 82656.25,
+      "DR": {
+        "Obrigatorio": false,
+        "CorrenteResidualMA": 30,
+        "Tipo": "AC",
+        "In": 16
+      },
+      "Pareceres": [
+        {
+          "Criterio": "capacidade de corrente",
+          "Atende": true,
+          "Valor": "IB = 6,4 A",
+          "Limite": "IZ = 16,8 A",
+          "Item": "6.2.6.1.2 a), 6.2.5, Tabela 36",
+          "Explicacao": "Tabela 36, método B1, 2 condutores carregados: 24,0 A × FCT 1,00 × FCA 0,70 (3 circuito(s) no trecho QD-circA)",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seção mínima",
+          "Atende": true,
+          "Valor": "2,5 mm²",
+          "Limite": "≥ 2,5 mm²",
+          "Item": "6.2.6.1.2 f), Tabela 47",
+          "Explicacao": "circuito de força (tomadas inclusive): 2,5 mm² em cobre",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "sobrecarga",
+          "Atende": true,
+          "Valor": "IB 6,4 ≤ In 8 ≤ IZ 16,8 A",
+          "Limite": "I2 = 11,6 ≤ 1,45 IZ = 24,4 A",
+          "Item": "5.3.4.1, 6.3.4.2, NBR NM 60898 8.6.2.3",
+          "Explicacao": "disjuntor C8 A, 2P, 7,5 kA; I2 = 1,45 In atende automaticamente quando In ≤ IZ",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "queda de tensão",
+          "Atende": true,
+          "Valor": "0,33 % no circuito, 0,33 % acumulada",
+          "Limite": "≤ 4 % no circuito e ≤ 5 % do ponto de entrega",
+          "Item": "6.2.6.1.2 e), 6.2.7.1 c), 6.2.7.2",
+          "Explicacao": "L = 9,0 m (pelos eletrodutos), R = 7,323 Ω/km a 36 °C, cos φ = 0,85",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "capacidade de interrupção",
+          "Atende": true,
+          "Valor": "Icc presumida no quadro = 6,30 kA",
+          "Limite": "Icn = 7,5 kA",
+          "Item": "5.3.5.5 a), 6.3.4.3, NBR NM 60898 5.3.4",
+          "Explicacao": "corrente de curto trifásica máxima no barramento do quadro pelo método das impedâncias",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "solicitação térmica no curto",
+          "Valor": "I²t ≤ 84000 A²s (classe 3)",
+          "Limite": "k²S² = 82656 A²s (k = 115)",
+          "Item": "5.3.5.5 b), Tabela 30, NBR NM 60898 Anexo ZA",
+          "Explicacao": "não comprovado: o limite da classe 3 (84000 A²s) passa de k²S²; a curva I²t real do fabricante costuma ficar abaixo. Informe o I²t de catálogo na Icc presumida para comprovar, ou use disjuntor limitador",
+          "Reprovado": false,
+          "NaoAvaliado": true
+        },
+        {
+          "Criterio": "seccionamento automático",
+          "Atende": true,
+          "Valor": "Zs = 0,194 Ω, Ikmín = 622 A",
+          "Limite": "Ia = 80 A (curva C, 10 × In); Zs · Ia = 16 ≤ Uo = 127 V",
+          "Item": "5.1.2.2.4.2, Tabela 25",
+          "Explicacao": "esquema TNCS: o disjuntor deve atuar em até 0,8 s na falta fase-PE no fim do circuito; aqui pela atuação instantânea (< 0,1 s)",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "CriterioQueMandou": "seção mínima",
+      "Avisos": [],
+      "Atende": true,
+      "Reprovados": []
+    },
+    {
+      "Id": "C7",
+      "Numero": "7",
+      "Descricao": "Micro-ondas (TUE cozinha)",
+      "Quadro": "QD",
+      "Tipo": "TomadaUsoEspecifico",
+      "Ligacao": "FF",
+      "PotenciaVA": 1500,
+      "CorrenteDeProjeto": 6.818181818181818,
+      "Comprimento": 8.5,
+      "ComprimentoEstimado": false,
+      "Isolacao": "Pvc70",
+      "Material": "Cobre",
+      "MetodoCritico": "B1",
+      "TrechoCritico": "QD-circB",
+      "CondutoresCarregados": 2,
+      "FatorDeTemperatura": 1,
+      "FatorDeAgrupamento": 0.6,
+      "CircuitosAgrupados": 5,
+      "SecaoFase": 2.5,
+      "SecaoNeutro": 2.5,
+      "SecaoPE": 2.5,
+      "CapacidadeDeReferencia": 24,
+      "CapacidadeCorrigida": 14.399999999999999,
+      "Disjuntor": {
+        "In": 8,
+        "Curva": "C",
+        "IcnKA": 7.5,
+        "Polos": 2,
+        "I2": 11.6,
+        "Ia": 80
+      },
+      "QuedaTerminal": 0.39042785415620085,
+      "QuedaTotal": 0.39042785415620085,
+      "QuedasAMontante": [],
+      "IccMaximaNaOrigemKA": 6.3,
+      "IccMinimaNoFimA": 656.3969766130565,
+      "ImpedanciaDeFalta": 0.1838064529525137,
+      "EnergiaPassanteA2s": 84000,
+      "EnergiaSuportadaA2s": 82656.25,
+      "DR": {
+        "Obrigatorio": true,
+        "Motivo": "5.1.3.2.2 d) — ponto em cozinha, copa, área de serviço, lavanderia, garagem ou local molhado de habitação",
+        "CorrenteResidualMA": 30,
+        "Tipo": "A",
+        "In": 16
+      },
+      "Pareceres": [
+        {
+          "Criterio": "capacidade de corrente",
+          "Atende": true,
+          "Valor": "IB = 6,8 A",
+          "Limite": "IZ = 14,4 A",
+          "Item": "6.2.6.1.2 a), 6.2.5, Tabela 36",
+          "Explicacao": "Tabela 36, método B1, 2 condutores carregados: 24,0 A × FCT 1,00 × FCA 0,60 (5 circuito(s) no trecho QD-circB)",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seção mínima",
+          "Atende": true,
+          "Valor": "2,5 mm²",
+          "Limite": "≥ 2,5 mm²",
+          "Item": "6.2.6.1.2 f), Tabela 47",
+          "Explicacao": "circuito de força (tomadas inclusive): 2,5 mm² em cobre",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "sobrecarga",
+          "Atende": true,
+          "Valor": "IB 6,8 ≤ In 8 ≤ IZ 14,4 A",
+          "Limite": "I2 = 11,6 ≤ 1,45 IZ = 20,9 A",
+          "Item": "5.3.4.1, 6.3.4.2, NBR NM 60898 8.6.2.3",
+          "Explicacao": "disjuntor C8 A, 2P, 7,5 kA; I2 = 1,45 In atende automaticamente quando In ≤ IZ",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "queda de tensão",
+          "Atende": true,
+          "Valor": "0,39 % no circuito, 0,39 % acumulada",
+          "Limite": "≤ 4 % no circuito e ≤ 5 % do ponto de entrega",
+          "Item": "6.2.6.1.2 e), 6.2.7.1 c), 6.2.7.2",
+          "Explicacao": "L = 8,5 m (pelos eletrodutos), R = 7,410 Ω/km a 39 °C, cos φ = 1,00",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "capacidade de interrupção",
+          "Atende": true,
+          "Valor": "Icc presumida no quadro = 6,30 kA",
+          "Limite": "Icn = 7,5 kA",
+          "Item": "5.3.5.5 a), 6.3.4.3, NBR NM 60898 5.3.4",
+          "Explicacao": "corrente de curto trifásica máxima no barramento do quadro pelo método das impedâncias",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "solicitação térmica no curto",
+          "Valor": "I²t ≤ 84000 A²s (classe 3)",
+          "Limite": "k²S² = 82656 A²s (k = 115)",
+          "Item": "5.3.5.5 b), Tabela 30, NBR NM 60898 Anexo ZA",
+          "Explicacao": "não comprovado: o limite da classe 3 (84000 A²s) passa de k²S²; a curva I²t real do fabricante costuma ficar abaixo. Informe o I²t de catálogo na Icc presumida para comprovar, ou use disjuntor limitador",
+          "Reprovado": false,
+          "NaoAvaliado": true
+        },
+        {
+          "Criterio": "seccionamento automático",
+          "Atende": true,
+          "Valor": "Zs = 0,184 Ω, Ikmín = 656 A",
+          "Limite": "Ia = 80 A (curva C, 10 × In); Zs · Ia = 15 ≤ Uo = 127 V",
+          "Item": "5.1.2.2.4.2, Tabela 25",
+          "Explicacao": "esquema TNCS: o disjuntor deve atuar em até 0,8 s na falta fase-PE no fim do circuito; aqui pela atuação instantânea (< 0,1 s)",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "CriterioQueMandou": "seção mínima",
+      "Avisos": [],
+      "Atende": true,
+      "Reprovados": []
+    },
+    {
+      "Id": "C8",
+      "Numero": "8",
+      "Descricao": "TUG banheiro",
+      "Quadro": "QD",
+      "Tipo": "TomadaUsoGeral",
+      "Ligacao": "FN",
+      "PotenciaVA": 600,
+      "CorrenteDeProjeto": 4.724409448818897,
+      "Comprimento": 10.5,
+      "ComprimentoEstimado": false,
+      "Isolacao": "Pvc70",
+      "Material": "Cobre",
+      "MetodoCritico": "B1",
+      "TrechoCritico": "QD-circB",
+      "CondutoresCarregados": 2,
+      "FatorDeTemperatura": 1,
+      "FatorDeAgrupamento": 0.6,
+      "CircuitosAgrupados": 5,
+      "SecaoFase": 2.5,
+      "SecaoNeutro": 2.5,
+      "SecaoPE": 2.5,
+      "CapacidadeDeReferencia": 24,
+      "CapacidadeCorrigida": 14.399999999999999,
+      "Disjuntor": {
+        "In": 10,
+        "Curva": "C",
+        "IcnKA": 7.5,
+        "Polos": 1,
+        "I2": 14.5,
+        "Ia": 100
+      },
+      "QuedaTerminal": 0.569036716558158,
+      "QuedaTotal": 0.569036716558158,
+      "QuedasAMontante": [],
+      "IccMaximaNaOrigemKA": 6.3,
+      "IccMinimaNoFimA": 536.2582285247244,
+      "ImpedanciaDeFalta": 0.2249848926923037,
+      "EnergiaPassanteA2s": 84000,
+      "EnergiaSuportadaA2s": 82656.25,
+      "DR": {
+        "Obrigatorio": true,
+        "Motivo": "5.1.3.2.2 a) — ponto em local com banheira ou chuveiro",
+        "CorrenteResidualMA": 30,
+        "Tipo": "A",
+        "In": 16
+      },
+      "Pareceres": [
+        {
+          "Criterio": "capacidade de corrente",
+          "Atende": true,
+          "Valor": "IB = 4,7 A",
+          "Limite": "IZ = 14,4 A",
+          "Item": "6.2.6.1.2 a), 6.2.5, Tabela 36",
+          "Explicacao": "Tabela 36, método B1, 2 condutores carregados: 24,0 A × FCT 1,00 × FCA 0,60 (5 circuito(s) no trecho QD-circB)",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "seção mínima",
+          "Atende": true,
+          "Valor": "2,5 mm²",
+          "Limite": "≥ 2,5 mm²",
+          "Item": "6.2.6.1.2 f), Tabela 47",
+          "Explicacao": "circuito de força (tomadas inclusive): 2,5 mm² em cobre",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "sobrecarga",
+          "Atende": true,
+          "Valor": "IB 4,7 ≤ In 10 ≤ IZ 14,4 A",
+          "Limite": "I2 = 14,5 ≤ 1,45 IZ = 20,9 A",
+          "Item": "5.3.4.1, 6.3.4.2, NBR NM 60898 8.6.2.3",
+          "Explicacao": "disjuntor C10 A, 1P, 7,5 kA; I2 = 1,45 In atende automaticamente quando In ≤ IZ",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "queda de tensão",
+          "Atende": true,
+          "Valor": "0,57 % no circuito, 0,57 % acumulada",
+          "Limite": "≤ 4 % no circuito e ≤ 5 % do ponto de entrega",
+          "Item": "6.2.6.1.2 e), 6.2.7.1 c), 6.2.7.2",
+          "Explicacao": "L = 10,5 m (pelos eletrodutos), R = 7,284 Ω/km a 34 °C, cos φ = 1,00",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "capacidade de interrupção",
+          "Atende": true,
+          "Valor": "Icc presumida no quadro = 6,30 kA",
+          "Limite": "Icn = 7,5 kA",
+          "Item": "5.3.5.5 a), 6.3.4.3, NBR NM 60898 5.3.4",
+          "Explicacao": "corrente de curto trifásica máxima no barramento do quadro pelo método das impedâncias",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "solicitação térmica no curto",
+          "Valor": "I²t ≤ 84000 A²s (classe 3)",
+          "Limite": "k²S² = 82656 A²s (k = 115)",
+          "Item": "5.3.5.5 b), Tabela 30, NBR NM 60898 Anexo ZA",
+          "Explicacao": "não comprovado: o limite da classe 3 (84000 A²s) passa de k²S²; a curva I²t real do fabricante costuma ficar abaixo. Informe o I²t de catálogo na Icc presumida para comprovar, ou use disjuntor limitador",
+          "Reprovado": false,
+          "NaoAvaliado": true
+        },
+        {
+          "Criterio": "seccionamento automático",
+          "Atende": true,
+          "Valor": "Zs = 0,225 Ω, Ikmín = 536 A",
+          "Limite": "Ia = 100 A (curva C, 10 × In); Zs · Ia = 22 ≤ Uo = 127 V",
+          "Item": "5.1.2.2.4.2, Tabela 25",
+          "Explicacao": "esquema TNCS: o disjuntor deve atuar em até 0,8 s na falta fase-PE no fim do circuito; aqui pela atuação instantânea (< 0,1 s)",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "CriterioQueMandou": "seção mínima",
+      "Avisos": [],
+      "Atende": true,
+      "Reprovados": []
+    }
+  ],
+  "Quadros": [
+    {
+      "Id": "QD",
+      "Nome": "QD — Quadro de distribuição",
+      "Fases": 2,
+      "NumeroDeCircuitos": 8,
+      "Reserva": 3,
+      "PotenciaInstaladaVA": 14940,
+      "PotenciaDeDemandaVA": 14940,
+      "CorrenteDeDemanda": 58.818897637795274,
+      "CargasPorFase": [
+        {
+          "Fase": "A",
+          "PotenciaVA": 7740,
+          "Corrente": 60.94488188976378
+        },
+        {
+          "Fase": "B",
+          "PotenciaVA": 7200,
+          "Corrente": 56.69291338582677
+        }
+      ],
+      "DesequilibrioPercentual": 7.228915662650603,
+      "IccNoBarramentoKA": 6.3,
+      "DisjuntorGeral": {
+        "In": 63,
+        "Curva": "C",
+        "IcnKA": 7.5,
+        "Polos": 2,
+        "I2": 91.35,
+        "Ia": 630
+      },
+      "Dps": {
+        "Classe": "I",
+        "Esquema": "2+1 (cada fase e o neutro ao PE)",
+        "Quantidade": 3,
+        "UcMinimo": 139.70000000000002,
+        "UcComercial": 175,
+        "UpMaximo": 1.5,
+        "InMinimoKA": 10,
+        "IimpMinimoKA": 12.5,
+        "SecaoDeLigacao": 4,
+        "Motivo": "classe I na entrada por exposição a descarga direta ou linha aérea (6.3.5.2.1 e NBR 5419-4)"
+      },
+      "MotivoDoDps": "5.4.2.1.1 a) — alimentação por linha aérea em região AQ2 (40 dias de trovoada por ano)",
+      "CircuitosComDR": [
+        "1",
+        "3",
+        "4",
+        "5",
+        "7",
+        "8"
+      ],
+      "Avisos": []
+    }
+  ],
+  "Trechos": [
+    {
+      "Id": "QD-circA",
+      "De": "QD",
+      "Para": "cxA-circ",
+      "Comprimento": 2,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 25,
+      "DnSugerido": 25,
+      "Condutores": 9,
+      "AreaDosCondutores": 106.45286706689012,
+      "TaxaDeOcupacao": 0.3564497041420118,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 5,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "36 % (DN 25, 9 condutores, 106 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "2,0 m + 1 curva(s) × 3 m = 5,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "QD-circB",
+      "De": "QD",
+      "Para": "cxB-circ",
+      "Comprimento": 2,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 40,
+      "DnSugerido": 40,
+      "Condutores": 15,
+      "AreaDosCondutores": 215.0263091749534,
+      "TaxaDeOcupacao": 0.25920000000000004,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 5,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "26 % (DN 40, 15 condutores, 215 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "2,0 m + 1 curva(s) × 3 m = 5,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "QD-bwc",
+      "De": "QD",
+      "Para": "CH",
+      "Comprimento": 6,
+      "Curvas90": 2,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 20,
+      "Condutores": 3,
+      "AreaDosCondutores": 54.28672105403163,
+      "TaxaDeOcupacao": 0.30720000000000003,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 12,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "31 % (DN 20, 3 condutores, 54 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "6,0 m + 2 curva(s) × 3 m = 12,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "2 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "circ-sala",
+      "De": "cxA-circ",
+      "Para": "cx-sala",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 20,
+      "Condutores": 6,
+      "AreaDosCondutores": 66.84523768675682,
+      "TaxaDeOcupacao": 0.37826666666666664,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "38 % (DN 20, 6 condutores, 67 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "circ-d1",
+      "De": "cxA-circ",
+      "Para": "cx-d1",
+      "Comprimento": 4,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 25,
+      "DnSugerido": 25,
+      "Condutores": 9,
+      "AreaDosCondutores": 106.45286706689012,
+      "TaxaDeOcupacao": 0.3564497041420118,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 7,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "36 % (DN 25, 9 condutores, 106 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "4,0 m + 1 curva(s) × 3 m = 7,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "d1-d2",
+      "De": "cx-d1",
+      "Para": "cx-d2",
+      "Comprimento": 3.5,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 20,
+      "Condutores": 6,
+      "AreaDosCondutores": 66.84523768675682,
+      "TaxaDeOcupacao": 0.37826666666666664,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6.5,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "38 % (DN 20, 6 condutores, 67 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,5 m + 1 curva(s) × 3 m = 6,5 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "sala-var",
+      "De": "cx-sala",
+      "Para": "cx-var",
+      "Comprimento": 4.5,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 20,
+      "Condutores": 6,
+      "AreaDosCondutores": 66.84523768675682,
+      "TaxaDeOcupacao": 0.37826666666666664,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 7.5,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "38 % (DN 20, 6 condutores, 67 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "4,5 m + 1 curva(s) × 3 m = 7,5 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "circ-coz",
+      "De": "cxB-circ",
+      "Para": "cx-coz",
+      "Comprimento": 3.5,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 40,
+      "DnSugerido": 40,
+      "Condutores": 15,
+      "AreaDosCondutores": 215.0263091749534,
+      "TaxaDeOcupacao": 0.25920000000000004,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6.5,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "26 % (DN 40, 15 condutores, 215 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,5 m + 1 curva(s) × 3 m = 6,5 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "coz-as",
+      "De": "cx-coz",
+      "Para": "cx-as",
+      "Comprimento": 2.5,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 25,
+      "DnSugerido": 25,
+      "Condutores": 6,
+      "AreaDosCondutores": 81.52432936065513,
+      "TaxaDeOcupacao": 0.2729783037475345,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 5.5,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "27 % (DN 25, 6 condutores, 82 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "2,5 m + 1 curva(s) × 3 m = 5,5 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "coz-bwc",
+      "De": "cx-coz",
+      "Para": "cx-bwc",
+      "Comprimento": 2,
+      "Curvas90": 0,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 20,
+      "Condutores": 6,
+      "AreaDosCondutores": 66.84523768675682,
+      "TaxaDeOcupacao": 0.37826666666666664,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 2,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "38 % (DN 20, 6 condutores, 67 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "2,0 m + 0 curva(s) × 3 m = 2,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "0 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "circA-circ",
+      "De": "cxA-circ",
+      "Para": "cx-circ",
+      "Comprimento": 0.5,
+      "Curvas90": 0,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 20,
+      "Condutores": 6,
+      "AreaDosCondutores": 66.84523768675682,
+      "TaxaDeOcupacao": 0.37826666666666664,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 0.5,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "38 % (DN 20, 6 condutores, 67 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "0,5 m + 0 curva(s) × 3 m = 0,5 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "0 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-L-sala",
+      "De": "cx-sala",
+      "Para": "L-sala",
+      "Comprimento": 0.5,
+      "Curvas90": 0,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 27.237608306623507,
+      "TaxaDeOcupacao": 0.15413333333333334,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 0.5,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "15 % (DN 20, 3 condutores, 27 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "0,5 m + 0 curva(s) × 3 m = 0,5 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "0 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-L-coz",
+      "De": "cx-coz",
+      "Para": "L-coz",
+      "Comprimento": 0.5,
+      "Curvas90": 0,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 27.237608306623507,
+      "TaxaDeOcupacao": 0.15413333333333334,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 0.5,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "15 % (DN 20, 3 condutores, 27 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "0,5 m + 0 curva(s) × 3 m = 0,5 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "0 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-L-as",
+      "De": "cx-as",
+      "Para": "L-as",
+      "Comprimento": 0.5,
+      "Curvas90": 0,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 27.237608306623507,
+      "TaxaDeOcupacao": 0.15413333333333334,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 0.5,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "15 % (DN 20, 3 condutores, 27 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "0,5 m + 0 curva(s) × 3 m = 0,5 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "0 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-L-bwc",
+      "De": "cx-bwc",
+      "Para": "L-bwc",
+      "Comprimento": 0.5,
+      "Curvas90": 0,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 27.237608306623507,
+      "TaxaDeOcupacao": 0.15413333333333334,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 0.5,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "15 % (DN 20, 3 condutores, 27 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "0,5 m + 0 curva(s) × 3 m = 0,5 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "0 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-L-d1",
+      "De": "cx-d1",
+      "Para": "L-d1",
+      "Comprimento": 0.5,
+      "Curvas90": 0,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 27.237608306623507,
+      "TaxaDeOcupacao": 0.15413333333333334,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 0.5,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "15 % (DN 20, 3 condutores, 27 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "0,5 m + 0 curva(s) × 3 m = 0,5 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "0 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-L-d2",
+      "De": "cx-d2",
+      "Para": "L-d2",
+      "Comprimento": 0.5,
+      "Curvas90": 0,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 27.237608306623507,
+      "TaxaDeOcupacao": 0.15413333333333334,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 0.5,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "15 % (DN 20, 3 condutores, 27 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "0,5 m + 0 curva(s) × 3 m = 0,5 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "0 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-L-circ",
+      "De": "cx-circ",
+      "Para": "L-circ",
+      "Comprimento": 0.5,
+      "Curvas90": 0,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 27.237608306623507,
+      "TaxaDeOcupacao": 0.15413333333333334,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 0.5,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "15 % (DN 20, 3 condutores, 27 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "0,5 m + 0 curva(s) × 3 m = 0,5 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "0 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-L-var",
+      "De": "cx-var",
+      "Para": "L-var",
+      "Comprimento": 0.5,
+      "Curvas90": 0,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 27.237608306623507,
+      "TaxaDeOcupacao": 0.15413333333333334,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 0.5,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "15 % (DN 20, 3 condutores, 27 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "0,5 m + 0 curva(s) × 3 m = 0,5 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "0 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-sala-1",
+      "De": "cx-sala",
+      "Para": "T-sala-1",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 39.607629380133304,
+      "TaxaDeOcupacao": 0.22413333333333327,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "22 % (DN 20, 3 condutores, 40 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-sala-2",
+      "De": "cx-sala",
+      "Para": "T-sala-2",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 39.607629380133304,
+      "TaxaDeOcupacao": 0.22413333333333327,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "22 % (DN 20, 3 condutores, 40 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-sala-3",
+      "De": "cx-sala",
+      "Para": "T-sala-3",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 39.607629380133304,
+      "TaxaDeOcupacao": 0.22413333333333327,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "22 % (DN 20, 3 condutores, 40 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-sala-4",
+      "De": "cx-sala",
+      "Para": "T-sala-4",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 39.607629380133304,
+      "TaxaDeOcupacao": 0.22413333333333327,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "22 % (DN 20, 3 condutores, 40 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-d1-1",
+      "De": "cx-d1",
+      "Para": "T-d1-1",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 39.607629380133304,
+      "TaxaDeOcupacao": 0.22413333333333327,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "22 % (DN 20, 3 condutores, 40 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-d1-2",
+      "De": "cx-d1",
+      "Para": "T-d1-2",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 39.607629380133304,
+      "TaxaDeOcupacao": 0.22413333333333327,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "22 % (DN 20, 3 condutores, 40 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-d1-3",
+      "De": "cx-d1",
+      "Para": "T-d1-3",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 39.607629380133304,
+      "TaxaDeOcupacao": 0.22413333333333327,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "22 % (DN 20, 3 condutores, 40 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-d2-1",
+      "De": "cx-d2",
+      "Para": "T-d2-1",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 39.607629380133304,
+      "TaxaDeOcupacao": 0.22413333333333327,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "22 % (DN 20, 3 condutores, 40 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-d2-2",
+      "De": "cx-d2",
+      "Para": "T-d2-2",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 39.607629380133304,
+      "TaxaDeOcupacao": 0.22413333333333327,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "22 % (DN 20, 3 condutores, 40 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-d2-3",
+      "De": "cx-d2",
+      "Para": "T-d2-3",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 39.607629380133304,
+      "TaxaDeOcupacao": 0.22413333333333327,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "22 % (DN 20, 3 condutores, 40 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-circ",
+      "De": "cx-circ",
+      "Para": "T-circ",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 39.607629380133304,
+      "TaxaDeOcupacao": 0.22413333333333327,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "22 % (DN 20, 3 condutores, 40 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-var",
+      "De": "cx-var",
+      "Para": "T-var",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 39.607629380133304,
+      "TaxaDeOcupacao": 0.22413333333333327,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "22 % (DN 20, 3 condutores, 40 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-coz-1",
+      "De": "cx-coz",
+      "Para": "T-coz-1",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 20,
+      "Condutores": 3,
+      "AreaDosCondutores": 54.28672105403163,
+      "TaxaDeOcupacao": 0.30720000000000003,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "31 % (DN 20, 3 condutores, 54 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-coz-2",
+      "De": "cx-coz",
+      "Para": "T-coz-2",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 20,
+      "Condutores": 3,
+      "AreaDosCondutores": 54.28672105403163,
+      "TaxaDeOcupacao": 0.30720000000000003,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "31 % (DN 20, 3 condutores, 54 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-coz-3",
+      "De": "cx-coz",
+      "Para": "T-coz-3",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 20,
+      "Condutores": 3,
+      "AreaDosCondutores": 54.28672105403163,
+      "TaxaDeOcupacao": 0.30720000000000003,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "31 % (DN 20, 3 condutores, 54 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-coz-4",
+      "De": "cx-coz",
+      "Para": "T-coz-4",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 20,
+      "Condutores": 3,
+      "AreaDosCondutores": 54.28672105403163,
+      "TaxaDeOcupacao": 0.30720000000000003,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "31 % (DN 20, 3 condutores, 54 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-as-1",
+      "De": "cx-as",
+      "Para": "T-as-1",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 20,
+      "Condutores": 3,
+      "AreaDosCondutores": 54.28672105403163,
+      "TaxaDeOcupacao": 0.30720000000000003,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "31 % (DN 20, 3 condutores, 54 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-as-2",
+      "De": "cx-as",
+      "Para": "T-as-2",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 20,
+      "Condutores": 3,
+      "AreaDosCondutores": 54.28672105403163,
+      "TaxaDeOcupacao": 0.30720000000000003,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "31 % (DN 20, 3 condutores, 54 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-as-3",
+      "De": "cx-as",
+      "Para": "T-as-3",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 20,
+      "Condutores": 3,
+      "AreaDosCondutores": 54.28672105403163,
+      "TaxaDeOcupacao": 0.30720000000000003,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "31 % (DN 20, 3 condutores, 54 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "soma das áreas externas dos condutores sobre a área interna do eletroduto",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-T-bwc",
+      "De": "cx-bwc",
+      "Para": "T-bwc",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 39.607629380133304,
+      "TaxaDeOcupacao": 0.22413333333333327,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "22 % (DN 20, 3 condutores, 40 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-AC-d1",
+      "De": "cx-d1",
+      "Para": "AC-d1",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 39.607629380133304,
+      "TaxaDeOcupacao": 0.22413333333333327,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "22 % (DN 20, 3 condutores, 40 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    },
+    {
+      "Id": "desc-MO",
+      "De": "cx-coz",
+      "Para": "MO",
+      "Comprimento": 3,
+      "Curvas90": 1,
+      "TipoEletroduto": "FlexivelCorrugado",
+      "DnInformado": 20,
+      "DnSugerido": 16,
+      "Condutores": 3,
+      "AreaDosCondutores": 39.607629380133304,
+      "TaxaDeOcupacao": 0.22413333333333327,
+      "TaxaMaxima": 0.4,
+      "ComprimentoEquivalente": 6,
+      "ComprimentoMaximo": 15,
+      "Pareceres": [
+        {
+          "Criterio": "taxa de ocupação",
+          "Atende": true,
+          "Valor": "22 % (DN 20, 3 condutores, 40 mm²)",
+          "Limite": "≤ 40 %",
+          "Item": "6.2.11.1.6 a)",
+          "Explicacao": "menor DN que atende: 16",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "trecho entre caixas",
+          "Atende": true,
+          "Valor": "3,0 m + 1 curva(s) × 3 m = 6,0 m",
+          "Limite": "≤ 15 m",
+          "Item": "6.2.11.1.6 b)",
+          "Explicacao": "trecho contínuo dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        },
+        {
+          "Criterio": "curvas",
+          "Atende": true,
+          "Valor": "1 curva(s) de 90°",
+          "Limite": "≤ 3",
+          "Item": "6.2.11.1.7",
+          "Explicacao": "dentro do limite",
+          "Reprovado": false,
+          "NaoAvaliado": false
+        }
+      ],
+      "Atende": true
+    }
+  ],
+  "Problemas": [
+    {
+      "Codigo": "DR-01",
+      "Gravidade": "Nota",
+      "Mensagem": "Circuito 1 exige DR de 30 mA: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro (1 ponto(s)).",
+      "Item": "5.1.3.2.2",
+      "Elementos": [
+        "C1",
+        "L-bwc"
+      ]
+    },
+    {
+      "Codigo": "DR-01",
+      "Gravidade": "Nota",
+      "Mensagem": "Circuito 3 exige DR de 30 mA: 5.1.3.2.2 d) — ponto em cozinha, copa, área de serviço, lavanderia, garagem ou local molhado de habitação (4 ponto(s)).",
+      "Item": "5.1.3.2.2",
+      "Elementos": [
+        "C3",
+        "T-coz-1",
+        "T-coz-2",
+        "T-coz-3",
+        "T-coz-4"
+      ]
+    },
+    {
+      "Codigo": "DR-01",
+      "Gravidade": "Nota",
+      "Mensagem": "Circuito 4 exige DR de 30 mA: 5.1.3.2.2 d) — ponto em cozinha, copa, área de serviço, lavanderia, garagem ou local molhado de habitação (3 ponto(s)).",
+      "Item": "5.1.3.2.2",
+      "Elementos": [
+        "C4",
+        "T-as-1",
+        "T-as-2",
+        "T-as-3"
+      ]
+    },
+    {
+      "Codigo": "DR-01",
+      "Gravidade": "Nota",
+      "Mensagem": "Circuito 5 exige DR de 30 mA: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro (1 ponto(s)).",
+      "Item": "5.1.3.2.2",
+      "Elementos": [
+        "C5",
+        "CH"
+      ]
+    },
+    {
+      "Codigo": "DR-01",
+      "Gravidade": "Nota",
+      "Mensagem": "Circuito 7 exige DR de 30 mA: 5.1.3.2.2 d) — ponto em cozinha, copa, área de serviço, lavanderia, garagem ou local molhado de habitação (1 ponto(s)).",
+      "Item": "5.1.3.2.2",
+      "Elementos": [
+        "C7",
+        "MO"
+      ]
+    },
+    {
+      "Codigo": "DR-01",
+      "Gravidade": "Nota",
+      "Mensagem": "Circuito 8 exige DR de 30 mA: 5.1.3.2.2 a) — ponto em local com banheira ou chuveiro (1 ponto(s)).",
+      "Item": "5.1.3.2.2",
+      "Elementos": [
+        "C8",
+        "T-bwc"
+      ]
+    },
+    {
+      "Codigo": "Q-01",
+      "Gravidade": "Nota",
+      "Mensagem": "Quadro QD — Quadro de distribuição: 8 circuito(s); prever 3 espaço(s) de reserva e considerar a reserva no alimentador.",
+      "Item": "6.5.4.7, Tabela 59",
+      "Elementos": [
+        "QD"
+      ]
+    },
+    {
+      "Codigo": "Q-02",
+      "Gravidade": "Nota",
+      "Mensagem": "DPS obrigatório no quadro de entrada: 5.4.2.1.1 a) — alimentação por linha aérea em região AQ2 (40 dias de trovoada por ano).",
+      "Item": "5.4.2.1.1, 6.3.5.2",
+      "Elementos": [
+        "QD"
+      ]
+    },
+    {
+      "Codigo": "Q-04",
+      "Gravidade": "Nota",
+      "Mensagem": "Quadros residenciais saem com a advertência padrão (não trocar disjuntor por maior; não desativar o DR).",
+      "Item": "6.5.4.10",
+      "Elementos": [
+        "QD"
+      ]
+    }
+  ],
+  "Duracao": "00:00:00.0597655",
+  "Atende": true
+}

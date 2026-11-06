@@ -1,0 +1,42 @@
+# Motor AutoEletrica — protótipo
+
+Verificação e dimensionamento de instalações elétricas de baixa tensão pela ABNT NBR 5410:2004 (com a NBR NM 60898 para os disjuntores, a NBR NM 247-3 e a NBR 15465 para a ocupação dos eletrodutos), sem dependência da Revit API. É o par do [motor SPK](../motor-spk/README.md): mesma arquitetura, mesmo padrão de teste. O plano do produto está em [`autoeletrica/docs/plano-de-desenvolvimento.md`](../autoeletrica/docs/plano-de-desenvolvimento.md).
+
+## Rodar
+
+Precisa do .NET SDK 10.
+
+```bash
+dotnet test                                                                   # testes das tabelas, dos critérios e do exemplo
+dotnet run --project src/Eletrica.Cli -- exemplo exemplos/apartamento.json
+dotnet run --project src/Eletrica.Cli -- calcular exemplos/apartamento.json exemplos/apartamento-saida
+dotnet run --project src/Eletrica.Cli -- verificar exemplos/apartamento.json
+```
+
+O resultado do exemplo está em [`exemplos/apartamento-saida/memorial.md`](exemplos/apartamento-saida/memorial.md).
+
+## Estrutura
+
+| Pasta | Conteúdo |
+|---|---|
+| `src/Eletrica.Motor` | Biblioteca `netstandard2.0` (carrega no Revit 2023–2027). |
+| `src/Eletrica.Motor/Modelo` | `Instalacao`: alimentação, ambientes, quadros, circuitos, pontos, trechos de eletroduto. O construtor valida tudo de uma vez. |
+| `src/Eletrica.Motor/Normas` | Tabelas e regras como dados, cada valor com o item: `Nbr5410` (fatores, mínimos, Tabela 59, 9.5…), `Nbr5410Capacidades` (Tabelas 36 a 39 completas), `Nbr60898` (In, Icn, curvas, Tabela 15, classes de I²t do Anexo ZA), `Condutores` (NM 247-3, temperaturas, resistividade), `Eletrodutos` (NBR 15465 + diâmetros internos de catálogo), `DispositivosDR`, `DispositivosDPS`. |
+| `src/Eletrica.Motor/Calculo` | `Grafo` (comprimento real pelos eletrodutos), `Eletrotecnica` (IB, queda, impedâncias, curto pelo método das impedâncias), `Dimensionamento` (os seis critérios de 6.2.6.1.2, circuito a circuito, com o agrupamento lido trecho a trecho), `Ocupacao` (eletrodutos), `Verificacao` (Verificar modelo), `CalculoEletrica` (orquestra). |
+| `src/Eletrica.Motor/Relatorios` | Memorial em Markdown e quadro de cargas. |
+| `src/Eletrica.Motor/Exemplos` | Apartamento de dois dormitórios com traçado de eletrodutos. |
+| `src/Eletrica.Cli` | Linha de comando com entrada em JSON (o formato que o add-in exporta). |
+| `testes/Eletrica.Motor.Testes` | xUnit: um valor por coluna das tabelas, casos-limite de cada critério, o exemplo inteiro e sabotagens do exemplo para o Verificar modelo. |
+
+## O que o cálculo faz
+
+1. **Verificar modelo** (`Verificacao`): pontos de tomada e de luz mínimos por cômodo (9.5.2), carga de iluminação (9.5.2.1.2), banheiro (9.1), chuveiro sem tomada (9.5.2.3), DR obrigatório por uso do ambiente (5.1.3.2.2), divisão de circuitos (4.2.5.5, 9.5.3), DPS obrigatório (5.4.2.1.1), reserva do quadro (Tabela 59), e a consistência do modelo (ponto sem circuito, sem caminho pelos eletrodutos, quadro sem alimentador). Cada problema tem código (`A-01`, `C-03`, `DR-01`, `M-03`…), gravidade, item da norma e os elementos envolvidos, para o add-in destacar na vista.
+2. **Dimensionar** (`Dimensionamento`), do quadro de entrada para as pontas: IB pela ligação; capacidade de corrente pelas Tabelas 36 a 39 com fator de temperatura (Tabela 40) e de agrupamento (Tabela 42) **em cada trecho por onde o circuito passa**, valendo o pior (6.2.5.8); disjuntor NM 60898 com IB ≤ In ≤ IZ (e I2 = 1,45 In ≤ 1,45 IZ); queda de tensão com o comprimento real pelo grafo de eletrodutos, acumulando os alimentadores (≤ 4 % no terminal, ≤ 5 % do ponto de entrega); curto máximo no barramento (Icn), I²t ≤ k²S² (classe 3 do Anexo ZA ou o I²t de catálogo informado), curto mínimo fase-PE no fim do circuito e Zs·Ia ≤ Uo (TN); seção mínima (Tabela 47). A seção final é a menor que passa em tudo e o relatório diz qual critério mandou. Neutro (6.2.6.2) e PE (Tabela 58) saem da fase. DR por circuito (obrigatoriedade, IΔn, tipo).
+3. **Eletrodutos** (`Ocupacao`): taxa de ocupação com o diâmetro externo real (NM 247-3) de todos os condutores do trecho, DN sugerido, 15 m menos 3 m por curva, até 3 curvas.
+4. **Quadros**: potência instalada e de demanda, corrente, distribuição e desequilíbrio entre fases, Icc no barramento, disjuntor geral, DPS (classe, esquema, Uc, Up, In, Iimp, seções de ligação), circuitos com DR, reserva.
+
+Premissas que o memorial declara: fator de tensão 1,05/0,95 e X/R = 3 da rede a montante no método das impedâncias; resistência a quente ×1,5 no curto mínimo; reatância 0,08 Ω/km; temperatura de operação do condutor pelo Anexo G da IEC 60364-5-52; diâmetros internos de eletroduto de catálogo (a NBR 15465 só fixa o externo).
+
+## O que falta (fase 2 do plano)
+
+Demanda por tipo de carga e por distribuidora, seletividade entre disjuntores, motores (partida), neutro reduzido automático, memorial .docx, lista de material, e as normas que ainda não chegaram (NBR IEC 61008/61009 e 61643 oficiais, 5419:2026, 61439-3). Ver `autoeletrica/docs/normas-necessarias.md`.

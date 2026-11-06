@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Eletrica.Cli/Eletrica.Cli.csproj" />
+    <Project Path="src/Eletrica.Motor/Eletrica.Motor.csproj" />
+  </Folder>
+  <Folder Name="/testes/">
+    <Project Path="testes/Eletrica.Motor.Testes/Eletrica.Motor.Testes.csproj" />
+  </Folder>
+</Solution>

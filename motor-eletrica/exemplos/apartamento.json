@@ -1,0 +1,1194 @@
+{
+  "Nome": "Apartamento tipo — 2 dormitórios",
+  "Alimentacao": {
+    "TensaoFaseNeutro": 127,
+    "TensaoFaseFase": 220,
+    "Fases": 2,
+    "Esquema": "TNCS",
+    "IccPresumidaKA": 6,
+    "LinhaAerea": true,
+    "DiasDeTrovoada": 40,
+    "TemSpda": false,
+    "TemperaturaAmbiente": 30,
+    "Habitacao": true,
+    "EhTrifasica": false
+  },
+  "Ambientes": [
+    {
+      "Id": "sala",
+      "Nome": "Sala de estar/jantar",
+      "Uso": "Sala",
+      "Area": 18,
+      "Perimetro": 17.2,
+      "Molhado": false,
+      "Banho": false
+    },
+    {
+      "Id": "coz",
+      "Nome": "Cozinha",
+      "Uso": "Cozinha",
+      "Area": 8.5,
+      "Perimetro": 12,
+      "Bancada": 1.8,
+      "Molhado": true,
+      "Banho": false
+    },
+    {
+      "Id": "as",
+      "Nome": "Área de serviço",
+      "Uso": "AreaServico",
+      "Area": 3.6,
+      "Perimetro": 8,
+      "Molhado": true,
+      "Banho": false
+    },
+    {
+      "Id": "bwc",
+      "Nome": "Banheiro",
+      "Uso": "Banheiro",
+      "Area": 3.2,
+      "Perimetro": 7.4,
+      "Molhado": true,
+      "Banho": true
+    },
+    {
+      "Id": "d1",
+      "Nome": "Dormitório 1",
+      "Uso": "Dormitorio",
+      "Area": 11,
+      "Perimetro": 13.4,
+      "Molhado": false,
+      "Banho": false
+    },
+    {
+      "Id": "d2",
+      "Nome": "Dormitório 2",
+      "Uso": "Dormitorio",
+      "Area": 8.4,
+      "Perimetro": 11.8,
+      "Molhado": false,
+      "Banho": false
+    },
+    {
+      "Id": "circ",
+      "Nome": "Circulação",
+      "Uso": "Circulacao",
+      "Area": 2.4,
+      "Perimetro": 6.4,
+      "Molhado": false,
+      "Banho": false
+    },
+    {
+      "Id": "var",
+      "Nome": "Varanda",
+      "Uso": "Varanda",
+      "Area": 3,
+      "Perimetro": 7,
+      "Molhado": false,
+      "Banho": false
+    }
+  ],
+  "Quadros": [
+    {
+      "Id": "QD",
+      "Nome": "QD — Quadro de distribuição",
+      "Fases": 2,
+      "No": "QD",
+      "FatorDeDemanda": 1,
+      "IsolacaoAlimentador": "Epr90",
+      "MetodoAlimentador": "B1",
+      "NoDoQuadro": "QD"
+    }
+  ],
+  "Circuitos": [
+    {
+      "Id": "C1",
+      "Numero": "1",
+      "Quadro": "QD",
+      "Tipo": "Iluminacao",
+      "Ligacao": "FN",
+      "Descricao": "Iluminação",
+      "FatorDePotencia": 1,
+      "Rendimento": 1,
+      "Isolacao": "Pvc70",
+      "Material": "Cobre",
+      "MetodoPadrao": "B1",
+      "HarmonicasAltas": false,
+      "Fases": 1,
+      "TemNeutro": true
+    },
+    {
+      "Id": "C2",
+      "Numero": "2",
+      "Quadro": "QD",
+      "Tipo": "TomadaUsoGeral",
+      "Ligacao": "FN",
+      "Descricao": "TUG sala, dormitórios, circulação e varanda",
+      "FatorDePotencia": 1,
+      "Rendimento": 1,
+      "Isolacao": "Pvc70",
+      "Material": "Cobre",
+      "MetodoPadrao": "B1",
+      "HarmonicasAltas": false,
+      "Fases": 1,
+      "TemNeutro": true
+    },
+    {
+      "Id": "C3",
+      "Numero": "3",
+      "Quadro": "QD",
+      "Tipo": "TomadaUsoGeral",
+      "Ligacao": "FN",
+      "Descricao": "TUG cozinha",
+      "FatorDePotencia": 1,
+      "Rendimento": 1,
+      "Isolacao": "Pvc70",
+      "Material": "Cobre",
+      "MetodoPadrao": "B1",
+      "HarmonicasAltas": false,
+      "Fases": 1,
+      "TemNeutro": true
+    },
+    {
+      "Id": "C4",
+      "Numero": "4",
+      "Quadro": "QD",
+      "Tipo": "TomadaUsoGeral",
+      "Ligacao": "FN",
+      "Descricao": "TUG área de serviço",
+      "FatorDePotencia": 1,
+      "Rendimento": 1,
+      "Isolacao": "Pvc70",
+      "Material": "Cobre",
+      "MetodoPadrao": "B1",
+      "HarmonicasAltas": false,
+      "Fases": 1,
+      "TemNeutro": true
+    },
+    {
+      "Id": "C5",
+      "Numero": "5",
+      "Quadro": "QD",
+      "Tipo": "Chuveiro",
+      "Ligacao": "FF",
+      "Descricao": "Chuveiro elétrico",
+      "FatorDePotencia": 1,
+      "Rendimento": 1,
+      "Isolacao": "Pvc70",
+      "Material": "Cobre",
+      "MetodoPadrao": "B1",
+      "HarmonicasAltas": false,
+      "Fases": 2,
+      "TemNeutro": false
+    },
+    {
+      "Id": "C6",
+      "Numero": "6",
+      "Quadro": "QD",
+      "Tipo": "ArCondicionado",
+      "Ligacao": "FF",
+      "Descricao": "Ar-condicionado dormitório 1",
+      "FatorDePotencia": 0.85,
+      "Rendimento": 1,
+      "Isolacao": "Pvc70",
+      "Material": "Cobre",
+      "MetodoPadrao": "B1",
+      "HarmonicasAltas": false,
+      "Fases": 2,
+      "TemNeutro": false
+    },
+    {
+      "Id": "C7",
+      "Numero": "7",
+      "Quadro": "QD",
+      "Tipo": "TomadaUsoEspecifico",
+      "Ligacao": "FF",
+      "Descricao": "Micro-ondas (TUE cozinha)",
+      "FatorDePotencia": 1,
+      "Rendimento": 1,
+      "Isolacao": "Pvc70",
+      "Material": "Cobre",
+      "MetodoPadrao": "B1",
+      "HarmonicasAltas": false,
+      "Fases": 2,
+      "TemNeutro": false
+    },
+    {
+      "Id": "C8",
+      "Numero": "8",
+      "Quadro": "QD",
+      "Tipo": "TomadaUsoGeral",
+      "Ligacao": "FN",
+      "Descricao": "TUG banheiro",
+      "FatorDePotencia": 1,
+      "Rendimento": 1,
+      "Isolacao": "Pvc70",
+      "Material": "Cobre",
+      "MetodoPadrao": "B1",
+      "HarmonicasAltas": false,
+      "Fases": 1,
+      "TemNeutro": true
+    }
+  ],
+  "Pontos": [
+    {
+      "Id": "L-sala",
+      "Ambiente": "sala",
+      "Circuito": "C1",
+      "Tipo": "Iluminacao",
+      "PotenciaVA": 280,
+      "No": "L-sala",
+      "Altura": 2.6,
+      "NoTeto": true,
+      "NoDoPonto": "L-sala"
+    },
+    {
+      "Id": "L-coz",
+      "Ambiente": "coz",
+      "Circuito": "C1",
+      "Tipo": "Iluminacao",
+      "PotenciaVA": 100,
+      "No": "L-coz",
+      "Altura": 2.6,
+      "NoTeto": true,
+      "NoDoPonto": "L-coz"
+    },
+    {
+      "Id": "L-as",
+      "Ambiente": "as",
+      "Circuito": "C1",
+      "Tipo": "Iluminacao",
+      "PotenciaVA": 100,
+      "No": "L-as",
+      "Altura": 2.6,
+      "NoTeto": true,
+      "NoDoPonto": "L-as"
+    },
+    {
+      "Id": "L-bwc",
+      "Ambiente": "bwc",
+      "Circuito": "C1",
+      "Tipo": "Iluminacao",
+      "PotenciaVA": 100,
+      "No": "L-bwc",
+      "Altura": 2.6,
+      "NoTeto": true,
+      "NoDoPonto": "L-bwc"
+    },
+    {
+      "Id": "L-d1",
+      "Ambiente": "d1",
+      "Circuito": "C1",
+      "Tipo": "Iluminacao",
+      "PotenciaVA": 160,
+      "No": "L-d1",
+      "Altura": 2.6,
+      "NoTeto": true,
+      "NoDoPonto": "L-d1"
+    },
+    {
+      "Id": "L-d2",
+      "Ambiente": "d2",
+      "Circuito": "C1",
+      "Tipo": "Iluminacao",
+      "PotenciaVA": 100,
+      "No": "L-d2",
+      "Altura": 2.6,
+      "NoTeto": true,
+      "NoDoPonto": "L-d2"
+    },
+    {
+      "Id": "L-circ",
+      "Ambiente": "circ",
+      "Circuito": "C1",
+      "Tipo": "Iluminacao",
+      "PotenciaVA": 100,
+      "No": "L-circ",
+      "Altura": 2.6,
+      "NoTeto": true,
+      "NoDoPonto": "L-circ"
+    },
+    {
+      "Id": "L-var",
+      "Ambiente": "var",
+      "Circuito": "C1",
+      "Tipo": "Iluminacao",
+      "PotenciaVA": 100,
+      "No": "L-var",
+      "Altura": 2.6,
+      "NoTeto": true,
+      "NoDoPonto": "L-var"
+    },
+    {
+      "Id": "T-sala-1",
+      "Ambiente": "sala",
+      "Circuito": "C2",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 100,
+      "No": "T-sala-1",
+      "Altura": 0.3,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-sala-1"
+    },
+    {
+      "Id": "T-sala-2",
+      "Ambiente": "sala",
+      "Circuito": "C2",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 100,
+      "No": "T-sala-2",
+      "Altura": 0.3,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-sala-2"
+    },
+    {
+      "Id": "T-sala-3",
+      "Ambiente": "sala",
+      "Circuito": "C2",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 100,
+      "No": "T-sala-3",
+      "Altura": 0.3,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-sala-3"
+    },
+    {
+      "Id": "T-sala-4",
+      "Ambiente": "sala",
+      "Circuito": "C2",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 100,
+      "No": "T-sala-4",
+      "Altura": 0.3,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-sala-4"
+    },
+    {
+      "Id": "T-d1-1",
+      "Ambiente": "d1",
+      "Circuito": "C2",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 100,
+      "No": "T-d1-1",
+      "Altura": 0.3,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-d1-1"
+    },
+    {
+      "Id": "T-d1-2",
+      "Ambiente": "d1",
+      "Circuito": "C2",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 100,
+      "No": "T-d1-2",
+      "Altura": 0.3,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-d1-2"
+    },
+    {
+      "Id": "T-d1-3",
+      "Ambiente": "d1",
+      "Circuito": "C2",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 100,
+      "No": "T-d1-3",
+      "Altura": 0.3,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-d1-3"
+    },
+    {
+      "Id": "T-d2-1",
+      "Ambiente": "d2",
+      "Circuito": "C2",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 100,
+      "No": "T-d2-1",
+      "Altura": 0.3,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-d2-1"
+    },
+    {
+      "Id": "T-d2-2",
+      "Ambiente": "d2",
+      "Circuito": "C2",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 100,
+      "No": "T-d2-2",
+      "Altura": 0.3,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-d2-2"
+    },
+    {
+      "Id": "T-d2-3",
+      "Ambiente": "d2",
+      "Circuito": "C2",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 100,
+      "No": "T-d2-3",
+      "Altura": 0.3,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-d2-3"
+    },
+    {
+      "Id": "T-circ",
+      "Ambiente": "circ",
+      "Circuito": "C2",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 100,
+      "No": "T-circ",
+      "Altura": 0.3,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-circ"
+    },
+    {
+      "Id": "T-var",
+      "Ambiente": "var",
+      "Circuito": "C2",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 100,
+      "No": "T-var",
+      "Altura": 0.3,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-var"
+    },
+    {
+      "Id": "T-coz-1",
+      "Ambiente": "coz",
+      "Circuito": "C3",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 600,
+      "No": "T-coz-1",
+      "Altura": 1.2,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-coz-1"
+    },
+    {
+      "Id": "T-coz-2",
+      "Ambiente": "coz",
+      "Circuito": "C3",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 600,
+      "No": "T-coz-2",
+      "Altura": 1.2,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-coz-2"
+    },
+    {
+      "Id": "T-coz-3",
+      "Ambiente": "coz",
+      "Circuito": "C3",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 600,
+      "No": "T-coz-3",
+      "Altura": 0.3,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-coz-3"
+    },
+    {
+      "Id": "T-coz-4",
+      "Ambiente": "coz",
+      "Circuito": "C3",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 100,
+      "No": "T-coz-4",
+      "Altura": 0.3,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-coz-4"
+    },
+    {
+      "Id": "T-as-1",
+      "Ambiente": "as",
+      "Circuito": "C4",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 600,
+      "No": "T-as-1",
+      "Altura": 1.2,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-as-1"
+    },
+    {
+      "Id": "T-as-2",
+      "Ambiente": "as",
+      "Circuito": "C4",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 600,
+      "No": "T-as-2",
+      "Altura": 1.2,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-as-2"
+    },
+    {
+      "Id": "T-as-3",
+      "Ambiente": "as",
+      "Circuito": "C4",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 600,
+      "No": "T-as-3",
+      "Altura": 0.3,
+      "CorrenteDaTomada": 10,
+      "NoTeto": false,
+      "NoDoPonto": "T-as-3"
+    },
+    {
+      "Id": "T-bwc",
+      "Ambiente": "bwc",
+      "Circuito": "C8",
+      "Tipo": "TomadaUsoGeral",
+      "PotenciaVA": 600,
+      "No": "T-bwc",
+      "Altura": 1.2,
+      "CorrenteDaTomada": 10,
+      "VolumeDoBanheiro": 3,
+      "NoTeto": false,
+      "NoDoPonto": "T-bwc"
+    },
+    {
+      "Id": "CH",
+      "Ambiente": "bwc",
+      "Circuito": "C5",
+      "Tipo": "Chuveiro",
+      "PotenciaVA": 5500,
+      "No": "CH",
+      "Altura": 2.2,
+      "VolumeDoBanheiro": 1,
+      "NoTeto": false,
+      "NoDoPonto": "CH"
+    },
+    {
+      "Id": "AC-d1",
+      "Ambiente": "d1",
+      "Circuito": "C6",
+      "Tipo": "ArCondicionado",
+      "PotenciaVA": 1400,
+      "No": "AC-d1",
+      "Altura": 2.1,
+      "NoTeto": false,
+      "NoDoPonto": "AC-d1"
+    },
+    {
+      "Id": "MO",
+      "Ambiente": "coz",
+      "Circuito": "C7",
+      "Tipo": "TomadaUsoEspecifico",
+      "PotenciaVA": 1500,
+      "No": "MO",
+      "Altura": 1.2,
+      "CorrenteDaTomada": 20,
+      "NoTeto": false,
+      "NoDoPonto": "MO"
+    }
+  ],
+  "Trechos": [
+    {
+      "Id": "QD-circA",
+      "De": "QD",
+      "Para": "cxA-circ",
+      "Comprimento": 2,
+      "Circuitos": [
+        "C1",
+        "C2",
+        "C6"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 25,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "QD-circB",
+      "De": "QD",
+      "Para": "cxB-circ",
+      "Comprimento": 2,
+      "Circuitos": [
+        "C1",
+        "C3",
+        "C4",
+        "C7",
+        "C8"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 40,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "QD-bwc",
+      "De": "QD",
+      "Para": "CH",
+      "Comprimento": 6,
+      "Circuitos": [
+        "C5"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 2,
+      "Externo": false
+    },
+    {
+      "Id": "circ-sala",
+      "De": "cxA-circ",
+      "Para": "cx-sala",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C1",
+        "C2"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "circ-d1",
+      "De": "cxA-circ",
+      "Para": "cx-d1",
+      "Comprimento": 4,
+      "Circuitos": [
+        "C1",
+        "C2",
+        "C6"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 25,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "d1-d2",
+      "De": "cx-d1",
+      "Para": "cx-d2",
+      "Comprimento": 3.5,
+      "Circuitos": [
+        "C1",
+        "C2"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "sala-var",
+      "De": "cx-sala",
+      "Para": "cx-var",
+      "Comprimento": 4.5,
+      "Circuitos": [
+        "C1",
+        "C2"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "circ-coz",
+      "De": "cxB-circ",
+      "Para": "cx-coz",
+      "Comprimento": 3.5,
+      "Circuitos": [
+        "C1",
+        "C3",
+        "C4",
+        "C7",
+        "C8"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 40,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "coz-as",
+      "De": "cx-coz",
+      "Para": "cx-as",
+      "Comprimento": 2.5,
+      "Circuitos": [
+        "C1",
+        "C4"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 25,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "coz-bwc",
+      "De": "cx-coz",
+      "Para": "cx-bwc",
+      "Comprimento": 2,
+      "Circuitos": [
+        "C1",
+        "C8"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 0,
+      "Externo": false
+    },
+    {
+      "Id": "circA-circ",
+      "De": "cxA-circ",
+      "Para": "cx-circ",
+      "Comprimento": 0.5,
+      "Circuitos": [
+        "C1",
+        "C2"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 0,
+      "Externo": false
+    },
+    {
+      "Id": "desc-L-sala",
+      "De": "cx-sala",
+      "Para": "L-sala",
+      "Comprimento": 0.5,
+      "Circuitos": [
+        "C1"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 0,
+      "Externo": false
+    },
+    {
+      "Id": "desc-L-coz",
+      "De": "cx-coz",
+      "Para": "L-coz",
+      "Comprimento": 0.5,
+      "Circuitos": [
+        "C1"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 0,
+      "Externo": false
+    },
+    {
+      "Id": "desc-L-as",
+      "De": "cx-as",
+      "Para": "L-as",
+      "Comprimento": 0.5,
+      "Circuitos": [
+        "C1"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 0,
+      "Externo": false
+    },
+    {
+      "Id": "desc-L-bwc",
+      "De": "cx-bwc",
+      "Para": "L-bwc",
+      "Comprimento": 0.5,
+      "Circuitos": [
+        "C1"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 0,
+      "Externo": false
+    },
+    {
+      "Id": "desc-L-d1",
+      "De": "cx-d1",
+      "Para": "L-d1",
+      "Comprimento": 0.5,
+      "Circuitos": [
+        "C1"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 0,
+      "Externo": false
+    },
+    {
+      "Id": "desc-L-d2",
+      "De": "cx-d2",
+      "Para": "L-d2",
+      "Comprimento": 0.5,
+      "Circuitos": [
+        "C1"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 0,
+      "Externo": false
+    },
+    {
+      "Id": "desc-L-circ",
+      "De": "cx-circ",
+      "Para": "L-circ",
+      "Comprimento": 0.5,
+      "Circuitos": [
+        "C1"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 0,
+      "Externo": false
+    },
+    {
+      "Id": "desc-L-var",
+      "De": "cx-var",
+      "Para": "L-var",
+      "Comprimento": 0.5,
+      "Circuitos": [
+        "C1"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 0,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-sala-1",
+      "De": "cx-sala",
+      "Para": "T-sala-1",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C2"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-sala-2",
+      "De": "cx-sala",
+      "Para": "T-sala-2",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C2"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-sala-3",
+      "De": "cx-sala",
+      "Para": "T-sala-3",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C2"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-sala-4",
+      "De": "cx-sala",
+      "Para": "T-sala-4",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C2"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-d1-1",
+      "De": "cx-d1",
+      "Para": "T-d1-1",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C2"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-d1-2",
+      "De": "cx-d1",
+      "Para": "T-d1-2",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C2"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-d1-3",
+      "De": "cx-d1",
+      "Para": "T-d1-3",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C2"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-d2-1",
+      "De": "cx-d2",
+      "Para": "T-d2-1",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C2"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-d2-2",
+      "De": "cx-d2",
+      "Para": "T-d2-2",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C2"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-d2-3",
+      "De": "cx-d2",
+      "Para": "T-d2-3",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C2"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-circ",
+      "De": "cx-circ",
+      "Para": "T-circ",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C2"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-var",
+      "De": "cx-var",
+      "Para": "T-var",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C2"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-coz-1",
+      "De": "cx-coz",
+      "Para": "T-coz-1",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C3"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-coz-2",
+      "De": "cx-coz",
+      "Para": "T-coz-2",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C3"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-coz-3",
+      "De": "cx-coz",
+      "Para": "T-coz-3",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C3"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-coz-4",
+      "De": "cx-coz",
+      "Para": "T-coz-4",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C3"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-as-1",
+      "De": "cx-as",
+      "Para": "T-as-1",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C4"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-as-2",
+      "De": "cx-as",
+      "Para": "T-as-2",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C4"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-as-3",
+      "De": "cx-as",
+      "Para": "T-as-3",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C4"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-T-bwc",
+      "De": "cx-bwc",
+      "Para": "T-bwc",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C8"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-AC-d1",
+      "De": "cx-d1",
+      "Para": "AC-d1",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C6"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    },
+    {
+      "Id": "desc-MO",
+      "De": "cx-coz",
+      "Para": "MO",
+      "Comprimento": 3,
+      "Circuitos": [
+        "C7"
+      ],
+      "TipoEletroduto": "FlexivelCorrugado",
+      "Dn": 20,
+      "Metodo": "B1",
+      "Curvas90": 1,
+      "Externo": false
+    }
+  ],
+  "Caixas": []
+}
