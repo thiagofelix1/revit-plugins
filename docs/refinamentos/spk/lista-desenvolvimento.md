@@ -2,7 +2,7 @@
 
 Uma linha por entrega, na ordem combinada. `[x]` só quando provado no Revit (à mão ou pela [suíte automática](teste-automatico.md)); o que só compila fica `[ ]`. A ordem de cada etapa só começa com o critério de pronto da anterior, salvo o que não depende do engenheiro parceiro.
 
-Atualizada em 29/10/2026. Como o engenheiro usa o plugin de ponta a ponta: [fluxos.md](fluxos.md).
+Atualizada em 06/11/2026. Como o engenheiro usa o plugin de ponta a ponta: [fluxos.md](fluxos.md).
 
 ## 0. Base (feito)
 
@@ -112,6 +112,35 @@ Pronto quando um setor da Nova Era (ou de um projeto do engenheiro) é desenhado
 - [ ] Subir diâmetros até atender, com a ordem de DN que o projetista usar. Falta definir o alvo: sem curva de abastecimento, hoje quase nada reprova por pressão.
 - [ ] Visão de todos os setores juntos e do setor que dimensiona a bomba.
 - [ ] Sugerir a bomba pela curva de abastecimento.
+
+## 8. Kit SPK: tubos, peças, bicos e VGA
+
+Famílias e tipos nossos, criados pelo plugin no projeto quando faltarem (prefixo "SPK –"), para evitar os erros de configuração vistos no MNEVVM: cobre de 65 mm sem segmento, tipo sem tampão ou sem tê no DN, interno de Sch 40 em tubo BSP, bico não achado pelo nome, área 0 e bico hospedado. Nunca sobrescreve o que é do escritório; o projetista continua escolhendo o tipo de tubo, e o K continua sendo confirmado pelo engenheiro.
+
+- [ ] 1. Um tê nosso, criado por código (como o tê mecânico do teste automático, em `Cenas.cs`), que o Revit aceite no roteamento em todos os DN. É o ponto que decide se as peças saem por código ou desenhadas à mão uma vez, no Revit 2025.
+- [ ] 2. As outras peças: cruzeta, cotovelo, redução e tampão.
+- [ ] 3. Tipos de tubo pela API: "SPK – Aço 5580 média BSP" e "SPK – Aço 5590 Sch 40", com o segmento nos internos das normas, os tamanhos, o sistema de incêndio e as preferências de roteamento com as peças nossas. O tubo real do escritório depende do engenheiro.
+- [ ] 4. Bicos genéricos: pendente e em pé, sem hospedeiro, com K, área e temperatura como parâmetros, reconhecidos na hora pelo Famílias. Partem de um modelo genérico com a categoria trocada (o Revit desta máquina não tem modelo de sprinkler em português).
+- [ ] 5. VGA: acessório com entrada e saída, reconhecido como Fonte.
+- [ ] 6. Botão Preparar projeto: carrega o que falta, sem tocar no que existe, e convive com o Padrão do escritório.
+- [ ] Famílias de fabricante (Tyco, Viking): só com a licença conferida; até lá, o usuário carrega as dele e confirma no Famílias.
+
+## Pendências espalhadas
+
+Itens que estavam como "Falta" dentro de itens feitos, ou que apareceram nos testes de novembro.
+
+- [ ] Aviso de velocidade alta: 32 m/s passou calado num teste (MNEVVM refeitório). A causa daquele caso não foi conferida.
+- [ ] Famílias: quando não acha candidato, diz "Abrindo a janela" e não abre nada; aceita área 0 sem avisar, e o bico some do Calcular. O nome da família precisa conter chuveiro, sprinkler, spk ou esfr.
+- [ ] Memorial: um arquivo só (`memorial.docx`) para todos os projetos e setores, sobrescrito a cada cálculo.
+- [ ] Aviso de vínculo desalinhado (arquitetura ou estrutura fora da posição da rede).
+- [ ] Obstruções que faltam: pilar, duto, viga inteira abaixo do bico (Tabela 16, Figura 28), ESFR (Tabela 22) e viga inclinada na Tabela 15. Treliça só avisa.
+- [ ] Teto alto: critério por setor (o teto mais alto vale para o setor inteiro) e cobertura estendida (Tabela 9); teto bico a bico depende do engenheiro.
+- [ ] Corredor em T ou em cruz na geral; Ligar tubos em linha (luva), destino vertical e ponta direto em bico.
+- [ ] Corrigir derivações: bucha de redução encostada de lado (48 na Nova Era) e recusas por cota presa (45).
+- [ ] Lista de material por setor.
+- [ ] MNEVVM: gerar a rede de novo e seguir o roteiro manual a partir do passo 6 (Folhas e Memorial ainda não conferidos à mão depois das correções).
+- [ ] Normas oficiais: quando forem compradas, re-checar o que veio das cópias (NBR 10897 de 2020, 5580, 5590, 16704, 16981, IT-23 e IT-24 vigentes).
+- [ ] Regressão só roda no Revit 2027: incluir 2025 e 2026 antes de distribuir.
 
 ## Conhecido e aceito por enquanto
 
