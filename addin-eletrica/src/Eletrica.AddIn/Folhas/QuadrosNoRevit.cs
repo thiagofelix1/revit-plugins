@@ -15,6 +15,23 @@ static class QuadrosNoRevit
 {
     public sealed record Feito(IReadOnlyList<View> Vistas, IReadOnlyList<string> Avisos);
 
+    /// <summary>As vistas que o Quadros fez por último e a assinatura da instalação de onde saíram.</summary>
+    public sealed record Registro(string Assinatura, List<string> Vistas);
+
+    const string ChaveRegistro = "VistasDeQuadros";
+
+    /// <summary>
+    ///     As vistas do último Quadros, se ainda valem: a instalação não mudou desde então e nenhuma foi apagada. As Pranchas
+    ///     usam isto para não refazer as vistas que o Quadros acabou de fazer (no Snowdon, 339 vistas e uns 10 minutos).
+    /// </summary>
+    public static Feito? Atuais(Document doc, LeitorInstalacao.Lida lida)
+    {
+        if (ArmazenamentoEletrica.Ler<Registro>(doc, ChaveRegistro) is not { } registro) return null;
+        if (registro.Assinatura != Servicos.ServicoCalculo.Assinatura(lida.Instalacao)) return null;
+        var vistas = registro.Vistas.Select(doc.GetElement).OfType<View>().ToList();
+        return vistas.Count == registro.Vistas.Count ? new Feito(vistas, []) : null;
+    }
+
     static readonly Desenho.Coluna[] ColunasDoQuadro =
     [
         new("Circ.", 12), new("Descrição", 46), new("Ligação", 16), new("Fase", 10), new("VA", 14), new("IB (A)", 12), new("F / N / PE (mm²)", 26),
@@ -42,18 +59,35 @@ static class QuadrosNoRevit
         var avisos = new List<string>();
         var vistas = new List<View>();
         var i = lida.Instalacao;
-        using var transacao = new Transaction(doc, "AutoEletrica — Quadros");
-        transacao.Start();
-        EngolirAvisos.Aplicar(transacao);
+        // Num prédio grande são centenas de vistas com milhares de textos: numa transação só, o Snowdon (169 quadros) passou de
+        // 9 GB. Confirma em lotes dentro de um grupo; um Ctrl+Z ainda desfaz tudo.
+        using var grupo = new TransactionGroup(doc, "AutoEletrica — Quadros");
+        grupo.Start();
         var nomes = NomesUnicos(r.Quadros);
-        foreach (var q in r.Quadros)
+        var comPainel = new FilteredElementCollector(doc).OfClass(typeof(Autodesk.Revit.DB.Electrical.PanelScheduleView))
+            .Cast<Autodesk.Revit.DB.Electrical.PanelScheduleView>().Select(p => p.GetPanel()).ToHashSet();
+        foreach (var lote in r.Quadros.Select((q, n) => (q, n)).GroupBy(x => x.n / QuadrosPorLote, x => x.q))
         {
-            vistas.Add(QuadroDeCargas(doc, i, r, q, nomes[q.Id]));
-            vistas.Add(UnifilarDoQuadro(doc, i, r, q, nomes[q.Id], avisos));
-            PainelNativo(doc, lida, q, avisos);
+            using var transacao = new Transaction(doc, "AutoEletrica — Quadros (lote)");
+            transacao.Start();
+            EngolirAvisos.Aplicar(transacao);
+            foreach (var q in lote)
+            {
+                vistas.Add(QuadroDeCargas(doc, i, r, q, nomes[q.Id]));
+                vistas.Add(UnifilarDoQuadro(doc, i, r, q, nomes[q.Id], avisos));
+                PainelNativo(doc, lida, q, avisos, comPainel);
+            }
+            transacao.Commit();
         }
-        vistas.Add(Prumada(doc, lida, r, avisos));
-        transacao.Commit();
+        using (var transacao = new Transaction(doc, "AutoEletrica — Prumada"))
+        {
+            transacao.Start();
+            EngolirAvisos.Aplicar(transacao);
+            vistas.Add(Prumada(doc, lida, r, avisos));
+            ArmazenamentoEletrica.Gravar(doc, ChaveRegistro, new Registro(Servicos.ServicoCalculo.Assinatura(i), vistas.Select(v => v.UniqueId).ToList()));
+            transacao.Commit();
+        }
+        grupo.Assimilate();
         return new Feito(vistas, avisos);
     }
 
@@ -245,14 +279,14 @@ static class QuadrosNoRevit
     }
 
     /// <summary>Quadro de cargas nativo do Revit (PanelScheduleView), quando o projeto tem modelo de quadro; o padrão brasileiro é a vista de desenho.</summary>
-    static void PainelNativo(Document doc, LeitorInstalacao.Lida lida, ResultadoQuadro q, List<string> avisos)
+    const int QuadrosPorLote = 15;
+
+    static void PainelNativo(Document doc, LeitorInstalacao.Lida lida, ResultadoQuadro q, List<string> avisos, HashSet<ElementId> comPainel)
     {
         if (!lida.Elementos.TryGetValue(q.Id, out var id)) return;
         try
         {
-            var existente = new FilteredElementCollector(doc).OfClass(typeof(Autodesk.Revit.DB.Electrical.PanelScheduleView))
-                .Cast<Autodesk.Revit.DB.Electrical.PanelScheduleView>().Any(p => p.GetPanel() == id);
-            if (!existente) Autodesk.Revit.DB.Electrical.PanelScheduleView.CreateInstanceView(doc, id);
+            if (comPainel.Add(id)) Autodesk.Revit.DB.Electrical.PanelScheduleView.CreateInstanceView(doc, id);
         }
         catch (Autodesk.Revit.Exceptions.ApplicationException e)
         {

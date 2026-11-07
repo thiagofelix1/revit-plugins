@@ -453,6 +453,18 @@ static class TesteAutomatico
                 catch (Exception e) when (e is Motor.Modelo.ErroDeModelo or InvalidOperationException) { linhas.Add("motor: " + e.Message); }
                 return string.Join("\n", linhas);
             }
+            case "assinatura":
+            {
+                // Grava o JSON que entra na assinatura do cálculo, para comparar duas leituras do mesmo modelo.
+                var lidaA = LeitorInstalacao.Ler(doc, dados);
+                var ia = lidaA.Instalacao;
+                var opcoes = new JsonSerializerOptions(ArmazenamentoEletrica.Json) { WriteIndented = true };
+                var json = JsonSerializer.Serialize(new { ia.Alimentacao, ia.Ambientes, ia.Quadros, ia.Circuitos, ia.Pontos, ia.Trechos, ia.Comandos, ia.Caixas }, opcoes);
+                var n = Directory.GetFiles(PastaSaida, $"assinatura-{r.Nome}-*.json").Length + 1;
+                var arquivo = Path.Combine(PastaSaida, $"assinatura-{r.Nome}-{n}.json");
+                File.WriteAllText(arquivo, json);
+                return $"{Servicos.ServicoCalculo.Assinatura(ia)} ({Path.GetFileName(arquivo)})";
+            }
             case "sondarSistemas":
                 return CenasEletrica.SondarSistemas(doc);
             case "diagnosticoQuadros":

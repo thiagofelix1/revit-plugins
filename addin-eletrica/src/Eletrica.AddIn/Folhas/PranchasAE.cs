@@ -35,29 +35,55 @@ static class PranchasAE
         if (carimbo == ElementId.InvalidElementId)
             throw new InvalidOperationException("O projeto não tem família de carimbo (Title Block) carregada. Carregue o carimbo do escritório e rode de novo.");
 
-        // Vistas que vão para as folhas: quadros, unifilares, prumada, legenda, lista (refeitas agora).
-        var quadros = QuadrosNoRevit.Gerar(doc, lida, r);
+        // Vistas que vão para as folhas: quadros, unifilares e prumada (as do último Quadros, se o cálculo não mudou depois
+        // dele; senão refeitas), legenda e lista (refeitas, são rápidas).
+        var quadros = QuadrosNoRevit.Atuais(doc, lida) ?? QuadrosNoRevit.Gerar(doc, lida, r);
         avisos.AddRange(quadros.Avisos);
         var lista = ListaDeMaterialRevit.Gerar(doc, lida, r);
         avisos.AddRange(lista.Avisos);
         var legenda = LegendaDeFiacao.Gerar(doc, r, lida.Instalacao, padrao);
 
-        using var transacao = new Transaction(doc, "AutoEletrica — Pranchas");
-        transacao.Start();
-        EngolirAvisos.Aplicar(transacao);
+        // Num prédio grande são centenas de folhas: uma transação só, com o modelo regenerado várias vezes por folha, passou
+        // de 6 GB no Snowdon. Agora as folhas são confirmadas em lotes dentro de um grupo (um Ctrl+Z desfaz tudo), o modelo só
+        // regenera onde a medida é necessária (plantas) e o registro das folhas é gravado uma vez, no fim.
+        using var grupo = new TransactionGroup(doc, "AutoEletrica — Pranchas");
+        grupo.Start();
+        var registro = Registro(doc);
+        Transaction? transacao = null;
+        var nesteLote = 0;
+        void Lote()
+        {
+            if (transacao is not null && nesteLote < FolhasPorLote) return;
+            if (transacao is not null) transacao.Commit();
+            transacao?.Dispose();
+            transacao = new Transaction(doc, "AutoEletrica — Pranchas (lote)");
+            transacao.Start();
+            EngolirAvisos.Aplicar(transacao);
+            nesteLote = 0;
+        }
+        Regiao? utilDoCarimbo = null;
+        Regiao UtilDe(ViewSheet folha)
+        {
+            // Todas as folhas usam o mesmo carimbo: mede a área útil uma vez.
+            if (utilDoCarimbo is { } jaMedida) return jaMedida;
+            doc.Regenerate();
+            utilDoCarimbo = Util(folha);
+            return utilDoCarimbo.Value;
+        }
 
         // Plantas por nível
         var niveis = NiveisComEletrica(doc);
         var n = 1;
         foreach (var (nivel, caixa) in niveis)
         {
+            Lote();
             var planta = Planta(doc, nivel, caixa, avisos);
-            var folha = Recriar(doc, carimbo, $"{PrefixoNumero}PL-{n:00}", $"Elétrica — planta {nivel.Name}");
-            doc.Regenerate();
-            var util = Util(folha);
+            var folha = Recriar(doc, registro, carimbo, $"{PrefixoNumero}PL-{n:00}", $"Elétrica — planta {nivel.Name}");
+            var util = UtilDe(folha);
             ColocarNaRegiao(doc, folha, planta, util.Parte(0, 0, 0.72, 1), avisos);
             Colocar(doc, folha, legenda, util.Parte(0.74, 0.55, 1, 1).Centro, avisos);
             folhas.Add(folha);
+            nesteLote++;
             n++;
         }
         if (niveis.Count == 0) avisos.Add("Nenhum nível com elementos elétricos: nenhuma planta gerada.");
@@ -70,19 +96,20 @@ static class PranchasAE
             var nome = nomes[q.Id];
             var cargas = quadros.Vistas.FirstOrDefault(v => v.Name == Desenho.NomeValido($"{Desenho.Prefixo}Quadro de cargas — {nome}"));
             var unifilar = quadros.Vistas.FirstOrDefault(v => v.Name == Desenho.NomeValido($"{Desenho.Prefixo}Unifilar — {nome}"));
-            var folha = Recriar(doc, carimbo, $"{PrefixoNumero}QD-{k:00}", $"Elétrica — {nome} - quadro de cargas e unifilar");
-            doc.Regenerate();
-            var util = Util(folha);
-            if (cargas is not null) Colocar(doc, folha, cargas, util.Parte(0, 0, 0.5, 1).Centro, avisos);
-            if (unifilar is not null) Colocar(doc, folha, unifilar, util.Parte(0.52, 0, 1, 1).Centro, avisos);
+            Lote();
+            var folha = Recriar(doc, registro, carimbo, $"{PrefixoNumero}QD-{k:00}", $"Elétrica — {nome} - quadro de cargas e unifilar");
+            var util = UtilDe(folha);
+            if (cargas is not null) Colocar(doc, folha, cargas, util.Parte(0, 0, 0.5, 1).Centro, avisos, centrar: false);
+            if (unifilar is not null) Colocar(doc, folha, unifilar, util.Parte(0.52, 0, 1, 1).Centro, avisos, centrar: false);
             folhas.Add(folha);
+            nesteLote++;
             k++;
         }
 
         // Documentos: prumada, lista de material, tabelas nativas
-        var docs = Recriar(doc, carimbo, $"{PrefixoNumero}DOC-01", "Elétrica — prumada, legenda e lista de material");
-        doc.Regenerate();
-        var regiao = Util(docs);
+        Lote();
+        var docs = Recriar(doc, registro, carimbo, $"{PrefixoNumero}DOC-01", "Elétrica — prumada, legenda e lista de material");
+        var regiao = UtilDe(docs);
         if (quadros.Vistas.FirstOrDefault(v => v.Name == $"{Desenho.Prefixo}Prumada elétrica") is { } prumada) Colocar(doc, docs, prumada, regiao.Parte(0, 0.5, 0.5, 1).Centro, avisos);
         Colocar(doc, docs, lista.Vista, regiao.Parte(0.52, 0, 1, 1).Centro, avisos);
         var y = regiao.Y0 + regiao.Altura * 0.45;
@@ -97,7 +124,10 @@ static class PranchasAE
         }
         folhas.Add(docs);
 
-        transacao.Commit();
+        ArmazenamentoEletrica.Gravar(doc, ChaveRegistro, registro);
+        transacao!.Commit();
+        transacao.Dispose();
+        grupo.Assimilate();
         return new Feito(folhas, avisos);
     }
 
@@ -106,9 +136,8 @@ static class PranchasAE
     static Dictionary<string, string> Registro(Document doc) => ArmazenamentoEletrica.Ler<Dictionary<string, string>>(doc, ChaveRegistro) ?? new Dictionary<string, string>();
 
     /// <summary>Apaga a folha do plugin com este papel (pelo número ou pelo registro) e cria outra com o carimbo. Folha que não é do plugin não é tocada.</summary>
-    static ViewSheet Recriar(Document doc, ElementId carimbo, string numero, string nome)
+    static ViewSheet Recriar(Document doc, Dictionary<string, string> registro, ElementId carimbo, string numero, string nome)
     {
-        var registro = Registro(doc);
         var ids = new FilteredElementCollector(doc).OfClass(typeof(ViewSheet)).Cast<ViewSheet>().Where(s => s.SheetNumber == numero).Select(s => s.Id).ToList();
         if (registro.TryGetValue(numero, out var unico) && doc.GetElement(unico) is ViewSheet anterior) ids.Add(anterior.Id);
         if (ids.Count > 0) doc.Delete(ids.Distinct().ToList());
@@ -116,7 +145,6 @@ static class PranchasAE
         folha.SheetNumber = numero;
         folha.Name = Desenho.NomeValido(nome);
         registro[numero] = folha.UniqueId;
-        ArmazenamentoEletrica.Gravar(doc, ChaveRegistro, registro);
         return folha;
     }
 
@@ -135,7 +163,13 @@ static class PranchasAE
         return area.Parte(0.03, 0.05, 0.84, 0.97);
     }
 
-    static Viewport? Colocar(Document doc, ViewSheet folha, View vista, XYZ centro, List<string> avisos)
+    const int FolhasPorLote = 20;
+
+    /// <summary>
+    ///     Põe a vista na folha com o centro no ponto. Com <paramref name="centrar" />, regenera e corrige o deslocamento do
+    ///     título da vista; sem, fica a poucos milímetros do centro, mas não regenera o modelo inteiro por vista.
+    /// </summary>
+    static Viewport? Colocar(Document doc, ViewSheet folha, View vista, XYZ centro, List<string> avisos, bool centrar = true)
     {
         if (!Viewport.CanAddViewToSheet(doc, folha.Id, vista.Id))
         {
@@ -145,6 +179,7 @@ static class PranchasAE
         try
         {
             var viewport = Viewport.Create(doc, folha.Id, vista.Id, centro);
+            if (!centrar) return viewport;
             doc.Regenerate();
             var quadro = viewport.GetBoxOutline();
             var atual = (quadro.MinimumPoint + quadro.MaximumPoint) / 2;
