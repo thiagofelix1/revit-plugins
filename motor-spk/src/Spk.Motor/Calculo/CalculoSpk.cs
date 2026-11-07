@@ -45,6 +45,15 @@ public sealed record RelatorioSpk(
 
 public static class CalculoSpk
 {
+    /// <summary>
+    /// Velocidade acima da qual o cálculo avisa, em m/s. A NBR 10897 não fixa limite na rede: é conferência de plausibilidade,
+    /// calibrada nos testes de 07/11/2026 (a Nova Era, projeto real, chega a 13,3 m/s; K ou diâmetro errado passou de 15).
+    /// </summary>
+    public const double VelocidadeDeAviso = 15;
+
+    /// <summary>Trecho mais curto que isto não entra no aviso: a ligação do bico à peça usa um interno adotado, não um tubo real.</summary>
+    public const double ComprimentoParaVelocidade = 0.5;
+
     public static RelatorioSpk Executar(ProjetoSpk projeto)
     {
         var avisos = new List<string>();
@@ -72,6 +81,7 @@ public static class CalculoSpk
         }
 
         if (projeto.Base is BaseDensidadeArea { Ajuste: { } ajuste }) avisos.AddRange(ajuste.Avisos);
+        if (AvisoDeVelocidade(resultado) is { } velocidade) avisos.Insert(0, velocidade);
 
         double? pressaoDisponivel = null;
         if (projeto.Abastecimento is { } curva)
@@ -94,6 +104,20 @@ public static class CalculoSpk
         }
 
         return new RelatorioSpk(projeto, resultado, busca, vazaoHidrantes, duracao, pressaoDisponivel, verificacoes, avisos);
+    }
+
+    /// <summary>Velocidade fora do comum num trecho de tubo de verdade: costuma vir de K ou diâmetro errado.</summary>
+    public static string? AvisoDeVelocidade(ResultadoDemanda resultado)
+    {
+        var rapidos = resultado.Trechos
+            .Where(t => t.Comprimento >= ComprimentoParaVelocidade && Math.Abs(t.Velocidade) > VelocidadeDeAviso)
+            .OrderByDescending(t => Math.Abs(t.Velocidade)).ToList();
+        if (rapidos.Count == 0) return null;
+        var pior = rapidos[0];
+        return $"ATENÇÃO: {rapidos.Count} trecho(s) com velocidade acima de {VelocidadeDeAviso:0} m/s; o maior é o {pior.Id}, com " +
+               $"{Math.Abs(pior.Velocidade):0.0} m/s e {Math.Abs(pior.Vazao):0} L/min em DN {pior.DiametroNominal?.ToString() ?? "?"}. " +
+               "A NBR 10897 não fixa limite de velocidade na rede, mas um valor assim costuma vir de fator K ou diâmetro errado: " +
+               "confira o K dos bicos (Famílias) e os diâmetros.";
     }
 
     static (double Vazao, double Duracao) DemandaHidrantes(ProjetoSpk p, List<string> avisos)
