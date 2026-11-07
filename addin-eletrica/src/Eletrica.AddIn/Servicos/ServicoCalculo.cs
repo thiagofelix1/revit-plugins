@@ -59,13 +59,36 @@ public static class ServicoCalculo
         return new Saida(resultado, lida, memorial, avisos);
     }
 
-    /// <summary>Assinatura da instalação lida (SHA-256 do JSON): muda quando qualquer dado que entra no cálculo muda.</summary>
+    /// <summary>
+    ///     Assinatura da instalação lida (SHA-256 do JSON): muda quando qualquer dado que entra no cálculo muda. Os números
+    ///     entram arredondados a milésimos: o Revit devolve comprimentos e cargas com ruído de ponto flutuante entre duas
+    ///     leituras do mesmo modelo, e isso não pode virar "cálculo desatualizado".
+    /// </summary>
     public static string Assinatura(Instalacao i)
     {
-        var json = JsonSerializer.Serialize(new { i.Alimentacao, i.Ambientes, i.Quadros, i.Circuitos, i.Pontos, i.Trechos, i.Comandos, i.Caixas }, ArmazenamentoEletrica.Json);
+        var json = JsonParaAssinatura(i, indentado: false);
         using var sha = SHA256.Create();
         var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(json));
         return BitConverter.ToString(bytes).Replace("-", "").Substring(0, 16);
+    }
+
+    /// <summary>O JSON que entra na assinatura (o teste grava este texto para comparar duas leituras).</summary>
+    public static string JsonParaAssinatura(Instalacao i, bool indentado)
+    {
+        var opcoes = new JsonSerializerOptions(ArmazenamentoEletrica.Json) { WriteIndented = indentado };
+        opcoes.Converters.Add(new DoubleArredondado());
+        return JsonSerializer.Serialize(new { i.Alimentacao, i.Ambientes, i.Quadros, i.Circuitos, i.Pontos, i.Trechos, i.Comandos, i.Caixas }, opcoes);
+    }
+
+    sealed class DoubleArredondado : System.Text.Json.Serialization.JsonConverter<double>
+    {
+        public override double Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) => reader.GetDouble();
+
+        public override void Write(Utf8JsonWriter writer, double value, JsonSerializerOptions options)
+        {
+            if (double.IsNaN(value) || double.IsInfinity(value)) writer.WriteStringValue(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            else writer.WriteNumberValue(Math.Round(value, 3));
+        }
     }
 
     /// <summary>O último cálculo ainda vale para o modelo como está? Nulo quando não há cálculo.</summary>

@@ -11,8 +11,8 @@
    "cena": "apartamento",
    "passos": [
     "ambientes", "parametros", "pontosPorAmbiente", "verificar", "criarCircuitos", "tracarEstrela", "diagnosticoGrafo", "passarCircuitos",
-    "verificar", "caixasPorRegra", "passarCircuitos", "verificar", "calcular", "desenharFiacao", "etiquetar",
-    "legenda", "quadros", "lista", "pranchas"
+    "verificar", "caixasPorRegra", "passarCircuitos", "verificar", "calcular", "assinatura", "desenharFiacao", "etiquetar",
+    "legenda", "quadros", "assinatura", "lista", "pranchas"
    ],
    "esperado": {
     "cena.ambientesLidos": "7",
@@ -36,6 +36,7 @@
     "calcular.circuitos": ">=7",
     "desenharFiacao.fios": ">=1",
     "quadros.vistas": ">=3",
+    "assinatura#2.mudou": "0",
     "pranchas.folhas": ">=3",
     "etapasComErro": "0",
     "dialogos": "0"
@@ -88,9 +89,10 @@
     "LinhaAerea": false, "DiasDeTrovoada": 20, "Habitacao": false
    },
    "usosSugeridos": true,
-   "passos": ["passarCircuitos", "calcular", "quadros", "pranchas"],
+   "passos": ["passarCircuitos", "calcular", "assinatura", "quadros", "assinatura", "pranchas"],
    "esperado": {
     "quadros.vistas": ">=10",
+    "assinatura#2.mudou": "0",
     "pranchas.folhas": ">=3",
     "etapasComErro": "0"
    }

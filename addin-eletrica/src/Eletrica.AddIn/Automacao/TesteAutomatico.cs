@@ -46,6 +46,7 @@ static class TesteAutomatico
 
     static UIControlledApplication? aplicacao;
     static readonly List<string> dialogos = [];
+    static string? ultimaAssinatura;
 
     public static void Registrar(UIControlledApplication app)
     {
@@ -126,6 +127,7 @@ static class TesteAutomatico
     {
         var r = new RelatorioCenario { Nome = cenario.Nome };
         dialogos.Clear();
+        ultimaAssinatura = null;
         Document? doc = null;
         var arquivo = Path.Combine(PastaSaida, Seguro(cenario.Nome) + ".rvt");
         var ocorrencias = new Dictionary<string, int>();
@@ -456,14 +458,17 @@ static class TesteAutomatico
             case "assinatura":
             {
                 // Grava o JSON que entra na assinatura do cálculo, para comparar duas leituras do mesmo modelo.
+                // "mudou" = 1 quando difere da leitura anterior neste cenário: entre dois passos que não mexem no modelo (Quadros,
+                // por exemplo) tem de ser 0, senão o Guia avisaria "cálculo desatualizado" sem motivo.
                 var lidaA = LeitorInstalacao.Ler(doc, dados);
                 var ia = lidaA.Instalacao;
-                var opcoes = new JsonSerializerOptions(ArmazenamentoEletrica.Json) { WriteIndented = true };
-                var json = JsonSerializer.Serialize(new { ia.Alimentacao, ia.Ambientes, ia.Quadros, ia.Circuitos, ia.Pontos, ia.Trechos, ia.Comandos, ia.Caixas }, opcoes);
                 var n = Directory.GetFiles(PastaSaida, $"assinatura-{r.Nome}-*.json").Length + 1;
                 var arquivo = Path.Combine(PastaSaida, $"assinatura-{r.Nome}-{n}.json");
-                File.WriteAllText(arquivo, json);
-                return $"{Servicos.ServicoCalculo.Assinatura(ia)} ({Path.GetFileName(arquivo)})";
+                File.WriteAllText(arquivo, Servicos.ServicoCalculo.JsonParaAssinatura(ia, indentado: true));
+                var assinatura = Servicos.ServicoCalculo.Assinatura(ia);
+                if (ultimaAssinatura is { } anterior) M("mudou", anterior == assinatura ? 0 : 1);
+                ultimaAssinatura = assinatura;
+                return $"{assinatura} ({Path.GetFileName(arquivo)})";
             }
             case "sondarSistemas":
                 return CenasEletrica.SondarSistemas(doc);
