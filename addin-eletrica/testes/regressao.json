@@ -68,13 +68,29 @@
    "usosSugeridos": true,
    "passos": [
     "diagnosticoQuadros", "ambientes", "parametros", "verificar", "passarCircuitos", "verificar", "calcular", "desenharFiacao", "etiquetar",
-    "legenda", "quadros", "lista", "pranchas"
+    "legenda", "lista"
    ],
    "esperado": {
     "ambientes.ambientes": ">=10",
     "verificar.quadros": ">=1",
     "verificar.circuitos": ">=10",
     "calcular.circuitos": ">=10",
+    "passarCircuitos.circuitos": ">=1",
+    "etapasComErro": "0"
+   }
+  },
+  {
+   "nome": "snowdon-entregaveis",
+   "abrir": "{Samples}\\Snowdon Towers Sample Electrical.rvt",
+   "copiarJunto": ["{Samples}\\Snowdon Towers Sample *.rvt"],
+   "dados": {
+    "TensaoFaseNeutro": 120, "TensaoFaseFase": 208, "Fases": 3, "Esquema": "TNS", "IccPresumidaKA": 10,
+    "LinhaAerea": false, "DiasDeTrovoada": 20, "Habitacao": false
+   },
+   "usosSugeridos": true,
+   "passos": ["passarCircuitos", "calcular", "quadros", "pranchas"],
+   "esperado": {
+    "quadros.vistas": ">=10",
     "pranchas.folhas": ">=3",
     "etapasComErro": "0"
    }

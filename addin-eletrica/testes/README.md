@@ -8,6 +8,16 @@ O mesmo esquema do [teste automático do SPK](../../docs/refinamentos/spk/teste-
 py -3 -I addin-eletrica/testes/fila.py tudo
 ```
 
+A regressão é dividida em grupos, porque Quadros e Pranchas no Snowdon (169 quadros, 187 folhas) levam 30 minutos ou mais e chegaram a ocupar mais de 10 GB, travando a máquina de 16 GB:
+
+| Grupo | Cenários | Tempo | Quando |
+|---|---|---|---|
+| `apartamento` | apto-completo, apto-tt | ~2 min | depois de toda mudança |
+| `snowdon` | snowdon-mecanica (até a Lista de material) | ~5 min | mudança em leitura, grafo, passagem, cálculo |
+| `tudo` | apartamento + snowdon | ~7 min | o dia a dia |
+| `pesado` | snowdon-entregaveis (Quadros e Pranchas) | 30 min ou mais | só ao mexer em Quadros ou Pranchas, sozinho, com a máquina livre |
+| `completo` | tudo + pesado | 40 min ou mais | antes de uma entrega |
+
 Depois abra o Revit 2027 (com o add-in de desenvolvimento instalado). Duas telas aparecem antes do plugin carregar e o teste não consegue responder: o aviso de licença do trial (fechar no X) e o aviso de add-in sem assinatura ("Sempre carregar"; volta a cada build). Em seguida o plugin roda a fila, responde os diálogos do Revit, salva as cópias e fecha o Revit.
 
 No fim, em `Documentos\AutoEletrica\testes`:
@@ -24,7 +34,7 @@ Para mandar o resultado: o `relatorio.json` basta.
 |---|---|---|
 | `apto-completo` | Novo, pelo template elétrico brasileiro, com a cena `apartamento` | O fluxo inteiro sem clique: ler ambientes do vínculo, lançar pontos por ambiente (tomadas, luz, interruptor com comando, chuveiro), Verificar antes dos circuitos (acusa ponto sem circuito), Criar circuitos, traçar eletrodutos em estrela, Passar circuitos (com retornos), Verificar (sem ponto sem circuito nem sem caminho, divisão de circuitos certa, toda luminária com comando), Caixas por regra e Verificar de novo (sem trecho acima de 15 m nem com mais de 3 curvas), Calcular, Desenhar fiação, Etiquetar, Legenda, Quadros, Lista de material e Pranchas. |
 | `apto-tt` | Idem, esquema TT com RA de 80 Ω | O Calcular pelo caminho do TT dentro do Revit. |
-| `snowdon-mecanica` | Cópia do Snowdon Towers Sample Electrical (exemplo da Autodesk que vem com o Revit), com os outros modelos do Snowdon copiados ao lado para os vínculos resolverem | A mecânica num projeto de terceiros grande e já modelado: ler quadros, circuitos, pontos e eletrodutos de um modelo que o plugin não criou, passar circuitos, verificar, calcular, desenhar fiação, etiquetar e gerar todos os entregáveis sem erro. O Snowdon é americano (120/208 V, tomadas NEMA, escritórios): os números da NBR saem cheios de avisos, e isso é esperado. Ele prova que o código roda, não que a engenharia está certa. |
+| `snowdon-mecanica` | Cópia do Snowdon Towers Sample Electrical (exemplo da Autodesk que vem com o Revit), com os outros modelos do Snowdon copiados ao lado para os vínculos resolverem | A mecânica num projeto de terceiros grande e já modelado: ler quadros, circuitos, pontos e eletrodutos de um modelo que o plugin não criou, passar circuitos, verificar, calcular, desenhar fiação, etiquetar, legenda e lista de material sem erro. Quadros e Pranchas ficam no cenário `snowdon-entregaveis`, do grupo `pesado`. O Snowdon é americano (120/208 V, tomadas NEMA, escritórios): os números da NBR saem cheios de avisos, e isso é esperado. Ele prova que o código roda, não que a engenharia está certa. |
 
 ## A cena `apartamento`
 

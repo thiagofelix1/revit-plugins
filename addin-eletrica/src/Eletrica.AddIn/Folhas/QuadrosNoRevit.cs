@@ -137,7 +137,7 @@ static class QuadrosNoRevit
     static View UnifilarDoQuadro(Document doc, Instalacao i, ResultadoInstalacao r, ResultadoQuadro q, string nome, List<string> avisos)
     {
         var vista = Desenho.NovaVista(doc, $"{Desenho.Prefixo}Unifilar — {nome}");
-        var diagrama = Procurar(Unifilar.Montar(i, r), q.Nome);
+        var diagrama = Procurar(DiagramasDe(i, r), q.Nome);
         if (diagrama is null)
         {
             avisos.Add($"{q.Nome}: unifilar não montado.");
@@ -280,6 +280,18 @@ static class QuadrosNoRevit
 
     /// <summary>Quadro de cargas nativo do Revit (PanelScheduleView), quando o projeto tem modelo de quadro; o padrão brasileiro é a vista de desenho.</summary>
     const int QuadrosPorLote = 15;
+
+    // Os diagramas de todos os quadros, montados uma vez por resultado: montar de novo para cada quadro custava 169 × 169
+    // montagens no Snowdon.
+    static (ResultadoInstalacao Resultado, IReadOnlyList<Unifilar.Diagrama> Diagramas)? _diagramas;
+
+    static IReadOnlyList<Unifilar.Diagrama> DiagramasDe(Instalacao i, ResultadoInstalacao r)
+    {
+        if (_diagramas is { } d && ReferenceEquals(d.Resultado, r)) return d.Diagramas;
+        var diagramas = Unifilar.Montar(i, r);
+        _diagramas = (r, diagramas);
+        return diagramas;
+    }
 
     static void PainelNativo(Document doc, LeitorInstalacao.Lida lida, ResultadoQuadro q, List<string> avisos, HashSet<ElementId> comPainel)
     {
