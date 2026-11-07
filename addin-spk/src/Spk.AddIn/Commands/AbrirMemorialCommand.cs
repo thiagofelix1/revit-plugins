@@ -6,18 +6,36 @@ using Nice3point.Revit.Toolkit.External;
 
 namespace Spk.AddIn.Commands;
 
-/// <summary>Abre no programa padrão (Word etc.) o último memorial.docx gerado pelo cálculo.</summary>
+/// <summary>
+/// Abre no programa padrão (Word etc.) o memorial do projeto aberto, do último setor calculado nele. Sem ele (cálculo
+/// feito antes desta versão), oferece o último memorial gerado, que pode ser de outro projeto.
+/// </summary>
 [UsedImplicitly]
 [Transaction(TransactionMode.ReadOnly)]
 public class AbrirMemorialCommand : ExternalCommand
 {
     public override void Execute()
     {
-        var caminho = Path.Combine(PastasSpk.Calculo, "memorial.docx");
+        var ultimo = Path.Combine(PastasSpk.Calculo, "memorial.docx");
+        var gravado = Context.ActiveDocument is { } aberto ? ResultadoGravado.Ler(aberto) : null;
+        var caminho = Context.ActiveDocument is { } atual && gravado is not null ? PastasSpk.MemorialDo(atual, gravado.Setor) : ultimo;
         if (!File.Exists(caminho))
         {
-            TaskDialog.Show("SPK", "Ainda não há memorial gerado. Rode \"Calcular\" primeiro.");
-            return;
+            if (gravado is null || !File.Exists(ultimo))
+            {
+                TaskDialog.Show("SPK", "Ainda não há memorial deste projeto. Rode \"Calcular\" primeiro.");
+                return;
+            }
+            var outro = new TaskDialog("SPK — Memorial")
+            {
+                MainInstruction = "O memorial deste projeto não está guardado",
+                MainContent = $"O último cálculo deste projeto (setor {gravado.Setor}) foi feito antes de o SPK guardar um memorial por projeto. " +
+                              "Rode Calcular de novo para gerá-lo.\n\nAbrir o último memorial gerado, que pode ser de outro projeto?",
+                CommonButtons = TaskDialogCommonButtons.Yes | TaskDialogCommonButtons.No,
+                DefaultButton = TaskDialogResult.No,
+            };
+            if (outro.Show() != TaskDialogResult.Yes) return;
+            caminho = ultimo;
         }
 
         if (Context.ActiveDocument is { } doc && ResultadoGravado.Ler(doc) is { } calculo && Servicos.AssinaturaDaRede.Mudou(doc, calculo))

@@ -16,7 +16,9 @@ static class ServicoCalculo
 
     const string Atencao = "ATENÇÃO";
 
-    public sealed record Resultado(LeitorRede.RedeLida Lida, RelatorioSpk Relatorio, string? AvisoGravacao, string PastaMemorial)
+    /// <param name="PastaMemorial">A pasta do último memorial (memorial.md e memorial.docx), de qualquer projeto.</param>
+    /// <param name="ArquivoMemorial">O memorial deste projeto e setor, o que o botão Memorial abre.</param>
+    public sealed record Resultado(LeitorRede.RedeLida Lida, RelatorioSpk Relatorio, string? AvisoGravacao, string PastaMemorial, string ArquivoMemorial)
     {
         public Spk.Motor.Calculo.ResultadoChuveiro Critico =>
             Relatorio.Resultado.Chuveiros.First(c => c.Id == Relatorio.Resultado.ChuveiroCritico);
@@ -42,7 +44,7 @@ static class ServicoCalculo
                 {string.Join("\n", Avisos)}
 
                 Memorial em:
-                {PastaMemorial}
+                {ArquivoMemorial}
                 """;
         }
     }
@@ -85,10 +87,15 @@ static class ServicoCalculo
         var pasta = PastasSpk.Calculo;
         Directory.CreateDirectory(pasta);
         File.WriteAllText(Path.Combine(pasta, "memorial.md"), Memorial.Gerar(relatorio));
-        File.WriteAllBytes(Path.Combine(pasta, "memorial.docx"), MemorialDocx.Gerar(relatorio));
+        var docx = MemorialDocx.Gerar(relatorio);
+        File.WriteAllBytes(Path.Combine(pasta, "memorial.docx"), docx);
+        // O do projeto e setor fica guardado: calcular outro projeto não o sobrescreve.
+        var doProjeto = PastasSpk.MemorialDo(doc, lida.Setor);
+        Directory.CreateDirectory(PastasSpk.Memoriais);
+        File.WriteAllBytes(doProjeto, docx);
 
         var aviso = GravarNoModelo(doc, lida, relatorio, dados);
-        return new Resultado(lida, relatorio, aviso, pasta);
+        return new Resultado(lida, relatorio, aviso, pasta, doProjeto);
     }
 
     /// <summary>
