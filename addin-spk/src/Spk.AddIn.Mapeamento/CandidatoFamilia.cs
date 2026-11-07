@@ -71,6 +71,17 @@ public sealed class CandidatoFamilia : INotifyPropertyChanged
         ? "Nenhum parâmetro de área encontrado. Informe a área de cobertura em m²."
         : $"Preenchido a partir do parâmetro \"{ParametroAreaCobertura}\". Confira se é a área de cobertura. O número continua editável.";
 
+    /// <summary>Marcado como chuveiro sem K ou área maior que zero: ficaria de fora do cálculo.</summary>
+    public bool FaltamMedidas => Papel == PapelFamilia.Chuveiro && !(Positivo(ValorFatorK) && Positivo(ValorAreaCobertura));
+
+    /// <summary>Aceita "360", "5.6" e "5,6", com texto depois do número ("9 m²"), como a leitura do mapeamento gravado.</summary>
+    static bool Positivo(string texto)
+    {
+        var achado = System.Text.RegularExpressions.Regex.Match((texto ?? "").Trim(), @"^-?\d+([.,]\d+)?");
+        return achado.Success && double.TryParse(achado.Value.Replace(',', '.'), System.Globalization.NumberStyles.Float,
+            System.Globalization.CultureInfo.InvariantCulture, out var valor) && valor > 0;
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     void OnPropertyChanged(string nome) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nome));

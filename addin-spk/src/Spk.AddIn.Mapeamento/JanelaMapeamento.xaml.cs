@@ -20,6 +20,17 @@ public partial class JanelaMapeamento : Window
 
     void Confirmar_Click(object sender, RoutedEventArgs e)
     {
+        // Bico sem K ou área ficava de fora do cálculo sem aviso: aqui ele não passa.
+        var semMedidas = Candidatos.Where(c => c.FaltamMedidas).Select(c => $"• {c.Familia} : {c.Tipo}").ToList();
+        if (semMedidas.Count > 0)
+        {
+            MessageBox.Show(this,
+                "Estes bicos estão sem fator K ou área de cobertura maior que zero, e ficariam fora do cálculo:\n\n" +
+                string.Join("\n", semMedidas.Take(10)) + (semMedidas.Count > 10 ? $"\n... e mais {semMedidas.Count - 10}" : "") +
+                "\n\nPreencha o K (L/min/bar½) e a área (m²), ou marque a linha como Ignorar.",
+                "SPK — Famílias", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
         Resultado = Candidatos;
         DialogResult = true;
         Close();

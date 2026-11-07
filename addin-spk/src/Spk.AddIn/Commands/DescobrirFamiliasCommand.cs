@@ -38,8 +38,10 @@ public class DescobrirFamiliasCommand : ExternalCommand
 
         var instancias = new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance)).Cast<FamilyInstance>().ToList();
 
+        // Pela categoria Sprinklers ou pelo nome: família de bico com outro nome (o código do fabricante) também entra.
         var candidatosChuveiro = instancias
-            .Where(fi => fi.Symbol is { } simbolo && PalavrasChuveiro.Any(p => simbolo.Family.Name.ToLowerInvariant().Contains(p)))
+            .Where(fi => fi.Symbol is { } simbolo && (fi.Category?.Id.Value == (long)BuiltInCategory.OST_Sprinklers
+                                                      || PalavrasChuveiro.Any(p => simbolo.Family.Name.ToLowerInvariant().Contains(p))))
             .GroupBy(fi => (Categoria: fi.Category?.Name ?? "sem categoria", Familia: fi.Symbol.Family.Name, Tipo: fi.Symbol.Name))
             .ToList();
 
@@ -72,7 +74,22 @@ public class DescobrirFamiliasCommand : ExternalCommand
         Directory.CreateDirectory(Path.GetDirectoryName(caminho)!);
         File.WriteAllText(caminho, relatorio.ToString());
 
-        TaskDialog.Show("Spk — Descobrir famílias", $"""
+        if (candidatosChuveiro.Count == 0 && candidatosVga.Count == 0)
+        {
+            // Sem nada para confirmar, a janela não abre: o projetista precisa saber por quê e o que fazer.
+            TaskDialog.Show("SPK — Famílias", $"""
+                Nenhum bico nem VGA no modelo para confirmar.
+
+                Famílias lista os bicos que já estão no modelo: da categoria Sprinklers, ou com chuveiro, sprinkler, spk ou esfr no nome da família. Ponha os bicos antes (Gerar rede, Bicos por ambiente ou à mão) e rode Famílias de novo.
+
+                Tubos: {tubos.Count}  |  Sistemas: {sistemas.Count}  |  Categorias no modelo: {categorias.Count}
+                Relatório completo em:
+                {caminho}
+                """);
+            return;
+        }
+
+        TaskDialog.Show("SPK — Famílias", $"""
             Tubos: {tubos.Count}  |  Sistemas: {sistemas.Count}  |  Candidatos a chuveiro: {candidatosChuveiro.Count}  |  VGAs: {candidatosVga.Count}  |  Categorias no modelo: {categorias.Count}
 
             Relatório completo gravado em:
@@ -80,8 +97,6 @@ public class DescobrirFamiliasCommand : ExternalCommand
 
             Abrindo a janela de confirmação...
             """);
-
-        if (candidatosChuveiro.Count == 0 && candidatosVga.Count == 0) return;
 
         var candidatos = candidatosChuveiro.Select(grupo =>
         {
