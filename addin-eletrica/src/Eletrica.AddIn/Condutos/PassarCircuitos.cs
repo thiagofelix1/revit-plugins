@@ -19,8 +19,6 @@ public static class PassarCircuitos
     {
         var i = lida.Instalacao;
         var avisos = new List<string>();
-        var porCadeia = new Dictionary<string, HashSet<string>>();
-        var retornosPorCadeia = new Dictionary<string, List<string>>();
 
         // Grafo só com a topologia: todos os trechos valem para todos os circuitos, menos os que a fiação manual manda evitar.
         var todosOsIds = i.Circuitos.Select(c => c.Id).ToList();
@@ -36,53 +34,12 @@ public static class PassarCircuitos
             todos.Add(t with { Circuitos = permitidos });
         }
         var topologia = new Instalacao(i.Nome, i.Alimentacao, i.Ambientes, i.Quadros, i.Circuitos, i.Pontos, todos, comandos: i.Comandos);
-        var grafo = new Grafo(topologia);
-        foreach (var (trecho, ids) in forcados)
-        {
-            if (!porCadeia.TryGetValue(trecho, out var set)) porCadeia[trecho] = set = [];
-            foreach (var id in ids) set.Add(id);
-        }
-
-        var circuitosLevados = 0;
-        foreach (var c in i.Circuitos)
-        {
-            var comandos = i.Comandos.Where(k => k.Circuito == c.Id).ToList();
-            var destinos = c.QuadroAlimentado is { } qa
-                ? [i.Quadro(qa)!.NoDoQuadro]
-                : i.PontosDo(c).Select(p => p.NoDoPonto).Distinct().ToList();
-            // A fase do circuito de iluminação vai até o primeiro interruptor de cada comando (5.6.6.1.2).
-            foreach (var k in comandos) destinos.Add(k.NoDoInterruptor(0));
-            destinos = destinos.Distinct().ToList();
-            if (destinos.Count == 0) continue;
-            var caminhos = grafo.CaminhosDe(c, destinos);
-            var levou = false;
-            foreach (var destino in destinos)
-            {
-                if (!caminhos.TryGetValue(destino, out var caminho))
-                {
-                    avisos.Add($"Circuito {c.Numero}: o ponto em {destino} não tem caminho pelos eletrodutos até o quadro {i.QuadroDe(c).Nome}.");
-                    continue;
-                }
-                levou = true;
-                foreach (var t in caminho)
-                {
-                    if (!porCadeia.TryGetValue(t.Id, out var set)) porCadeia[t.Id] = set = [];
-                    set.Add(c.Id);
-                }
-            }
-            if (levou) circuitosLevados++;
-
-            // Retornos: entre interruptores em série (2 por trecho no paralelo e no intermediário) e do último interruptor a cada luminária (1).
-            foreach (var k in comandos)
-            {
-                var entre = Comando.RetornosEntreInterruptores(k.Tipo);
-                for (var n = 0; n + 1 < k.Interruptores.Count; n++)
-                    Retorno(grafo, k.NoDoInterruptor(n), k.NoDoInterruptor(n + 1), c, entre, $"comando {k.Id}, interruptores {n + 1} e {n + 2}", porCadeia, retornosPorCadeia, avisos);
-                var ultimo = k.NoDoInterruptor(k.Interruptores.Count - 1);
-                foreach (var no in k.Luminarias.Select(l => i.Ponto(l)?.NoDoPonto).Where(n => n is not null).Distinct())
-                    Retorno(grafo, ultimo, no!, c, Comando.RetornosAteALuminaria, $"comando {k.Id}, do último interruptor à luminária", porCadeia, retornosPorCadeia, avisos);
-            }
-        }
+        // O caminho, os paralelos, os retornos e os avisos são do motor (Passagem), testados sem o Revit.
+        var passagem = Passagem.Executar(topologia, forcados.ToDictionary(kv => kv.Key, kv => (IReadOnlyList<string>)kv.Value));
+        avisos.AddRange(passagem.Avisos);
+        var circuitosLevados = passagem.CircuitosLevados;
+        var porCadeia = passagem.CircuitosPorTrecho;
+        var retornosPorCadeia = passagem.RetornosPorTrecho;
 
         using var transacao = new Transaction(doc, "AutoEletrica — Passar circuitos");
         transacao.Start();
@@ -94,7 +51,7 @@ public static class PassarCircuitos
         {
             var ids = porCadeia.TryGetValue(cadeia.Id, out var set) ? set.ToList() : [];
             var circuitos = ids.Select(id => i.Circuito(id)!).OrderBy(c => c.Numero, StringComparer.OrdinalIgnoreCase).ToList();
-            var retornos = retornosPorCadeia.TryGetValue(cadeia.Id, out var r) ? r : [];
+            var retornos = retornosPorCadeia.TryGetValue(cadeia.Id, out var r) ? r : (IReadOnlyList<string>)[];
             var condutores = circuitos.Sum(c => c.Fases + (c.TemNeutro ? 1 : 0) + 1) + retornos.Count;
             var fiacao = Etiqueta(circuitos, resultados, retornos.Count);
             foreach (var el in cadeia.Conduites.Cast<Element>().Concat(cadeia.Conexoes))
@@ -116,25 +73,6 @@ public static class PassarCircuitos
         if (cadeia is null) return [];
         var texto = cadeia.Conduites.Select(c => ParametrosEletrica.LerTexto(c, parametro)).FirstOrDefault(t => !string.IsNullOrWhiteSpace(t));
         return (texto ?? "").Split([';', ',', ' '], StringSplitOptions.RemoveEmptyEntries).ToList();
-    }
-
-    static void Retorno(Grafo grafo, string de, string para, Circuito c, int condutores, string descricao,
-        Dictionary<string, HashSet<string>> porCadeia, Dictionary<string, List<string>> retornosPorCadeia, List<string> avisos)
-    {
-        if (condutores <= 0) return;
-        var caminho = grafo.CaminhoEntre(de, para, c.Id);
-        if (caminho is null)
-        {
-            avisos.Add($"Circuito {c.Numero}, {descricao}: não há caminho pelos eletrodutos entre {de} e {para}; retorno não contado.");
-            return;
-        }
-        foreach (var t in caminho)
-        {
-            if (!porCadeia.TryGetValue(t.Id, out var set)) porCadeia[t.Id] = set = [];
-            set.Add(c.Id);
-            if (!retornosPorCadeia.TryGetValue(t.Id, out var lista)) retornosPorCadeia[t.Id] = lista = [];
-            for (var n = 0; n < condutores; n++) lista.Add(c.Id);
-        }
     }
 
     /// <summary>
